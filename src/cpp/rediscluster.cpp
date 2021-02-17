@@ -308,6 +308,9 @@ CommandReply RedisCluster::run_model(const std::string& key,
         We will choose it based on the db of the first input tensor.
     */
 
+    if(inputs.size()==1)
+        return this->_run_model_dagrun(key, inputs, outputs);
+
     uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
     uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
                                                 this->_db_nodes.size()-1);
@@ -658,102 +661,45 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
     return;
 }
 
-void RedisCluster::__run_model_dagrun(const std::string& key,
-                                      std::vector<std::string> inputs,
-                                      std::vector<std::string> outputs)
+CommandReply RedisCluster::_run_model_dagrun(const std::string& key,
+                                            std::vector<std::string> inputs,
+                                            std::vector<std::string> outputs)
 {
-    /*This function will run a RedisAI model.  Because the RedisAI
-    AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
-    and model are all on the same node.  As a result, we will
-    have to retrieve all input tensors that are not on the same
-    node as the model and set temporary
-    */
+    //TODO we should expand this to include multiple inputs
+    //and outputs
 
-    //TODO We need to make sure that no other clients are using the
-    //same keys and model because we may end up overwriting or having
-    //race conditions on who can use the model, etc.
+    uint16_t hash_slot = this->_get_hash_slot(inputs[0]);
+    uint16_t db_index = this->_get_dbnode_index(hash_slot, 0,
+                                                this->_db_nodes.size()-1);
+    DBNode* db = &(this->_db_nodes[db_index]);
 
-    DBNode* db = this->_get_model_script_db(key, inputs, outputs);
-
-    //Create list of input tensors that do not hash to db slots
-    std::unordered_set<std::string> remote_inputs;
-    for(int i=0; i<inputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(inputs[i]);
-        if(hash_slot < db->lower_hash_slot ||
-        hash_slot > db->upper_hash_slot)
-        remote_inputs.insert(inputs[i]);
-    }
-
-    //Retrieve tensors that do not hash to db,
-    //rename the tensors to {prefix}.tensor_name.TMP
-    //TODO we need to make sure users don't use the .TMP suffix
-    //or check that the key does not exist
-    for(int i=0; i<inputs.size(); i++) {
-        if(remote_inputs.count(inputs[i])>0) {
-        std::string new_key = "{" + db->prefix + "}." +
-                                inputs[i] + ".TMP";
-        this->copy_tensor(inputs[i], new_key);
-        remote_inputs.erase(inputs[i]);
-        remote_inputs.insert(new_key);
-        inputs[i] = new_key;
-        }
-    }
-
-    //Create a renaming scheme for output tensor
-    std::unordered_map<std::string, std::string> remote_outputs;
-    for(int i=0; i<outputs.size(); i++) {
-        uint16_t hash_slot = this->_get_hash_slot(outputs[i]);
-        if(hash_slot < db->lower_hash_slot ||
-        hash_slot > db->upper_hash_slot) {
-            std::string tmp_name = "{" + db->prefix + "}." +
-                                outputs[i] + ".TMP";
-            remote_outputs.insert({outputs[i], tmp_name});
-            outputs[i] = remote_outputs[outputs[i]];
-        }
-    }
+    std::vector<std::string> tmp_outputs =
+        _get_tmp_names(outputs, db->prefix);
 
     std::string model_name = "{" + db->prefix +
                             "}." + std::string(key);
     Command cmd;
-
     cmd.add_field("AI.DAGRUN");
     cmd.add_field("LOAD");
     cmd.add_field(std::to_string(inputs.size()));
     cmd.add_fields(inputs);
     cmd.add_field("PERSIST");
-    cmd.add_field(std::to_string(outputs.size()));
-    cmd.add_fields(outputs);
+    cmd.add_field(std::to_string(tmp_outputs.size()));
+    cmd.add_fields(tmp_outputs);
     cmd.add_field("|>");
     cmd.add_field("AI.MODELRUN");
     cmd.add_field(model_name, true);
     cmd.add_field("INPUTS");
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
-    cmd.add_fields(outputs);
-    this->run(cmd);
+    cmd.add_fields(tmp_outputs);
+    CommandReply reply = this->run(cmd);
 
-    //Delete temporary input tensors
-    std::unordered_set<std::string>::const_iterator i_it
-        = remote_inputs.begin();
-    std::unordered_set<std::string>::const_iterator i_it_end
-        = remote_inputs.end();
-    while(i_it!=i_it_end) {
-        this->delete_tensor(*i_it);
-        i_it++;
-    }
+    this->copy_tensors(tmp_outputs, outputs);
 
-    //Move temporary output to the correct location and
-    //delete temporary output tensors
-    std::unordered_map<std::string, std::string>::const_iterator j_it
-        = remote_outputs.begin();
-    std::unordered_map<std::string, std::string>::const_iterator j_it_end
-        = remote_outputs.end();
-    while(j_it!=j_it_end) {
-        this->rename_tensor(j_it->second, j_it->first);
-        j_it++;
-    }
+    this->_delete_keys(tmp_outputs);
 
-    return;
+    return reply;
 }
 
 DBNode* RedisCluster::_get_model_script_db(const std::string& name,

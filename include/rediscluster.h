@@ -373,16 +373,18 @@ class RedisCluster : public RedisServer
                           );
 
         /*!
-        *   \brief  Run a model in the database that uses dagrun
+        *   \brief  Run a model in the database that uses dagrun.
+        *   This is only implemented for the case when
+        *   there is only one input.
         *   \param key The key associated with the model
         *   \param inputs The keys of inputs tensors to use
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
         */
-        void __run_model_dagrun(const std::string& key,
-                                std::vector<std::string> inputs,
-                                std::vector<std::string> outputs);
+        CommandReply _run_model_dagrun(const std::string& key,
+                                       std::vector<std::string> inputs,
+                                       std::vector<std::string> outputs);
 
         /*!
         *   \brief  Retrieve the optimum model prefix for
