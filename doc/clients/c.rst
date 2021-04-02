@@ -1,15 +1,18 @@
 
-****
-C
-****
+***
+ C
+***
 
-C Client Examples
-=================
+Client API
+==========
 
-Place holder for examples of the C client
+.. doxygenfile:: c_client.h
+   :project: c_client
 
-C Client API
-============
 
-.. doxygenindex::
-        :project: c_client
+Dataset API
+===========
+
+.. doxygenfile:: c_dataset.h
+   :project: c_client
+

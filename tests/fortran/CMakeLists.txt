@@ -1,14 +1,12 @@
-project(FortranClientTest)
+project(FortranClientTester)
+enable_language(Fortran)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 cmake_minimum_required(VERSION 3.10)
 
-SET(CMAKE_CXX_STANDARD 11)
-set(CMAKE_fortran_COMPILER "ftn")
-set(CMAKE_FORTRAN_FLAGS="-g -O0")
-
-enable_language(Fortran)
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_C_STANDARD 99)
 
 #TODO put in output warnings
 # Determine where the hiredis library is based on if an environment variable
@@ -19,7 +17,7 @@ if(DEFINED ENV{HIREDIS_INSTALL_PATH})
 	   string(CONCAT HIREDIS_INCLUDE_PATH $ENV{HIREDIS_INSTALL_PATH} "/include/")
 else()
      	   find_library(HIREDIS_LIB hiredis PATH_SUFFIXES "/lib")
-	   find_path(HIREDIS_INCLUDE_PATH hiredis PATH_SUFFIXES "/include/")
+	   find_path(HIREDIS_INCLUDE_PATH hiredis PATH_SUFFIXES "/include")
 endif()
 
 # Determine where the protobuf library is based on if an environment variable
@@ -41,84 +39,104 @@ if(DEFINED ENV{REDISPP_INSTALL_PATH})
 	   string(CONCAT REDISPP_INCLUDE_PATH $ENV{REDISPP_INSTALL_PATH} "/include/")
 else()
      	   find_library(REDISPP_LIB redis++ PATH_SUFFIXES "/lib")
-	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include/")
+	   find_path(REDISPP_INCLUDE_PATH redis++ PATH_SUFFIXES "/include")
 endif()
 
-
-find_package(MPI)
-
 include_directories(SYSTEM
-    ${MPI_INCLUDE_PATH}
-    ../../../clients/
-    ../../../utils/protobuf/
-    /usr/local/include/
+    ../../include
+    ../../utils/protobuf
+    /usr/local/include
     ${HIREDIS_INCLUDE_PATH}
     ${REDISPP_INCLUDE_PATH}
     ${PROTOBUF_INCLUDE_PATH}
 )
 
+
+
 set(CLIENT_LIBRARIES ${REDISPP_LIB} ${HIREDIS_LIB} ${PROTOBUF_LIB})
 set(CLIENT_SRC
-           unit_test_aux.F90
-		   ../../../clients/fortran_client.F90
-	       ../../../clients/client.cc
-		   ../../../clients/c_client.cc
-	       ../../../utils/protobuf/smartsim_protobuf.pb.cc)
-# Not exact key tests
-add_executable(scalar_unit_test
-  scalar_unit_test.F90
-  ${CLIENT_SRC}
+	../../../src/c/c_client.cpp
+	../../../src/c/c_dataset.cpp
+	../../../src/cpp/client.cpp
+	 ../../../src/cpp/dataset.cpp
+	 ../../../src/cpp/command.cpp
+	 ../../../src/cpp/commandlist.cpp
+	 ../../../src/cpp/metadata.cpp
+	 ../../../src/cpp/tensorbase.cpp
+	 ../../../src/cpp/tensorpack.cpp
+	 ../../../src/cpp/dbnode.cpp
+	 ../../../src/cpp/commandreply.cpp
+	 ../../utils/protobuf/smartredis.pb.cc
+     ../../../src/cpp/redisserver.cpp
+     ../../../src/cpp/redis.cpp
+     ../../../src/cpp/rediscluster.cpp
+   ../../../src/fortran/fortran_c_interop.F90
+   ../../../src/fortran/dataset.F90
+   ../../../src/fortran/client.F90
+	 test_utils.F90)
+
+# ld executables
+
+add_executable(client_test_put_get_1D
+	client_test_put_get_1D.F90
+	${CLIENT_SRC}
 )
-target_link_libraries(scalar_unit_test
-  ${CLIENT_LIBRARIES}
-  )
-add_executable(poll_key_and_check_scalar_unit_test
-  poll_key_and_check_scalar_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_put_get_1D
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(poll_key_and_check_scalar_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_put_get_2D
+	client_test_put_get_2D.F90
+	${CLIENT_SRC}
 )
-add_executable(array_1d_unit_test
-  array_1d_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_put_get_2D
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(array_1d_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_put_get_3D
+	client_test_put_get_3D.F90
+	${CLIENT_SRC}
 )
-add_executable(array_2d_unit_test
-  array_2d_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_put_get_3D
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(array_2d_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_mnist
+	client_test_mnist.F90
+	${CLIENT_SRC}
 )
-# Exact key tests
-add_executable(exact_key_scalar_unit_test
-  exact_key_scalar_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_mnist
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(exact_key_scalar_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_dataset
+	client_test_dataset.F90
+	${CLIENT_SRC}
 )
-add_executable(poll_exact_key_and_check_scalar_unit_test
-  exact_key_poll_key_and_check_scalar_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_dataset
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(poll_exact_key_and_check_scalar_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_put_get_unpack_dataset
+	client_test_put_get_unpack_dataset.F90
+	${CLIENT_SRC}
 )
-add_executable(exact_key_array_1d_unit_test
-  exact_key_array_1d_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_put_get_unpack_dataset
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(exact_key_array_1d_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_misc_tensor
+	client_test_misc_tensor.F90
+	${CLIENT_SRC}
 )
-add_executable(exact_key_array_2d_unit_test
-  exact_key_array_2d_unit_test.F90
-  ${CLIENT_SRC}
+target_link_libraries(client_test_misc_tensor
+	${CLIENT_LIBRARIES}
 )
-target_link_libraries(exact_key_array_2d_unit_test
-  ${CLIENT_LIBRARIES}
+
+add_executable(client_test_ensemble
+	client_test_ensemble.F90
+	${CLIENT_SRC}
+)
+target_link_libraries(client_test_ensemble
+	${CLIENT_LIBRARIES}
 )

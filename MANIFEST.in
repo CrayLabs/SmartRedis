@@ -1,18 +1,10 @@
-graft docs
+include requirements.txt
+include requirements-dev.txt
+include setup_env.sh
+include Makefile
+include CMakeLists.txt
 graft src
-graft tests
+graft build-scripts
+graft include
+graft utils
 
-
-include .coveragerc
-include .cookiecutterrc
-include .editorconfig
-
-include AUTHORS.rst
-include CHANGELOG.rst
-include CONTRIBUTING.rst
-include LICENSE
-include README.rst
-
-include tox.ini .travis.yml .appveyor.yml .readthedocs.yml
-
-global-exclude *.py[cod] __pycache__/* *.so *.dylib

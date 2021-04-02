@@ -1,399 +1,897 @@
+/*
+ * BSD 2-Clause License
+ *
+ * Copyright (c) 2021, Hewlett Packard Enterprise
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "client.h"
 
-SmartSimClient::SmartSimClient(bool cluster, bool fortran_array)
+using namespace SmartRedis;
+
+Client::Client(bool cluster)
 {
-  this->_fortran_array = fortran_array;
-  if (cluster)
-  {
-    redis_cluster = new sw::redis::RedisCluster(_get_ssdb());
-    redis = 0;
-  }
-  else
-  {
-    redis_cluster = 0;
-    redis = new sw::redis::Redis(_get_ssdb());
-  }
-  return;
-}
-
-SmartSimClient::~SmartSimClient() {}
-
-std::string SmartSimClient::_get_ssdb()
-{
-  char *host_and_port = getenv("SSDB");
-
-  if (host_and_port == NULL)
-    throw std::runtime_error("The environment variable SSDB must be set to use the client.");
-
-  std::string ssdb("tcp://");
-  ssdb.append(host_and_port);
-  return ssdb;
-}
-
-
-void SmartSimClient::run_script(std::string_view key, std::vector<std::string_view> inputs, std::vector<std::string_view> outputs)
-{
-  //This function will run a RedisAI model.  However, we can only do one input and one output,
-  //which we need to fix.  We should look into how the python object clients convert it to
-  //c code.
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.SCRIPTRUN");
-  cmd_args.push_back(key);
-
-  cmd_args.push_back("INPUTS");
-  for (int i = 0; i < inputs.size(); i++)
-    cmd_args.push_back(inputs[i]);
-
-  cmd_args.push_back("OUTPUTS");
-  for (int i = 0; i < outputs.size(); i++)
-    cmd_args.push_back(outputs[i]);
-
-  reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::run_model(std::string_view key, std::vector<std::string_view> inputs, std::vector<std::string_view> outputs)
-{
-  //This function will run a RedisAI model.  However, we can only do one input and one output,
-  //which we need to fix.  We should look into how the python object clients convert it to
-  //c code.
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.MODELRUN");
-  cmd_args.push_back(key);
-
-  cmd_args.push_back("INPUTS");
-  for (int i = 0; i < inputs.size(); i++)
-    cmd_args.push_back(inputs[i]);
-
-  cmd_args.push_back("OUTPUTS");
-  for (int i = 0; i < outputs.size(); i++)
-    cmd_args.push_back(outputs[i]);
-
-  if (redis_cluster)
-    reply = redis_cluster->command(cmd_args.begin(), cmd_args.end());
-  else
-    reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::set_model(std::string_view key, std::string_view backend, std::string_view device, std::string model_file)
-{
-  //This function will set a model that is saved in a file.  It is assumed it is a binary file.
-  //TODO need to examine code of optimum read to reduce time and memory
-  //We really should read into a c str if we are goign to just make a string view at the end.
-  std::ifstream fin(model_file.c_str(), std::ios::binary);
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-
-  const std::string tmp = ostream.str();
-  const char *model_buf = tmp.c_str();
-  int model_buf_len = tmp.length();
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.MODELSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(backend);
-  cmd_args.push_back(device);
-  cmd_args.push_back("BLOB");
-  cmd_args.push_back(std::string_view(model_buf, model_buf_len));
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  if (redis_cluster)
-    reply = redis_cluster->command(cmd_args.begin(), cmd_args.end());
-  else
-    reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-void SmartSimClient::set_script(std::string_view key, std::string_view device, std::string script_file)
-{
-  //This function will set a script that is saved in a file.  It is assumed it is a ascii file.
-  //TODO need to examine code of optimum read to reduce time and memory
-  //We really should read into a c str if we are goinng to just make a string view at the end.
-  std::ifstream fin(script_file.c_str());
-  std::ostringstream ostream;
-  ostream << fin.rdbuf();
-
-  const std::string tmp = ostream.str();
-  const char *script_buf = tmp.c_str();
-  int script_buf_len = tmp.length();
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.SCRIPTSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(device);
-  cmd_args.push_back("SOURCE");
-  cmd_args.push_back(std::string_view(script_buf, script_buf_len));
-
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
-  reply = redis->command(cmd_args.begin(), cmd_args.end());
-}
-
-template <class T>
-void* SmartSimClient::_add_array_vals_to_buffer(void* data, int* dims, int n_dims,
-                                 void* buf, int buf_length)
-  {
-    //TODO we should check at some point that we don't exceed buf length
-    //TODO test in multi dimensions with each dimension having a different set of values (make sure
-    // (dimensions are independent))
-    if(n_dims > 1) {
-        T** current = (T**) data;
-        for(int i = 0; i < dims[0]; i++) {
-          buf = this->_add_array_vals_to_buffer<T>(*current, &dims[1], n_dims-1, buf, buf_length);
-          current++;
-        }
+    if(cluster) {
+        this->_redis_cluster = new RedisCluster();
+        this->_redis = 0;
+        this->_redis_server = this->_redis_cluster;
     }
     else {
-        memcpy(buf, data, sizeof(T)*dims[0]);
-        return &((T*)buf)[dims[0]];
+        this->_redis_cluster = 0;
+        this->_redis = new Redis();
+        this->_redis_server = this->_redis;
     }
-    return buf;
-  }
+    this->_set_prefixes_from_env();
 
-void SmartSimClient::_put_rai_tensor(std::vector<std::string_view> cmd_args)
-{
-  int n_trials = 5;
-  bool success = true;
-  std::string key("<key placeholder>");
-  while (n_trials > 0)
-  {
-    try
-    {
-      if (redis_cluster)
-      {
-        redis_cluster->command(cmd_args.begin(), cmd_args.end());
-      }
-      else
-      {
-        redis->command(cmd_args.begin(), cmd_args.end());
-      }
-      n_trials = -1;
-    }
-    catch (sw::redis::IoError &e)
-    {
-      n_trials--;
-      std::cout << "WARNING: Caught redis IOError: " << e.what() << std::endl;
-      std::cout << "WARNING: Could not set key " << key << " in database. " << n_trials << " more trials will be made." << std::endl;
-    }
-  }
-  if (n_trials == 0)
-    throw std::runtime_error("Could not set " + std::string(key) + " in database due to redis IOError.");
+    this->_use_tensor_prefix = true;
+    this->_use_model_prefix = false;
 
-  if (!success)
-    throw std::runtime_error("Redis failed to receive key: " + std::string(key));
-
-  return;
+    return;
 }
 
-
-template <class T>
-void SmartSimClient::put_tensor(std::string_view key, std::string_view type, int* dims, int n_dims, void* data)
-{
-  // Calculate the amount of memory to allocate for the data buffer
-  // TODO if the n_dims==1 we should just pass through the array without extra
-  // memory allocation
-
-  //TODO add check to return if n_dims = 0 and/or dims[0] == 0
-  //This should throw and error if anyting is 0
-  int n_bytes = 1;
-  for (int i = 0; i < n_dims; i++) {
-    n_bytes *= dims[i];
-  }
-  n_bytes *= sizeof(T);
-
-  T* buf = (T*)malloc(n_bytes);
-
-  SmartSimClient::_add_array_vals_to_buffer<T>(data, dims, n_dims, (void*)buf, n_bytes);
-
-  std::vector<std::string_view> cmd_args;
-  cmd_args.push_back("AI.TENSORSET");
-  cmd_args.push_back(key);
-  cmd_args.push_back(type);
-
-  std::vector<std::string> dim_strings;
-  for(int i = 0; i < n_dims; i++) {
-    dim_strings.push_back(std::to_string(dims[i]));
-  }
-
-  for(int i = 0; i < n_dims; i++) {
-    cmd_args.push_back(std::string_view(dim_strings[i].c_str(), dim_strings[i].length()));
-  }
-
-  cmd_args.push_back("BLOB");
-  cmd_args.push_back(std::string_view((char*)buf, n_bytes));
-
-  //std::cout<<"Cmd args:"<<std::endl;
-  //for(int i = 0; i < cmd_args.size(); i++)
-  //  std::cout<<cmd_args[i]<<std::endl;
-
-  this->_put_rai_tensor(cmd_args);
-
-  delete[] buf;
-
-  return;
+Client::~Client() {
+    if(this->_redis_cluster)
+        delete this->_redis_cluster;
+    if(this->_redis)
+        delete this->_redis;
 }
 
-void SmartSimClient::_get_tensor_dims(std::unique_ptr<redisReply, sw::redis::ReplyDeleter>& reply,
-                                      int** dims, int& n_dims)
+void Client::put_dataset(DataSet& dataset)
 {
-  //This function will fill dims and set n_dims to the number of dimensions that are in the
-  //tensor get reply
+    CommandList cmds;
+    Command* cmd;
 
-  //We are going to assume right now that the meta data reply is always in the same order
-  //and we are going to just index into the base reply.
 
-  if(reply->elements < 6)
-    throw std::runtime_error("The message does not have the correct number of fields");
+    // Send the metadata message
+    std::string meta_key =
+        this->_build_dataset_meta_key(dataset.name, false);
 
-  redisReply* r = reply->element[3];
+    cmd = cmds.add_command();
+    cmd->add_field("SET");
+    cmd->add_field(meta_key, true);
+    cmd->add_field_ptr(dataset.get_metadata_buf());
 
-  n_dims = r->elements;
-  (*dims) = new int[n_dims];
-
-  for(int i = 0; i < r->elements; i++)
-  {
-    redisReply* r_dim = r->element[i];
-    (*dims)[i] = r_dim->integer;
-  }
-
-  return;
-}
-
-void SmartSimClient::_get_tensor_data_blob(std::unique_ptr<redisReply, sw::redis::ReplyDeleter>& reply,
-                                           void** blob)
-{
-  //This function will fill dims and set n_dims to the number of dimensions that are in the
-  //tensor get reply
-
-  //We are going to assume right now that the meta data reply is always in the same order
-  //and we are going to just index into the base reply.
-
-  if(reply->elements < 6)
-    throw std::runtime_error("The message does not have the correct number of fields");
-
-  redisReply* r = reply->element[5];
-
-  (*blob) = malloc(r->len);
-  memcpy(*blob, r->str, r->len);
-
-  return;
-}
-
-template <class T>
-void SmartSimClient::_reformat_data_blob(void* value, int* dims, int n_dims, int& buf_position, void* buf)
-{
-  if(n_dims > 1) {
-    T** current = (T**) value;
-    for(int i = 0; i < dims[0]; i++) {
-      this->_reformat_data_blob<T>(*current, &dims[1], n_dims-1, buf_position, buf);
-      current++;
+    // Send the tensor data
+    DataSet::tensor_iterator it = dataset.tensor_begin();
+    DataSet::tensor_iterator it_end = dataset.tensor_end();
+    TensorBase* tensor = 0;
+    std::string tensor_key;
+    while(it != it_end) {
+        tensor = *it;
+        tensor_key =
+            this->_build_dataset_tensor_key(dataset.name,
+                                            tensor->name(),
+                                            false);
+        cmd = cmds.add_command();
+        cmd->add_field("AI.TENSORSET");
+        cmd->add_field(tensor_key, true);
+        cmd->add_field(tensor->type_str());
+        cmd->add_fields(tensor->dims());
+        cmd->add_field("BLOB");
+        cmd->add_field_ptr(tensor->buf());
+        it++;
     }
-  }
-  else {
-    T* buf_to_copy = &(((T*)buf)[buf_position]);
-    memcpy(value, buf_to_copy, dims[0]*sizeof(T));
-    buf_position += dims[0];
-  }
-  return;
+
+    // Add variable to indicate dataset was correctly set.
+    std::string dataset_ack_key =
+        this->_build_dataset_ack_key(dataset.name, false);
+
+    cmd = cmds.add_command();
+    cmd->add_field("SET");
+    cmd->add_field(dataset_ack_key, true);
+    cmd->add_field("1");
+
+    this->_run(cmds);
+    return;
 }
 
+DataSet Client::get_dataset(const std::string& name)
+{
+    // Get the metadata message and construct DataSet
+    CommandReply reply = this->_get_dataset_metadata(name);
 
-template <typename T>
-void SmartSimClient::get_tensor(std::string_view key, void* result)
+    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+    std::vector<std::string> tensor_names = dataset.get_tensor_names();
+
+    std::vector<size_t> reply_dims;
+    std::string_view blob;
+    TensorType type;
+    std::string tensor_key;
+    for(size_t i=0; i<tensor_names.size(); i++) {
+        tensor_key =
+            this->_build_dataset_tensor_key(name, tensor_names[i], true);
+        Command cmd;
+        cmd.add_field("AI.TENSORGET");
+        cmd.add_field(tensor_key, true);
+        cmd.add_field("META");
+        cmd.add_field("BLOB");
+        reply = this->_run(cmd);
+        reply_dims = CommandReplyParser::get_tensor_dims(reply);
+        blob = CommandReplyParser::get_tensor_data_blob(reply);
+        type = CommandReplyParser::get_tensor_data_type(reply);
+        dataset._add_to_tensorpack(tensor_names[i],
+                                   (void*)blob.data(), reply_dims,
+                                   type, MemoryLayout::contiguous);
+    }
+    return dataset;
+}
+
+void Client::rename_dataset(const std::string& name,
+                            const std::string& new_name)
+{
+    this->copy_dataset(name, new_name);
+    this->delete_dataset(name);
+    return;
+}
+
+void Client::copy_dataset(const std::string& src_name,
+                          const std::string& dest_name)
+{
+    CommandReply reply = this->_get_dataset_metadata(src_name);
+    DataSet dataset = DataSet(src_name, reply.str(), reply.str_len());
+    std::vector<std::string> tensor_names = dataset.get_tensor_names();
+
+    std::vector<std::string> tensor_src_names;
+    std::vector<std::string> tensor_dest_names;
+    for(size_t i=0; i<tensor_names.size(); i++) {
+        tensor_src_names.push_back(
+            this->_build_dataset_tensor_key(src_name, tensor_names[i],true));
+        tensor_dest_names.push_back(
+            this->_build_dataset_tensor_key(dest_name, tensor_names[i],false));
+    }
+    this->_redis_server->copy_tensors(tensor_src_names,
+                                      tensor_dest_names);
+
+    Command put_meta_cmd;
+    CommandReply put_meta_reply;
+    std::string put_meta_key;
+    put_meta_key = this->_build_dataset_meta_key(dest_name, false);
+    put_meta_cmd.add_field("SET");
+    put_meta_cmd.add_field(put_meta_key, true);
+    put_meta_cmd.add_field_ptr(dataset.get_metadata_buf());
+    put_meta_reply = this->_run(put_meta_cmd);
+
+    // Add variable to indicate dataset was correctly set.
+
+    std::string dataset_ack_key =
+        this->_build_dataset_ack_key(dest_name, false);
+
+    Command ack_cmd;
+    ack_cmd.add_field("SET");
+    ack_cmd.add_field(dataset_ack_key, true);
+    ack_cmd.add_field("1");
+    this->_run(ack_cmd);
+    return;
+}
+
+void Client::delete_dataset(const std::string& name)
+{
+    CommandReply reply = this->_get_dataset_metadata(name);
+    DataSet dataset = DataSet(name, reply.str(), reply.str_len());
+
+    Command cmd;
+    cmd.add_field("DEL");
+    cmd.add_field(this->_build_dataset_meta_key(dataset.name, true),true);
+
+    std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    std::string tensor_key;
+    for(size_t i=0; i<tensor_names.size(); i++) {
+        tensor_key =
+            this->_build_dataset_tensor_key(dataset.name,
+                                            tensor_names[i], true);
+        cmd.add_field(tensor_key, true);
+    }
+
+    std::string dataset_ack_key =
+        this->_build_dataset_ack_key(name, false);
+    cmd.add_field(dataset_ack_key, true);
+
+    reply = this->_run(cmd);
+    return;
+}
+
+void Client::put_tensor(const std::string& key,
+                        void* data,
+                        const std::vector<size_t>& dims,
+                        const TensorType type,
+                        const MemoryLayout mem_layout)
+{
+    std::string p_key = this->_build_tensor_key(key, false);
+
+    TensorBase* tensor;
+    switch(type) {
+        case TensorType::dbl :
+            tensor = new Tensor<double>(p_key, data, dims,
+                                        type, mem_layout);
+            break;
+        case TensorType::flt :
+            tensor = new Tensor<float>(p_key, data, dims,
+                                        type, mem_layout);
+            break;
+        case TensorType::int64 :
+            tensor = new Tensor<int64_t>(p_key, data, dims,
+                                         type, mem_layout);
+            break;
+        case TensorType::int32 :
+            tensor = new Tensor<int32_t>(p_key, data, dims,
+                                         type, mem_layout);
+            break;
+        case TensorType::int16 :
+            tensor = new Tensor<int16_t>(p_key, data, dims,
+                                         type, mem_layout);
+            break;
+        case TensorType::int8 :
+            tensor = new Tensor<int8_t>(p_key, data, dims,
+                                        type, mem_layout);
+            break;
+        case TensorType::uint16 :
+            tensor = new Tensor<uint16_t>(p_key, data, dims,
+                                          type, mem_layout);
+            break;
+        case TensorType::uint8 :
+            tensor = new Tensor<uint8_t>(p_key, data, dims,
+                                         type, mem_layout);
+            break;
+    }
+
+    CommandReply reply = this->_redis_server->put_tensor(*tensor);
+
+    delete tensor;
+}
+
+void Client::get_tensor(const std::string& key,
+                        void*& data,
+                        std::vector<size_t>& dims,
+                        TensorType& type,
+                        const MemoryLayout mem_layout)
 {
 
-  int n_trials = 5;
-  //Make sure no memory leaks
-  std::unique_ptr<redisReply, sw::redis::ReplyDeleter> reply;
+    std::string g_key = this->_build_tensor_key(key, true);
+    CommandReply reply = this->_redis_server->get_tensor(g_key);
 
-  while(n_trials > 0) {
-    try {
-      if(redis_cluster)
-        reply = redis_cluster->command("AI.TENSORGET", key, "META", "BLOB");
-      else
-        reply = redis->command("AI.TENSORGET", key, "META", "BLOB");
-      n_trials = -1;
-    }
-    catch (sw::redis::IoError& e) {
-      n_trials--;
-      std::cout<<"WARNING: Caught redis IOError: "<<e.what()<<std::endl;
-      std::cout<<"WARNING: Could not get key "<<key<<" from database. "<<n_trials<<" more trials will be made."<<std::endl;
-    }
-  }
-  if(n_trials == 0)
-    throw std::runtime_error("Could not retreive "+std::string(key)+" from database due to redis IOError.");
+    dims = CommandReplyParser::get_tensor_dims(reply);
+    type = CommandReplyParser::get_tensor_data_type(reply);
+    std::string_view blob =
+        CommandReplyParser::get_tensor_data_blob(reply);
 
-  //This is a quick object inspection of the object.  Note that for
-  //   messages we should check the type and not just print out strings.
-  //   There is int, double, and string types possible in the message.
-  //Need check for if the reply is valid.
-  /*
-  std::cout<<"The get key is "<<key<<std::endl;
-  std::cout<<"The base reply string length is: "<<reply->len<<std::endl;
-  std::cout<<"The base type is "<<reply->type<<std::endl;
-  if(reply->str)
-    std::cout<<"The base reply string is: "<<reply->str<<std::endl;
-  for(int i = 0; i < reply->elements; i++) {
-      std::cout<<"*** Looking at sub element "<<i<<std::endl;
-      redisReply* r = reply->element[i];
-      std::cout<<"The sub element type is "<<r->type<<std::endl;
-      std::cout<<"The sub reply string length is: "<<r->len<<std::endl;
-      if(r->str)
-        std::cout<<"The sub reply string is: "<<r->str<<std::endl;
-      if(r->elements > 0) {
-        for(int i = 0; i < r->elements; i++) {
-          std::cout<<"*** *** Looking at subsub element "<<i<<std::endl;
-          std::cout<<"subsub element type is "<<r->type<<std::endl;
-          redisReply* rr = r->element[i];
-          std::cout<<"The subsub reply string length is: "<<rr->len<<std::endl;
-          if(rr->str)
-            std::cout<<"The subsub reply string is: "<<rr->str<<std::endl;
+    if(dims.size()<=0)
+        throw std::runtime_error("The number of dimensions of the "\
+                                "fetched tensor are invalid: " +
+                                std::to_string(dims.size()));
+
+    for(size_t i=0; i<dims.size(); i++) {
+        if(dims[i]<=0) {
+        throw std::runtime_error("Dimension " +
+                                 std::to_string(dims[i]) +
+                                 "of the fetched tensor is not valid: " +
+                                 std::to_string(dims[i]));
         }
-      }
-
-  }
-  */
-/* For now we are only interested in the BLOB and will return the blob message without
-  checking size or dimensions (assuming 1D for for).  We will return a raw pointer to that address.
-
-*/
-  void* binary_data = 0;
-  int* dims = 0;
-  int n_dims = 0;
-  int pos = 0;
-  this->_get_tensor_dims(reply, &dims, n_dims);
-  this->_get_tensor_data_blob(reply, &binary_data);
-  this->_reformat_data_blob<T>(result, dims, n_dims, pos, binary_data);
-
-  delete[] dims;
-}
-// These routines potentially modify keys by adding a prefix
-bool SmartSimClient::key_exists(const char* key)
-{
-  if(redis_cluster)
-    return redis_cluster->exists(std::string_view(key));
-  else
-    return redis->exists(std::string_view(key));
-}
-
-bool SmartSimClient::poll_key(const char* key, int poll_frequency_ms, int num_tries)
-{
-  bool key_exists = false;
-
-  while(!(num_tries==0)) {
-    if(this->key_exists(key)) {
-      key_exists = true;
-      break;
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
-    if(num_tries>0)
-      num_tries--;
-  }
 
-  if(key_exists)
-    return true;
-  else
-    return false;
+    TensorBase* ptr;
+    switch(type) {
+        case TensorType::dbl :
+            ptr = new Tensor<double>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+
+            break;
+        case TensorType::flt :
+            ptr = new Tensor<float>(g_key, (void*)blob.data(), dims,
+                                    type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int64 :
+            ptr = new Tensor<int64_t>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int32 :
+            ptr = new Tensor<int32_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int16 :
+            ptr = new Tensor<int16_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        case TensorType::int8 :
+            ptr = new Tensor<int8_t>(g_key, (void*)blob.data(), dims,
+                                     type, MemoryLayout::contiguous);
+            break;
+        case TensorType::uint16 :
+            ptr = new Tensor<uint16_t>(g_key, (void*)blob.data(), dims,
+                                       type, MemoryLayout::contiguous);
+            break;
+        case TensorType::uint8 :
+            ptr = new Tensor<uint8_t>(g_key, (void*)blob.data(), dims,
+                                      type, MemoryLayout::contiguous);
+            break;
+        default :
+            throw std::runtime_error("The tensor could not be "\
+                                     "retrieved in client.get_tensor().");
+            break;
+    }
+    this->_tensor_memory.add_tensor(ptr);
+    data = ptr->data_view(mem_layout);
+    return;
 }
 
+void Client::get_tensor(const std::string& key,
+                                void*& data,
+                                size_t*& dims,
+                                size_t& n_dims,
+                                TensorType& type,
+                                const MemoryLayout mem_layout)
+{
+
+    std::vector<size_t> dims_vec;
+    this->get_tensor(key, data, dims_vec,
+                    type, mem_layout);
+
+    size_t dims_bytes = sizeof(size_t)*dims_vec.size();
+    dims = this->_dim_queries.allocate_bytes(dims_bytes);
+    n_dims = dims_vec.size();
+
+    std::vector<size_t>::const_iterator it = dims_vec.cbegin();
+    std::vector<size_t>::const_iterator it_end = dims_vec.cend();
+    size_t i = 0;
+    while(it!=it_end) {
+        dims[i] = *it;
+        i++;
+        it++;
+    }
+
+    return;
+}
+
+void Client::unpack_tensor(const std::string& key,
+                          void* data,
+                          const std::vector<size_t>& dims,
+                          const TensorType type,
+                          const MemoryLayout mem_layout)
+{
+    if(mem_layout == MemoryLayout::contiguous &&
+        dims.size()>1) {
+        throw std::runtime_error("The destination memory space "\
+                                "dimension vector should only "\
+                                "be of size one if the memory "\
+                                "layout is contiguous.");
+        }
+
+    std::string g_key = this->_build_tensor_key(key, true);
+    CommandReply reply = this->_redis_server->get_tensor(g_key);
+
+    std::vector<size_t> reply_dims =
+        CommandReplyParser::get_tensor_dims(reply);
+
+    if(mem_layout == MemoryLayout::contiguous ||
+        mem_layout == MemoryLayout::fortran_contiguous) {
+
+        int total_dims = 1;
+        for(size_t i=0; i<reply_dims.size(); i++) {
+            total_dims *= reply_dims[i];
+        }
+        if( (total_dims != dims[0]) &&
+            (mem_layout == MemoryLayout::contiguous) )
+        throw std::runtime_error("The dimensions of the fetched "\
+                                "tensor do not match the length of "\
+                                "the contiguous memory space.");
+    }
+
+    if(mem_layout == MemoryLayout::nested) {
+        if(dims.size()!= reply_dims.size())
+        throw std::runtime_error("The number of dimensions of the  "\
+                                "fetched tensor, " +
+                                std::to_string(reply_dims.size()) + " "\
+                                "does not match the number of "\
+                                "dimensions of the user memory space, " +
+                                std::to_string(dims.size()));
+
+        for(size_t i=0; i<reply_dims.size(); i++) {
+            if(dims[i]!=reply_dims[i]) {
+                throw std::runtime_error("The dimensions of the fetched tensor "\
+                                        "do not match the provided "\
+                                        "dimensions of the user memory space.");
+            }
+        }
+    }
+
+    TensorType reply_type = CommandReplyParser::get_tensor_data_type(reply);
+    if(type!=reply_type)
+        throw std::runtime_error("The type of the fetched tensor "\
+                                "does not match the provided type");
+    std::string_view blob = CommandReplyParser::get_tensor_data_blob(reply);
+
+    TensorBase* tensor;
+    switch(reply_type) {
+        case TensorType::dbl :
+        tensor = new Tensor<double>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::flt :
+        tensor = new Tensor<float>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::int64  :
+        tensor = new Tensor<int64_t>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::int32 :
+        tensor = new Tensor<int32_t>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::int16 :
+        tensor = new Tensor<int16_t>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::int8 :
+        tensor = new Tensor<int8_t>(g_key, (void*)blob.data(),
+                                    reply_dims, reply_type,
+                                    MemoryLayout::contiguous);
+        break;
+        case TensorType::uint16 :
+        tensor = new Tensor<uint16_t>(g_key, (void*)blob.data(),
+                                      reply_dims, reply_type,
+                                      MemoryLayout::contiguous);
+        break;
+        case TensorType::uint8 :
+        tensor = new Tensor<uint8_t>(g_key, (void*)blob.data(),
+                                     reply_dims, reply_type,
+                                     MemoryLayout::contiguous);
+        break;
+    }
+
+    tensor->fill_mem_space(data, dims, mem_layout);
+    delete tensor;
+    return;
+}
+
+void Client::rename_tensor(const std::string& key,
+                           const std::string& new_key)
+{
+    std::string p_key = this->_build_tensor_key(key, true);
+    std::string p_new_key = this->_build_tensor_key(key, false);
+    CommandReply reply =
+        this->_redis_server->rename_tensor(p_key, p_new_key);
+    return;
+}
+
+void Client::delete_tensor(const std::string& key)
+{
+    std::string p_key = this->_build_tensor_key(key, true);
+    CommandReply reply =
+            this->_redis_server->delete_tensor(p_key);
+    return;
+}
+
+void Client::copy_tensor(const std::string& src_key,
+                         const std::string& dest_key)
+{
+    std::string p_src_key = this->_build_tensor_key(src_key, true);
+    std::string p_dest_key = this->_build_tensor_key(dest_key, false);
+    CommandReply reply =
+            this->_redis_server->copy_tensor(p_src_key, p_dest_key);
+    return;
+}
+
+void Client::set_model_from_file(const std::string& key,
+                                 const std::string& model_file,
+                                 const std::string& backend,
+                                 const std::string& device,
+                                 int batch_size,
+                                 int min_batch_size,
+                                 const std::string& tag,
+                                 const std::vector<std::string>& inputs,
+                                 const std::vector<std::string>& outputs)
+{
+    if(model_file.size()==0)
+        throw std::runtime_error("model_file is a required  "
+                                "parameter of set_model.");
+
+    std::ifstream fin(model_file, std::ios::binary);
+    std::ostringstream ostream;
+    ostream << fin.rdbuf();
+
+    const std::string tmp = ostream.str();
+    std::string_view model(tmp.data(), tmp.length());
+
+    this->set_model(key, model, backend, device, batch_size,
+                    min_batch_size, tag, inputs, outputs);
+    return;
+}
+
+void Client::set_model(const std::string& key,
+                       const std::string_view& model,
+                       const std::string& backend,
+                       const std::string& device,
+                       int batch_size,
+                       int min_batch_size,
+                       const std::string& tag,
+                       const std::vector<std::string>& inputs,
+                       const std::vector<std::string>& outputs)
+{
+    if(key.size()==0)
+        throw std::runtime_error("key is a required parameter "
+                                 "of set_model.");
+
+    if(backend.size()==0)
+        throw std::runtime_error("backend is a required  "
+                                 "parameter of set_model.");
+
+    if(backend.compare("TF")!=0) {
+        if(inputs.size() > 0)
+        throw std::runtime_error("INPUTS in the model set command "\
+                                 "is only valid for TF models");
+        if(outputs.size() > 0)
+        throw std::runtime_error("OUTPUTS in the model set command "\
+                                 "is only valid for TF models");
+    }
+
+    if(backend.compare("TF")!=0 && backend.compare("TFLITE")!=0 &&
+        backend.compare("TORCH")!=0 && backend.compare("ONNX")!=0) {
+        throw std::runtime_error(std::string(backend) +
+                                    " is not a valid backend.");
+    }
+
+    if(device.size()==0)
+        throw std::runtime_error("device is a required  "
+                                 "parameter of set_model.");
+
+    if(device.compare("CPU")!=0 &&
+        std::string(device).find("GPU")==std::string::npos) {
+        throw std::runtime_error(std::string(backend) +
+                                 " is not a valid backend.");
+    }
+
+    std::string p_key = this->_build_model_key(key, false);
+    this->_redis_server->set_model(p_key, model, backend, device,
+                                   batch_size, min_batch_size,
+                                   tag, inputs, outputs);
+
+    return;
+}
+
+std::string_view Client::get_model(const std::string& key)
+{
+    std::string g_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_model(g_key);
+    char* model = this->_model_queries.allocate(reply.str_len());
+    std::memcpy(model, reply.str(), reply.str_len());
+    return std::string_view(model, reply.str_len());
+}
+
+void Client::set_script_from_file(const std::string& key,
+                                  const std::string& device,
+                                  const std::string& script_file)
+{
+    std::ifstream fin(script_file);
+    std::ostringstream ostream;
+    ostream << fin.rdbuf();
+
+    const std::string tmp = ostream.str();
+    std::string_view script(tmp.data(), tmp.length());
+
+    this->set_script(key, device, script);
+    return;
+}
+
+
+void Client::set_script(const std::string& key,
+                        const std::string& device,
+                        const std::string_view& script)
+{
+    std::string s_key = this->_build_model_key(key, false);
+    this->_redis_server->set_script(s_key, device, script);
+    return;
+}
+
+std::string_view Client::get_script(const std::string& key)
+{
+    std::string g_key = this->_build_model_key(key, true);
+    CommandReply reply = this->_redis_server->get_script(g_key);
+    char* script = this->_model_queries.allocate(reply.str_len());
+    std::memcpy(script, reply.str(), reply.str_len());
+    return std::string_view(script, reply.str_len());
+}
+
+void Client::run_model(const std::string& key,
+                       std::vector<std::string> inputs,
+                       std::vector<std::string> outputs)
+{
+    std::string g_key = this->_build_model_key(key, true);
+
+    if (this->_use_tensor_prefix) {
+        this->_append_with_get_prefix(inputs);
+        this->_append_with_put_prefix(outputs);
+    }
+    this->_redis_server->run_model(g_key, inputs, outputs);
+    return;
+}
+
+void Client::run_script(const std::string& key,
+                        const std::string& function,
+                        std::vector<std::string> inputs,
+                        std::vector<std::string> outputs)
+{
+    std::string g_key = this->_build_model_key(key, true);
+
+    if (this->_use_tensor_prefix) {
+        this->_append_with_get_prefix(inputs);
+        this->_append_with_put_prefix(outputs);
+    }
+    this->_redis_server->run_script(g_key, function, inputs, outputs);
+    return;
+}
+
+bool Client::key_exists(const std::string& key)
+{
+    return this->_redis_server->key_exists(key);
+}
+
+bool Client::tensor_exists(const std::string& name)
+{
+    std::string g_key = this->_build_tensor_key(name, true);
+    return this->_redis_server->key_exists(g_key);
+}
+
+bool Client::model_exists(const std::string& name)
+{
+    std::string g_key = this->_build_model_key(name, true);
+    return this->_redis_server->model_key_exists(g_key);
+}
+
+bool Client::poll_key(const std::string& key,
+                      int poll_frequency_ms,
+                      int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->key_exists(key)) {
+            key_exists = true;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    return key_exists;
+}
+
+bool Client::poll_model(const std::string& name,
+                        int poll_frequency_ms,
+                        int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->model_exists(name)) {
+            key_exists = true;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    return key_exists;
+}
+
+bool Client::poll_tensor(const std::string& name,
+                         int poll_frequency_ms,
+                         int num_tries)
+{
+    bool key_exists = false;
+
+    while(!(num_tries==0)) {
+        if(this->tensor_exists(name)) {
+            key_exists = true;
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+        if(num_tries>0)
+        num_tries--;
+    }
+
+    if(key_exists)
+        return true;
+    else
+        return false;
+}
+
+void Client::set_data_source(std::string source_id)
+{
+    bool valid_prefix = false;
+    int num_prefix = _get_key_prefixes.size();
+    int i = 0;
+    for (i=0; i<num_prefix; i++) {
+        if (this->_get_key_prefixes[i].compare(source_id)==0) {
+            valid_prefix = true;
+            break;
+        }
+    }
+
+    if (valid_prefix)
+        this->_get_key_prefix = this->_get_key_prefixes[i];
+    else
+        throw std::runtime_error("Client error: data source " +
+                    std::string(source_id) +
+                    "could not be found during client "+
+                    "initialization.");
+}
+
+
+void Client::use_model_ensemble_prefix(bool use_prefix)
+{
+    this->_use_model_prefix = use_prefix;
+}
+
+void Client::use_tensor_ensemble_prefix(bool use_prefix)
+{
+    this->_use_tensor_prefix = use_prefix;
+}
+
+CommandReply Client::_run(Command& cmd)
+{
+    return this->_redis_server->run(cmd);
+}
+
+CommandReply Client::_run(CommandList& cmds)
+{
+    return this->_redis_server->run(cmds);
+}
+
+void Client::_set_prefixes_from_env()
+{
+    const char* keyout_p = std::getenv("SSKEYOUT");
+    if (keyout_p)
+        this->_put_key_prefix = keyout_p;
+    else
+        this->_put_key_prefix.clear();
+
+    char* keyin_p = std::getenv("SSKEYIN");
+    if(keyin_p) {
+        char* a = &keyin_p[0];
+        char* b = a;
+        char parse_char = ',';
+        while (*b) {
+            if(*b==parse_char) {
+                if(a!=b)
+                    this->_get_key_prefixes.push_back(std::string(a, b-a));
+                a=++b;
+            }
+            else
+                b++;
+        }
+        if(a!=b)
+            this->_get_key_prefixes.push_back(std::string(a, b-a));
+    }
+
+    if (this->_get_key_prefixes.size() > 0)
+        this->set_data_source(this->_get_key_prefixes[0].c_str());
+}
+
+inline std::string Client::_put_prefix()
+{
+    std::string prefix;
+    if(this->_put_key_prefix.size()>0)
+        prefix =  this->_put_key_prefix + '.';
+    return prefix;
+}
+
+inline std::string Client::_get_prefix()
+{
+    std::string prefix;
+    if(this->_get_key_prefix.size()>0)
+        prefix =  this->_get_key_prefix + '.';
+    return prefix;
+}
+
+inline void Client::_append_with_get_prefix(
+                     std::vector<std::string>& keys)
+{
+    std::vector<std::string>::iterator prefix_it;
+    std::vector<std::string>::iterator prefix_it_end;
+    prefix_it = keys.begin();
+    prefix_it_end = keys.end();
+    while(prefix_it != prefix_it_end) {
+        *prefix_it = this->_build_tensor_key(*prefix_it, true);
+        prefix_it++;
+    }
+    return;
+}
+
+inline void Client::_append_with_put_prefix(
+                     std::vector<std::string>& keys)
+{
+    std::vector<std::string>::iterator prefix_it;
+    std::vector<std::string>::iterator prefix_it_end;
+    prefix_it = keys.begin();
+    prefix_it_end = keys.end();
+    while(prefix_it != prefix_it_end) {
+        *prefix_it = this->_build_tensor_key(*prefix_it, false);
+        prefix_it++;
+    }
+    return;
+}
+
+inline CommandReply Client::_get_dataset_metadata(const std::string& name)
+{
+    Command cmd;
+    cmd.add_field("GET");
+    cmd.add_field(this->_build_dataset_meta_key(name, true), true);
+    return this->_run(cmd);
+}
+
+inline std::string Client::_build_tensor_key(const std::string& key, bool on_db)
+{
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+
+    return prefix + key;
+}
+
+inline std::string Client::_build_model_key(const std::string& key, bool on_db)
+{
+    std::string prefix;
+    if (this->_use_model_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+
+    return prefix + key;
+}
+
+inline std::string Client::_build_dataset_key(const std::string& dataset_name, bool on_db)
+{
+    std::string key;
+    std::string prefix;
+    if (this->_use_tensor_prefix)
+        prefix = on_db ? this->_get_prefix() : this->_put_prefix();
+
+    key = prefix +
+          "{" + dataset_name + "}";
+    return key;
+}
+
+inline std::string Client::_build_dataset_tensor_key(const std::string& dataset_name,
+                                                     const std::string& tensor_name,
+                                                     bool on_db)
+{
+    return this->_build_dataset_key(dataset_name, on_db) + "."+ tensor_name;
+}
+
+inline std::string Client::_build_dataset_meta_key(const std::string& dataset_name,
+                                                   bool on_db)
+{
+    return this->_build_dataset_key(dataset_name, on_db) + ".meta";
+}
+
+inline std::string Client::_build_dataset_ack_key(const std::string& dataset_name,
+                                                  bool on_db)
+{
+    return this->_build_tensor_key(dataset_name, on_db);
+}

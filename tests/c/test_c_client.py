@@ -1,311 +1,74 @@
 import pytest
-from smartsim.tests.decorators import compiled_client_test
-from smartsim import Experiment
+from os import path as osp
+from glob import glob
 from shutil import which
-from os import path
+from subprocess import Popen, PIPE, TimeoutExpired
+import time
 
-if not which("srun"):
-    pytestmark = pytest.mark.skip()
+RANKS = 1
+TEST_PATH = osp.dirname(osp.abspath(__file__))
 
-test_dir=path.dirname(path.abspath(__file__))
-
-alloc_experiment = Experiment("alloc_retrieval")
-alloc = alloc_experiment.get_allocation(nodes=5, ppn=2)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_scalar_put_get"])
-def test_put_get_scalar(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
+def get_test_names():
+    """Obtain test names by globbing for client_test
+    Add tests manually if necessary
     """
+    glob_path = osp.join(TEST_PATH, "build/client_test*")
+    test_names = glob(glob_path)
+    test_names = [(pytest.param(test,
+                                id=osp.basename(test))) for test in test_names]
+    return test_names
 
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
+def get_run_command():
+    """Get run command for specific platform"""
+    if which("srun"):
+        return [which("srun"), "-n", f"{RANKS}"]
+    return [which("mpirun"),"-np", f"{RANKS}"]
 
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_array_1d_put_get"])
-def test_put_get_array_1d(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
+@pytest.mark.parametrize("test", get_test_names())
+def test_c_client(test, use_cluster):
+    """This function actually runs the tests using the parameterization
+    function provided in Pytest
+
+    :param test: a path to a test to run
+    :type test: str
     """
+    cmd = get_run_command()
+    cmd.append(test)
+    print(f"Running test: {osp.basename(test)}")
+    print(f"Test command {' '.join(cmd)}")
+    print(f"Using cluster: {use_cluster}")
+    execute_cmd(cmd)
+    time.sleep(2)
 
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
+def execute_cmd(cmd_list):
+    """Execute a command """
 
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_array_2d_put_get"])
-def test_put_get_array_2d(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
+    # spawning the subprocess and connecting to its output
+    run_path = osp.join(TEST_PATH, "build/")
+    proc = Popen(
+        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
+    try:
+        out, err = proc.communicate(timeout=120)
+        if out:
+            print("OUTPUT:", out.decode("utf-8"))
+        if err:
+            print("ERROR:", err.decode("utf-8"))
+        assert(proc.returncode == 0)
+    except UnicodeDecodeError:
+        output, errs = proc.communicate()
+        print("ERROR:", errs.decode("utf-8"))
+        assert(False)
+    except TimeoutExpired:
+        proc.kill()
+        output, errs = proc.communicate()
+        print("TIMEOUT: test timed out after test timeout limit of 120 seconds")
+        print("OUTPUT:", output.decode("utf-8"))
+        print("ERROR:", errs.decode("utf-8"))
+        assert(False)
+    except Exception:
+        proc.kill()
+        output, errs = proc.communicate()
+        print("OUTPUT:", output.decode("utf-8"))
+        print("ERROR:", errs.decode("utf-8"))
+        assert(False)
 
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_poll_key_and_check"])
-def test_poll_key_and_check(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-# Exact key tests
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_scalar_put_get"])
-def test_exact_key_put_get_scalar(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_array_1d_put_get"])
-def test_exact_key_put_get_array_1d(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_array_2d_put_get"])
-def test_exact_key_put_get_array_2d(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_poll_exact_key_and_check"])
-def test_exact_key_poll_key_and_check(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-# Exact key tests wo prefixing
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_scalar_put_get"])
-def test_exact_key_put_get_scalar_w_prefixing(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    client_model.enable_key_prefixing()
-    client_model.register_incoming_entity(client_model,'c')
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_array_1d_put_get"])
-def test_exact_key_put_get_array_1d_w_prefixing(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    client_model.enable_key_prefixing()
-    client_model.register_incoming_entity(client_model,'c')
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_exact_key_array_2d_put_get"])
-def test_exact_key_put_get_array_2d_w_prefixing(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    client_model.enable_key_prefixing()
-    client_model.register_incoming_entity(client_model,'c')
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
-
-@compiled_client_test(test_dir=test_dir,
-                 target_names=["client_test_poll_exact_key_and_check"])
-def test_exact_key_poll_key_and_check_w_prefixing(*args, **kwargs):
-    """ This function tests putting and getting a scalar
-        to and from the SmartSim database.  Success is
-        based on equality of the sent and retreived scalar
-    """
-
-    experiment = Experiment("client_test")
-    experiment.add_allocation(alloc)
-    run_settings = {"nodes":1,
-                    "ppn": 2,
-                    "executable":kwargs['binary_names'][0],
-                    "alloc": alloc}
-    client_model = experiment.create_model("client_test",
-                                            run_settings=run_settings)
-    client_model.enable_key_prefixing()
-    client_model.register_incoming_entity(client_model,'c')
-    orc = experiment.create_orchestrator(db_nodes=1, alloc=alloc)
-    experiment.generate()
-    experiment.start()
-    experiment.poll(interval=5)
-    assert(experiment.get_status(client_model) == "COMPLETED")
-    experiment.stop(orchestrator=orc)
-    experiment.poll(interval=1, poll_db=True)
