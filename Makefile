@@ -1,4 +1,3 @@
-
 MAKEFLAGS += --no-print-directory
 
 # Do not remove this block. It is used by the 'help' rule when
@@ -169,40 +168,39 @@ cov:
 .PHONY: test
 test: build-tests
 test:
-	@python -m pytest -vv ./tests
+	@python3 -m pytest -vv ./tests
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@python -m pytest -vv -s ./tests
+	@python3 -m pytest -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
 test-c: build-test-c
 test-c:
-	@python -m pytest -vv -s ./tests/c/
+	@python3 -m pytest -vv -s ./tests/c/
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
 test-cpp: build-test-cpp
 test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/
+	@python3 -m pytest -vv -s ./tests/cpp/
 
 
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py:
-	@python -m pytest -vv ./tests/python/
+	@python3 -m pytest -vv ./tests/python/
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
 test-fortran: build-test-fortran
-	@python -m pytest -vv ./tests/fortran/
+	@python3 -m pytest -vv ./tests/fortran/
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov:
-	@python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
-
+	@python3 -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/

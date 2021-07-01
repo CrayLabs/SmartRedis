@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(python3 -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 cd ./tests/fortran/
 
@@ -37,4 +37,3 @@ if [[ $DO_FORTRAN == "yes" ]]; then
 else
     echo "Skipping Fortran test build"
 fi
-
