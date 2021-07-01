@@ -11,17 +11,17 @@ fi
 cd ./third-party
 
 # get the number of processors
-NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
+NPROC=$(python3 -c "import multiprocessing as mp; print(mp.cpu_count())")
 # get python installed cmake
-CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+CMAKE=$(python3 -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
 
 # Install Hiredis
 if ls ../install/lib/libhiredis.a 1>/dev/null 2>&1; then
     echo "Hiredis has already been installed"
 else
     if [[ ! -d "./hiredis" ]]; then
-	git clone https://github.com/redis/hiredis.git hiredis --branch v1.0.0 --depth=1
-	echo "Hiredis downloaded"
+        git clone https://github.com/redis/hiredis.git hiredis --branch v1.0.0 --depth=1
+        echo "Hiredis downloaded"
     fi
     cd hiredis
 
@@ -41,14 +41,13 @@ if ls ../install/lib/libredis++.a 1>/dev/null 2>&1; then
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
         git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.2.3 --depth=1
-	    echo "Redis-plus-plus downloaded"
+            echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus
     #ex -s -c '2i|SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)' -c x CMakeLists.txt
     mkdir compile
     cd compile
-
-    $CMAKE -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="$(pwd)../../../install/lib/" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../../install" -DCMAKE_CXX_STANDARD=17 ..
+    $CMAKE -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="$(pwd)/../../../install/$MPI_ROOT/lib/" -DCMAKE_INSTALL_PREFIX="$(pwd)/../../../install/" -DCMAKE_CXX_STANDARD=17 ..
     CC=gcc CXX=g++ make -j $NPROC
     CC=gcc CXX=g++ make install
     cd ../../
