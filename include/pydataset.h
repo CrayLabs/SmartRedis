@@ -32,43 +32,39 @@
 #include <pybind11/numpy.h>
 #include <string>
 
-namespace py = pybind11;
+using namespace SmartRedis;
 
-namespace SmartRedis {
+namespace py = pybind11;
 
 class PyDataset;
 
 class PyDataset
 {
-    public:
+public:
+  PyDataset(const std::string& name);
+  PyDataset(DataSet& dataset);
+  ~PyDataset();
 
-        PyDataset(const std::string& name);
-        PyDataset(DataSet& dataset);
-        ~PyDataset();
+  void add_tensor(const std::string& name,
+                  py::array data,
+                  std::string& type);
 
-        void add_tensor(const std::string& name,
-                        py::array data,
-                        std::string& type);
+  py::array get_tensor(const std::string& name);
 
-        py::array get_tensor(const std::string& name);
+  void add_meta_scalar(const std::string& name,
+                       py::array data,
+                       std::string& type);
 
-        void add_meta_scalar(const std::string& name,
-                            py::array data,
-                            std::string& type);
+  void add_meta_string(const std::string& name,
+                       const std::string& data);
 
-        void add_meta_string(const std::string& name,
-                            const std::string& data);
+  py::array get_meta_scalars(const std::string& name);
 
-        py::array get_meta_scalars(const std::string& name);
-
-        py::list get_meta_strings(const std::string& name);
+  py::list get_meta_strings(const std::string& name);
 
 
-        DataSet* get();
+  DataSet* get();
 
-    private:
-
-        DataSet* _dataset;
+private:
+  DataSet* _dataset;
 };
-
-} //namespace SmartRedis

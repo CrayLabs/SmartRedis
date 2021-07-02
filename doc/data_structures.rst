@@ -147,8 +147,7 @@ experience across the C++, C, and Fortran clients.
                     const MemoryLayout mem_layout);
 
 .. note::
-    Memory allocated by C++, C, and Fortran
-    ``Client`` during a ``get_tensor()``
+    Memory allocated by ``Client`` during a ``get_tensor()``
     call will be valid and not freed until the ``Client``
     object is destroyed.  Therefore, if the type and dimensions
     of the tensor are known, it is recommended that
@@ -159,10 +158,7 @@ retrieving tensors.  In this methodology, a NumPy array is returned
 to the user, and the only required input to the function is the
 name of the tensor to retrieve because all the type and dimensions
 information are embedded in the NumPy array object.
-The Python interface for ``get_tensor()`` is shown below.  In the
-Python implementation of ``get_tensor()``, the memory associated
-with the retrieved tensor will be freed when the NumPy array
-goes out of scope or is deleted.
+The Python interface for ``get_tensor()`` is shown below.
 
 .. code-block:: python
 

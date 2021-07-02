@@ -36,6 +36,7 @@
 #include <forward_list>
 #include "tensor.h"
 #include "tensorbase.h"
+#include "tensorlist.h"
 
 ///@file
 
@@ -88,7 +89,7 @@ class TensorPack
         /*!
         *   \brief Default TensorPack destructor
         */
-        ~TensorPack();
+        ~TensorPack() = default;
 
         /*!
         *   \brief Add a tensor to the dataset
@@ -167,7 +168,7 @@ class TensorPack
         *   \returns Const TensorPack iterator to the first
         *            TensorBase
         */
-        const_tensorbase_iterator tensor_cbegin() const;
+        const_tensorbase_iterator tensor_cbegin();
 
 
         /*!
@@ -184,7 +185,7 @@ class TensorPack
         *   \returns TensorPack const iterator to the
         *             past-the-end TensorBase
         */
-        const_tensorbase_iterator tensor_cend() const;
+        const_tensorbase_iterator tensor_cend();
 
     private:
 
@@ -202,6 +203,63 @@ class TensorPack
         */
         std::unordered_map<std::string, TensorBase*> _tensorbase_inventory;
 
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<double>
+        *          to make iterating easier.
+        */
+        TensorList<double> _tensors_double;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<float>
+        *          to make iterating easier.
+        */
+        TensorList<float> _tensors_float;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<int64_t>
+        *          to make iterating easier.
+        */
+        TensorList<int64_t> _tensors_int64;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<int32_t>
+        *          to make iterating easier.
+        */
+        TensorList<int32_t> _tensors_int32;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<int16_T>
+        *          to make iterating easier.
+        */
+        TensorList<int16_t> _tensors_int16;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<int8_t>
+        *          to make iterating easier.
+        */
+        TensorList<int8_t> _tensors_int8;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<uint16_t>
+        *          to make iterating easier.
+        */
+        TensorList<uint16_t> _tensors_uint16;
+
+        /*!
+        *   \brief TensorLists for memory management and
+        *          operations on Tensor<uint8_t>
+        *          to make iterating easier.
+        */
+        TensorList<uint8_t> _tensors_uint8;
+
         /*!
         *   \brief Rebuild the tensor map and
         *          forward_list iterator
@@ -209,11 +267,14 @@ class TensorPack
         void _rebuild_tensor_inventory();
 
         /*!
-        *   \brief Copy the tensor inventory from one
-        *          TensorPack to this TensorPack
-        *   \param tp The source TensorPack for copying
+        *   \brief Add a TensorList to the tensor
+        *          inventory
+        *   \param t_list The TensorList to add
+        *   \tparam T The data type of the TensorList
+        *           to add (e.g. double)
         */
-        void _copy_tensor_inventory(const TensorPack& tp);
+        template <typename T>
+        void _add_tensorlist_to_inventory(TensorList<T>& t_list);
 };
 
 } //namespace SmartRedis

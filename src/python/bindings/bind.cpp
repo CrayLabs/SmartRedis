@@ -28,7 +28,6 @@
 
 #include "pyclient.h"
 
-using namespace SmartRedis;
 namespace py = pybind11;
 
 

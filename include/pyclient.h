@@ -38,7 +38,7 @@
 
 ///@file
 
-namespace SmartRedis {
+using namespace SmartRedis;
 
 namespace py = pybind11;
 
@@ -432,7 +432,4 @@ class PyClient
         Client* _client;
 
 };
-
-} //namespace SmartRedis
-
 #endif //PY_CLIENT_H
