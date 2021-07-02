@@ -100,8 +100,6 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
         this->_name = std::move(tb._name);
         this->_type = std::move(tb._type);
         this->_dims = std::move(tb._dims);
-        if(this->_data)
-            free(this->_data);
         this->_data = tb._data;
         tb._data = 0;
     }
