@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 if [[ ! -d "./third-party" ]]; then
     mkdir ./third-party
