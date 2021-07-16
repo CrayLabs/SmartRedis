@@ -1,10 +1,10 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # get the number of processors
-NPROC=$(python3 -c "import multiprocessing as mp; print(mp.cpu_count())")
-echo "NPROC is $NPROC "
-CMAKE=$(python3 -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
-echo "cmake is $CMAKE"
+NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
+
+CMAKE=$(python -c "import cmake; import os; print(os.path.join(cmake.CMAKE_BIN_DIR, 'cmake'))")
+
 # Remove existing module
 if [ -f ./src/python/module/smartredis/smartredisPy.*.so ]; then
     echo "Removing existing module installation"
@@ -19,8 +19,7 @@ fi
 # make a new build directory and invoke cmake
 mkdir build
 cd build
-ln -fs $(pwd)/../install/$MPI_ROOT/lib/* $(pwd)/../install/lib/
-$CMAKE -DCMAKE_PREFIX_PATH="$(pwd)/../install/lib/" -DCMAKE_INSTALL_PREFIX="$(pwd)/../install/"  ..
+$CMAKE ..
 make -j $NPROC
 make install
 
