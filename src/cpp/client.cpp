@@ -30,6 +30,7 @@
 
 using namespace SmartRedis;
 
+// Constructor
 Client::Client(bool cluster)
 {
     if(cluster) {
@@ -50,6 +51,7 @@ Client::Client(bool cluster)
     return;
 }
 
+// Destructor
 Client::~Client() {
     if(this->_redis_cluster)
         delete this->_redis_cluster;
