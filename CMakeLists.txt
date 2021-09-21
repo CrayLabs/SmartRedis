@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.10)
 
 option(BUILD_PYTHON "Build the python module" ON)
 
+enable_language(Fortran)
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR})
+
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXE_LINKER_FLAGS "-lpthread")
@@ -49,6 +52,7 @@ include_directories(SYSTEM
     include
     install/include
     src/fortran
+    ${CMAKE_Fortran_MODULE_DIRECTORY}
 )
 
 # Build dynamic library
@@ -64,6 +68,12 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
+)
+
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}
+        DESTINATION "mod"
+        FILES_MATCHING
+        PATTERN "*.mod"
 )
 
 if(BUILD_PYTHON)
