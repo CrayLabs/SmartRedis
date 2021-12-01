@@ -70,7 +70,10 @@ void put_get_dataset(
     // Make sure a nonexistant dataset doesn't exist
     std::string nonexistant("nonexistant");
     if (client.dataset_exists(nonexistant))
-      throw std::runtime_error("DataSet existence of a non-existant"\
+      throw std::runtime_error("DataSet existence of a non-existant "\
+                                 "dataset failed.");
+    if (client.poll_dataset(nonexistant, 50, 5))
+      throw std::runtime_error("DataSet existence of a non-existant "\
                                  "dataset failed.");
 
     //Put the DataSet into the database
@@ -78,6 +81,9 @@ void put_get_dataset(
 
     // Make sure it exists
     if (!client.dataset_exists(dataset_name))
+      throw std::runtime_error("DataSet existence of a non-existant"\
+                                 "dataset failed.");
+    if (!client.poll_dataset(dataset_name, 50, 5))
       throw std::runtime_error("DataSet existence of a non-existant"\
                                  "dataset failed.");
 

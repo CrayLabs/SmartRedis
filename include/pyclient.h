@@ -362,7 +362,7 @@ class PyClient
                       int num_tries);
 
         /*!
-        *   \brief Check if a tensor or dataset exists in the database at a
+        *   \brief Check if a tensor exists in the database at a
         *          specified frequency for a specified number
         *          of times. The name will be automatically prefixed
         *          base on prefixing behavior.
@@ -379,6 +379,25 @@ class PyClient
         bool poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries);
+
+        /*!
+        *   \brief Check if a dataset exists in the database at a
+        *          specified frequency for a specified number
+        *          of times. The name will be automatically prefixed
+        *          base on prefixing behavior.
+        *   \param name The key that will be checked in the database
+        *   \param poll_frequency_ms The frequency of checks for the
+        *                            key in milliseconds
+        *   \param num_tries The total number of times to check for
+        *                    the specified number of keys.  If the
+        *                    value is set to -1, the key will be
+        *                    polled indefinitely.
+        *   \returns Returns true if the key is found within the
+        *            specified number of tries, otherwise false.
+        */
+        bool poll_dataset(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries);
 
         /*!
         *   \brief Check if a model or script exists in the database at a

@@ -531,6 +531,25 @@ bool PyClient::poll_tensor(const std::string& name,
     return result;
 }
 
+bool PyClient::poll_dataset(const std::string& name,
+                            int poll_frequency_ms,
+                            int num_tries)
+{
+    bool result = false;
+    try {
+        result = _client->poll_dataset(name, poll_frequency_ms, num_tries);
+    }
+    catch(const std::exception& e) {
+        throw smart_runtime_error(e.what());
+    }
+    catch(...) {
+        throw smart_runtime_error("A non-standard exception "\
+                                  "was encountered during client "\
+                                  "poll_tensor execution.");
+    }
+    return result;
+}
+
 bool PyClient::poll_model(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)

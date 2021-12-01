@@ -120,6 +120,21 @@ interface
 end interface
 
 interface
+  function poll_dataset_c(client, dataset_name, dataset_name_length, poll_frequency_ms, num_tries, exists) &
+      bind(c, name="poll_dataset")
+    use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
+    import :: enum_kind
+    integer(kind=enum_kind)       :: poll_dataset_c
+    type(c_ptr), value            :: client
+    character(kind=c_char)        :: dataset_name(*)
+    integer(kind=c_size_t), value :: dataset_name_length
+    integer(kind=c_int),    value :: poll_frequency_ms
+    integer(kind=c_int),    value :: num_tries
+    logical(kind=c_bool)          :: exists
+  end function poll_dataset_c
+end interface
+
+interface
   function poll_key_c(client, key, key_length, poll_frequency_ms, num_tries, exists) bind(c, name="poll_key")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind

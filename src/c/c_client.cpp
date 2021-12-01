@@ -1059,11 +1059,11 @@ SRError poll_model(void* c_client,
 // Delay until a tensor exists in the database
 extern "C"
 SRError poll_tensor(void* c_client,
-                 const char* name,
-                 const size_t name_length,
-                 const int poll_frequency_ms,
-                 const int num_tries,
-                 bool* exists)
+                    const char* name,
+                    const size_t name_length,
+                    const int poll_frequency_ms,
+                    const int num_tries,
+                    bool* exists)
 {
   SRError result = sr_ok;
   try
@@ -1075,6 +1075,38 @@ SRError poll_tensor(void* c_client,
     std::string name_str(name, name_length);
 
     *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
+  }
+  catch (const smart_error& e) {
+    sr_set_last_error(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
+    result = sr_internal;
+  }
+
+  return result;
+}
+
+// Delay until a dataset exists in the database
+extern "C"
+SRError poll_dataset(void* c_client,
+                     const char* name,
+                     const size_t name_length,
+                     const int poll_frequency_ms,
+                     const int num_tries,
+                     bool* exists)
+{
+  SRError result = sr_ok;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+
+    *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
   }
   catch (const smart_error& e) {
     sr_set_last_error(e);
