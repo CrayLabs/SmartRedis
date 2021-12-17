@@ -91,22 +91,22 @@ PYBIND11_MODULE(smartredisPy, m) {
         try {
             if (p) std::rethrow_exception(p);
         }
-        catch (const _smart_bad_alloc& e) {
+        catch (const BadAllocException& e) {
             PyErr_SetString(PyExc_MemoryError, e.what());
         }
-        catch (const _smart_database_error& e) {
+        catch (const DatabaseException& e) {
             PyErr_SetString(PyExc_OSError, e.what());
         }
-        catch (const _smart_runtime_error& e) {
+        catch (const RuntimeException& e) {
             PyErr_SetString(PyExc_RuntimeError, e.what());
         }
-        catch (const _smart_parameter_error& e) {
+        catch (const ParameterException& e) {
             PyErr_SetString(PyExc_ValueError, e.what());
         }
-        catch (const _smart_timeout_error& e) {
+        catch (const TimeoutException& e) {
             PyErr_SetString(PyExc_TimeoutError, e.what());
         }
-        catch (const _smart_internal_error& e) {
+        catch (const InternalException& e) {
             PyErr_SetString(PyExc_SystemError, e.what());
         }
     });

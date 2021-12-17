@@ -26,25 +26,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(SMARTREDIS_ASSERT_H)
+#ifndef SMARTREDIS_ASSERT_H
 #define SMARTREDIS_ASSERT_H
 
 #include "srexception.h"
 
-inline bool throw_runtime_error(const std::string &txt, const char *file, int line)
-{
-    throw _smart_runtime_error(txt, file, line);
-}
+///@file
 
-inline bool throw_param_error(const std::string &txt, const char *file, int line)
+/*!
+*   \brief  Throw a SmartRedis::RuntimeException. Written as a boolean function in order
+*           that it may be logically joined with an assertion (leveraging short-circuiting)
+*           and not impact code coverage statistics for adding assertions
+*   \param txt Message for the RuntimeException
+*   \param file Source file for where the RuntimeException should report as thrown from
+*   \param line Line number for where the RuntimeException should report as thrown from
+*   \returns This routine always throws an exception
+*/
+inline bool throw_runtime_exception(const std::string &txt, const char *file, int line)
 {
-    throw _smart_parameter_error(txt, file, line);
+    throw RuntimeException(txt, file, line);
 }
 
 #define SR_ASSERT(condition) \
-    ((condition) || throw_runtime_error(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
+    ((condition) || throw_runtime_exception(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
+
+
+/*!
+*   \brief  Throw a SmartRedis::ParameterException. Written as a boolean function in order
+*           that it may be logically joined with an assertion (leveraging short-circuiting)
+*           and not impact code coverage statistics for adding parameter checks
+*   \param txt Message for the ParameterException
+*   \param file Source file for where the RuntimeException should report as thrown from
+*   \param line Line number for where the RuntimeException should report as thrown from
+*   \returns This routine always throws an exception
+*/
+inline bool throw_param_exception(const std::string &txt, const char *file, int line)
+{
+    throw ParameterException(txt, file, line);
+}
 
 #define SR_CHECK_PARAMS(condition) \
-    ((condition) || throw_param_error(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
+    ((condition) || throw_param_exception(std::string("Assertion failed!") + #condition, __FILE__, __LINE__))
 
 #endif // SMARTREDIS_ASSERT_H

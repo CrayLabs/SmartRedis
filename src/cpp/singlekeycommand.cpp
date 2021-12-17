@@ -45,5 +45,6 @@ Command* SingleKeyCommand::clone()
         return new SingleKeyCommand(*this);
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("SingleKeyCommand clone");
-    }}
+        throw SRBadAllocException("SingleKeyCommand clone");
+    }
+}

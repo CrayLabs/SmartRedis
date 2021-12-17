@@ -33,8 +33,8 @@
 
 template <typename T_send, typename T_recv>
 void put_and_copy_dataset(
-		    void (*fill_array)(T_send***, int, int, int),
-		    std::vector<size_t> dims,
+            void (*fill_array)(T_send***, int, int, int),
+            std::vector<size_t> dims,
             SRTensorType type,
             std::string key_suffix,
             std::string dataset_name)
@@ -63,9 +63,9 @@ void put_and_copy_dataset(
     std::string t_name_2 = "tensor_2";
     std::string t_name_3 = "tensor_3";
 
-    source_dataset.add_tensor(t_name_1, t_send_1, dims, type, sr_layout_nested);
-    source_dataset.add_tensor(t_name_2, t_send_2, dims, type, sr_layout_nested);
-    source_dataset.add_tensor(t_name_3, t_send_3, dims, type, sr_layout_nested);
+    source_dataset.add_tensor(t_name_1, t_send_1, dims, type, SRMemLayoutNested);
+    source_dataset.add_tensor(t_name_2, t_send_2, dims, type, SRMemLayoutNested);
+    source_dataset.add_tensor(t_name_3, t_send_3, dims, type, SRMemLayoutNested);
 
     //Put the DataSet into the database
     client.put_dataset(source_dataset);
@@ -75,8 +75,7 @@ void put_and_copy_dataset(
     client.copy_dataset(dataset_name, dest_dataset_name);
 
     if(!client.tensor_exists(dest_dataset_name))
-        throw _smart_runtime_error("The DataSet confirmation "\
-                                 "key is not set.");
+        throw RuntimeException("The DataSet confirmation key is not set.");
 
     //Retrieving a dataset
     SmartRedis::DataSet DestDataSet = client.get_dataset(dest_dataset_name);
@@ -106,7 +105,7 @@ int main(int argc, char* argv[]) {
     dataset_name = "3D_dbl_dataset_rank";
     put_and_copy_dataset<double,double>(
                     &set_3D_array_floating_point_values<double>,
-                    dims, sr_tensor_dbl, "_dbl", dataset_name);
+                    dims, SRTensorTypeDouble, "_dbl", dataset_name);
 
     return 0;
 }

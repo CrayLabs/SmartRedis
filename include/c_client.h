@@ -41,23 +41,17 @@ extern "C" {
 #endif
 
 /*!
-*   \brief Return the last error encountered
-*   \return The text data for the last error encountered
-*/
-const char *sr_get_last_error();
-
-/*!
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a database cluster is being used
 *   \param new_client Receives the new client
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError SmartRedisCClient(bool cluster, void **new_client);
 
 /*!
 *   \brief C-client destructor
 *   \param c_client A pointer to a pointer to the c-client to destroy
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError DeleteCClient(void** c_client);
 
@@ -66,7 +60,7 @@ SRError DeleteCClient(void** c_client);
 *   \param c_client A pointer to c client
 *                   to use for communication
 *   \param dataset The DataSet object to send
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError put_dataset(void* c_client, void* dataset);
 
@@ -77,7 +71,7 @@ SRError put_dataset(void* c_client, void* dataset);
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
 *   \param dataset Receives the DataSet
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_dataset(void* c_client,
                     const char* name,
@@ -93,7 +87,7 @@ SRError get_dataset(void* c_client,
 *   \param new_name The new name of the dataset object
 *   \param new_name_length The length of the new name c-string,
 *                          excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError rename_dataset(void* c_client,
                        const char* name,
@@ -110,7 +104,7 @@ SRError rename_dataset(void* c_client,
 *   \param dest_name The destination name of the dataset object
 *   \param dest_name_length The length of the dest_name c-string,
 *                           excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError copy_dataset(void* c_client,
                      const char* src_name,
@@ -124,7 +118,7 @@ SRError copy_dataset(void* c_client,
 *   \param name The name of the dataset object
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError delete_dataset(void* c_client,
                        const char* name,
@@ -141,7 +135,7 @@ SRError delete_dataset(void* c_client,
 *   \param n_dims The number of dimensions of the tensor
 *   \param type The data type of the tensor
 *   \param mem_layout The memory layout of the data
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError put_tensor(void* c_client,
                    const char* key,
@@ -170,7 +164,7 @@ SRError put_tensor(void* c_client,
 *   \param n_dims The number of dimensions of the tensor
 *   \param type The data type of the tensor that is set by the c-client
 *   \param mem_layout The layout requested for the allocated memory space
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_tensor(void* c_client,
                    const char* key,
@@ -192,7 +186,7 @@ SRError get_tensor(void* c_client,
 *   \param n_dims The number of dimensions of the tensor
 *   \param type The data type of the provided memory space.
 *   \param mem_layout The memory layout of the provided memory space.
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError unpack_tensor(void* c_client,
                      const char* key,
@@ -212,7 +206,7 @@ SRError unpack_tensor(void* c_client,
 *   \param new_key The new tensor key
 *   \param new_key_length The length of the new_key c-string,
                           excluding null terminating characters
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError rename_tensor(void* c_client,
                       const char* key,
@@ -226,7 +220,7 @@ SRError rename_tensor(void* c_client,
 *   \param key The key of the tensor to delete
 *   \param key_length The length of the key c-string,
 *                     excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError delete_tensor(void* c_client,
                       const char* key,
@@ -241,7 +235,7 @@ SRError delete_tensor(void* c_client,
 *   \param dest_name The destination name of the tensor
 *   \param dest_name_length The length of the dest_name c-string,
 *                           excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError copy_tensor(void* c_client,
                     const char* src_name,
@@ -277,7 +271,7 @@ SRError copy_tensor(void* c_client,
 *   \param output_lengths The length of each output name c-string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError set_model_from_file(void* c_client,
                             const char* key,
@@ -327,7 +321,7 @@ SRError set_model_from_file(void* c_client,
 *   \param output_lengths The length of each output name c-string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError set_model(void* c_client,
                   const char* key,
@@ -358,7 +352,7 @@ SRError set_model(void* c_client,
 *   \param model_length The length of the model buffer c-string,
 *                       excluding null terminating character
 *   \param model Receives the model as a c-string
-*   \returns Returns sr_ok on success
+*   \returns Returns SRNoError on success or an error code on failure
 */
 SRError get_model(void* c_client,
                   const char* key,
@@ -378,7 +372,7 @@ SRError get_model(void* c_client,
 *   \param script_file The source file for the script
 *   \param script_file_length The length of the script file name c-string,
 *                             excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError set_script_from_file(void* c_client,
                              const char* key,
@@ -399,7 +393,7 @@ SRError set_script_from_file(void* c_client,
 *   \param script The script as a c-string buffer
 *   \param script_length The length of the script c-string,
 *                        excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError set_script(void* c_client,
                    const char* key,
@@ -419,7 +413,7 @@ SRError set_script(void* c_client,
 *   \param script A pointer to newly allocated memory containing the script
 *   \param script_length The length of the script buffer c-string,
 *                        excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_script(void* c_client,
                    const char* key,
@@ -446,7 +440,7 @@ SRError get_script(void* c_client,
 *   \param output_lengths The length of each output name c-string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError run_script(void* c_client,
                    const char* key,
@@ -476,7 +470,7 @@ SRError run_script(void* c_client,
 *   \param output_lengths The length of each output name c-string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError run_model(void* c_client,
                   const char* key,
@@ -495,7 +489,7 @@ SRError run_model(void* c_client,
 *   \param key_length The length of the key c-string,
 *                     excluding null terminating character
 *   \param exists Receives whether the key exists
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError key_exists(void* c_client,
                    const char* key,
@@ -511,7 +505,7 @@ SRError key_exists(void* c_client,
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
 *   \param exists Receives whether the tensor exists
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError tensor_exists(void* c_client,
                       const char* name,
@@ -527,7 +521,7 @@ SRError tensor_exists(void* c_client,
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
 *   \param exists Receives whether the model exists
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError model_exists(void* c_client,
                      const char* name,
@@ -543,7 +537,7 @@ SRError model_exists(void* c_client,
 *   \param name_length The length of the name c-string,
 *                      excluding null terminating character
 *   \param exists Receives whether the dataset exists
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError dataset_exists(void* c_client,
                        const char* name,
@@ -563,7 +557,7 @@ SRError dataset_exists(void* c_client,
 *                    will be polled indefinitely.
 *   \param exists Receives whether the key is found within the
 *                 specified number of tries
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_key(void* c_client,
                  const char* key,
@@ -587,7 +581,7 @@ SRError poll_key(void* c_client,
 *                    will be polled indefinitely.
 *   \param exists Receives whether the model is found within the
 *                 specified number of tries
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_model(void* c_client,
                    const char* name,
@@ -611,7 +605,7 @@ SRError poll_model(void* c_client,
 *                    will be polled indefinitely.
 *   \param exists Receives whether the tensor is found within the
 *                 specified number of tries
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_tensor(void* c_client,
                     const char* name,
@@ -650,7 +644,7 @@ SRError poll_dataset(void* c_client,
 *   \param source_id The prefix for retrieval commands
 *   \param source_id_length The length of the source_id c-string,
 *                           excluding null terminating character
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError set_data_source(void* c_client,
                         const char* source_id,
@@ -671,7 +665,7 @@ SRError set_data_source(void* c_client,
 *   \param use_prefix If set to true, all future operations
 *                     on tensors and datasets will use
 *                     a prefix, if available.
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 
@@ -687,7 +681,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 *   \param use_prefix If set to true, all future operations
 *                     on models and scripts will use
 *                     a prefix, if available.
-*   \return Returns sr_ok on success
+*   \return Returns SRNoError on success or an error code on failure
 */
 SRError use_model_ensemble_prefix(void* c_client, bool use_prefix);
 

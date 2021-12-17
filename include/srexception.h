@@ -26,139 +26,213 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(SMARTREDIS_SMART_ERROR_H)
-#define SMARTREDIS_SMART_ERROR_H
+#ifndef SMARTREDIS_SRException_H
+#define SMARTREDIS_SRException_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
+///@file
+
+/*!
+*   \brief  SRError lists possible errors encountered in SmartRedis.
+*/
 typedef enum {
-    sr_ok        = 0, // No error
-    sr_badalloc  = 1, // Memory allocation error
-    sr_dberr     = 2, // Backend database error
-    sr_internal  = 3, // Internal SmartRedis error
-    sr_runtime   = 4, // Runtime error executing an operation
-    sr_parameter = 5, // Bad parameter error
-	sr_timeout   = 6, // Timeout error
-    sr_invalid   = 7  // Uninitialized error variable
+    SRNoError        = 0, // No error
+    SRBadAllocError  = 1, // Memory allocation error
+    SRDatabaseError  = 2, // Backend database error
+    SRInternalError  = 3, // Internal SmartRedis error
+    SRRuntimeError   = 4, // Runtime error executing an operation
+    SRParameterError = 5, // Bad parameter error
+    SRTimeoutError   = 6, // Timeout error
+    SRKeyError       = 7, // Key error
+    SRInvalidError   = 8  // Uninitialized error variable
 } SRError;
 
 
-// Retrieve the last error encountered
+/*!
+*   \brief Return the last error encountered
+*   \return The text data for the last error encountered
+*/
 #ifdef __cplusplus
 extern "C"
 #endif
-const char* sr_get_last_error();
+const char* SRGetLastError();
 
 #ifdef __cplusplus
-
 #include <string>
+namespace SmartRedis {
 
-// Smart error: custom error class for the SmartRedis library
-class smart_error: public std::runtime_error
+/*!
+*   \brief  Smart error: custom exception class for the SmartRedis library
+*/
+class Exception: public std::exception
 {
-	// Inherit all the standard constructors
-	using std::runtime_error::runtime_error;
+    public:
+    Exception(const char* what_arg)
+      : _msg(what_arg)
+    {
+        // NOP
+    }
 
+    Exception(const char* what_arg, const char* file, int line)
+      : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
+    {
+        // NOP
+    }
 
-	public:
-	smart_error(const char* what_arg, const char* file, int line)
-	  : std::runtime_error(std::string(what_arg) + "\n" + file + ":" + std::to_string(line))
-	{
-	    // NOP
-	}
+    Exception(const std::string& what_arg, const char* file, int line)
+      : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
+    {
+        // NOP
+    }
 
-	smart_error(const std::string& what_arg, const char* file, int line)
-	  : std::runtime_error(std::string(what_arg) + "\n" + file + ":" + std::to_string(line))
-	{
-	    // NOP
-	}
+    Exception(const Exception& other) noexcept
+      : _msg(other._msg), _loc(other._loc)
+    {
+        // NOP
+    }
 
-	smart_error(const smart_error& other) noexcept
-	  : std::runtime_error(other)
-	{
-		// NOP
-	}
+    Exception(const std::exception& other) noexcept
+      : _msg(other.what())
+    {
+        // NOP
+    }
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_invalid;
-	}
+    Exception& operator=(const Exception &) = default;
+    Exception(Exception &&) = default;
+    Exception& operator=(Exception &&) = default;
+    virtual ~Exception() override = default;
+
+    virtual SRError to_error_code() const noexcept {
+        return SRInvalidError;
+    }
+
+    virtual const char* what() const noexcept{
+        return _msg.c_str();
+    }
+
+    virtual const char* where() const noexcept {
+        return _loc.c_str();
+    }
+
+    protected:
+    std::string _msg;
+    std::string _loc;
 };
 
-// Memory allocation error
-class _smart_bad_alloc: public smart_error
-{
-	using smart_error::smart_error;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_badalloc;
-	}
+/*!
+*   \brief  Memory allocation exception for SmartRedis
+*/
+class BadAllocException: public Exception
+{
+    using Exception::Exception;
+
+    virtual SRError to_error_code() const noexcept {
+        return SRBadAllocError;
+    }
 };
 
-#define smart_bad_alloc(txt) _smart_bad_alloc(txt, __FILE__, __LINE__)
+#define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
-//  Back-end database error
-class _smart_database_error: public smart_error
+
+/*!
+*   \brief  Back-end database exception for SmartRedis
+*/
+class DatabaseException: public Exception
 {
-	using smart_error::smart_error;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_dberr;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRDatabaseError;
+    }
 };
 
-#define smart_database_error(txt) _smart_database_error(txt, __FILE__, __LINE__)
+#define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
-// Runtime error
-class _smart_runtime_error: public smart_error
+
+/*!
+*   \brief  Runtime exception for SmartRedis
+*/
+class RuntimeException: public Exception
 {
-	using smart_error::smart_error;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_runtime;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRRuntimeError;
+    }
 };
 
-#define smart_runtime_error(txt) _smart_runtime_error(txt, __FILE__, __LINE__)
+#define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
-// Parameter error
-class _smart_parameter_error: public smart_error
+
+/*!
+*   \brief  Parameter exception for SmartRedis
+*/
+class ParameterException: public Exception
 {
-	using smart_error::smart_error;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_parameter;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRParameterError;
+    }
 };
 
-#define smart_parameter_error(txt) _smart_parameter_error(txt, __FILE__, __LINE__)
+#define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
-#define smart_runtime_error(txt) _smart_runtime_error(txt, __FILE__, __LINE__)
 
-// Timeout error
-class _smart_timeout_error: public smart_error
+/*!
+*   \brief  Timeout exception for SmartRedis
+*/
+class TimeoutException: public Exception
 {
-	using smart_error::smart_error;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_timeout;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRTimeoutError;
+    }
 };
 
-#define smart_timeout_error(txt) _smart_timeout_error(txt, __FILE__, __LINE__)
+#define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
-// Internal error
-class _smart_internal_error: public smart_error
+
+/*!
+*   \brief  Internal exception for SmartRedis
+*/
+class InternalException: public Exception
 {
-	using smart_error::smart_error;
+    using Exception::Exception;
 
-	virtual SRError to_error_code() const noexcept {
-		return sr_internal;
-	}
+    virtual SRError to_error_code() const noexcept {
+        return SRInternalError;
+    }
 };
 
-#define smart_internal_error(txt) _smart_internal_error(txt, __FILE__, __LINE__)
+#define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
-// Store the last error encountered
+
+/*!
+*   \brief  Key exception for SmartRedis
+*/
+class KeyException: public Exception
+{
+    using Exception::Exception;
+
+    virtual SRError to_error_code() const noexcept {
+        return SRKeyError;
+    }
+};
+
+#define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
+
+/*!
+*   \brief  Store the last error encountered
+*/
 extern "C"
-void sr_set_last_error(const smart_error& last_error);
+void SRSetLastError(const Exception& last_error);
+
+} // namespace SmartRedis
 
 #endif // __cplusplus
-#endif // SMARTREDIS_SMART_ERROR_H
+#endif // SMARTREDIS_SRException_H

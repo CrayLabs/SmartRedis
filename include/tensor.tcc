@@ -29,8 +29,6 @@
 #ifndef SMARTREDIS_TENSOR_TCC
 #define SMARTREDIS_TENSOR_TCC
 
-#include "srexception.h"
-
 // Tensor constructor
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
@@ -51,7 +49,7 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
     if (&tensor == this)
         return;
 
-    _set_tensor_data(tensor._data, tensor._dims, sr_layout_contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 }
@@ -74,7 +72,7 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
 
     // Deep copy tensor data
     TensorBase::operator=(tensor);
-    _set_tensor_data(tensor._data, tensor._dims, sr_layout_contiguous);
+    _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
     _c_mem_views = tensor._c_mem_views;
     _f_mem_views = tensor._f_mem_views;
 
@@ -109,7 +107,7 @@ TensorBase* Tensor<T>::clone()
         return new_tensor;
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("tnesor");
+        throw SRBadAllocException("tensor");
     }
 }
 
@@ -142,23 +140,22 @@ void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
     void* ptr = NULL;
 
     switch (mem_layout) {
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             ptr = _data;
             break;
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             ptr = _f_mem_views.allocate_bytes(_n_data_bytes());
             _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
-        case sr_layout_nested:
+        case SRMemLayoutNested:
             _build_nested_memory(&ptr,
                                  _dims.data(),
                                  _dims.size(),
                                  (T*)_data);
             break;
         default:
-            throw smart_runtime_error(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.data_view().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.data_view().");
     }
     return ptr;
 }
@@ -170,12 +167,12 @@ void Tensor<T>::fill_mem_space(void* data,
                                SRMemoryLayout mem_layout)
 {
     if (_data == NULL) {
-        throw smart_runtime_error("The tensor does not have "\
-                                  "a data array to fill with.");
+        throw SRRuntimeException("The tensor does not have "\
+                                 "a data array to fill with.");
     }
 
     if (dims.size() == 0) {
-        throw smart_runtime_error("The dimensions must have nonzero size");
+        throw SRRuntimeException("The dimensions must have nonzero size");
     }
 
     // Calculate size of memory buffer
@@ -183,27 +180,27 @@ void Tensor<T>::fill_mem_space(void* data,
     std::vector<size_t>::const_iterator it = dims.cbegin();
     for ( ; it != dims.cend(); it++) {
         if (*it <= 0) {
-            throw smart_runtime_error("All dimensions must be greater than 0.");
+            throw SRRuntimeException("All dimensions must be greater than 0.");
         }
         n_values *= (*it);
     }
 
     // Make sure there is space for all the data
     if (n_values != num_values()) {
-        throw smart_runtime_error("The provided dimensions do "\
-                                  "not match the size of the "\
-                                  "tensor data array");
+        throw SRRuntimeException("The provided dimensions do "\
+                                 "not match the size of the "\
+                                 "tensor data array");
     }
 
     // Copy over the data
     switch (mem_layout) {
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _c_to_f_memcpy((T*)data, (T*)_data, _dims);
             break;
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(data, _data, _n_data_bytes());
             break;
-        case sr_layout_nested: {
+        case SRMemLayoutNested: {
             size_t starting_position = 0;
             _fill_nested_mem_with_data(data, dims.data(),
                                              dims.size(),
@@ -212,9 +209,8 @@ void Tensor<T>::fill_mem_space(void* data,
             }
             break;
         default:
-            throw smart_runtime_error(
-                "Unsupported MemoryLayout value in "\
-                "Tensor<T>.fill_mem_space().");
+            throw SRRuntimeException("Unsupported MemoryLayout value in "\
+                                     "Tensor<T>.fill_mem_space().");
     }
 }
 
@@ -259,7 +255,7 @@ void Tensor<T>::_fill_nested_mem_with_data(void* data,
     }
     else {
         T* data_to_copy = &(((T*)tensor_data)[data_position]);
-	    std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
+        std::memcpy(data, data_to_copy, dims[0] * sizeof(T));
         data_position += dims[0];
     }
 }
@@ -273,13 +269,13 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                    T* contiguous_mem)
 {
     if (dims == NULL) {
-        throw smart_runtime_error("Missing dims in call to "\
-                                  "_build_nested_memory");
+        throw SRRuntimeException("Missing dims in call to "\
+                                 "_build_nested_memory");
     }
     if (n_dims > 1) {
         T** new_data = _c_mem_views.allocate(dims[0]);
         if (new_data == NULL)
-            throw smart_bad_alloc("nested memory for tensor");
+            throw SRBadAllocException("nested memory for tensor");
         (*data) = reinterpret_cast<void*>(new_data);
         for (size_t i = 0; i < dims[0]; i++)
             contiguous_mem = _build_nested_memory(
@@ -305,23 +301,23 @@ void Tensor<T>::_set_tensor_data(void* src_data,
         _data = new unsigned char[n_bytes];
     }
     catch (std::bad_alloc& e) {
-        throw smart_bad_alloc("tensor data");
+        throw SRBadAllocException("tensor data");
     }
 
     switch (mem_layout) {
-        case sr_layout_contiguous:
+        case SRMemLayoutContiguous:
             std::memcpy(_data, src_data, n_bytes);
             break;
-        case sr_layout_fortran_contiguous:
+        case SRMemLayoutFortranContiguous:
             _f_to_c_memcpy((T*)_data, (T*) src_data, dims);
             break;
-        case sr_layout_nested:
+        case SRMemLayoutNested:
             _copy_nested_to_contiguous(
                 src_data, dims.data(), dims.size(), _data);
             break;
         default:
-            throw smart_runtime_error("Invalid memory layout in call "\
-                                      "to _set_tensor_data");
+            throw SRRuntimeException("Invalid memory layout in call "\
+                                     "to _set_tensor_data");
     }
 }
 
@@ -339,7 +335,7 @@ void Tensor<T>::_f_to_c_memcpy(T* c_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c_memcpy");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _f_to_c(c_data, f_data, dims, dim_positions, 0);
@@ -353,7 +349,7 @@ void Tensor<T>::_c_to_f_memcpy(T* f_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw smart_runtime_error("Invalid buffer suppplied to _c_to_f_memcpy");
+        throw SRRuntimeException("Invalid buffer suppplied to _c_to_f_memcpy");
     }
     std::vector<size_t> dim_positions(dims.size(), 0);
     _c_to_f(f_data, c_data, dims, dim_positions, 0);
@@ -368,7 +364,7 @@ void Tensor<T>::_f_to_c(T* c_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];
@@ -396,7 +392,7 @@ void Tensor<T>::_c_to_f(T* f_data,
                         size_t current_dim)
 {
     if (c_data == NULL || f_data == NULL) {
-        throw smart_runtime_error("Invalid buffer suppplied to _f_to_c");
+        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
     }
     size_t start = dim_positions[current_dim];
     size_t end = dims[current_dim];

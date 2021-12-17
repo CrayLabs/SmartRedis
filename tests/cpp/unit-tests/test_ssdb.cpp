@@ -59,9 +59,9 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     {
         const char* old_ssdb = std::getenv("SSDB");
 
-	INFO("SSDB must be set to a valid host and "\
-	     "port before running this test.");
-	REQUIRE(old_ssdb != NULL);
+    INFO("SSDB must be set to a valid host and "\
+         "port before running this test.");
+    REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb;
 
@@ -70,11 +70,11 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
         {
             // SSDB is nullptr
             unsetenv("SSDB");
-            CHECK_THROWS(test_ssdb.get_ssdb());
+            CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
 
             // SSDB contains invalid characters
             setenv_ssdb ("127.0.0.1:*&^9");
-            CHECK_THROWS(test_ssdb.get_ssdb());
+            CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
 
             // Valid SSDB. Ensure one of 127 or 128 is chosen
             setenv_ssdb("127,128");

@@ -29,8 +29,6 @@
 #ifndef SMARTREDIS_COMMANDLIST_TCC
 #define SMARTREDIS_COMMANDLIST_TCC
 
-#include "srexception.h"
-
 template <class T>
 T* CommandList::add_command()
 {
@@ -40,7 +38,7 @@ T* CommandList::add_command()
         return new_cmd;
     }
     catch (std::bad_alloc &e) {
-        throw smart_bad_alloc("command");
+        throw SRBadAllocException("command");
     }
 };
 

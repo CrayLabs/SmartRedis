@@ -52,11 +52,11 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string tensor_name = "test_tensor";
             std::vector<size_t> dims = {1, 2, 3};
-            SRTensorType type = sr_tensor_flt;
+            SRTensorType type = SRTensorTypeFloat;
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<float> tensor(tensor_size, 2.0);
             void* data = tensor.data();
-            SRMemoryLayout mem_layout = sr_layout_contiguous;
+            SRMemoryLayout mem_layout = SRMemLayoutContiguous;
             dataset.add_tensor(tensor_name, data, dims, type, mem_layout);
 
             THEN("The tensor name can be retrieved")
@@ -135,29 +135,12 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                 std::vector<size_t> retrieved_dims;
                 SRTensorType retrieved_type;
 
-#if 1
                 CHECK_THROWS_AS(
                     dataset.get_tensor("does_not_exist", retrieved_data,
                                        retrieved_dims, retrieved_type,
                                        mem_layout),
-                    std::runtime_error);
-#else
-                try {
-                    dataset.get_tensor("does_not_exist", retrieved_data,
-                                       retrieved_dims, retrieved_type,
-                                       mem_layout);
-                } catch (_smart_runtime_error const&) {
-                    throw std::runtime_error("We can catch an _smart_runtime_error, but Catch cannot detect it");
-                } catch (std::exception &e) {
-                    std::string foo("thrown: \"");
-                    foo += currentExceptionTypeName();
-                    foo += "\"; _smart_runtime_error: \"";
-                    _smart_runtime_error e2("test");
-                    foo += typeid(e2).name();
-                    foo += "\"";
-                    throw std::runtime_error(foo);
-                }
-#endif
+                    SmartRedis::RuntimeException
+                );
             }
         }
 
@@ -165,7 +148,7 @@ SCENARIO("Testing DataSet object", "[DataSet]")
         {
             std::string meta_scalar_name = "flt_meta_scalars";
             float meta_scalar = 10.0;
-            SRMetaDataType type = sr_meta_flt;
+            SRMetaDataType type = SRMetadataTypeFloat;
 
             CHECK(dataset.has_field(meta_scalar_name) == false);
             dataset.add_meta_scalar(meta_scalar_name, &meta_scalar, type);
@@ -194,7 +177,8 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_meta_scalars(meta_scalar_name,
                                             (void*&)retrieved_data,
                                              retrieved_length, type),
-                    std::runtime_error);
+                    SmartRedis::RuntimeException
+                );
             }
         }
 

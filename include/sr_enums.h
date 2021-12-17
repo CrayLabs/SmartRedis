@@ -30,38 +30,46 @@
 #ifndef SMARTREDIS_ENUMS_H
 #define SMARTREDIS_ENUMS_H
 
-// Memory layout of tensor data
+///@file
+
+/*!
+*   \brief  Enumeration for memory layout of tensor data
+*/
 typedef enum {
-    sr_layout_invalid            = 0,
-    sr_layout_nested             = 1,
-    sr_layout_contiguous         = 2,
-    sr_layout_fortran_nested     = 3,
-    sr_layout_fortran_contiguous = 4
+    SRMemLayoutInvalid           = 0, // Invalid or uninitialized memory layout
+    SRMemLayoutNested            = 1, // Multidimensional row-major array layout with nested arrays of pointers (contiguous at innermost layer)
+    SRMemLayoutContiguous        = 2, // Multidimensional row-major array layout in contiguous memory
+    SRMemLayoutFortranNested     = 3, // Multidimensional column-major array layout with nested arrays of pointers (contiguous at innermost layer)
+    SRMemLayoutFortranContiguous = 4  // Multidimensional column-major array layout in contiguous memory
 } SRMemoryLayout;
 
-// Metadata types
+/*!
+*   \brief  Enumeration for metadata types
+*/
 typedef enum {
-    sr_meta_invalid = 0,
-    sr_meta_dbl     = 1,
-    sr_meta_flt     = 2,
-    sr_meta_int32   = 3,
-    sr_meta_int64   = 4,
-    sr_meta_uint32  = 5,
-    sr_meta_uint64  = 6,
-    sr_meta_string  = 7
+    SRMetadataTypeInvalid = 0, // Invalid or uninitialized metadata
+    SRMetadataTypeDouble  = 1, // Double-precision floating point metadata
+    SRMetadataTypeFloat   = 2, // Floating point metadata
+    SRMetadataTypeInt32   = 3, // 32-bit signed integer metadata
+    SRMetadataTypeInt64   = 4, // 64-bit signed integer metadata
+    SRMetadataTypeUint32  = 5, // 32-bit unsigned integer metadata
+    SRMetadataTypeUint64  = 6, // 64-bit unsigned integer metadata
+    SRMetadataTypeString  = 7  // ASCII text string metadata
 } SRMetaDataType;
 
-// Tensor types
+/*!
+*   \brief  Enumeration for tensor data types
+*/
 typedef enum {
-    sr_tensor_invalid = 0,
-    sr_tensor_dbl     = 1,
-    sr_tensor_flt     = 2,
-    sr_tensor_int8    = 3,
-    sr_tensor_int16   = 4,
-    sr_tensor_int32   = 5,
-    sr_tensor_int64   = 6,
-    sr_tensor_uint8   = 7,
-    sr_tensor_uint16  = 8
+    SRTensorTypeInvalid = 0, // Invalid or uninitialized tensor type
+    SRTensorTypeDouble  = 1, // Double-precision floating point tensor type
+    SRTensorTypeFloat   = 2, // Floating point tensor type
+    SRTensorTypeInt8    = 3, // 8-bit signed integer tensor type
+    SRTensorTypeInt16   = 4, // 16-bit signed integer tensor type
+    SRTensorTypeInt32   = 5, // 32-bit signed integer tensor type
+    SRTensorTypeInt64   = 6, // 64-bit signed integer tensor type
+    SRTensorTypeUint8   = 7, // 8-bit unsigned integer tensor type
+    SRTensorTypeUint16  = 8  // 16-bit unsigned integer tensor type
 } SRTensorType;
 
 #endif // SMARTREDIS_ENUMS_H

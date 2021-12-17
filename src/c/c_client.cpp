@@ -38,9 +38,9 @@ using namespace SmartRedis;
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
-SRError SmartRedisCClient(bool cluster, void **new_client)
+SRError SmartRedisCClient(bool cluster, void** new_client)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try {
     // Sanity check params
     SR_CHECK_PARAMS(new_client != NULL);
@@ -50,18 +50,18 @@ SRError SmartRedisCClient(bool cluster, void **new_client)
   }
   catch (const std::bad_alloc& e) {
     *new_client = NULL;
-    sr_set_last_error(smart_bad_alloc("client allocation"));
-    result = sr_badalloc;
+    SRSetLastError(SRBadAllocException("client allocation"));
+    result = SRBadAllocError;
   }
-  catch (const smart_error& e) {
+  catch (const Exception& e) {
     *new_client = NULL;
-    sr_set_last_error(e);
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
     *new_client = NULL;
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -71,7 +71,7 @@ SRError SmartRedisCClient(bool cluster, void **new_client)
 extern "C"
 SRError DeleteCClient(void** c_client)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -80,13 +80,13 @@ SRError DeleteCClient(void** c_client)
     delete reinterpret_cast<Client*>(*c_client);
     *c_client = NULL;
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -96,7 +96,7 @@ SRError DeleteCClient(void** c_client)
 extern "C"
 SRError put_dataset(void* c_client, void* dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -107,13 +107,13 @@ SRError put_dataset(void* c_client, void* dataset)
 
     s->put_dataset(*d);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -125,7 +125,7 @@ extern "C"
 SRError get_dataset(void* c_client, const char* name,
                     const size_t name_length, void **dataset)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
 
   try {
     // Sanity check params
@@ -140,16 +140,16 @@ SRError get_dataset(void* c_client, const char* name,
       *dataset = reinterpret_cast<void*>(d);
     } catch (const std::bad_alloc& e) {
       *dataset = NULL;
-      throw smart_bad_alloc("client allocation");
+      throw SRBadAllocException("client allocation");
     }
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -161,7 +161,7 @@ SRError rename_dataset(void* c_client, const char* name,
                        const size_t name_length, const char* new_name,
                        const size_t new_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -173,13 +173,13 @@ SRError rename_dataset(void* c_client, const char* name,
 
     s->rename_dataset(name_str, new_name_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -192,7 +192,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
                     const size_t src_name_length, const char* dest_name,
                     const size_t dest_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -204,13 +204,13 @@ SRError copy_dataset(void* c_client, const char* src_name,
 
     s->copy_dataset(src_name_str, dest_name_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -220,7 +220,7 @@ SRError copy_dataset(void* c_client, const char* src_name,
 extern "C"
 SRError delete_dataset(void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -230,13 +230,13 @@ SRError delete_dataset(void* c_client, const char* name, const size_t name_lengt
     std::string dataset_name(name, name_length);
     s->delete_dataset(dataset_name);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -253,7 +253,7 @@ SRError put_tensor(void* c_client,
                   const SRTensorType type,
                   const SRMemoryLayout mem_layout)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -268,13 +268,13 @@ SRError put_tensor(void* c_client,
 
     s->put_tensor(key_str, data, dims_vec, type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -291,7 +291,7 @@ SRError get_tensor(void* c_client,
                   SRTensorType* type,
                   const SRMemoryLayout mem_layout)
 {
-  SRError outcome = sr_ok;
+  SRError outcome = SRNoError;
   try
   {
     // Sanity check params
@@ -303,13 +303,13 @@ SRError get_tensor(void* c_client,
 
     s->get_tensor(key_str, *result, *dims, *n_dims, *type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     outcome = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    outcome = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    outcome = SRInternalError;
   }
 
   return outcome;
@@ -327,7 +327,7 @@ SRError unpack_tensor(void* c_client,
                      const SRTensorType type,
                      const SRMemoryLayout mem_layout)
 {
-  SRError outcome = sr_ok;
+  SRError outcome = SRNoError;
   try
   {
     // Sanity check params
@@ -342,13 +342,13 @@ SRError unpack_tensor(void* c_client,
 
     s->unpack_tensor(key_str, result, dims_vec, type, mem_layout);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     outcome = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    outcome = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    outcome = SRInternalError;
   }
 
   return outcome;
@@ -360,7 +360,7 @@ SRError rename_tensor(void* c_client, const char* key,
                      const size_t key_length, const char* new_key,
                      const size_t new_key_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -372,13 +372,13 @@ SRError rename_tensor(void* c_client, const char* key,
 
     s->rename_tensor(key_str, new_key_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -389,7 +389,7 @@ extern "C"
 SRError delete_tensor(void* c_client, const char* key,
                       const size_t key_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -400,13 +400,13 @@ SRError delete_tensor(void* c_client, const char* key,
 
     s->delete_tensor(key_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -420,7 +420,7 @@ SRError copy_tensor(void* c_client,
                    const char* dest_name,
                    const size_t dest_name_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -432,16 +432,31 @@ SRError copy_tensor(void* c_client,
 
     s->copy_tensor(src_str, dest_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
+}
+
+bool CompareCaseInsensitive(const char* a,const char* b) {
+  while (*a != '\0' && *b != '\0') {
+    // Check current character
+    if (toupper(*a) != toupper(*b))
+      return false;
+
+    // Advance to next character
+    a++;
+    b++;
+  }
+
+  // Make sure there is no additional data in b
+  return (*a == *b);
 }
 
 // Set a model stored in a binary file.
@@ -458,31 +473,39 @@ SRError set_model_from_file(void* c_client,
                            const char** outputs, const size_t* output_lengths,
                            const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
-    // Sanity check params
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
     SR_CHECK_PARAMS(c_client != NULL && key != NULL && model_file != NULL &&
-                    backend != NULL && device != NULL && tag != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+                    backend != NULL && device != NULL);
+    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+    if (isTensorFlow) {
+      if (inputs == NULL || input_lengths == NULL ||
+          outputs == NULL || output_lengths == NULL) {
+        throw SRParameterException("Inputs and outputs are required with TensorFlow");
+      }
+    }
 
     // For the inputs and outputs arrays, a single empty string is ok (this means
     // that the array should be skipped) but if more than one entry is present, the
     // strings must be nonzero length
-    if (n_inputs != 1 && input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++){
-        if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw smart_parameter_error(
-            std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+    if (isTensorFlow) {
+      if (n_inputs != 1 && input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++){
+          if (inputs[i] == NULL || input_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
-    }
-    if (n_outputs != 1 && output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw smart_parameter_error(
-            std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+      if (n_outputs != 1 && output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          if (outputs[i] == NULL || output_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
     }
@@ -496,16 +519,20 @@ SRError set_model_from_file(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    if (isTensorFlow) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
 
     std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    if (isTensorFlow) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
 
@@ -513,13 +540,13 @@ SRError set_model_from_file(void* c_client,
                            batch_size, min_batch_size, tag_str, input_vec,
                            output_vec);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -539,31 +566,39 @@ SRError set_model(void* c_client,
                  const char** outputs, const size_t* output_lengths,
                  const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
-    // Sanity check params
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
     SR_CHECK_PARAMS(c_client != NULL && key != NULL && model != NULL &&
-                    backend != NULL && device != NULL && tag != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+                    backend != NULL && device != NULL);
+    bool isTensorFlow = CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+    if (isTensorFlow) {
+      if (inputs == NULL || input_lengths == NULL ||
+          outputs == NULL || output_lengths == NULL) {
+        throw SRParameterException("Inputs and outputs are required with TensorFlow");
+      }
+    }
 
     // For the inputs and outputs arrays, a single empty string is ok (this means
     // that the array should be skipped) but if more than one entry is present, the
     // strings must be nonzero length
-    if (n_inputs != 1 && input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++){
-        if (inputs[i] == NULL || input_lengths[i] == 0) {
-          throw smart_parameter_error(
-            std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+    if (isTensorFlow) {
+      if (n_inputs != 1 && input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++){
+          if (inputs[i] == NULL || input_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
-    }
-    if (n_outputs != 1 && output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        if (outputs[i] == NULL || output_lengths[i] == 0) {
-          throw smart_parameter_error(
-            std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+      if (n_outputs != 1 && output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          if (outputs[i] == NULL || output_lengths[i] == 0) {
+            throw SRParameterException(
+              std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          }
         }
       }
     }
@@ -577,16 +612,20 @@ SRError set_model(void* c_client,
 
     // Catch the case where an empty string was sent (default C++ client behavior)
     std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    if (isTensorFlow) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
 
     std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    if (isTensorFlow) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
 
@@ -594,13 +633,13 @@ SRError set_model(void* c_client,
                 batch_size, min_batch_size, tag_str, input_vec,
                 output_vec);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -614,7 +653,7 @@ SRError get_model(void* c_client,
                   size_t* model_length,
                   const char** model)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -628,13 +667,13 @@ SRError get_model(void* c_client,
     *model_length = model_str_view.size();
     *model = model_str_view.data();
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -650,7 +689,7 @@ SRError set_script_from_file(void* c_client,
                             const char* script_file,
                             const size_t script_file_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -664,13 +703,13 @@ SRError set_script_from_file(void* c_client,
 
     s->set_script_from_file(key_str, device_str, script_file_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -686,7 +725,7 @@ SRError set_script(void* c_client,
                   const char* script,
                   const size_t script_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -701,13 +740,13 @@ SRError set_script(void* c_client,
 
     s->set_script(key_str, device_str, script_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -721,7 +760,7 @@ SRError get_script(void* c_client,
                   const char** script,
                   size_t* script_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -735,13 +774,13 @@ SRError get_script(void* c_client,
     (*script) = script_str_view.data();
     (*script_length) = script_str_view.size();
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -761,7 +800,7 @@ SRError run_script(void* c_client,
                   const size_t* output_lengths,
                   const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -772,13 +811,13 @@ SRError run_script(void* c_client,
     // Inputs and outputs are mandatory for run_script
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw smart_parameter_error(
+        throw SRParameterException(
           std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw smart_parameter_error(
+        throw SRParameterException(
           std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
@@ -803,13 +842,13 @@ SRError run_script(void* c_client,
     Client* s = reinterpret_cast<Client*>(c_client);
     s->run_script(key_str, function_str, input_vec, output_vec);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -827,7 +866,7 @@ SRError run_model(void* c_client,
                  const size_t* output_lengths,
                  const size_t n_outputs)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -838,13 +877,13 @@ SRError run_model(void* c_client,
     // Inputs and outputs are mandatory for run_script
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw smart_parameter_error(
+        throw SRParameterException(
           std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw smart_parameter_error(
+        throw SRParameterException(
           std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
       }
     }
@@ -868,13 +907,13 @@ SRError run_model(void* c_client,
     Client* s = reinterpret_cast<Client*>(c_client);
     s->run_model(key_str, input_vec, output_vec);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -885,7 +924,7 @@ extern "C"
 SRError key_exists(void* c_client, const char* key, const size_t key_length,
                    bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -896,13 +935,13 @@ SRError key_exists(void* c_client, const char* key, const size_t key_length,
 
     *exists = s->key_exists(key_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -913,7 +952,7 @@ extern "C"
 SRError model_exists(void* c_client, const char* name, const size_t name_length,
                      bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -924,13 +963,13 @@ SRError model_exists(void* c_client, const char* name, const size_t name_length,
 
     *exists = s->model_exists(name_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -941,7 +980,7 @@ extern "C"
 SRError tensor_exists(void* c_client, const char* name, const size_t name_length,
                       bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -952,13 +991,13 @@ SRError tensor_exists(void* c_client, const char* name, const size_t name_length
 
     *exists = s->tensor_exists(name_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -969,7 +1008,7 @@ extern "C"
 SRError dataset_exists(void* c_client, const char* name, const size_t name_length,
                        bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -980,13 +1019,13 @@ SRError dataset_exists(void* c_client, const char* name, const size_t name_lengt
 
     *exists = s->dataset_exists(name_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1001,7 +1040,7 @@ SRError poll_key(void* c_client,
                  const int num_tries,
                  bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1012,13 +1051,13 @@ SRError poll_key(void* c_client,
 
     *exists = s->poll_key(key_str, poll_frequency_ms, num_tries);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1033,7 +1072,7 @@ SRError poll_model(void* c_client,
                    const int num_tries,
                    bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1044,13 +1083,13 @@ SRError poll_model(void* c_client,
 
     *exists = s->poll_model(name_str, poll_frequency_ms, num_tries);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1065,7 +1104,7 @@ SRError poll_tensor(void* c_client,
                     const int num_tries,
                     bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1076,13 +1115,13 @@ SRError poll_tensor(void* c_client,
 
     *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1097,7 +1136,7 @@ SRError poll_dataset(void* c_client,
                      const int num_tries,
                      bool* exists)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1108,13 +1147,13 @@ SRError poll_dataset(void* c_client,
 
     *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1126,7 +1165,7 @@ SRError set_data_source(void* c_client,
                         const char* source_id,
                         const size_t source_id_length)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1137,13 +1176,13 @@ SRError set_data_source(void* c_client,
 
     s->set_data_source(source_id_str);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1153,7 +1192,7 @@ SRError set_data_source(void* c_client,
 extern "C"
 SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1162,13 +1201,13 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
     Client* s = reinterpret_cast<Client*>(c_client);
     s->use_model_ensemble_prefix(use_prefix);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
@@ -1178,7 +1217,7 @@ SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
 extern "C"
 SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  SRError result = sr_ok;
+  SRError result = SRNoError;
   try
   {
     // Sanity check params
@@ -1187,13 +1226,13 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
     Client* s = reinterpret_cast<Client*>(c_client);
     s->use_tensor_ensemble_prefix(use_prefix);
   }
-  catch (const smart_error& e) {
-    sr_set_last_error(e);
+  catch (const Exception& e) {
+    SRSetLastError(e);
     result = e.to_error_code();
   }
   catch (...) {
-    sr_set_last_error(smart_internal_error("Unknown exception occurred"));
-    result = sr_internal;
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
   }
 
   return result;
