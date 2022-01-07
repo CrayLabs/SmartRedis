@@ -217,7 +217,7 @@ void Client::put_tensor(const std::string& key,
                 tensor = new Tensor<uint8_t>(p_key, data, dims, type, mem_layout);
                 break;
             default:
-                throw SRRuntimeException("Invalid type for put_tensor");
+                throw SRTypeException("Invalid type for put_tensor");
         }
     }
     catch (std::bad_alloc& e) {
@@ -391,7 +391,7 @@ void Client::unpack_tensor(const std::string& key,
                                             SRMemLayoutContiguous);
                 break;
             default:
-                throw SRRuntimeException("Invalid type for unpack_tensor");
+                throw SRTypeException("Invalid type for unpack_tensor");
         }
     }
     catch (std::bad_alloc& e) {
@@ -447,8 +447,8 @@ void Client::set_model_from_file(const std::string& key,
                                  const std::vector<std::string>& outputs)
 {
     if (model_file.size() == 0) {
-        throw SRRuntimeException("model_file is a required "
-                                 "parameter of set_model.");
+        throw SRParameterException("model_file is a required "
+                                   "parameter of set_model.");
     }
 
     std::ifstream fin(model_file, std::ios::binary);
@@ -474,22 +474,22 @@ void Client::set_model(const std::string& key,
                        const std::vector<std::string>& outputs)
 {
     if (key.size() == 0) {
-        throw SRRuntimeException("key is a required parameter of set_model.");
+        throw SRParameterException("key is a required parameter of set_model.");
     }
 
     if (backend.size() == 0) {
-        throw SRParameterException("backend is a required  "\
+        throw SRParameterException("backend is a required "\
                                    "parameter of set_model.");
     }
 
     if (backend.compare("TF") != 0) {
         if (inputs.size() > 0) {
-            throw SRRuntimeException("INPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw SRParameterException("INPUTS in the model set command "\
+                                       "is only valid for TF models");
         }
         if (outputs.size() > 0) {
-            throw SRRuntimeException("OUTPUTS in the model set command "\
-                                     "is only valid for TF models");
+            throw SRParameterException("OUTPUTS in the model set command "\
+                                       "is only valid for TF models");
         }
     }
 
@@ -792,7 +792,7 @@ void Client::flush_db(std::string address)
     uint64_t port = cmd.parse_port(address);
     if (host.empty() or port == 0){
         throw SRRuntimeException(std::string(address) +
-                                  "is not a valid database node address.");
+                                 "is not a valid database node address.");
     }
     cmd.set_exec_address_port(host, port);
 
@@ -1128,8 +1128,7 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
         if (dims[i] <= 0) {
             throw SRRuntimeException("Dimension " +
                                      std::to_string(i) +
-                                     "of the fetched tensor is "\
-                                     "not valid: " +
+                                     "of the fetched tensor is not valid: " +
                                      std::to_string(dims[i]));
         }
     }
@@ -1170,11 +1169,9 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                                         dims, type, SRMemLayoutContiguous);
                 break;
             default :
-                throw SRRuntimeException("An invalid TensorType was "\
-                                         "provided to "
-                                         "Client::_get_tensorbase_obj(). "
-                                         "The tensor could not be "\
-                                         "retrieved.");
+                throw SRTypeException("An invalid TensorType was provided to "\
+                                      "Client::_get_tensorbase_obj(). "\
+                                      "The tensor could not be retrieved.");
                 break;
         }
     }

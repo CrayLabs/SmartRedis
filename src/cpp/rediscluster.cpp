@@ -433,8 +433,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     */
 
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0,
-                                                _db_nodes.size()-1);
+    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size()-1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_model");

@@ -46,7 +46,8 @@ typedef enum {
     SRParameterError = 5, // Bad parameter error
     SRTimeoutError   = 6, // Timeout error
     SRKeyError       = 7, // Key error
-    SRInvalidError   = 8  // Uninitialized error variable
+    SRInvalidError   = 8, // Uninitialized error variable
+    SRTypeError      = 9  // Type mismatch
 } SRError;
 
 
@@ -225,6 +226,20 @@ class KeyException: public Exception
 };
 
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
+
+/*!
+*   \brief  Type mismatch exception for SmartRedis
+*/
+class TypeException: public Exception
+{
+    using Exception::Exception;
+
+    virtual SRError to_error_code() const noexcept {
+        return SRTypeError;
+    }
+};
+
+#define SRTypeException(txt) TypeException(txt, __FILE__, __LINE__)
 
 /*!
 *   \brief  Store the last error encountered
