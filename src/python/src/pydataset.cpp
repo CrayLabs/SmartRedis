@@ -36,8 +36,23 @@ namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name)
 {
-  DataSet* dataset = new DataSet(name);
-  _dataset = dataset;
+  _dataset = NULL;
+  try {
+    _dataset = new DataSet(name);
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "during dataset construction.");
+  }
 }
 
 PyDataset::PyDataset(DataSet* dataset)
@@ -59,17 +74,32 @@ DataSet* PyDataset::get() {
 
 void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type)
 {
-  auto buffer = data.request();
-  void* ptr = buffer.ptr;
+  try {
+    auto buffer = data.request();
+    void* ptr = buffer.ptr;
 
-  // get dims
-  std::vector<size_t> dims(buffer.ndim);
-  for (size_t i=0; i < buffer.shape.size(); i++) {
-      dims[i] = (size_t) buffer.shape[i];
+    // get dims
+    std::vector<size_t> dims(buffer.ndim);
+    for (size_t i=0; i < buffer.shape.size(); i++) {
+        dims[i] = (size_t) buffer.shape[i];
+    }
+
+    SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
+    _dataset->add_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
   }
-
-  SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
-  _dataset->add_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing add_tensor.");
+  }
 }
 
 py::array PyDataset::get_tensor(const std::string& name)
@@ -78,9 +108,19 @@ py::array PyDataset::get_tensor(const std::string& name)
     try {
         tensor = _dataset->_get_tensorbase_obj(name);
     }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
-    }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing get_tensor.");
+  }
 
     // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
@@ -137,16 +177,46 @@ py::array PyDataset::get_tensor(const std::string& name)
 
 void PyDataset::add_meta_scalar(const std::string& name, py::array data, std::string& type)
 {
-  auto buffer = data.request();
-  void* ptr = buffer.ptr;
+  try {
+    auto buffer = data.request();
+    void* ptr = buffer.ptr;
 
-  SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
-  _dataset->add_meta_scalar(name, ptr, ttype);
+    SRMetaDataType ttype = METADATA_TYPE_MAP.at(type);
+    _dataset->add_meta_scalar(name, ptr, ttype);
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing add_meta_scalar.");
+  }
 }
 
 void PyDataset::add_meta_string(const std::string& name, const std::string& data)
 {
-  _dataset->add_meta_string(name, data);
+  try {
+    _dataset->add_meta_string(name, data);
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing add_meta_string.");
+  }
 }
 
 py::array PyDataset::get_meta_scalars(const std::string& name)
@@ -154,7 +224,22 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
   SRMetaDataType type = SRMetadataTypeInvalid;
   size_t length = 0;
   void *ptr = NULL;
-  _dataset->get_meta_scalars(name, ptr, length, type);
+  try {
+    _dataset->get_meta_scalars(name, ptr, length, type);
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing get_meta_scalars.");
+  }
 
   // detect data type
   switch (type) {
@@ -193,13 +278,43 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
 
 std::string PyDataset::get_name()
 {
+  try {
     return _dataset->name;
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing get_name.");
+  }
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name)
 {
-  // We return a copy
-  return py::cast(_dataset->get_meta_strings(name));
+  try {
+    // We return a copy
+    return py::cast(_dataset->get_meta_strings(name));
+  }
+  catch (Exception& e) {
+      // exception is already prepared for caller
+      throw e;
+  }
+  catch (std::exception& e) {
+      // should never happen
+      throw SRInternalException(e.what());
+  }
+  catch (...) {
+      // should never happen
+      throw SRInternalException("A non-standard exception was encountered "\
+                                "while executing get_meta_strings.");
+  }
 }
 
 // EOF
