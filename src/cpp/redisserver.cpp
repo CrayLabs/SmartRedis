@@ -29,12 +29,37 @@
 #include <ctype.h>
 #include "redisserver.h"
 #include "srexception.h"
+#include "srassert.h"
 
 using namespace SmartRedis;
 
 // We should never seed srand more than once. There are more elegant ways
 // to prevent it, but this will suffice
 static bool ___srand_seeded = false;
+
+// RedisServer constructor
+RedisServer::RedisServer()
+{
+    _init_integer_from_env(_connection_timeout, "SR_CONN_TIMEOUT",
+                           _DEFAULT_CONN_TIMEOUT);
+    _init_integer_from_env(_connection_interval, "SR_CONN_INTERVAL",
+                           _DEFAULT_CONN_INTERVAL);
+    _init_integer_from_env(_command_timeout, "SR_CMD_TIMEOUT",
+                           _DEFAULT_CMD_TIMEOUT);
+    _init_integer_from_env(_command_interval, "SR_CMD_INTERVAL",
+                           _DEFAULT_CMD_INTERVAL);
+
+    SR_ASSERT(_connection_interval > 0);
+    SR_ASSERT(_connection_timeout > 0);
+    SR_ASSERT(_command_interval > 0);
+    SR_ASSERT(_command_interval > 0);
+
+    _connection_attempts = _connection_timeout / _connection_interval + 1;
+    _command_attempts = _command_timeout / _command_interval + 1;
+
+    SR_ASSERT(_connection_attempts >= 1);
+    SR_ASSERT(_command_attempts >= 1);
+}
 
 // Retrieve a single address, randomly chosen from a list of addresses if
 // applicable, from the SSDB environment variable
@@ -89,4 +114,48 @@ void RedisServer::_check_ssdb_string(const std::string& env_str) {
                                      " is invalid because of character " + c);
         }
     }
+}
+
+//Initialize variable of type integer from environment variable
+void RedisServer::_init_integer_from_env(int& value,
+                                         const std::string& env_var,
+                                         const int& default_value)
+{
+    value = default_value;
+
+    char* env_char = getenv(env_var.c_str());
+
+    if (env_char != NULL) {
+
+        // Enforce that all characters are digits because std::stoi
+        // will truncate a string like "10xy" to 10.
+        // We want to guard users from input errors they might have.
+        char* c = env_char;
+        while (*c != 0) {
+            if (!isdigit(*c)) {
+                throw SRRuntimeException("The value of " + env_var +
+                                         " must only contain digits "\
+                                         "and must be positive number.");
+            }
+            c++;
+        }
+
+        try {
+            value = std::stoi(env_char);
+        }
+        catch (std::invalid_argument& e) {
+            throw SRRuntimeException("The value of " + env_var + " could "\
+                                     "not be converted to type integer.");
+        }
+        catch (std::out_of_range& e) {
+            throw SRRuntimeException("The value of " + env_var + " is too "\
+                                     "large to be stored as an integer "\
+                                     "value.");
+        }
+        catch (std::exception& e) {
+            throw SRRuntimeException(e.what());
+        }
+    }
+
+    return;
 }
