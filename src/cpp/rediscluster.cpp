@@ -584,7 +584,7 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         }
 
         // Sleep before the next attempt
-        std::this_thread::sleep_for(std::chrono::seconds(_command_interval));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
     // If we get here, we've either run out of retry attempts or gotten
@@ -644,7 +644,7 @@ inline void RedisCluster::_connect(std::string address_port)
             delete _redis_cluster;
             _redis_cluster = NULL;
         }
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
     }
 
     // If we get here, we failed to establish a connection
