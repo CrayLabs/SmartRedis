@@ -50,32 +50,39 @@ using namespace SmartRedis;
 class RedisTest : public Redis
 {
     public:
-        virtual int get_connection_timeout() {return _connection_timeout;}
-        virtual int get_connection_interval() {return _connection_interval;}
-        virtual int get_command_timeout() {return _command_timeout;}
-        virtual int get_command_interval() {return _command_interval;}
-        virtual int get_connection_attempts() {return _connection_attempts;}
-        virtual int get_command_attempts() {return _command_attempts;}
-        virtual int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
-        virtual int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
-        virtual int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
-        virtual int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
+        int get_connection_timeout() {return _connection_timeout;}
+        int get_connection_interval() {return _connection_interval;}
+        int get_command_timeout() {return _command_timeout;}
+        int get_command_interval() {return _command_interval;}
+        int get_connection_attempts() {return _connection_attempts;}
+        int get_command_attempts() {return _command_attempts;}
+        int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
+        int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
+        int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
+        int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
 };
 
 class RedisClusterTest : public RedisCluster
 {
     public:
-        virtual int get_connection_timeout() {return _connection_timeout;}
-        virtual int get_connection_interval() {return _connection_interval;}
-        virtual int get_command_timeout() {return _command_timeout;}
-        virtual int get_command_interval() {return _command_interval;}
-        virtual int get_connection_attempts() {return _connection_attempts;}
-        virtual int get_command_attempts() {return _command_attempts;}
-        virtual int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
-        virtual int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
-        virtual int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
-        virtual int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
+        int get_connection_timeout() {return _connection_timeout;}
+        int get_connection_interval() {return _connection_interval;}
+        int get_command_timeout() {return _command_timeout;}
+        int get_command_interval() {return _command_interval;}
+        int get_connection_attempts() {return _connection_attempts;}
+        int get_command_attempts() {return _command_attempts;}
+        int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
+        int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
+        int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
+        int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
 };
+
+// For simplicity, define constants for environment variables outside
+// of the objects because of inheritance limitations
+const char* CONN_TIMEOUT_ENV_VAR = "SR_CONN_TIMEOUT";
+const char* CONN_INTERVAL_ENV_VAR = "SR_CONN_INTERVAL";
+const char* CMD_TIMEOUT_ENV_VAR = "SR_CMD_TIMEOUT";
+const char* CMD_INTERVAL_ENV_VAR = "SR_CMD_INTERVAL";
 
 // Helper method to invoke the constructor when we expect an
 // error to be thrown
@@ -93,10 +100,10 @@ void invoke_constructor()
 // cross-test contamination
 void unset_all_env_vars()
 {
-        unsetenv("SR_CONN_TIMEOUT");
-        unsetenv("SR_CONN_INTERVAL");
-        unsetenv("SR_CMD_TIMEOUT");
-        unsetenv("SR_CMD_INTERVAL");
+        unsetenv(CONN_TIMEOUT_ENV_VAR);
+        unsetenv(CONN_INTERVAL_ENV_VAR);
+        unsetenv(CMD_TIMEOUT_ENV_VAR);
+        unsetenv(CMD_INTERVAL_ENV_VAR);
 }
 
 // Helper function to check that all default values being used
@@ -121,7 +128,6 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     GIVEN("A Redis derived object created with all environment variables unset")
     {
         unset_all_env_vars();
-
         if (use_cluster()) {
             RedisClusterTest redis_server;
             THEN("Default member variable values are used")
@@ -140,10 +146,10 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     GIVEN("A Redis derived object with empty environment variables set")
     {
         unset_all_env_vars();
-        setenv("SR_CONN_TIMEOUT", "", true);
-        setenv("SR_CONN_INTERVAL", "", true);
-        setenv("SR_CMD_TIMEOUT", "", true);
-        setenv("SR_CMD_INTERVAL", "", true);
+        setenv(CONN_TIMEOUT_ENV_VAR, "", true);
+        setenv(CONN_INTERVAL_ENV_VAR, "", true);
+        setenv(CMD_TIMEOUT_ENV_VAR, "", true);
+        setenv(CMD_INTERVAL_ENV_VAR, "", true);
 
         if (use_cluster()) {
             RedisClusterTest redis_server;
@@ -170,10 +176,10 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         int expected_cmd_attempts = 9;
 
         unset_all_env_vars();
-        setenv("SR_CONN_TIMEOUT", std::to_string(conn_timeout).c_str(), true);
-        setenv("SR_CONN_INTERVAL", std::to_string(conn_interval).c_str(), true);
-        setenv("SR_CMD_TIMEOUT", std::to_string(cmd_timeout).c_str(), true);
-        setenv("SR_CMD_INTERVAL", std::to_string(cmd_interval).c_str(), true);
+        setenv(CONN_TIMEOUT_ENV_VAR, std::to_string(conn_timeout).c_str(), true);
+        setenv(CONN_INTERVAL_ENV_VAR, std::to_string(conn_interval).c_str(), true);
+        setenv(CMD_TIMEOUT_ENV_VAR, std::to_string(cmd_timeout).c_str(), true);
+        setenv(CMD_INTERVAL_ENV_VAR, std::to_string(cmd_interval).c_str(), true);
 
         if (use_cluster()) {
             RedisClusterTest redis_server;
@@ -214,38 +220,38 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             }
         }
     }
-    GIVEN("A negative value of SR_CONN_TIMEOUT")
+    GIVEN("A negative value of " + std::string(CONN_TIMEOUT_ENV_VAR))
     {
         unset_all_env_vars();
-        setenv("SR_CONN_TIMEOUT", "-1", true);
+        setenv(CONN_TIMEOUT_ENV_VAR, "-1", true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
         }
     }
-    GIVEN("A negative value of SR_CONN_INTERVAL")
+    GIVEN("A negative value of " + std::string(CONN_INTERVAL_ENV_VAR))
     {
         unset_all_env_vars();
-        setenv("SR_CONN_INTERVAL", "-2", true);
+        setenv(CONN_INTERVAL_ENV_VAR, "-2", true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
         }
     }
-    GIVEN("A negative value of SR_CMD_TIMEOUT")
+    GIVEN("A negative value of " +  std::string(CMD_TIMEOUT_ENV_VAR))
     {
         unset_all_env_vars();
-        setenv("SR_CMD_TIMEOUT", "-3", true);
+        setenv(CMD_TIMEOUT_ENV_VAR, "-3", true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
         }
     }
 
-    GIVEN("A negative value of SR_CMD_INTERVAL")
+    GIVEN("A negative value of " + std::string(CMD_INTERVAL_ENV_VAR))
     {
         unset_all_env_vars();
-        setenv("SR_CMD_INTERVAL", "-4", true);
+        setenv(CMD_INTERVAL_ENV_VAR, "-4", true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
@@ -254,7 +260,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     GIVEN("An environment variable that includes non-digits")
     {
         unset_all_env_vars();
-        setenv("SR_CMD_INTERVAL", "425xkdfa4kd", true);
+        setenv(CMD_INTERVAL_ENV_VAR, "425xkdfa4kd", true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
@@ -264,29 +270,31 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     {
         std::string env_var_str = std::to_string(INT_MAX) + "0";
         unset_all_env_vars();
-        setenv("SR_CMD_INTERVAL", env_var_str.c_str(), true);
+        setenv(CMD_INTERVAL_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
         }
     }
-    GIVEN("An environment variable value of SR_CONN_TIMEOUT "\
+    GIVEN("An environment variable value of " +
+          std::string(CONN_TIMEOUT_ENV_VAR) +
           "that is too large for conversion to number of attempts")
     {
         std::string env_var_str = std::to_string(INT_MAX/1000+1);
         unset_all_env_vars();
-        setenv("SR_CONN_TIMEOUT", env_var_str.c_str(), true);
+        setenv(CONN_TIMEOUT_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);
         }
     }
-    GIVEN("An environment variable value of SR_CMD_TIMEOUT "\
+    GIVEN("An environment variable value of " +
+          std::string(CMD_TIMEOUT_ENV_VAR) +
           "that is too large for conversion to number of attempts")
     {
         std::string env_var_str = std::to_string(INT_MAX/1000+1);
         unset_all_env_vars();
-        setenv("SR_CMD_TIMEOUT", env_var_str.c_str(), true);
+        setenv(CMD_TIMEOUT_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
             CHECK_THROWS_AS(invoke_constructor(), Exception);

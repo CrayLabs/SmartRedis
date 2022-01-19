@@ -39,13 +39,13 @@ static bool ___srand_seeded = false;
 // RedisServer constructor
 RedisServer::RedisServer()
 {
-    _init_integer_from_env(_connection_timeout, "SR_CONN_TIMEOUT",
+    _init_integer_from_env(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
                            _DEFAULT_CONN_TIMEOUT);
-    _init_integer_from_env(_connection_interval, "SR_CONN_INTERVAL",
+    _init_integer_from_env(_connection_interval, _CONN_INTERVAL_ENV_VAR,
                            _DEFAULT_CONN_INTERVAL);
-    _init_integer_from_env(_command_timeout, "SR_CMD_TIMEOUT",
+    _init_integer_from_env(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
                            _DEFAULT_CMD_TIMEOUT);
-    _init_integer_from_env(_command_interval, "SR_CMD_INTERVAL",
+    _init_integer_from_env(_command_interval, _CMD_INTERVAL_ENV_VAR,
                            _DEFAULT_CMD_INTERVAL);
 
     _check_runtime_variables();
@@ -156,28 +156,34 @@ void RedisServer::_init_integer_from_env(int& value,
 inline void RedisServer::_check_runtime_variables()
 {
     if( _connection_timeout <= 0) {
-        throw SRRuntimeException("SR_CONN_TIMEOUT must be greater than 0.");
+        throw SRRuntimeException(_CONN_TIMEOUT_ENV_VAR +
+                                 " must be greater than 0.");
     }
 
     if( _connection_interval <= 0) {
-        throw SRRuntimeException("SR_CONN_INTERVAL must be greater than 0.");
+        throw SRRuntimeException(_CONN_INTERVAL_ENV_VAR +
+                                " must be greater than 0.");
     }
 
     if( _command_timeout <= 0) {
-        throw SRRuntimeException("SR_CMD_TIMEOUT must be greater than 0.");
+        throw SRRuntimeException(_CMD_TIMEOUT_ENV_VAR +
+                                 " must be greater than 0.");
     }
 
     if( _command_interval <= 0) {
-        throw SRRuntimeException("SR_CMD_INTERVAL must be greater than 0.");
+        throw SRRuntimeException(_CMD_INTERVAL_ENV_VAR +
+                                 " must be greater than 0.");
     }
 
     if ( _connection_timeout > (INT_MAX / 1000) ) {
-        throw SRRuntimeException("Connection timeout must be less than "
+        throw SRRuntimeException(_CONN_TIMEOUT_ENV_VAR +
+                                " must be less than "
                                  + std::to_string(INT_MAX / 1000));
     }
 
     if ( _command_timeout > (INT_MAX / 1000) ) {
-        throw SRRuntimeException("Command timeout must be less than "
+        throw SRRuntimeException(_CMD_TIMEOUT_ENV_VAR +
+                                 " must be less than "
                                  + std::to_string(INT_MAX / 1000));
     }
 }
