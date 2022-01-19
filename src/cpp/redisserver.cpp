@@ -29,7 +29,6 @@
 #include <ctype.h>
 #include "redisserver.h"
 #include "srexception.h"
-#include "srassert.h"
 
 using namespace SmartRedis;
 
@@ -49,16 +48,13 @@ RedisServer::RedisServer()
     _init_integer_from_env(_command_interval, "SR_CMD_INTERVAL",
                            _DEFAULT_CMD_INTERVAL);
 
-    SR_ASSERT(_connection_interval > 0);
-    SR_ASSERT(_connection_timeout > 0);
-    SR_ASSERT(_command_interval > 0);
-    SR_ASSERT(_command_interval > 0);
+    _check_runtime_variables();
 
-    _connection_attempts = _connection_timeout / _connection_interval + 1;
-    _command_attempts = _command_timeout / _command_interval + 1;
+    _connection_attempts = ( _connection_timeout * 1000 ) /
+                             _connection_interval + 1;
 
-    SR_ASSERT(_connection_attempts >= 1);
-    SR_ASSERT(_command_attempts >= 1);
+    _command_attempts = ( _command_timeout * 1000 ) /
+                          _command_interval + 1;
 }
 
 // Retrieve a single address, randomly chosen from a list of addresses if
@@ -125,17 +121,15 @@ void RedisServer::_init_integer_from_env(int& value,
 
     char* env_char = getenv(env_var.c_str());
 
-    if (env_char != NULL) {
-
+    if (env_char != NULL && strlen(env_char) > 0) {
         // Enforce that all characters are digits because std::stoi
         // will truncate a string like "10xy" to 10.
         // We want to guard users from input errors they might have.
         char* c = env_char;
         while (*c != 0) {
-            if (!isdigit(*c)) {
+            if (!isdigit(*c) && !(*c == '-' && c == env_char)) {
                 throw SRRuntimeException("The value of " + env_var +
-                                         " must only contain digits "\
-                                         "and must be positive number.");
+                                         " must be a valid number.");
             }
             c++;
         }
@@ -156,6 +150,34 @@ void RedisServer::_init_integer_from_env(int& value,
             throw SRRuntimeException(e.what());
         }
     }
+}
 
-    return;
+// Check that runtime variables are within valid ranges
+inline void RedisServer::_check_runtime_variables()
+{
+    if( _connection_timeout <= 0) {
+        throw SRRuntimeException("SR_CONN_TIMEOUT must be greater than 0.");
+    }
+
+    if( _connection_interval <= 0) {
+        throw SRRuntimeException("SR_CONN_INTERVAL must be greater than 0.");
+    }
+
+    if( _command_timeout <= 0) {
+        throw SRRuntimeException("SR_CMD_TIMEOUT must be greater than 0.");
+    }
+
+    if( _command_interval <= 0) {
+        throw SRRuntimeException("SR_CMD_INTERVAL must be greater than 0.");
+    }
+
+    if ( _connection_timeout > (INT_MAX / 1000) ) {
+        throw SRRuntimeException("Connection timeout must be less than "
+                                 + std::to_string(INT_MAX / 1000));
+    }
+
+    if ( _command_timeout > (INT_MAX / 1000) ) {
+        throw SRRuntimeException("Command timeout must be less than "
+                                 + std::to_string(INT_MAX / 1000));
+    }
 }

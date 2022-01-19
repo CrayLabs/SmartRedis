@@ -404,7 +404,7 @@ inline CommandReply Redis::_run(const Command& cmd)
                                       cmd.first_field() + " execution. ");
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(_command_interval));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
     }
 
     // If we get here, we've either run out of retry attempts or gotten
@@ -480,7 +480,7 @@ inline void Redis::_connect(std::string address_port)
                                          " during client connection.");
             }
         }
-        std::this_thread::sleep_for(std::chrono::seconds(_connection_interval));
+        std::this_thread::sleep_for(std::chrono::milliseconds(_connection_interval));
     }
 
     // Should never get here

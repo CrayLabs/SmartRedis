@@ -649,7 +649,7 @@ inline void RedisCluster::_connect(std::string address_port)
 
     // If we get here, we failed to establish a connection
     throw SRTimeoutException(std::string("Connection attempt failed after ") +
-                                         std::to_string(_connection_interval) + "tries");
+                                         std::to_string(_connection_attempts) + "tries");
 }
 
 // Map the RedisCluster via the CLUSTER SLOTS command

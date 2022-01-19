@@ -31,6 +31,7 @@
 
 #include <thread>
 #include <iostream>
+#include "limits.h"
 #include <sw/redis++/redis++.h>
 #include "command.h"
 #include "commandreply.h"
@@ -342,30 +343,30 @@ class RedisServer {
         int _connection_attempts;
 
         /*!
-        *   \brief The number of client connection attempts
+        *   \brief The number of client command execution attempts
         */
         int _command_attempts;
 
         /*!
         *   \brief Default value of connection timeout (seconds)
         */
-        static constexpr double _DEFAULT_CONN_TIMEOUT = 200;
+        static constexpr int _DEFAULT_CONN_TIMEOUT = 100;
 
         /*!
-        *   \brief Default value of connection attempt intervals (seconds)
+        *   \brief Default value of connection attempt intervals (milliseconds)
         */
-        static constexpr double _DEFAULT_CONN_INTERVAL = 2;
+        static constexpr int _DEFAULT_CONN_INTERVAL = 1000;
 
         /*!
         *   \brief Default value of command execution timeout (seconds)
         */
-        static constexpr double _DEFAULT_CMD_TIMEOUT = 200;
+        static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
 
         /*!
         *   \brief Default value of command execution attempt
-        *          intervals (seconds)
+        *          intervals (milliseconds)
         */
-        static constexpr double _DEFAULT_CMD_INTERVAL = 2;
+        static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
 
 
         /*!
@@ -393,22 +394,31 @@ class RedisServer {
 
         /*!
         *   \brief Initialize a variable of type integer from an environment
-        *          variable.  If the environment variable is not present,
+        *          variable.  If the environment variable is not set,
         *          the default value is assigned.
         *   \param value Reference to a integer value which will be assigned
         *                a default value or environment variable value
         *   \param env_var std::string of the environment variable name
         *   \param default_value The default value to assign if the environment
-        *                        variable is not present.
+        *                        variable is not set.
         *   \throw SmartRedis::RuntimeException if environment variable
         *          retrieval fails, conversion to integer fails, or
         *          if the value of the environment value contains
-        *          characters other than [0,9]
+        *          characters other than [0,9] or a negative sign ('-').
         */
         void _init_integer_from_env(int& value,
                                     const std::string& env_var,
                                     const int& default_value);
 
+        /*!
+        *   \brief This function checks that _connection_timeout,
+        *          _connection_interval, _command_timeout, and
+        *          _command_interval, which have been set from environment
+        *          variables, are within valid ranges.
+        *   \throw SmartRedis::RuntimeException if any of the runtime
+        *          settings is outside of the allowable range
+        */
+        void _check_runtime_variables();
 };
 
 } // namespace SmartRedis
