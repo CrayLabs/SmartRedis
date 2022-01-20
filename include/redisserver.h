@@ -32,7 +32,9 @@
 #include <thread>
 #include <iostream>
 #include "limits.h"
+
 #include <sw/redis++/redis++.h>
+
 #include "command.h"
 #include "commandreply.h"
 #include "commandlist.h"
@@ -317,6 +319,7 @@ class RedisServer {
         virtual CommandReply get_script(const std::string& key) = 0;
 
     protected:
+
         /*!
         *   \brief Timeout (in seconds) of connection attempt(s).
         */
@@ -368,6 +371,29 @@ class RedisServer {
         */
         static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
 
+        /*!
+        *   \brief Environment variable for connection timeout
+        */
+        inline static const std::string _CONN_TIMEOUT_ENV_VAR =
+            "SR_CONN_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for connection interval
+        */
+        inline static const std::string _CONN_INTERVAL_ENV_VAR =
+            "SR_CONN_INTERVAL";
+
+        /*!
+        *   \brief Environment variable for command execution timeout
+        */
+        inline static const std::string _CMD_TIMEOUT_ENV_VAR =
+            "SR_CMD_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for command execution interval
+        */
+        inline static const std::string _CMD_INTERVAL_ENV_VAR =
+            "SR_CMD_INTERVAL";
 
         /*!
         *   \brief Retrieve a single address, randomly
@@ -419,6 +445,8 @@ class RedisServer {
         *          settings is outside of the allowable range
         */
         void _check_runtime_variables();
+
+
 };
 
 } // namespace SmartRedis
