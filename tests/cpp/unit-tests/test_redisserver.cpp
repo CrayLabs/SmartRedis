@@ -44,7 +44,9 @@ using namespace SmartRedis;
     (i.e. virtual base classes) of Redis and RedisCluster, and a
     change like that does not seem warranted for testing purposes
     only.  If virtual base classes are implemented, RedisTest and
-    RedisClusterTest can be merged.
+    RedisClusterTest can be merged.  Direct inheritance from
+    RedisServer is not done because of the large number of
+    pure virtual functions that would need to be defined.
 */
 
 class RedisTest : public Redis
