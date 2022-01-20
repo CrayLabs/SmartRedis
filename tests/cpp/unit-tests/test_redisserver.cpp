@@ -226,7 +226,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CONN_TIMEOUT_ENV_VAR, "-1", true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("A negative value of " + std::string(CONN_INTERVAL_ENV_VAR))
@@ -235,7 +235,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CONN_INTERVAL_ENV_VAR, "-2", true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("A negative value of " +  std::string(CMD_TIMEOUT_ENV_VAR))
@@ -244,7 +244,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_TIMEOUT_ENV_VAR, "-3", true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
 
@@ -254,7 +254,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_INTERVAL_ENV_VAR, "-4", true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("An environment variable that includes non-digits")
@@ -263,7 +263,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_INTERVAL_ENV_VAR, "425xkdfa4kd", true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("An environment variable that is larger than integer storage size")
@@ -273,31 +273,31 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CMD_INTERVAL_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("An environment variable value of " +
           std::string(CONN_TIMEOUT_ENV_VAR) +
-          "that is too large for conversion to number of attempts")
+          " that is too large for conversion to number of attempts")
     {
         std::string env_var_str = std::to_string(INT_MAX/1000+1);
         unset_all_env_vars();
         setenv(CONN_TIMEOUT_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
     GIVEN("An environment variable value of " +
           std::string(CMD_TIMEOUT_ENV_VAR) +
-          "that is too large for conversion to number of attempts")
+          " that is too large for conversion to number of attempts")
     {
         std::string env_var_str = std::to_string(INT_MAX/1000+1);
         unset_all_env_vars();
         setenv(CMD_TIMEOUT_ENV_VAR, env_var_str.c_str(), true);
         THEN("Constructor throws an exception")
         {
-            CHECK_THROWS_AS(invoke_constructor(), Exception);
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
 }

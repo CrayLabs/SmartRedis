@@ -50,11 +50,11 @@ RedisServer::RedisServer()
 
     _check_runtime_variables();
 
-    _connection_attempts = ( _connection_timeout * 1000 ) /
-                             _connection_interval + 1;
+    _connection_attempts = (_connection_timeout * 1000) /
+                            _connection_interval + 1;
 
-    _command_attempts = ( _command_timeout * 1000 ) /
-                          _command_interval + 1;
+    _command_attempts = (_command_timeout * 1000) /
+                         _command_interval + 1;
 }
 
 // Retrieve a single address, randomly chosen from a list of addresses if
@@ -126,10 +126,10 @@ void RedisServer::_init_integer_from_env(int& value,
         // will truncate a string like "10xy" to 10.
         // We want to guard users from input errors they might have.
         char* c = env_char;
-        while (*c != 0) {
+        while (*c != '\0') {
             if (!isdigit(*c) && !(*c == '-' && c == env_char)) {
-                throw SRRuntimeException("The value of " + env_var +
-                                         " must be a valid number.");
+                throw SRParameterException("The value of " + env_var +
+                                           " must be a valid number.");
             }
             c++;
         }
@@ -138,16 +138,19 @@ void RedisServer::_init_integer_from_env(int& value,
             value = std::stoi(env_char);
         }
         catch (std::invalid_argument& e) {
-            throw SRRuntimeException("The value of " + env_var + " could "\
-                                     "not be converted to type integer.");
+            throw SRParameterException("The value of " + env_var + " could "\
+                                       "not be converted to type integer.");
         }
         catch (std::out_of_range& e) {
-            throw SRRuntimeException("The value of " + env_var + " is too "\
-                                     "large to be stored as an integer "\
-                                     "value.");
+            throw SRParameterException("The value of " + env_var + " is too "\
+                                       "large to be stored as an integer "\
+                                       "value.");
         }
         catch (std::exception& e) {
-            throw SRRuntimeException(e.what());
+            throw SRInternalException("An unexpected error occurred  "\
+                                      "while attempting to convert the "\
+                                      "environment variable " + env_var +
+                                      " to an integer.");
         }
     }
 }
@@ -156,34 +159,34 @@ void RedisServer::_init_integer_from_env(int& value,
 inline void RedisServer::_check_runtime_variables()
 {
     if( _connection_timeout <= 0) {
-        throw SRRuntimeException(_CONN_TIMEOUT_ENV_VAR +
-                                 " must be greater than 0.");
+        throw SRParameterException(_CONN_TIMEOUT_ENV_VAR +
+                                   " must be greater than 0.");
     }
 
     if( _connection_interval <= 0) {
-        throw SRRuntimeException(_CONN_INTERVAL_ENV_VAR +
-                                " must be greater than 0.");
+        throw SRParameterException(_CONN_INTERVAL_ENV_VAR +
+                                   " must be greater than 0.");
     }
 
     if( _command_timeout <= 0) {
-        throw SRRuntimeException(_CMD_TIMEOUT_ENV_VAR +
-                                 " must be greater than 0.");
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+                                   " must be greater than 0.");
     }
 
     if( _command_interval <= 0) {
-        throw SRRuntimeException(_CMD_INTERVAL_ENV_VAR +
-                                 " must be greater than 0.");
+        throw SRParameterException(_CMD_INTERVAL_ENV_VAR +
+                                   " must be greater than 0.");
     }
 
     if ( _connection_timeout > (INT_MAX / 1000) ) {
-        throw SRRuntimeException(_CONN_TIMEOUT_ENV_VAR +
-                                " must be less than "
-                                 + std::to_string(INT_MAX / 1000));
+        throw SRParameterException(_CONN_TIMEOUT_ENV_VAR +
+                                   " must be less than "
+                                   + std::to_string(INT_MAX / 1000));
     }
 
     if ( _command_timeout > (INT_MAX / 1000) ) {
-        throw SRRuntimeException(_CMD_TIMEOUT_ENV_VAR +
-                                 " must be less than "
-                                 + std::to_string(INT_MAX / 1000));
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+                                   " must be less than "
+                                   + std::to_string(INT_MAX / 1000));
     }
 }
