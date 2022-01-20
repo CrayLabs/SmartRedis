@@ -331,12 +331,12 @@ class RedisServer {
         int _command_timeout;
 
         /*!
-        *   \brief Interval (in milliseconcds) between connection attempts.
+        *   \brief Interval (in milliseconds) between connection attempts.
         */
         int _connection_interval;
 
         /*!
-        *   \brief Interval (in milliseconcds) between command execution attempts.
+        *   \brief Interval (in milliseconds) between command execution attempts.
         */
         int _command_interval;
 
