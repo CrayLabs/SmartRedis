@@ -87,28 +87,55 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_name", &PyDataset::get_name);
 
     // Register exception classes
+#if 1
+    auto rre_handler = py::register_exception<SmartRedis::Exception>(m, "RedisReplyError");
+    auto e1 = py::register_exception<SmartRedis::BadAllocException> (m, "RedisBadAllocError", rre_handler.ptr());
+    auto e2 = py::register_exception<SmartRedis::DatabaseException> (m, "RedisDatabaseError", rre_handler.ptr());
+    auto e3 = py::register_exception<SmartRedis::TimeoutException>  (m, "RedisTimeoutError",  rre_handler.ptr());
+    auto e4 = py::register_exception<SmartRedis::InternalException> (m, "RedisInternalError", rre_handler.ptr());
+    auto e5 = py::register_exception<SmartRedis::KeyException>      (m, "RedisKeyError",      rre_handler.ptr());
+#else
+    static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
+    static py::exception<SmartRedis::RuntimeException>  runtime_exception_handler(m,  "RedisRuntimeError",  exception_handler.ptr());
+    static py::exception<SmartRedis::BadAllocException> badalloc_exception_handler(m, "RedisBadAllocError", exception_handler.ptr());
+    static py::exception<SmartRedis::DatabaseException> database_exception_handler(m, "RedisDatabaseError", exception_handler.ptr());
+    static py::exception<SmartRedis::TimeoutException>  timeout_exception_handler(m,  "RedisTimeoutError",  exception_handler.ptr());
+    static py::exception<SmartRedis::InternalException> internal_exception_handler(m, "RedisInternalError", exception_handler.ptr());
+    static py::exception<SmartRedis::KeyException>      key_exception_handler(m,      "RedisKeyError",      exception_handler.ptr());
     py::register_exception_translator([](std::exception_ptr p) {
         try {
             if (p) std::rethrow_exception(p);
         }
-        catch (const BadAllocException& e) {
-            PyErr_SetString(PyExc_MemoryError, e.what());
-        }
-        catch (const DatabaseException& e) {
-            PyErr_SetString(PyExc_OSError, e.what());
-        }
-        catch (const RuntimeException& e) {
-            PyErr_SetString(PyExc_RuntimeError, e.what());
-        }
+        // Parameter exceptions map straight to Python ValueError
         catch (const ParameterException& e) {
             PyErr_SetString(PyExc_ValueError, e.what());
         }
+
+        // Type exceptions map straight to Python TypeError
+        catch (const TypeException& e) {
+            PyErr_SetString(PyExc_TypeError, e.what());
+        }
+
+        // Everything else maps to a custom override
+        catch (const RuntimeException& e) {
+            runtime_exception_handler(e.what());
+        }
+        catch (const BadAllocException& e) {
+            badalloc_exception_handler(e.what());
+        }
+        catch (const DatabaseException& e) {
+            database_exception_handler(e.what());
+        }
         catch (const TimeoutException& e) {
-            PyErr_SetString(PyExc_TimeoutError, e.what());
+            timeout_exception_handler(e.what());
         }
         catch (const InternalException& e) {
-            PyErr_SetString(PyExc_SystemError, e.what());
+            internal_exception_handler(e.what());
+        }
+        catch (const KeyException& e) {
+            key_exception_handler(e.what());
         }
     });
+#endif
 }
 
