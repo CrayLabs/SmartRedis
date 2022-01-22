@@ -158,33 +158,33 @@ void RedisServer::_init_integer_from_env(int& value,
 // Check that runtime variables are within valid ranges
 inline void RedisServer::_check_runtime_variables()
 {
-    if( _connection_timeout <= 0) {
+    if (_connection_timeout <= 0) {
         throw SRParameterException(_CONN_TIMEOUT_ENV_VAR +
                                    " must be greater than 0.");
     }
 
-    if( _connection_interval <= 0) {
+    if (_connection_interval <= 0) {
         throw SRParameterException(_CONN_INTERVAL_ENV_VAR +
                                    " must be greater than 0.");
     }
 
-    if( _command_timeout <= 0) {
+    if (_command_timeout <= 0) {
         throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
                                    " must be greater than 0.");
     }
 
-    if( _command_interval <= 0) {
+    if (_command_interval <= 0) {
         throw SRParameterException(_CMD_INTERVAL_ENV_VAR +
                                    " must be greater than 0.");
     }
 
-    if ( _connection_timeout > (INT_MAX / 1000) ) {
+    if (_connection_timeout > (INT_MAX / 1000)) {
         throw SRParameterException(_CONN_TIMEOUT_ENV_VAR +
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
     }
 
-    if ( _command_timeout > (INT_MAX / 1000) ) {
+    if (_command_timeout > (INT_MAX / 1000)) {
         throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
