@@ -79,6 +79,12 @@ void put_get_dataset(
     // Put the DataSet into the database
     client.put_dataset(sent_dataset);
 
+    // Check that the ack key was placed for the copied dataset
+    std::string ack_key = "{" + dataset_name + "}" + ".meta";
+    std::string ack_field = client.ack_field();
+    if(!client.hash_field_exists(ack_key, ack_field))
+        throw RuntimeException("The DataSet confirmation key is not set.");
+
     // Make sure it exists
     if (!client.dataset_exists(dataset_name))
       throw std::runtime_error("Client.dataset_exists() returns false "\
@@ -88,8 +94,8 @@ void put_get_dataset(
                                "after dataset placed into database.");
 
     // Test that the acknowledgement field exists after placement
-    std::string ack_key = "{" + dataset_name + "}" + ".meta";
-    std::string ack_field = client.ack_field();
+    ack_key = "{" + dataset_name + "}" + ".meta";
+    ack_field = client.ack_field();
     if(!client.hash_field_exists(ack_key, ack_field))
         throw std::runtime_error("The dataset ack field was not set.");
 

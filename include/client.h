@@ -798,6 +798,10 @@ class Client
         */
         TensorBase* _get_tensorbase_obj(const std::string& name);
 
+        /*!
+        *   \brief The name of the hash field used to confirm that the
+        *          DataSet placement operation was successfully completed.
+        */
         inline static const std::string _DATASET_ACK_FIELD = ".COMPLETE";
 
         friend class PyClient;
@@ -897,8 +901,8 @@ class Client
         *  \brief Create keys for putting or getting a DataSet tensors
         *         in the database
         *  \param dataset_name The name of the dataset
-        *  \param tensor_name The name of the tensor
-        *  \param on_db Indicates whether the key refers to an entity which
+        *  \param tensor_name A std::vector of tensor names
+        *  \param on_db Indicates whether the keys refer to an entity which
         *               is already in the database.
         *  \returns A std::vector<std::string> of the keys for the tensors
         */
