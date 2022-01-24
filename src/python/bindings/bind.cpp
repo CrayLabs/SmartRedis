@@ -94,6 +94,7 @@ PYBIND11_MODULE(smartredisPy, m) {
     auto e3 = py::register_exception<SmartRedis::TimeoutException>  (m, "RedisTimeoutError",  rre_handler.ptr());
     auto e4 = py::register_exception<SmartRedis::InternalException> (m, "RedisInternalError", rre_handler.ptr());
     auto e5 = py::register_exception<SmartRedis::KeyException>      (m, "RedisKeyError",      rre_handler.ptr());
+    auto e5 = py::register_exception<SmartRedis::RuntimeException>  (m, "RedisRuntimeError",  rre_handler.ptr());
 #else
     try {
         throw SRRuntimeException("Test");

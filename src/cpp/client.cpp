@@ -119,7 +119,7 @@ void Client::copy_dataset(const std::string& src_name,
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
-        throw SRRuntimeException("The requested DataSet " +
+        throw SRInternalException("The requested DataSet " +
                                  src_name + " does not exist.");
     }
     DataSet dataset(src_name);
