@@ -128,9 +128,9 @@ class Exception: public std::exception
 */
 class BadAllocException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRBadAllocError;
     }
@@ -144,9 +144,9 @@ class BadAllocException: public Exception
 */
 class DatabaseException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRDatabaseError;
     }
@@ -176,9 +176,9 @@ class RuntimeException: public Exception
 */
 class ParameterException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRParameterError;
     }
@@ -192,9 +192,9 @@ class ParameterException: public Exception
 */
 class TimeoutException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRTimeoutError;
     }
@@ -208,9 +208,9 @@ class TimeoutException: public Exception
 */
 class InternalException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRInternalError;
     }
@@ -224,9 +224,9 @@ class InternalException: public Exception
 */
 class KeyException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRKeyError;
     }
@@ -239,9 +239,9 @@ class KeyException: public Exception
 */
 class TypeException: public Exception
 {
+    public:
     using Exception::Exception;
 
-    public:
     virtual SRError to_error_code() const noexcept {
         return SRTypeError;
     }

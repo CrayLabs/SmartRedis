@@ -47,19 +47,11 @@ def exception_handler(func):
     def redis_api_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        # Catch RedisReplyErrors for additional processing.
+        # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
- #       except RRUE as cpp_error:
- #           exception_name = cpp_error.__class__.__name__
- #           func_name = "CClient." + func.__name__
- #           raise globals()[exception_name](str(cpp_error), func_name) from None
         except RRE as cpp_error:
             exception_name = cpp_error.__class__.__name__
-            func_name = "Client.." + func.__name__
-            raise globals()[exception_name](str(cpp_error), func_name) from None
-        except RedisReplyError as cpp_error:
-            exception_name = cpp_error.__class__.__name__
-            func_name = "Client..." + func.__name__
+            func_name = "Client." + func.__name__
             raise globals()[exception_name](str(cpp_error), func_name) from None
     return redis_api_wrapper
 
@@ -86,6 +78,9 @@ class Client(PyClient):
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
             super().__init__(cluster)
+        except RedisRuntimeError as e:
+            print("Got the runtime error!", str(e))
+            raise RedisRuntimeError(str(e)) from None
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 

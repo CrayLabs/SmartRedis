@@ -86,23 +86,6 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_meta_strings", &PyDataset::get_meta_strings)
         .def("get_name", &PyDataset::get_name);
 
-    // Register exception classes
-#if 0
-    auto rre_handler = py::register_exception<SmartRedis::Exception>(m, "RedisReplyError");
-    auto e1 = py::register_exception<SmartRedis::BadAllocException> (m, "RedisBadAllocError", rre_handler.ptr());
-    auto e2 = py::register_exception<SmartRedis::DatabaseException> (m, "RedisDatabaseError", rre_handler.ptr());
-    auto e3 = py::register_exception<SmartRedis::TimeoutException>  (m, "RedisTimeoutError",  rre_handler.ptr());
-    auto e4 = py::register_exception<SmartRedis::InternalException> (m, "RedisInternalError", rre_handler.ptr());
-    auto e5 = py::register_exception<SmartRedis::KeyException>      (m, "RedisKeyError",      rre_handler.ptr());
-    auto e5 = py::register_exception<SmartRedis::RuntimeException>  (m, "RedisRuntimeError",  rre_handler.ptr());
-#else
-    try {
-        throw SRRuntimeException("Test");
-    } catch (const RuntimeException& e) {
-        printf("\n***** Able to catch RuntimeException (%d) in PYBIND11_MODULE(smartredisPy, m)\n", e.to_error_code());
-        fflush(stdout);
-    }
-
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
     static py::exception<SmartRedis::RuntimeException>  runtime_exception_handler(m,  "RedisRuntimeError",  exception_handler.ptr());
     static py::exception<SmartRedis::BadAllocException> badalloc_exception_handler(m, "RedisBadAllocError", exception_handler.ptr());
@@ -114,48 +97,38 @@ PYBIND11_MODULE(smartredisPy, m) {
         try {
             if (p) std::rethrow_exception(p);
         }
-        // Parameter exceptions map straight to Python ValueError
+        // Parameter exceptions map to Python ValueError
         catch (const ParameterException& e) {
-            printf("***** ParameterException caught (%d)!\n", e.to_error_code());
             PyErr_SetString(PyExc_ValueError, e.what());
         }
 
-        // Type exceptions map straight to Python TypeError
+        // Type exceptions map to Python TypeError
         catch (const TypeException& e) {
-            printf("***** TypeException caught (%d)!\n", e.to_error_code());
             PyErr_SetString(PyExc_TypeError, e.what());
         }
 
         // Everything else maps to a custom override
         catch (const SmartRedis::RuntimeException& e) {
-            printf("***** RuntimeException caught (%d)!\n", e.to_error_code());
             runtime_exception_handler(e.what());
         }
         catch (const SmartRedis::BadAllocException& e) {
-            printf("***** BadAllocException caught (%d)!\n", e.to_error_code());
             badalloc_exception_handler(e.what());
         }
         catch (const SmartRedis::DatabaseException& e) {
-            printf("***** DatabaseException caught (%d)!\n", e.to_error_code());
             database_exception_handler(e.what());
         }
         catch (const SmartRedis::TimeoutException& e) {
-            printf("***** TimeoutException caught (%d)!\n", e.to_error_code());
             timeout_exception_handler(e.what());
         }
         catch (const SmartRedis::InternalException& e) {
-            printf("***** InternalException caught (%d)!\n", e.to_error_code());
             internal_exception_handler(e.what());
         }
         catch (const SmartRedis::KeyException& e) {
-            printf("***** KeyException caught (%d)!\n", e.to_error_code());
             key_exception_handler(e.what());
         }
         catch (const SmartRedis::Exception& e) {
-            printf("***** Exception caught (%d)!\n", e.to_error_code());
             exception_handler(e.what());
         }
     });
-#endif
 }
 

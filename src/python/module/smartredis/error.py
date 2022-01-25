@@ -61,7 +61,7 @@ class RedisRuntimeError(RedisReplyError):
     def _check_error(cpp_error, method="", key=""):
         msg = ""
         if method:
-            msg = f"Client.{method} execution failed\n"
+            msg = f"{method} execution failed\n"
         if "REDIS_REPLY_NIL" in cpp_error:
             msg += f"No Dataset stored at key: {key}"
             return msg

@@ -37,13 +37,14 @@ namespace py = pybind11;
 
 PyClient::PyClient(bool cluster)
 {
+//    throw SRRuntimeException("Test");
     _client = NULL;
     try {
         _client = new Client(cluster);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -84,7 +85,7 @@ void PyClient::put_tensor(std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -105,7 +106,7 @@ py::array PyClient::get_tensor(const std::string& key)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -176,7 +177,7 @@ void PyClient::delete_tensor(const std::string& key) {
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -196,7 +197,7 @@ void PyClient::copy_tensor(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -216,7 +217,7 @@ void PyClient::rename_tensor(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -236,7 +237,7 @@ void PyClient::put_dataset(PyDataset& dataset)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -257,7 +258,7 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -278,7 +279,7 @@ void PyClient::delete_dataset(const std::string& key) {
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -298,7 +299,7 @@ void PyClient::copy_dataset(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -318,7 +319,7 @@ void PyClient::rename_dataset(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -340,7 +341,7 @@ void PyClient::set_script_from_file(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -362,7 +363,7 @@ void PyClient::set_script(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -383,7 +384,7 @@ std::string_view PyClient::get_script(const std::string& key)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -407,7 +408,7 @@ void PyClient::run_script(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -428,7 +429,7 @@ py::bytes PyClient::get_model(const std::string& key)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -459,7 +460,7 @@ void PyClient::set_model(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -489,7 +490,7 @@ void PyClient::set_model_from_file(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -511,7 +512,7 @@ void PyClient::run_model(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -537,7 +538,7 @@ bool PyClient::key_exists(const std::string& key)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -562,7 +563,7 @@ bool PyClient::poll_key(const std::string& key,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -584,7 +585,7 @@ bool PyClient::model_exists(const std::string& name)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -606,7 +607,7 @@ bool PyClient::tensor_exists(const std::string& name)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -636,7 +637,7 @@ bool PyClient::poll_tensor(const std::string& name,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -660,7 +661,7 @@ bool PyClient::poll_dataset(const std::string& name,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -685,7 +686,7 @@ bool PyClient::poll_model(const std::string& name,
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -794,7 +795,7 @@ py::dict PyClient::config_get(std::string expression, std::string address)
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -816,7 +817,7 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
