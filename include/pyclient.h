@@ -486,6 +486,14 @@ class PyClient
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
         /*!
+        *   \brief Returns the AI.INFO command reply from any database shard
+        *   \returns A dictionary that maps AI.INFO field names to values
+        *   \throws SmartRedis::RuntimeException or derivative error object if
+        *           command execution or reply parsing fails.
+        */
+        py::dict get_ai_info();
+
+        /*!
         *   \brief Delete all the keys of the given database
         *   \param addresses The addresses of the database nodes. Each address is
         *                    formatted as address:port e.g. 127.0.0.1:6379

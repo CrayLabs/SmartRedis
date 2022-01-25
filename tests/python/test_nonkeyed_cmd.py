@@ -61,6 +61,17 @@ def test_dbcluster_info_command(use_cluster):
         with pytest.raises(RedisReplyError):
             client.get_db_cluster_info(address)
 
+def test_dbcluster_info_command(use_cluster):
+    # get env var to set through client init
+    ssdb = os.environ["SSDB"]
+    address = [ssdb]
+    del os.environ["SSDB"]
+
+    client = Client(address=ssdb, cluster=use_cluster)
+
+    ai_info = client.get_ai_info()
+
+    assert len(ai_info) != 0
 
 def test_flushdb_command(use_cluster):
     # from within the testing framework, there is no way

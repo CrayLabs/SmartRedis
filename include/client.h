@@ -600,6 +600,14 @@ class Client
         parsed_reply_map get_db_cluster_info(std::string address);
 
         /*!
+        *   \brief Returns the AI.INFO command reply from any database shard
+        *   \returns parsed_reply_map containing the AI.INFO information.
+        *   \throws SmartRedis::Exception or derivative error object if
+        *           command execution or reply parsing fails.
+        */
+        parsed_reply_map get_ai_info();
+
+        /*!
         *   \brief Returns the CLUSTER INFO command reply addressed to a single
         *          cluster node.
         *   \param address The address of the database node (host:port)

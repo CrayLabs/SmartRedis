@@ -515,6 +515,24 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     }
 }
 
+SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
+{
+    GIVEN("A Client object")
+    {
+        Client client(use_cluster());
+
+        WHEN("AI.INFO is called")
+        {
+            THEN("No errors are thrown and the returned object is not empty")
+            {
+                parsed_reply_map result;
+                CHECK_NOTHROW(result = client.get_ai_info());
+                CHECK(result.size() != 0);
+            }
+        }
+    }
+}
+
 SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
 

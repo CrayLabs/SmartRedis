@@ -713,6 +713,19 @@ class Client(PyClient):
         except RuntimeError as e:
             raise RedisReplyError(str(e), "get_db_cluster_info")
 
+    def get_ai_info(self):
+        """Returns AI.INFO command reply information from any
+        database node
+        :returns: Dictionary of AI.INFO reply fields
+        :rtype: dict
+        :raises RedisReplyError: if there is an error
+                in command execution or parsing the command reply.
+        """
+        try:
+            return super().get_ai_info()
+        except RuntimeError as e:
+            raise RedisReplyError(str(e), "get_ai_info()")
+
     def flush_db(self, addresses):
         """Removes all keys from a specified db node.
 

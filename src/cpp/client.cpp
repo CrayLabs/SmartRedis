@@ -784,6 +784,48 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
                                                      reply.str_len()));
 }
 
+// Returns the AI.INFO command reply addressed to any database shard
+parsed_reply_map Client::get_ai_info()
+{
+    // Run the AI.INFO command
+    AddressAnyCommand cmd;
+    cmd.add_field("AI.INFO", true);
+    CommandReply reply = _run(cmd);
+
+    if (reply.has_error())
+        throw SRRuntimeException("AI.INFO command failed on server");
+
+    if (reply.n_elements() % 2 != 0)
+        throw SRInternalException("The AI.INFO reply structure has an "\
+                                  "unexpected format");
+
+    // Parse reply
+    parsed_reply_map reply_map;
+    std::string key;
+    std::string value;
+    for(size_t i = 0; i < reply.n_elements(); i += 2){
+
+        if(reply[i].redis_reply_type() == "REDIS_REPLY_STRING")
+            key = reply[i].str();
+        else if (reply[i].redis_reply_type() == "REDIS_REPLY_STATUS")
+            key = reply[i].status_str();
+        else
+            throw SRInternalException("The AI.INFO reply does not have "\
+                                      "the correct type.");
+
+        if(reply[i+1].redis_reply_type() == "REDIS_REPLY_STRING")
+            value = reply[i+1].str();
+        else if (reply[i+1].redis_reply_type() == "REDIS_REPLY_STATUS")
+            value = reply[i+1].status_str();
+        else
+            throw SRInternalException("The AI.INFO reply does not have "\
+                                      "the correct type.");
+
+        reply_map[key] = value;
+    }
+    return reply_map;
+}
+
 // Delete all the keys of the given database
 void Client::flush_db(std::string address)
 {
