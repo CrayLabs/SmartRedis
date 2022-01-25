@@ -86,6 +86,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_meta_strings", &PyDataset::get_meta_strings)
         .def("get_name", &PyDataset::get_name);
 
+    // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
     static py::exception<SmartRedis::RuntimeException>  runtime_exception_handler(m,  "RedisRuntimeError",  exception_handler.ptr());
     static py::exception<SmartRedis::BadAllocException> badalloc_exception_handler(m, "RedisBadAllocError", exception_handler.ptr());
@@ -93,6 +94,8 @@ PYBIND11_MODULE(smartredisPy, m) {
     static py::exception<SmartRedis::TimeoutException>  timeout_exception_handler(m,  "RedisTimeoutError",  exception_handler.ptr());
     static py::exception<SmartRedis::InternalException> internal_exception_handler(m, "RedisInternalError", exception_handler.ptr());
     static py::exception<SmartRedis::KeyException>      key_exception_handler(m,      "RedisKeyError",      exception_handler.ptr());
+
+    // Translate SmartRedis Exception classes to python error classes
     py::register_exception_translator([](std::exception_ptr p) {
         try {
             if (p) std::rethrow_exception(p);

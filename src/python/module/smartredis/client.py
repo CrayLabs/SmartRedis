@@ -27,6 +27,7 @@
 import inspect
 import os
 import os.path as osp
+import functools
 
 import numpy as np
 
@@ -35,7 +36,6 @@ from .error import *
 from .smartredisPy import PyClient
 from .util import Dtypes, init_default
 from .smartredisPy import RedisReplyError as RRE
-#from .smartredisPy import RedisRuntimeError as RRUE
 
 def exception_handler(func):
     """Route exceptions raised in processing SmartRedis API calls to our Python wrappers
@@ -44,6 +44,7 @@ def exception_handler(func):
     :type func: function
     :raises RedisReplyError: if the underlying function execution raised an exception
     """
+    @functools.wraps(exception_handler)
     def redis_api_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -78,9 +79,8 @@ class Client(PyClient):
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
             super().__init__(cluster)
-        except RedisRuntimeError as e:
-            print("Got the runtime error!", str(e))
-            raise RedisRuntimeError(str(e)) from None
+        except RRE as e:
+            raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 
