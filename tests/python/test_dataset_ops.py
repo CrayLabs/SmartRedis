@@ -39,8 +39,6 @@ def test_copy_dataset(use_cluster):
     client = Client(None, use_cluster)
     client.put_dataset(dataset)
 
-    client.copy_dataset("test_dataset_bogus", "test_dataset_copied")
-
     client.copy_dataset("test_dataset_copy", "test_dataset_copied")
 
     # ensure copied dataset is the same after deleting the orig dataset
