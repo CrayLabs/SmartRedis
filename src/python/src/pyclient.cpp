@@ -601,22 +601,30 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     return addresses_info;
 }
 
-py::dict PyClient::get_ai_info()
-{
-    py::dict result;
-    try {
-        parsed_reply_map result_map = _client->get_ai_info();
-        result = py::cast(result_map);
-    }
-    catch(const std::exception& e) {
-        throw SRRuntimeException(e.what());
-    }
-    catch(...) {
-        throw SRRuntimeException("A non-standard exception was encountered "\
-                                "during client get_db_cluster_info execution.");
-    }
+// Execute AI.INFO command
+std::vector<py::dict>
+PyClient::get_ai_info(const std::vector<std::string>& addresses,
+                      const std::string& key,
+                      const bool reset_stat)
 
-    return result;
+{
+    std::vector<py::dict> ai_info;
+    for(size_t i = 0; i < addresses.size(); i++) {
+        try {
+            parsed_reply_map result =
+                _client->get_ai_info(addresses[i], key, reset_stat);
+            py::dict result_dict = py::cast(result);
+            ai_info.push_back(result_dict);
+        }
+        catch(const std::exception& e) {
+            throw SRRuntimeException(e.what());
+        }
+        catch(...) {
+            throw SRRuntimeException("A non-standard exception was encountered "\
+                                     "during client get_ai_info() execution.");
+        }
+    }
+    return ai_info;
 }
 
 // Delete all keys of all existing databases
