@@ -87,14 +87,10 @@ def exception_handler(func):
         # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
         except RRE as cpp_error:
-            from .dataset import Dataset
-            from .client import Client
-            method_name = ""
-            if func.__name__ in Client.__dict__:
-                method_name = "Client."
-            elif func.__name__ in Dataset.__dict__:
-                method_name = "Dataset."
+            # query args[9] (self) for the class name
+            method_name = args[0].__class__.__name__ + "." + func.__name__
+            # get our exception from the global symbol table. The smartredis.error hierarchy exactly
+            # parallels the one built via pybind to enable this
             exception_name = cpp_error.__class__.__name__
-            method_name = method_name + func.__name__
             raise globals()[exception_name](str(cpp_error), method_name) from None
     return redis_api_wrapper
