@@ -29,8 +29,9 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
-from .util import Dtypes
+from .util import Dtypes, exception_handler
 
+from .error import *
 
 class Dataset:
     def __init__(self, name):
@@ -60,6 +61,7 @@ class Dataset:
         new_dataset.set_data(dataset)
         return new_dataset
 
+    @exception_handler
     def get_data(self):
         """Return the PyDataset attribute
 
@@ -69,6 +71,7 @@ class Dataset:
         """
         return self._data
 
+    @exception_handler
     def set_data(self, dataset):
         """Set the PyDataset attribute
 
@@ -80,6 +83,7 @@ class Dataset:
             raise TypeError("The parameter provided must be of type PyDataset.")
         self._data = dataset
 
+    @exception_handler
     def add_tensor(self, name, data):
         """Add a named tensor to this dataset
 
@@ -93,6 +97,7 @@ class Dataset:
         dtype = Dtypes.tensor_from_numpy(data)
         self._data.add_tensor(name, data, dtype)
 
+    @exception_handler
     def get_tensor(self, name):
         """Get a tensor from the Dataset
 
@@ -103,6 +108,7 @@ class Dataset:
         """
         return self._data.get_tensor(name)
 
+    @exception_handler
     def add_meta_scalar(self, name, data):
         """Add metadata scalar field (non-string) with value to the DataSet
 
@@ -125,6 +131,7 @@ class Dataset:
         dtype = Dtypes.metadata_from_numpy(data_as_array)
         self._data.add_meta_scalar(name, data_as_array, dtype)
 
+    @exception_handler
     def add_meta_string(self, name, data):
         """Add metadata string field with value to the DataSet
 
@@ -140,6 +147,7 @@ class Dataset:
         """
         self._data.add_meta_string(name, data)
 
+    @exception_handler
     def get_meta_scalars(self, name):
         """Get the metadata scalar field values from the DataSet
 
@@ -149,6 +157,7 @@ class Dataset:
         """
         return self._data.get_meta_scalars(name)
 
+    @exception_handler
     def get_meta_strings(self, name):
         """Get the metadata scalar field values from the DataSet
 
