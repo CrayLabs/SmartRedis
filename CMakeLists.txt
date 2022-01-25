@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 
 option(BUILD_PYTHON "Build the python module" ON)
 
-set(CMAKE_BUILD_TYPE DEBUG)
+set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 add_link_options(-lpthread)

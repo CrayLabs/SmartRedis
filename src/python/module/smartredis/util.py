@@ -24,7 +24,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
+from .error import *
+import functools
+from .smartredisPy import RedisReplyError as RRE
 class Dtypes:
     @staticmethod
     def tensor_from_numpy(array):
@@ -70,3 +72,29 @@ def init_default(default, init_value, expected_type=None):
     if expected_type is not None and not isinstance(init_value, expected_type):
         raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
     return init_value
+
+def exception_handler(func):
+    """Route exceptions raised in processing SmartRedis API calls to our Python wrappers
+
+    :param func: the API function to decorate with this wrapper
+    :type func: function
+    :raises RedisReplyError: if the underlying function execution raised an exception
+    """
+    @functools.wraps(exception_handler)
+    def redis_api_wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
+        # TypeErrors and ValueErrors we pass straight through
+        except RRE as cpp_error:
+            from .dataset import Dataset
+            from .client import Client
+            method_name = ""
+            if func.__name__ in Client.__dict__:
+                method_name = "Client."
+            elif func.__name__ in Dataset.__dict__:
+                method_name = "Dataset."
+            exception_name = cpp_error.__class__.__name__
+            method_name = method_name + func.__name__
+            raise globals()[exception_name](str(cpp_error), method_name) from None
+    return redis_api_wrapper

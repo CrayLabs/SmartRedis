@@ -32,30 +32,11 @@ import functools
 import numpy as np
 
 from .dataset import Dataset
-from .error import *
 from .smartredisPy import PyClient
-from .util import Dtypes, init_default
+from .util import Dtypes, init_default, exception_handler
+
+from .error import *
 from .smartredisPy import RedisReplyError as RRE
-
-def exception_handler(func):
-    """Route exceptions raised in processing SmartRedis API calls to our Python wrappers
-
-    :param func: the API function to decorate with this wrapper
-    :type func: function
-    :raises RedisReplyError: if the underlying function execution raised an exception
-    """
-    @functools.wraps(exception_handler)
-    def redis_api_wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
-        # TypeErrors and ValueErrors we pass straight through
-        except RRE as cpp_error:
-            exception_name = cpp_error.__class__.__name__
-            func_name = "Client." + func.__name__
-            raise globals()[exception_name](str(cpp_error), func_name) from None
-    return redis_api_wrapper
-
 
 class Client(PyClient):
     def __init__(self, address=None, cluster=False):
