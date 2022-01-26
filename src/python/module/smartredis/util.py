@@ -81,7 +81,7 @@ def exception_handler(func):
     :raises RedisReplyError: if the underlying function execution raised an exception
     """
     @functools.wraps(exception_handler)
-    def redis_api_wrapper(*args, **kwargs):
+    def smartredis_api_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
@@ -93,4 +93,4 @@ def exception_handler(func):
             # parallels the one built via pybind to enable this
             exception_name = cpp_error.__class__.__name__
             raise globals()[exception_name](str(cpp_error), method_name) from None
-    return redis_api_wrapper
+    return smartredis_api_wrapper

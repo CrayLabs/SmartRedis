@@ -118,7 +118,7 @@ py::array PyClient::get_tensor(const std::string& key)
                                   "while executing get_tensor.");
     }
 
-    //Define py::capsule lambda function for destructor
+    // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
             delete reinterpret_cast<TensorBase*>(tensor);
             });
@@ -255,6 +255,10 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     DataSet* data;
     try {
         data = new DataSet(_client->get_dataset(name));
+    }
+    catch (const std::bad_alloc& e) {
+        data = NULL;
+        throw SRBadAllocException("DataSet");
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -423,9 +427,9 @@ void PyClient::run_script(const std::string& key,
 
 py::bytes PyClient::get_model(const std::string& key)
 {
-    std::string model;
     try {
-        model = std::string(_client->get_model(key));
+        std::string model(_client->get_model(key));
+        return py::bytes(model);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -440,7 +444,6 @@ py::bytes PyClient::get_model(const std::string& key)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing get_model.");
     }
-    return py::bytes(model);
 }
 
 void PyClient::set_model(const std::string& key,
@@ -455,8 +458,8 @@ void PyClient::set_model(const std::string& key,
 {
     try {
         _client->set_model(key, model, backend, device,
-                                batch_size, min_batch_size, tag,
-                                inputs, outputs);
+                           batch_size, min_batch_size, tag,
+                           inputs, outputs);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -532,9 +535,8 @@ void PyClient::set_data_source(const std::string& source_id)
 
 bool PyClient::key_exists(const std::string& key)
 {
-    bool result = false;
     try {
-        result = _client->key_exists(key);
+        return _client->key_exists(key);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -549,17 +551,14 @@ bool PyClient::key_exists(const std::string& key)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing key_exists.");
     }
-    return result;
 }
 
 bool PyClient::poll_key(const std::string& key,
                         int poll_frequency_ms,
                         int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_key(key, poll_frequency_ms,
-                                         num_tries);
+        return _client->poll_key(key, poll_frequency_ms, num_tries);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -574,14 +573,12 @@ bool PyClient::poll_key(const std::string& key,
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing poll_key.");
     }
-    return result;
 }
 
 bool PyClient::model_exists(const std::string& name)
 {
-    bool result = false;
     try {
-        result = _client->model_exists(name);
+        return _client->model_exists(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -596,14 +593,12 @@ bool PyClient::model_exists(const std::string& name)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing model_exists.");
     }
-    return result;
 }
 
 bool PyClient::tensor_exists(const std::string& name)
 {
-    bool result = false;
     try {
-        result = _client->tensor_exists(name);
+        return _client->tensor_exists(name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -618,7 +613,6 @@ bool PyClient::tensor_exists(const std::string& name)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing tensor_exists.");
     }
-    return result;
 }
 
 bool PyClient::dataset_exists(const std::string& name)
@@ -630,10 +624,8 @@ bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_tensor(name, poll_frequency_ms,
-                                            num_tries);
+        return _client->poll_tensor(name, poll_frequency_ms, num_tries);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -648,16 +640,14 @@ bool PyClient::poll_tensor(const std::string& name,
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing poll_tensor.");
     }
-    return result;
 }
 
 bool PyClient::poll_dataset(const std::string& name,
                             int poll_frequency_ms,
                             int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_dataset(name, poll_frequency_ms, num_tries);
+        return _client->poll_dataset(name, poll_frequency_ms, num_tries);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -672,17 +662,14 @@ bool PyClient::poll_dataset(const std::string& name,
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing poll_dataset.");
     }
-    return result;
 }
 
 bool PyClient::poll_model(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)
 {
-    bool result = false;
     try {
-        result = _client->poll_model(name, poll_frequency_ms,
-                                           num_tries);
+        return _client->poll_model(name, poll_frequency_ms, num_tries);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -697,7 +684,6 @@ bool PyClient::poll_model(const std::string& name,
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing poll_model.");
     }
-    return result;
 }
 
 void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
@@ -712,60 +698,60 @@ void PyClient::use_model_ensemble_prefix(bool use_prefix)
 
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {
-    std::vector<py::dict> addresses_info;
-    for(size_t i = 0; i < addresses.size(); i++) {
-        try {
+    try {
+        std::vector<py::dict> addresses_info;
+        for (size_t i = 0; i < addresses.size(); i++) {
             parsed_reply_nested_map info_map = _client->get_db_node_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
-        catch (Exception& e) {
-            // exception is already prepared for caller
-            throw e;
-        }
-        catch (std::exception& e) {
-            // should never happen
-            throw SRInternalException(e.what());
-        }
-        catch (...) {
-            // should never happen
-            throw SRInternalException("A non-standard exception was encountered "\
-                                      "while executing get_db_node_info.");
-        }
+        return addresses_info;
     }
-    return addresses_info;
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw e;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                    "while executing get_db_node_info.");
+    }
 }
 
 std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> addresses)
 {
-    std::vector<py::dict> addresses_info;
-    for (size_t i = 0; i < addresses.size(); i++) {
-        try {
+    try {
+        std::vector<py::dict> addresses_info;
+        for (size_t i = 0; i < addresses.size(); i++) {
             parsed_reply_map info_map = _client->get_db_cluster_info(addresses[i]);
             py::dict info_dict = py::cast(info_map);
             addresses_info.push_back(info_dict);
         }
-        catch (Exception& e) {
-            // exception is already prepared for caller
-            throw e;
-        }
-        catch (std::exception& e) {
-            // should never happen
-            throw SRInternalException(e.what());
-        }
-        catch (...) {
-            // should never happen
-            throw SRInternalException("A non-standard exception was encountered "\
-                                      "while executing get_db_cluster_info.");
-        }
+        return addresses_info;
     }
-    return addresses_info;
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw e;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                    "while executing get_db_cluster_info.");
+    }
 }
 
 // Delete all keys of all existing databases
 void PyClient::flush_db(std::vector<std::string> addresses)
 {
-    for(size_t i=0; i<addresses.size(); i++) {
+    for (size_t i = 0; i < addresses.size(); i++) {
         try {
             _client->flush_db(addresses[i]);
         }
@@ -788,10 +774,9 @@ void PyClient::flush_db(std::vector<std::string> addresses)
 // Read the configuration parameters of a running server
 py::dict PyClient::config_get(std::string expression, std::string address)
 {
-    py::dict result;
     try {
         std::unordered_map<std::string,std::string> result_map = _client->config_get(expression, address);
-        result = py::cast(result_map);
+        return py::cast(result_map);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -806,7 +791,6 @@ py::dict PyClient::config_get(std::string expression, std::string address)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing config_get.");
     }
-    return result;
 }
 
 // Reconfigure the server
