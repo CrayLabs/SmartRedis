@@ -612,10 +612,9 @@ bool Client::tensor_exists(const std::string& name)
     return _redis_server->key_exists(get_key);
 }
 
-// Check if the datyaset exists in the database
+// Check if the dataset exists in the database
 bool Client::dataset_exists(const std::string& name)
 {
-    // Same implementation as for tensors; the next line is NOT a type
     std::string key = _build_dataset_ack_key(name, true);
     return _redis_server->hash_field_exists(key, _DATASET_ACK_FIELD);
 }
