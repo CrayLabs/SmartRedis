@@ -75,8 +75,10 @@ class Client(PyClient):
         :type data: np.array
         :raises RedisReplyError: if put fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         if not isinstance(data, np.ndarray):
-            raise TypeError("Argument provided was not a numpy array")
+            raise TypeError(f"Argument provided for data, {type(data)}, is not of type np.ndarray")
         dtype = Dtypes.tensor_from_numpy(data)
         super().put_tensor(key, dtype, data)
 
@@ -90,6 +92,8 @@ class Client(PyClient):
         :return: numpy array
         :rtype: np.array
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         return super().get_tensor(key)
 
     @exception_handler
@@ -100,6 +104,8 @@ class Client(PyClient):
         :type key: str
         :raises RedisReplyError: if deletion fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         super().delete_tensor(key)
 
     @exception_handler
@@ -112,6 +118,10 @@ class Client(PyClient):
         :type dest_key: str
         :raises RedisReplyError: if copy operation fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(dest_key, str):
+            raise TypeError(f"Argument provided for dest_key, {type(dest_key)}, is not of type str")
         super().copy_tensor(key, dest_key)
 
     @exception_handler
@@ -124,6 +134,10 @@ class Client(PyClient):
         :type new_key: str
         :raises RedisReplyError: if rename operation fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(new_key, str):
+            raise TypeError(f"Argument provided for new_key, {type(new_key)}, is not of type str")
         super().rename_tensor(key, new_key)
 
     @exception_handler
@@ -139,7 +153,7 @@ class Client(PyClient):
         :raises RedisReplyError: if connection fails
         """
         if not isinstance(dataset, Dataset):
-            raise TypeError("Argument to put_dataset was not of type Dataset")
+            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type Dataset")
         pybind_dataset = dataset.get_data()
         super().put_dataset(pybind_dataset)
 
@@ -153,6 +167,8 @@ class Client(PyClient):
         :return: Dataset instance
         :rtype: Dataset
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         dataset = super().get_dataset(key)
         python_dataset = Dataset.from_pybind(dataset)
         return python_dataset
@@ -165,6 +181,8 @@ class Client(PyClient):
         :type key: str
         :raises RedisReplyError: if deletion fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         super().delete_dataset(key)
 
     @exception_handler
@@ -177,6 +195,10 @@ class Client(PyClient):
         :type dest_key: str
         :raises RedisReplyError: if copy operation fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(dest_key, str):
+            raise TypeError(f"Argument provided for dest_key, {type(dest_key)}, is not of type str")
         super().copy_dataset(key, dest_key)
 
     @exception_handler
@@ -189,6 +211,10 @@ class Client(PyClient):
         :type new_key: str
         :raises RedisReplyError: if rename operation fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(new_key, str):
+            raise TypeError(f"Argument provided for new_key, {type(new_key)}, is not of type str")
         super().rename_dataset(key, new_key)
 
     @exception_handler
@@ -210,6 +236,12 @@ class Client(PyClient):
         :raises TypeError: if argument was not a callable function
         :raises RedisReplyError: if function failed to set
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(device, str):
+            raise TypeError(f"Argument provided for device, {type(device)}, is not of type str")
+        if not callable(function):
+            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         device = self.__check_device(device)
         if not callable(function):
             raise TypeError("Argument provided was not a callable function")
@@ -231,6 +263,12 @@ class Client(PyClient):
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(script, str):
+            raise TypeError(f"Argument provided for script, {type(script)}, is not of type str")
+        if not isinstance(device, str):
+            raise TypeError(f"Argument provided for device, {type(device)}, is not of type str")
         device = self.__check_device(device)
         super().set_script(key, device, script)
 
@@ -246,6 +284,12 @@ class Client(PyClient):
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(file, str):
+            raise TypeError(f"Argument provided for file, {type(file)}, is not of type str")
+        if not isinstance(device, str):
+            raise TypeError(f"Argument provided for device, {type(device)}, is not of type str")
         device = self.__check_device(device)
         file_path = self.__check_file(file)
         super().set_script_from_file(key, device, file_path)
@@ -260,6 +304,8 @@ class Client(PyClient):
         :return: TorchScript stored at key
         :rtype: str
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         script = super().get_script(key)
         return script
 
@@ -277,6 +323,14 @@ class Client(PyClient):
         :type outputs: list[str]
         :raises RedisReplyError: if script execution fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(fn_name, str):
+            raise TypeError(f"Argument provided for fn_name, {type(fn_name)}, is not of type str")
+        if not isinstance(inputs, list):
+            raise TypeError(f"Argument provided for inputs, {type(inputs)}, is not of type list[str]")
+        if not isinstance(outputs, list):
+            raise TypeError(f"Argument provided for outputs, {type(outputs)}, is not of type list[str]")
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_script(key, fn_name, inputs, outputs)
 
@@ -290,6 +344,8 @@ class Client(PyClient):
         :return: model
         :rtype: bytes
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         model = super().get_model(key)
         return model
 
@@ -328,6 +384,18 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(backend, str):
+            raise TypeError(f"Argument provided for backend, {type(backend)}, is not of type str")
+        if not isinstance(device, str):
+            raise TypeError(f"Argument provided for device, {type(device)}, is not of type str")
+        if not isinstance(batch_size, int):
+            raise TypeError(f"Argument provided for batch_size, {type(batch_size)}, is not of type int")
+        if not isinstance(min_batch_size, int):
+            raise TypeError(f"Argument provided for min_batch_size, {type(min_batch_size)}, is not of type int")
+        if not isinstance(tag, str):
+            raise TypeError(f"Argument provided for tag, {type(tag)}, is not of type str")
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
@@ -378,6 +446,20 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(model_file, str):
+            raise TypeError(f"Argument provided for model_file, {type(model_file)}, is not of type str")
+        if not isinstance(backend, str):
+            raise TypeError(f"Argument provided for backend, {type(backend)}, is not of type str")
+        if not isinstance(device, str):
+            raise TypeError(f"Argument provided for device, {type(device)}, is not of type str")
+        if not isinstance(batch_size, int):
+            raise TypeError(f"Argument provided for batch_size, {type(batch_size)}, is not of type int")
+        if not isinstance(min_batch_size, int):
+            raise TypeError(f"Argument provided for min_batch_size, {type(min_batch_size)}, is not of type int")
+        if not isinstance(tag, str):
+            raise TypeError(f"Argument provided for tag, {type(tag)}, is not of type str")
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
@@ -406,6 +488,8 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model execution fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_model(key, inputs, outputs)
 
@@ -422,6 +506,8 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return super().tensor_exists(name)
 
     @exception_handler
@@ -437,6 +523,8 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return super().dataset_exists(name)
 
     @exception_handler
@@ -452,6 +540,8 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return super().model_exists(name)
 
     @exception_handler
@@ -464,6 +554,8 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `key_exists` fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
         return super().key_exists(key)
 
     @exception_handler
@@ -487,6 +579,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if key poll fails
         """
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(poll_frequency_ms, int):
+            raise TypeError(f"Argument provided for poll_frequency_ms, {type(poll_frequency_ms)}, is not of type int")
+        if not isinstance(num_tries, int):
+            raise TypeError(f"Argument provided for num_tries, {type(num_tries)}, is not of type int")
         return super().poll_key(key, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -511,6 +609,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_tensor` fails
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        if not isinstance(poll_frequency_ms, int):
+            raise TypeError(f"Argument provided for poll_frequency_ms, {type(poll_frequency_ms)}, is not of type int")
+        if not isinstance(num_tries, int):
+            raise TypeError(f"Argument provided for num_tries, {type(num_tries)}, is not of type int")
         return super().poll_tensor(name, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -535,6 +639,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_dataset` fails
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        if not isinstance(poll_frequency_ms, int):
+            raise TypeError(f"Argument provided for poll_frequency_ms, {type(poll_frequency_ms)}, is not of type int")
+        if not isinstance(num_tries, int):
+            raise TypeError(f"Argument provided for num_tries, {type(num_tries)}, is not of type int")
         return super().poll_dataset(name, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -559,6 +669,12 @@ class Client(PyClient):
         :rtype: bool
         :raises RedisReplyError: if `poll_model` fails
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        if not isinstance(poll_frequency_ms, int):
+            raise TypeError(f"Argument provided for poll_frequency_ms, {type(poll_frequency_ms)}, is not of type int")
+        if not isinstance(num_tries, int):
+            raise TypeError(f"Argument provided for num_tries, {type(num_tries)}, is not of type int")
         return super().poll_model(name, poll_frequency_ms, num_tries)
 
     @exception_handler
@@ -569,6 +685,8 @@ class Client(PyClient):
         :type source_id: str
         :raises RedisReplyError: if set data
         """
+        if not isinstance(source_id, str):
+            raise TypeError(f"Argument provided for source_id, {type(source_id)}, is not of type str")
         return super().set_data_source(source_id)
 
     @exception_handler
@@ -586,6 +704,8 @@ class Client(PyClient):
                            available.
         :type use_prefix: bool
         """
+        if not isinstance(use_prefix, bool):
+            raise TypeError(f"Argument provided for use_prefix, {type(use_prefix)}, is not of type bool")
         return super().use_model_ensemble_prefix(use_prefix)
 
     @exception_handler
@@ -603,6 +723,8 @@ class Client(PyClient):
                            available.
         :type use_prefix: bool
         """
+        if not isinstance(use_prefix, bool):
+            raise TypeError(f"Argument provided for use_prefix, {type(use_prefix)}, is not of type bool")
         return super().use_tensor_ensemble_prefix(use_prefix)
 
     @exception_handler
@@ -625,6 +747,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(addresses, list):
+            raise TypeError(f"Argument provided for addresses, {type(addresses)}, is not of type list[dict]")
         return super().get_db_node_info(addresses)
 
     @exception_handler
@@ -650,6 +774,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(addresses, list):
+            raise TypeError(f"Argument provided for addresses, {type(addresses)}, is not of type list[dict]")
         return super().get_db_cluster_info(addresses)
 
     @exception_handler
@@ -669,6 +795,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(addresses, list):
+            raise TypeError(f"Argument provided for addresses, {type(addresses)}, is not of type list[str]")
         super().flush_db(addresses)
 
     @exception_handler
@@ -698,6 +826,10 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(expression, str):
+            raise TypeError(f"Argument provided for expression, {type(expression)}, is not of type str")
+        if not isinstance(address, str):
+            raise TypeError(f"Argument provided for address, {type(address)}, is not of type str")
         return super().config_get(expression, address)
 
     @exception_handler
@@ -727,6 +859,10 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(value, str):
+            raise TypeError(f"Argument provided for value, {type(value)}, is not of type str")
+        if not isinstance(address, str):
+            raise TypeError(f"Argument provided for address, {type(address)}, is not of type str")
         super().config_set(config_param, value, address)
 
     @exception_handler
@@ -748,6 +884,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(addresses, list):
+            raise TypeError(f"Argument provided for addresses, {type(addresses)}, is not of type list[str]")
         super().save(addresses)
 
     # ---- helpers --------------------------------------------------------
