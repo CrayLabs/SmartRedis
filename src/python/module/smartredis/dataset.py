@@ -54,9 +54,8 @@ class Dataset:
                  the PyDataset
         :rtype: Dataset
         """
-
         if not isinstance(dataset, PyDataset):
-            raise TypeError("Argument provided must be of type PyDataset.")
+            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type PyDataset")
         new_dataset = Dataset(dataset.get_name())
         new_dataset.set_data(dataset)
         return new_dataset
@@ -78,9 +77,8 @@ class Dataset:
         :param dataset: The PyDataset object
         :type dataset: PyDataset
         """
-
         if not isinstance(dataset, PyDataset):
-            raise TypeError("The parameter provided must be of type PyDataset.")
+            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type PyDataset")
         self._data = dataset
 
     @exception_handler
@@ -92,8 +90,10 @@ class Dataset:
         :param data: tensor data
         :type data: np.array
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         if not isinstance(data, np.ndarray):
-            raise TypeError("Argument provided was not a numpy array")
+            raise TypeError(f"Argument provided for data, {type(data)}, is not of type np.ndarray")
         dtype = Dtypes.tensor_from_numpy(data)
         self._data.add_tensor(name, data, dtype)
 
@@ -106,6 +106,8 @@ class Dataset:
         :return: a numpy array of tensor data
         :rtype: np.array
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return self._data.get_tensor(name)
 
     @exception_handler
@@ -122,6 +124,8 @@ class Dataset:
         :param data: a scalar
         :type data: int | float
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
 
         # We want to support numpy datatypes and avoid pybind ones
         data_as_array = np.asarray(data)
@@ -145,6 +149,10 @@ class Dataset:
         :param data: The string to add to the field
         :type data: str
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        if not isinstance(data, str):
+            raise TypeError(f"Argument provided for data, {type(data)}, is not of type str")
         self._data.add_meta_string(name, data)
 
     @exception_handler
@@ -155,6 +163,8 @@ class Dataset:
                      field in the DataSet
         :type name: str
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return self._data.get_meta_scalars(name)
 
     @exception_handler
@@ -165,4 +175,6 @@ class Dataset:
                         field in the DataSet
         :type name: str
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         return self._data.get_meta_strings(name)
