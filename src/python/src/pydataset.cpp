@@ -80,7 +80,7 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
         // get dims
         std::vector<size_t> dims(buffer.ndim);
-        for (size_t i=0; i < buffer.shape.size(); i++) {
+        for (size_t i = 0; i < buffer.shape.size(); i++) {
             dims[i] = (size_t) buffer.shape[i];
         }
 
@@ -104,7 +104,7 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
 py::array PyDataset::get_tensor(const std::string& name)
 {
-    TensorBase* tensor;
+    TensorBase* tensor = NULL;
     try {
         tensor = _dataset->_get_tensorbase_obj(name);
     }
@@ -124,8 +124,8 @@ py::array PyDataset::get_tensor(const std::string& name)
 
     // Define py::capsule lambda function for destructor
     py::capsule free_when_done((void*)tensor, [](void *tensor) {
-            delete reinterpret_cast<TensorBase*>(tensor);
-            });
+        delete reinterpret_cast<TensorBase*>(tensor);
+    });
 
     // detect data type
     switch (tensor->type()) {
