@@ -808,10 +808,10 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
         std::string map_key = reply[i].str();
         std::string value;
         if(reply[i+1].redis_reply_type() == "REDIS_REPLY_STRING")
-            value = reply[i+1].str();
-        else if (reply[i+1].redis_reply_type() == "REDIS_REPLY_INTEGER")
+            value = reply[i + 1].str();
+        else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_INTEGER")
             value = std::to_string(reply[i+1].integer());
-        else if (reply[i+1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
+        else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
             value = std::to_string(reply[i+1].dbl());
         else
             throw SRInternalException("The AI.INFO field " + map_key +
