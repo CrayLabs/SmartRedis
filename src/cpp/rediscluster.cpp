@@ -581,8 +581,8 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     // Determine the prefix we need for the model or script
     if (!is_addressable(host, port)) {
-        throw SRInternalException("The provided host and port does "\
-                                  "not match a cluster shard address.");
+        throw SRRuntimeException("The provided host and port does "\
+                                 "not match a cluster shard address.");
     }
 
     std::string host_port = host + ":" + std::to_string(port);
@@ -590,7 +590,7 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     std::string prefixed_key = "{" + db_prefix + "}." + key;
 
-    //Build the Command
+    // Build the Command
     cmd.set_exec_address_port(host, port);
     cmd.add_field("AI.INFO");
     cmd.add_field(prefixed_key);
