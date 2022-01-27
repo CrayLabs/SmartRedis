@@ -38,8 +38,8 @@ int main(int argc, char* argv[]) {
 
     // Put the tensor into the database that was loaded from file
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                        SmartRedis::TensorType::flt,
-                        SmartRedis::MemoryLayout::contiguous);
+                      SRTensorTypeFloat, SRMemLayoutContiguous);
+
 
     // Run the preprocessing script on the input tensor
     client.run_script("mnist_script", "pre_process", {in_key}, {script_out_key});
@@ -50,8 +50,7 @@ int main(int argc, char* argv[]) {
     // Retrieve the output of the model
     std::vector<float> result(10, 0);
     client.unpack_tensor(out_key, result.data(), {10},
-                        SmartRedis::TensorType::flt,
-                        SmartRedis::MemoryLayout::contiguous);
+                         SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Print out the results of the model evaluation
     for(size_t i=0; i<result.size(); i++) {

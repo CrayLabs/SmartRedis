@@ -27,8 +27,7 @@ void run_mnist(const std::string& model_name,
 
     // Put the image tensor on the database
     client.put_tensor(in_key, img.data(), {1,1,28,28},
-                      SmartRedis::TensorType::flt,
-                      SmartRedis::MemoryLayout::contiguous);
+                      SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Run the preprocessing script
     client.run_script(script_name, "pre_process",
@@ -40,8 +39,7 @@ void run_mnist(const std::string& model_name,
     // Get the result of the model
     std::vector<float> result(1*10);
     client.unpack_tensor(out_key, result.data(), {10},
-                         SmartRedis::TensorType::flt,
-                         SmartRedis::MemoryLayout::contiguous);
+                      SRTensorTypeFloat, SRMemLayoutContiguous);
 
     // Print out the results of the model
     for(size_t i=0; i<result.size(); i++)
