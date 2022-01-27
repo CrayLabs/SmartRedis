@@ -800,19 +800,17 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
         throw SRInternalException("The AI.INFO reply structure has an "\
                                   "unexpected format");
 
-    reply.print_reply_structure();
-
     // Parse reply
     parsed_reply_map reply_map;
     for (size_t i = 0; i < reply.n_elements(); i += 2) {
         std::string map_key = reply[i].str();
         std::string value;
-        if(reply[i+1].redis_reply_type() == "REDIS_REPLY_STRING")
+        if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_STRING")
             value = reply[i + 1].str();
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_INTEGER")
-            value = std::to_string(reply[i+1].integer());
+            value = std::to_string(reply[i + 1].integer());
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
-            value = std::to_string(reply[i+1].dbl());
+            value = std::to_string(reply[i + 1].dbl());
         else
             throw SRInternalException("The AI.INFO field " + map_key +
                                       " has an unexpected type.");
