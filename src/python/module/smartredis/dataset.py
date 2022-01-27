@@ -40,6 +40,8 @@ class Dataset:
         :param name: name of dataset
         :type name: str
         """
+        if not isinstance(name, str):
+            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
         self._data = PyDataset(name)
 
     @staticmethod

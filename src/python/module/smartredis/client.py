@@ -859,6 +859,8 @@ class Client(PyClient):
                 CLUSTER SLOTS commands will lead to RedisReplyError
                 being thrown.
         """
+        if not isinstance(config_param, str):
+            raise TypeError(f"Argument provided for config_param, {type(config_param)}, is not of type str")
         if not isinstance(value, str):
             raise TypeError(f"Argument provided for value, {type(value)}, is not of type str")
         if not isinstance(address, str):

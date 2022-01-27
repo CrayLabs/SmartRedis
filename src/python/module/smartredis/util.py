@@ -87,7 +87,7 @@ def exception_handler(func):
         # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
         except RRE as cpp_error:
-            # query args[9] (self) for the class name
+            # query args[0] (i.e. 'self') for the class name
             method_name = args[0].__class__.__name__ + "." + func.__name__
             # get our exception from the global symbol table. The smartredis.error hierarchy exactly
             # parallels the one built via pybind to enable this

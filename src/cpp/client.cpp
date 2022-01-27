@@ -79,8 +79,8 @@ DataSet Client::get_dataset(const std::string& name)
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
-        throw SRRuntimeException("The requested DataSet " +
-                                 name + " does not exist.");
+        throw SRKeyException("The requested DataSet, \"" +
+                             name + "\", does not exist.");
     }
 
     DataSet dataset(name);
@@ -119,8 +119,8 @@ void Client::copy_dataset(const std::string& src_name,
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
-        throw SRRuntimeException("The requested DataSet " +
-                                 src_name + " does not exist.");
+        throw SRKeyException("The requested DataSet " +
+                             src_name + " does not exist.");
     }
     DataSet dataset(src_name);
     _unpack_dataset_metadata(dataset, reply);
