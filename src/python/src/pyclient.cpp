@@ -709,7 +709,7 @@ std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addres
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -735,7 +735,7 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     }
     catch (Exception& e) {
         // exception is already prepared for caller
-        throw e;
+        throw;
     }
     catch (std::exception& e) {
         // should never happen
@@ -744,7 +744,40 @@ std::vector<py::dict> PyClient::get_db_cluster_info(std::vector<std::string> add
     catch (...) {
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
-                                    "while executing get_db_cluster_info.");
+                                  "while executing get_db_cluster_info.");
+    }
+}
+
+// Execute AI.INFO command
+std::vector<py::dict>
+PyClient::get_ai_info(const std::vector<std::string>& addresses,
+                      const std::string& key,
+                      const bool reset_stat)
+
+{
+    try {
+        std::vector<py::dict> ai_info;
+        for(size_t i = 0; i < addresses.size(); i++) {
+                parsed_reply_map result =
+                    _client->get_ai_info(addresses[i], key, reset_stat);
+                py::dict result_dict = py::cast(result);
+                ai_info.push_back(result_dict);
+
+        }
+        return ai_info;
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "during client get_ai_info() execution.");
     }
 }
 
@@ -757,7 +790,7 @@ void PyClient::flush_db(std::vector<std::string> addresses)
         }
         catch (Exception& e) {
             // exception is already prepared for caller
-            throw e;
+            throw;
         }
         catch (std::exception& e) {
             // should never happen
@@ -822,7 +855,7 @@ void PyClient::save(std::vector<std::string> addresses)
         }
         catch (Exception& e) {
             // exception is already prepared for caller
-            throw e;
+            throw;
         }
         catch (std::exception& e) {
             // should never happen

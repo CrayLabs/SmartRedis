@@ -436,6 +436,18 @@ def test_bad_type_get_db_cluster_info(use_cluster):
         c.get_db_cluster_info("not a list")
 
 
+def test_bad_type_get_ai_info(use_cluster):
+    c = Client(None, use_cluster)
+    address = ["list", "of", "str"]
+    key = "ai.info.key"
+    with pytest.raises(TypeError):
+        c.get_ai_info("not a list", key)
+    with pytest.raises(TypeError):
+        c.get_ai_info(address, 42)
+    with pytest.raises(TypeError):
+        c.get_ai_info(address, key, "not a boolean")
+
+
 def test_bad_type_flush_db(use_cluster):
     c = Client(None, use_cluster)
     with pytest.raises(TypeError):

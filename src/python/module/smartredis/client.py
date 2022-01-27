@@ -779,6 +779,32 @@ class Client(PyClient):
         return super().get_db_cluster_info(addresses)
 
     @exception_handler
+    def get_ai_info(self, address, key, reset_stat=False):
+        """Returns AI.INFO command reply information for the
+        script or model key at the provided addresses.
+        :param addresses: The addresses of the database nodes
+        :type address: list[str]
+        :param key: The key associated with the model or script
+        :type key: str
+        :param reset_stat: Boolean indicating if the statistics
+                           for the model or script should be
+                           reset.
+        :type reset_stat: bool
+        :returns: A list of dictionaries with each entry in the
+                  list corresponding to an address reply
+        :rtype: list[dict]
+        :raises RedisReplyError: if there is an error
+                in command execution or parsing the command reply.
+        """
+        if not isinstance(address, list):
+            raise TypeError(f"Argument provided for address, {type(address)}, is not of type list[str]")
+        if not isinstance(key, str):
+            raise TypeError(f"Argument provided for key, {type(key)}, is not of type str")
+        if not isinstance(reset_stat, bool):
+            raise TypeError(f"Argument provided for reset_stat, {type(reset_stat)}, is not of type bool")
+        return super().get_ai_info(address, key, reset_stat)
+
+    @exception_handler
     def flush_db(self, addresses):
         """Removes all keys from a specified db node.
 
