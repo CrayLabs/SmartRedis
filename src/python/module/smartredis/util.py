@@ -26,7 +26,7 @@
 
 from .error import *
 import functools
-from .smartredisPy import RedisReplyError as RRE
+from .smartredisPy import RedisReplyError as PybindRedisReplyError
 class Dtypes:
     @staticmethod
     def tensor_from_numpy(array):
@@ -86,7 +86,7 @@ def exception_handler(func):
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
-        except RRE as cpp_error:
+        except PybindRedisReplyError as cpp_error:
             # query args[0] (i.e. 'self') for the class name
             method_name = args[0].__class__.__name__ + "." + func.__name__
             # get our exception from the global symbol table. The smartredis.error hierarchy exactly
@@ -94,3 +94,17 @@ def exception_handler(func):
             exception_name = cpp_error.__class__.__name__
             raise globals()[exception_name](str(cpp_error), method_name) from None
     return smartredis_api_wrapper
+
+def typecheck(arg, name, _type):
+    """Validate that an argument is of a given type
+
+    :param arg: the variable to be type tested
+    :type arg: variable, expected to match _type
+    :param name: the name of the variable
+    :type name: str
+    :param _type: the expected type for the variable
+    :type _type: a Python type
+    :raises TypeError exception if arg is not of type _type
+    """
+    if not isinstance(arg, _type):
+        raise TypeError(f"Argument {name} is of type {type(arg)}, not {_type}")

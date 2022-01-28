@@ -29,7 +29,7 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
-from .util import Dtypes, exception_handler
+from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
@@ -40,8 +40,7 @@ class Dataset:
         :param name: name of dataset
         :type name: str
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        typecheck(name, "name", str)
         self._data = PyDataset(name)
 
     @staticmethod
@@ -56,8 +55,7 @@ class Dataset:
                  the PyDataset
         :rtype: Dataset
         """
-        if not isinstance(dataset, PyDataset):
-            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type PyDataset")
+        typecheck(dataset, "dataset", PyDataset)
         new_dataset = Dataset(dataset.get_name())
         new_dataset.set_data(dataset)
         return new_dataset
@@ -79,8 +77,7 @@ class Dataset:
         :param dataset: The PyDataset object
         :type dataset: PyDataset
         """
-        if not isinstance(dataset, PyDataset):
-            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type PyDataset")
+        typecheck(dataset, "dataset", PyDataset)
         self._data = dataset
 
     @exception_handler
@@ -92,10 +89,8 @@ class Dataset:
         :param data: tensor data
         :type data: np.array
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
-        if not isinstance(data, np.ndarray):
-            raise TypeError(f"Argument provided for data, {type(data)}, is not of type np.ndarray")
+        typecheck(name, "name", str)
+        typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
         self._data.add_tensor(name, data, dtype)
 
@@ -108,8 +103,7 @@ class Dataset:
         :return: a numpy array of tensor data
         :rtype: np.array
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        typecheck(name, "name", str)
         return self._data.get_tensor(name)
 
     @exception_handler
@@ -126,8 +120,7 @@ class Dataset:
         :param data: a scalar
         :type data: int | float
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        typecheck(name, "name", str)
 
         # We want to support numpy datatypes and avoid pybind ones
         data_as_array = np.asarray(data)
@@ -151,10 +144,8 @@ class Dataset:
         :param data: The string to add to the field
         :type data: str
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
-        if not isinstance(data, str):
-            raise TypeError(f"Argument provided for data, {type(data)}, is not of type str")
+        typecheck(name, "name", str)
+        typecheck(data, "data", str)
         self._data.add_meta_string(name, data)
 
     @exception_handler
@@ -165,8 +156,7 @@ class Dataset:
                      field in the DataSet
         :type name: str
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        typecheck(name, "name", str)
         return self._data.get_meta_scalars(name)
 
     @exception_handler
@@ -177,6 +167,5 @@ class Dataset:
                         field in the DataSet
         :type name: str
         """
-        if not isinstance(name, str):
-            raise TypeError(f"Argument provided for name, {type(name)}, is not of type str")
+        typecheck(name, "name", str)
         return self._data.get_meta_strings(name)
