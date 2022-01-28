@@ -6,10 +6,7 @@ if [[ -f ./catch/single_include/catch2/catch.hpp ]]; then
 else
     echo "Installing Catch"
     if [[ ! -d "./catch" ]]; then
-        git clone https://github.com/catchorg/Catch2.git catch
-        cd catch
-        git checkout tags/v2.13.6
-        cd ..
+        git clone https://github.com/catchorg/Catch2.git catch --branch v2.13.6 --depth=1
     else
         echo "Catch downloaded"
     fi
