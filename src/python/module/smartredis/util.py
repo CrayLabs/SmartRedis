@@ -74,22 +74,25 @@ def init_default(default, init_value, expected_type=None):
     return init_value
 
 def exception_handler(func):
-    """Route exceptions raised in processing SmartRedis API calls to our Python wrappers
+    """Route exceptions raised in processing SmartRedis API calls to our
+    Python wrappers
 
     :param func: the API function to decorate with this wrapper
     :type func: function
-    :raises RedisReplyError: if the underlying function execution raised an exception
+    :raises RedisReplyError: if the wrapped function raised an exception
     """
     @functools.wraps(exception_handler)
     def smartredis_api_wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        # Catch RedisReplyErrors for additional processing (convert from pyerror to our error module).
+        # Catch RedisReplyErrors for additional processing (convert from
+        # pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
         except PybindRedisReplyError as cpp_error:
             # query args[0] (i.e. 'self') for the class name
             method_name = args[0].__class__.__name__ + "." + func.__name__
-            # get our exception from the global symbol table. The smartredis.error hierarchy exactly
+            # Get our exception from the global symbol table.
+            # The smartredis.error hierarchy exactly
             # parallels the one built via pybind to enable this
             exception_name = cpp_error.__class__.__name__
             raise globals()[exception_name](str(cpp_error), method_name) from None

@@ -1214,9 +1214,9 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                                         dims, type, SRMemLayoutContiguous);
                 break;
             default :
-                throw SRTypeException("An invalid TensorType was provided to "\
-                                      "Client::_get_tensorbase_obj(). "\
-                                      "The tensor could not be retrieved.");
+                throw SRInternalException("The database provided an invalid "\
+                                          "TensorType to Client::_get_tensorbase_obj(). "\
+                                          "The tensor could not be retrieved.");
                 break;
         }
     }

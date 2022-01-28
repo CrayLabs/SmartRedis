@@ -268,7 +268,8 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
             return py::array(length, data, py::none());
         }
         case SRMetadataTypeString: {
-            throw SRRuntimeException("MetaData is of type string. Use get_meta_strings method.");
+            throw SRRuntimeException("MetaData is of type string. "\
+                                     "Use get_meta_strings method.");
         }
         default :
             throw SRRuntimeException("Could not infer type");
