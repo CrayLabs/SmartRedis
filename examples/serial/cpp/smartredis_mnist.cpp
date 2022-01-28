@@ -1,7 +1,8 @@
 #include "client.h"
 
 void run_mnist(const std::string& model_name,
-               const std::string& script_name)
+               const std::string& script_name,
+               SmartRedis::Client& client)
 {
     // Initialize a vector that will hold input image tensor
     size_t n_values = 1*1*28*28;
@@ -22,9 +23,6 @@ void run_mnist(const std::string& model_name,
     std::string script_out_key = "mnist_processed_input";
     std::string out_key = "mnist_output";
 
-    // Initialize a Client object
-    SmartRedis::Client client(false);
-
     // Put the image tensor on the database
     client.put_tensor(in_key, img.data(), {1,1,28,28},
                       SRTensorTypeFloat, SRMemLayoutContiguous);
@@ -44,8 +42,6 @@ void run_mnist(const std::string& model_name,
     // Print out the results of the model
     for(size_t i=0; i<result.size(); i++)
         std::cout<<"Rank 0: Result["<<i<<"] = "<<result[i]<<std::endl;
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
@@ -53,7 +49,8 @@ int main(int argc, char* argv[]) {
     // Initialize a client for setting the model and script.
     // In general, Client objects should be reused, but for this
     // small example, Client objects are not reused.
-    SmartRedis::Client client(false);
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode);
 
     // Build model key, file name, and then set model
     // from file using client API
@@ -75,7 +72,7 @@ int main(int argc, char* argv[]) {
     std::string_view model = client.get_model(model_key);
     std::string_view script = client.get_script(script_key);
 
-    run_mnist("mnist_model", "mnist_script");
+    run_mnist("mnist_model", "mnist_script", client);
 
     std::cout<<"Finished SmartRedis MNIST example."<<std::endl;
 

@@ -27,7 +27,8 @@ int main(int argc, char* argv[]) {
     int64_t meta_scalar_3 = 3;
 
     // Initialize a SmartRedis client
-    SmartRedis::Client client(false);
+    bool cluster_mode = true; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode);
 
     // Create a DataSet
     SmartRedis::DataSet dataset("example_dataset");
