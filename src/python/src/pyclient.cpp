@@ -757,7 +757,7 @@ PyClient::get_ai_info(const std::vector<std::string>& addresses,
 {
     try {
         std::vector<py::dict> ai_info;
-        for(size_t i = 0; i < addresses.size(); i++) {
+        for (size_t i = 0; i < addresses.size(); i++) {
                 parsed_reply_map result =
                     _client->get_ai_info(addresses[i], key, reset_stat);
                 py::dict result_dict = py::cast(result);

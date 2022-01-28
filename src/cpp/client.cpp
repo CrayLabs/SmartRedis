@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ctype.h>
 #include "client.h"
 #include "srexception.h"
 
@@ -805,8 +806,16 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
     for (size_t i = 0; i < reply.n_elements(); i += 2) {
         std::string map_key = reply[i].str();
         std::string value;
-        if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_STRING")
-            value = reply[i + 1].str();
+        if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_STRING") {
+            // Strip off a prefix if present. Form is {xx}.restofstring
+            value = std::string(reply[i + 1].str(), reply[i + 1].str_len());
+            if (_redis_cluster != NULL && value.size() > 0 && value[0] == '{') {
+                size_t pos = value.find_first_of('}');
+                if (pos != std::string::npos && pos + 2 < value.size() && value[pos + 1] == '.') {
+                    value = value.substr(pos + 2, value.size() - (pos + 1));
+                }
+            }
+        }
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_INTEGER")
             value = std::to_string(reply[i + 1].integer());
         else if (reply[i + 1].redis_reply_type() == "REDIS_REPLY_DOUBLE")
@@ -816,6 +825,7 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
                                       " has an unexpected type.");
         reply_map[map_key] = value;
     }
+    printf("Leaving Client::get_ai_info()\n");
     return reply_map;
 }
 
