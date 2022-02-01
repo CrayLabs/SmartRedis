@@ -445,14 +445,29 @@ inline CommandReply Redis::_run(const Command& cmd)
             // Exception is already prepared, just propagate it
             throw;
         }
-        catch (sw::redis::Error &e) {
+        catch (sw::redis::IoError &e) {
             // For an error from Redis, retry unless we're out of chances
             if (i == _command_attempts) {
                 throw SRDatabaseException(
-                    std::string("Redis error when executing commend: ") +
+                    std::string("Redis IO error when executing commend: ") +
                     e.what());
             }
             // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing commend: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing commend: ") +
+                e.what());
         }
         catch (std::exception& e) {
             // Should never hit this, so bail immediately if we do
