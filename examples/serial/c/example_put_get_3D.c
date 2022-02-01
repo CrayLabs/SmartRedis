@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
   dims[2] = 3;
 
   void* client = NULL;
-    bool cluster_mode = true; // Set to false if not using a clustered database
+  bool cluster_mode = true; // Set to false if not using a clustered database
   if (SRNoError != SmartRedisCClient(cluster_mode, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
