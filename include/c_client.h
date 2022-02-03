@@ -265,7 +265,10 @@ SRError copy_tensor(void* c_client,
 *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
 *   \param backend_length The length of the backend string,
 *                        excluding null terminating character
-*   \param device The name of the device for execution (e.g. CPU or GPU)
+*   \param device The name of the device for execution. May be either
+*                 CPU or GPU. If multiple GPUs are present, a specific
+*                 GPU can be targeted by appending its zero-based
+*                 index, i.e. "GPU:1"
 *   \param device_length The length of the device string,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
@@ -315,7 +318,10 @@ SRError set_model_from_file(void* c_client,
 *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
 *   \param backend_length The length of the backend string,
 *                        excluding null terminating character
-*   \param device The name of the device for execution (e.g. CPU or GPU)
+*   \param device The name of the device for execution. May be either
+*                 CPU or GPU. If multiple GPUs are present, a specific
+*                 GPU can be targeted by appending its zero-based
+*                 index, i.e. "GPU:1"
 *   \param device_length The length of the device string,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
@@ -377,7 +383,10 @@ SRError get_model(void* c_client,
 *   \param key The key to associate with the script
 *   \param key_length The length of the key string,
 *                     excluding null terminating character
-*   \param device The name of the device for execution e.g. CPU or GPU)
+*   \param device The name of the device for execution. May be either
+*                 CPU or GPU. If multiple GPUs are present, a specific
+*                 GPU can be targeted by appending its zero-based
+*                 index, i.e. "GPU:1"
 *   \param device_length The length of the device name string,
 *                        excluding null terminating character
 *   \param script_file The source file for the script
@@ -398,7 +407,10 @@ SRError set_script_from_file(void* c_client,
 *   \param key The key to associate with the script
 *   \param key_length The length of the key string,
 *                     excluding null terminating character
-*   \param device The name of the device for execution (e.g. CPU or GPU)
+*   \param device The name of the device for execution. May be either
+*                 CPU or GPU. If multiple GPUs are present, a specific
+*                 GPU can be targeted by appending its zero-based
+*                 index, i.e. "GPU:1"
 *   \param device_length The length of the device name string,
 *                        excluding null terminating character
 *   \param script The script as a string buffer

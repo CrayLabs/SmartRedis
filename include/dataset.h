@@ -28,9 +28,7 @@
 
 #ifndef SMARTREDIS_DATASET_H
 #define SMARTREDIS_DATASET_H
-#ifndef __cplusplus
-#error C Clients should include "c_dataset.h"
-#else
+#ifdef __cplusplus
 #include "stdlib.h"
 #include <string>
 #include <vector>

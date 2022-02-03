@@ -71,7 +71,7 @@ class Client(PyClient):
 
         :param key: key for tensor for be stored at
         :type key: str
-        :param data: numpy array
+        :param data: numpy array of tensor data
         :type data: np.array
         :raises RedisReplyError: if put fails
         """
@@ -87,7 +87,7 @@ class Client(PyClient):
         :param key: key to get tensor from
         :type key: str
         :raises RedisReplyError: if get fails
-        :return: numpy array
+        :return: numpy array of tensor data
         :rtype: np.array
         """
         typecheck(key, "key", str)
@@ -108,30 +108,28 @@ class Client(PyClient):
     def copy_tensor(self, key, dest_key):
         """Copy a tensor at one key to another key
 
-        :param key: key of tensor to be copied
+        :param key: source key of tensor to be copied
         :type key: str
         :param dest_key: key to store new copy at
         :type dest_key: str
         :raises RedisReplyError: if copy operation fails
         """
         typecheck(key, "key", str)
-        if not isinstance(dest_key, str):
-            raise TypeError(f"Argument provided for dest_key, {type(dest_key)}, is not of type str")
+        typecheck(dest_key, "dest_key", str)
         super().copy_tensor(key, dest_key)
 
     @exception_handler
     def rename_tensor(self, key, new_key):
         """Rename a tensor in the database
 
-        :param key: key of tensor to be renamed
+        :param key: original key of tensor to be renamed
         :type key: str
         :param new_key: new name for the tensor
         :type new_key: str
         :raises RedisReplyError: if rename operation fails
         """
         typecheck(key, "key", str)
-        if not isinstance(new_key, str):
-            raise TypeError(f"Argument provided for new_key, {type(new_key)}, is not of type str")
+        typecheck(new_key, "new_key", str)
         super().rename_tensor(key, new_key)
 
     @exception_handler
@@ -144,10 +142,9 @@ class Client(PyClient):
         :param dataset: a Dataset instance
         :type dataset: Dataset
         :raises TypeError: if argument is not a Dataset
-        :raises RedisReplyError: if connection fails
+        :raises RedisReplyError: if update fails
         """
-        if not isinstance(dataset, Dataset):
-            raise TypeError(f"Argument provided for dataset, {type(dataset)}, is not of type Dataset")
+        typecheck(dataset, "dataset", Dataset)
         pybind_dataset = dataset.get_data()
         super().put_dataset(pybind_dataset)
 
@@ -157,7 +154,7 @@ class Client(PyClient):
 
         :param key: key the dataset is stored under
         :type key: str
-        :raises RedisConnectionError: if connection fails
+        :raises RedisReplyError: if retrieval fails
         :return: Dataset instance
         :rtype: Dataset
         """
@@ -181,7 +178,7 @@ class Client(PyClient):
     def copy_dataset(self, key, dest_key):
         """Copy a dataset from one key to another
 
-        :param key: name of dataset to be copied
+        :param key: source name for dataset to be copied
         :type key: str
         :param dest_key: new name of dataset
         :type dest_key: str
@@ -195,7 +192,7 @@ class Client(PyClient):
     def rename_dataset(self, key, new_key):
         """Rename a dataset in the database
 
-        :param key: name of the dataset to be renamed
+        :param key: original name of the dataset to be renamed
         :type key: str
         :param new_key: new name for the dataset
         :type new_key: str
@@ -212,8 +209,8 @@ class Client(PyClient):
         Function must be a callable TorchScript function and have at least
         one input and one output. Call the function with the Client.run_script
         method.
-        Device selection is either "GPU" or "CPU". If many devices are
-        present, a number can be passed for specification e.g. "GPU:1".
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param key: key to store function at
         :type key: str
@@ -236,8 +233,8 @@ class Client(PyClient):
     def set_script(self, key, script, device="CPU"):
         """Store a TorchScript at key in the database
 
-        Device selection is either "GPU" or "CPU". If many devices are
-        present, a number can be passed for specification e.g. "GPU:1".
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param key: key to store script under
         :type key: str
@@ -335,6 +332,8 @@ class Client(PyClient):
         outputs=None,
     ):
         """Put a TF, TF-lite, PT, or ONNX model in the database
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param key: key to store model under
         :type key: str
@@ -391,6 +390,8 @@ class Client(PyClient):
         outputs=None,
     ):
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param key: key to store model under
         :type key: str
