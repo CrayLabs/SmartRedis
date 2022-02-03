@@ -28,9 +28,7 @@
 
 #ifndef SMARTREDIS_CPP_CLIENT_H
 #define SMARTREDIS_CPP_CLIENT_H
-#ifndef __cplusplus
-#error C Clients should include "c_client.h"
-#else
+#ifdef __cplusplus
 #include "string.h"
 #include "stdlib.h"
 #include <iostream>
@@ -277,8 +275,10 @@ class Client
         *   \param key The model key for this model
         *   \param model_file The source file for the model
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
-        *   \param device The name of the device for execution
-        *                 (e.g. CPU or GPU)
+        *   \param device The name of the device for execution. May be either
+        *                 CPU or GPU. If multiple GPUs are present, a specific
+        *                 GPU can be targeted by appending its zero-based
+        *                 index, i.e. "GPU:1"
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
@@ -309,8 +309,10 @@ class Client
         *   \param key The model key to associate with the model
         *   \param model The model as a continuous buffer
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
-        *   \param device The name of the device for execution
-        *                 (e.g. CPU or GPU)
+        *   \param device The name of the device for execution. May be either
+        *                 CPU or GPU. If multiple GPUs are present, a specific
+        *                 GPU can be targeted by appending its zero-based
+        *                 index, i.e. "GPU:1"
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
@@ -350,8 +352,10 @@ class Client
         *   \brief Set a script (from file) in the
         *          database for future execution
         *   \param key The script key to associate with the script
-        *   \param device The name of the device for execution
-        *                 (e.g. CPU or GPU)
+        *   \param device The name of the device for execution. May be either
+        *                 CPU or GPU. If multiple GPUs are present, a specific
+        *                 GPU can be targeted by appending its zero-based
+        *                 index, i.e. "GPU:1"
         *   \param script_file The source file for the script
         *   \throw SmartRedis::Exception if set script command fails
         */
@@ -363,8 +367,10 @@ class Client
         *   \brief Set a script (from buffer) in the
         *          database for future execution
         *   \param key The script key to associate with the script
-        *   \param device The name of the device for execution
-        *                 (e.g. CPU or GPU)
+        *   \param device The name of the device for execution. May be either
+        *                 CPU or GPU. If multiple GPUs are present, a specific
+        *                 GPU can be targeted by appending its zero-based
+        *                 index, i.e. "GPU:1"
         *   \param script The script source in a string buffer
         *   \throw SmartRedis::Exception if set script command fails
         */
