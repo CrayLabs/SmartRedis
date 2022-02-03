@@ -456,14 +456,14 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the
         *            information about the given database nodes
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific adddress to avoid inconsistencies in
-        *           addresses retreived with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeException
-        *           being thrown.
+        *   \throw SRRuntimeException if the address is not addressable by this
+        *          client.  In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific adddress to avoid inconsistencies in
+        *          addresses retreived with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS comands will lead to SRRuntimeException
+        *          being thrown.
         */
         std::vector<py::dict> get_db_node_info(std::vector<std::string> addresses);
 
@@ -474,14 +474,14 @@ class PyClient
         *                    formatted as address:port e.g. 127.0.0.1:6379
         *   \returns A list of parsed_map objects containing all the cluster
         *            information about the given database nodes
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client.  In the case of using a cluster of database nodes,
-        *           it is best practice to bind each node in the cluster
-        *           to a specific adddress to avoid inconsistencies in
-        *           addresses retreived with the CLUSTER SLOTS command.
-        *           Inconsistencies in node addresses across
-        *           CLUSTER SLOTS comands will lead to SRRuntimeException
-        *           being thrown.
+        *   \throw SRRuntimeException if the address is not addressable by this
+        *          client.  In the case of using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific adddress to avoid inconsistencies in
+        *          addresses retreived with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS comands will lead to SRRuntimeException
+        *          being thrown.
         */
         std::vector<py::dict> get_db_cluster_info(std::vector<std::string> addresses);
 
@@ -496,8 +496,8 @@ class PyClient
         *   \returns A std::vector of dictionaries that map AI.INFO
         *            field names to values for each of the provided
         *            database addresses.
-        *   \throws SmartRedis::RuntimeException or derivative error object
-        *           if command execution or reply parsing fails.
+        *   \throw SmartRedis::RuntimeException or derivative error object
+        *          if command execution or reply parsing fails.
         */
         std::vector<py::dict>
         get_ai_info(const std::vector<std::string>& addresses,
@@ -520,8 +520,8 @@ class PyClient
         *   \returns A dictionary that maps configuration parameters to their values
         *            If the provided expression does not exist, then an empty
         *            dictionary is returned.
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client
+        *   \throw SRRuntimeException if the address is not addressable by this
+        *          client
         */
         py::dict config_get(std::string expression,std::string address);
 
@@ -534,9 +534,9 @@ class PyClient
         *   \param config_param A configuration parameter to set
         *   \param value The value to assign to the configuration parameter
         *   \param address The address of the database node execute on
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client or if command fails to execute or if the config_param
-        *           is unsupported.
+        *   \throw SRRuntimeException if the address is not addressable by this
+        *          client or if command fails to execute or if the config_param
+        *          is unsupported.
         */
         void config_set(std::string config_param, std::string value, std::string address);
 
@@ -545,8 +545,8 @@ class PyClient
         *          time snapshot of all the data inside the Redis instance  in the form of
         *          an RDB file.
         *   \param address The address of the database node (host:port)
-        *   \throws SRRuntimeException if the address is not addressable by this
-        *           client or if command fails to execute
+        *   \throw SRRuntimeException if the address is not addressable by this
+        *          client or if command fails to execute
         */
         void save(std::vector<std::string> addresses);
 

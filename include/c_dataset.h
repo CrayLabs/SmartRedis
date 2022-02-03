@@ -90,7 +90,7 @@ SRError add_tensor(void* dataset,
 *   \param name The name for the metadata field
 *   \param name_length The length of the dataset name string,
 *                      excluding null terminating character
-*   \param data The value of the metadata scalar
+*   \param data The scalar data to be appended to the metadata field
 *   \param type The data type for the metadata scalar
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -121,9 +121,7 @@ SRError add_meta_string(void* dataset,
 
 
 /*!
-*   \brief Get the data, dimensions, and type for a tensor in the
-*          dataset. This function will allocate and retain management of the
-*          memory for the tensor data.
+*   \brief Get the data, dimensions, and type for a tensor in the dataset
 *   \details The memory returned in data is valid until the dataset is
 *            destroyed. This method is meant to be used when the dimensions
 *            and type of the tensor are unknown or the user does not want to

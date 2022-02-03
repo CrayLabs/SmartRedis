@@ -72,9 +72,9 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns host of database node
         *   \param address The address of the database node
         *   \returns The host of the database node
-        *   \throws SRRuntimeException if ':' is at the start of address,
-        *           or if ':' is not found in address, or if allocating
-        *           storage for the host string fails.
+        *   \throw SRRuntimeException if ':' is at the start of address,
+        *          or if ':' is not found in address, or if allocating
+        *          storage for the host string fails.
         */
         inline std::string parse_host(std::string address)
         {
@@ -99,10 +99,10 @@ class AddressAtCommand : public NonKeyedCommand
         *   \brief Returns port of database node
         *   \param address The address of the database node
         *   \returns The port of the database node
-        *   \throws SRRuntimeException if ':' is at the end of the address,
-        *           or if ':' is not found in address, or if the port conversion
-        *           to unint64_t cannot be performed, or if the string representation
-        *           of the port is out of the range of representable values by an uint_64
+        *   \throw SRRuntimeException if ':' is at the end of the address,
+        *          or if ':' is not found in address, or if the port conversion
+        *          to uint64_t cannot be performed, or if the string representation
+        *          of the port is out of the range of representable values by an uint_64
         */
         inline uint64_t parse_port(std::string address)
         {
