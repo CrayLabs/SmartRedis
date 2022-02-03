@@ -559,7 +559,7 @@ SRError dataset_exists(void* c_client,
 *   \brief Check if a key exists in the database, repeating the check
 *          at a specified frequency and number of repetitions
 *   \param c_client The client object to use for communication
-*   \param key The key that will be checked in the database
+*   \param key The key to be checked in the database
 *   \param key_length The length of the key string,
 *                     excluding null terminating character
 *   \param poll_frequency_ms The time delay between checks, in milliseconds
@@ -579,7 +579,7 @@ SRError poll_key(void* c_client,
 *   \brief Check if a model or script exists in the database, repeating the
 *          check at a specified frequency and number of repetitions
 *   \param c_client The client object to use for communication
-*   \param name The name of the entity that will be checked in the database.
+*   \param name The name of the entity to be checked in the database.
 *               The full key associated to \p name will be formed according
 *               to the prefixing behavior
 *   \param name_length The length of the name string,
@@ -601,7 +601,7 @@ SRError poll_model(void* c_client,
 *   \brief Check if a tensor exists in the database, repeating the check
 *          at a specified frequency and number of repetitions
 *   \param c_client The client object to use for communication
-*   \param name The name of the entity that will be checked in the database.
+*   \param name The name of the entity to be checked in the database.
 *               The full key associated to \p name will be formed according
 *               to the prefixing behavior
 *   \param name_length The length of the name string,
@@ -623,7 +623,7 @@ SRError poll_tensor(void* c_client,
 *   \brief Check if a dataset exists in the database, repeating the check
 *          at a specified frequency and number of repetitions
 *   \param c_client The client object to use for communication
-*   \param name The name of the entity that will be checked in the database.
+*   \param name The name of the entity to be checked in the database.
 *               The full key associated to \p name will be formed according
 *               to the prefixing behavior
 *   \param name_length The length of the name string,
