@@ -69,6 +69,10 @@ class Client(PyClient):
     def put_tensor(self, key, data):
         """Put a tensor to a Redis database
 
+        The final tensor key under which the tensor is stored
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: key for tensor for be stored at
         :type key: str
         :param data: numpy array of tensor data
@@ -84,6 +88,10 @@ class Client(PyClient):
     def get_tensor(self, key):
         """Get a tensor from the database
 
+        The tensor key used to locate the tensor
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: key to get tensor from
         :type key: str
         :raises RedisReplyError: if get fails
@@ -97,6 +105,10 @@ class Client(PyClient):
     def delete_tensor(self, key):
         """Delete a tensor within the database
 
+        The tensor key used to locate the tensor to be deleted
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: key tensor is stored at
         :type key: str
         :raises RedisReplyError: if deletion fails
@@ -107,6 +119,10 @@ class Client(PyClient):
     @exception_handler
     def copy_tensor(self, key, dest_key):
         """Copy a tensor at one key to another key
+
+        The tensor key used to locate the tensor to be copied
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
         :param key: source key of tensor to be copied
         :type key: str
@@ -122,6 +138,10 @@ class Client(PyClient):
     def rename_tensor(self, key, new_key):
         """Rename a tensor in the database
 
+        The tensor key used to locate the tensor to be renamed
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: original key of tensor to be renamed
         :type key: str
         :param new_key: new name for the tensor
@@ -135,6 +155,11 @@ class Client(PyClient):
     @exception_handler
     def put_dataset(self, dataset):
         """Put a Dataset instance into the database
+
+        The final dataset key under which the dataset is stored
+        is generated from the name that was supplied when the
+        dataset was created and may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
         All associated tensors and metadata within the Dataset
         instance will also be stored.
@@ -152,6 +177,10 @@ class Client(PyClient):
     def get_dataset(self, key):
         """Get a dataset from the database
 
+        The dataset key used to locate the dataset
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: key the dataset is stored under
         :type key: str
         :raises RedisReplyError: if retrieval fails
@@ -167,6 +196,10 @@ class Client(PyClient):
     def delete_dataset(self, key):
         """Delete a dataset within the database
 
+        The dataset key used to locate the dataset to be deleted
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: name of the dataset
         :type key: str
         :raises RedisReplyError: if deletion fails
@@ -177,6 +210,10 @@ class Client(PyClient):
     @exception_handler
     def copy_dataset(self, key, dest_key):
         """Copy a dataset from one key to another
+
+        The dataset key used to locate the dataset to be copied
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
         :param key: source name for dataset to be copied
         :type key: str
@@ -192,6 +229,10 @@ class Client(PyClient):
     def rename_dataset(self, key, new_key):
         """Rename a dataset in the database
 
+        The dataset key used to locate the dataset to be renamed
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
         :param key: original name of the dataset to be renamed
         :type key: str
         :param new_key: new name for the dataset
@@ -205,6 +246,10 @@ class Client(PyClient):
     @exception_handler
     def set_function(self, key, function, device="CPU"):
         """Set a callable function into the database
+
+        The final script key that is used to store the function
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
 
         Function must be a callable TorchScript function and have at least
         one input and one output. Call the function with the Client.run_script
@@ -231,12 +276,16 @@ class Client(PyClient):
 
     @exception_handler
     def set_script(self, key, script, device="CPU"):
-        """Store a TorchScript at key in the database
+        """Store a TorchScript at a key in the database
+
+        The final script key that is used to store the script
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
 
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
-        :param key: key to store script under
+        :param key: key to store the script under
         :type key: str
         :param script: TorchScript code
         :type script: str
@@ -252,11 +301,15 @@ class Client(PyClient):
 
     @exception_handler
     def set_script_from_file(self, key, file, device="CPU"):
-        """Same as Client.set_script but from file
+        """Same as Client.set_script, but from file
+
+        The final script key that is used to store the script
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
 
         :param key: key to store script under
         :type key: str
-        :param file: path to TorchScript code
+        :param file: path to text file containing TorchScript code
         :type file: str
         :param device: device for script execution, defaults to "CPU"
         :type device: str, optional
@@ -271,11 +324,15 @@ class Client(PyClient):
 
     @exception_handler
     def get_script(self, key):
-        """Get a Torchscript stored in the database
+        """Retrieve a Torchscript stored in the database
 
-        :param key: key at which script is stored
+        The script key that is used to locate the script
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
+        :param key: the key at which script is stored
         :type key: str
-        :raises RedisReplyError: if script doesn't exist
+        :raises RedisReplyError: if script retrieval fails
         :return: TorchScript stored at key
         :rtype: str
         """
@@ -285,15 +342,19 @@ class Client(PyClient):
 
     @exception_handler
     def run_script(self, key, fn_name, inputs, outputs):
-        """Execute TorchScript stored inside the database remotely
+        """Execute TorchScript stored inside the database
 
-        :param key: key script is stored under
+        The script key that is used to locate the script to be run
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
+        :param key: the key the script is stored under
         :type key: str
-        :param fn_name: name of the function within the script to execute
+        :param fn_name: name of a function within the script to execute
         :type fn_name: str
-        :param inputs: list of input tensors stored in database
+        :param inputs: database tensor keys to use as script inputs
         :type inputs: list[str]
-        :param outputs: list of output tensor names to store results under
+        :param outputs: database tensor keys to receive script outputs
         :type outputs: list[str]
         :raises RedisReplyError: if script execution fails
         """
@@ -308,9 +369,13 @@ class Client(PyClient):
     def get_model(self, key):
         """Get a stored model
 
+        The model key that is used to locate the model
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
         :param key: key of stored model
         :type key: str
-        :raises RedisReplyError: if get fails or model doesnt exist
+        :raises RedisReplyError: if retrieval fails
         :return: model
         :rtype: bytes
         """
@@ -332,6 +397,10 @@ class Client(PyClient):
         outputs=None,
     ):
         """Put a TF, TF-lite, PT, or ONNX model in the database
+
+        The final model key that is used to store the model
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
@@ -351,7 +420,7 @@ class Client(PyClient):
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
         :type inputs: list[str], optional
-        :param outputs: model outupts (TF only), defaults to None
+        :param outputs: model outputs (TF only), defaults to None
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
@@ -390,6 +459,10 @@ class Client(PyClient):
         outputs=None,
     ):
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
+
+        The final model key that is used to store the model
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
@@ -440,6 +513,10 @@ class Client(PyClient):
     def run_model(self, key, inputs=None, outputs=None):
         """Execute a stored model
 
+        The model key that is used to locate the model to be run
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
         :param key: key for stored model
         :type key: str
         :param inputs: keys of stored inputs to provide model, defaults to None
@@ -456,14 +533,15 @@ class Client(PyClient):
     def tensor_exists(self, name):
         """Check if a tensor exists in the database
 
-        The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The tensor key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
         :param key: The tensor name that will be checked in the database
         :type key: str
         :returns: Returns true if the tensor exists in the database
         :rtype: bool
-        :raises RedisReplyError: if `tensor_exists` fails (i.e. causes an error)
+        :raises RedisReplyError: if checking for tensor existence causes an error
         """
         typecheck(name, "name", str)
         return super().tensor_exists(name)
@@ -472,8 +550,9 @@ class Client(PyClient):
     def dataset_exists(self, name):
         """Check if a dataset exists in the database
 
-        The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The dataset key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
         :param key: The dataset name that will be checked in the database
         :type key: str
@@ -488,8 +567,9 @@ class Client(PyClient):
     def model_exists(self, name):
         """Check if a model or script exists in the database
 
-        The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The model or script key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
 
         :param key: The model or script name that will be checked in the database
         :type key: str
@@ -517,22 +597,19 @@ class Client(PyClient):
     def poll_key(self, key, poll_frequency_ms, num_tries):
         """Check if the key exists in the database
 
-        The check is performed repeatedly at a
-        specified frequency for a specified number
-        of times.
+        The check is repeated at a specified polling interval and for
+        a specified number of retries.
 
         :param key: The key that will be checked in the database
         :type key: int
-        :param poll_frequency_ms: The frequency of checks for the
-                                  key in milliseconds
+        :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
-        :param num_tries: The total number of times to check for
-                          the specified number of keys.
+        :param num_tries: The total number of retries for the check
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.
         :rtype: bool
-        :raises RedisReplyError: if key poll fails
+        :raises RedisReplyError: if an error occurs while polling
         """
         typecheck(key, "key", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
@@ -543,23 +620,22 @@ class Client(PyClient):
     def poll_tensor(self, name, poll_frequency_ms, num_tries):
         """Check if a tensor exists in the database
 
-        The check will be performed at a
-        specified frequency for a specified number
-        of times. The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The check is repeated at a specified polling interval and for
+        a specified number of retries.
+        The tensor key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The key that will be checked in the database
+        :param key: The tensor key that will be checked in the database
         :type key: int
-        :param poll_frequency_ms: The frequency of checks for the
-                                  key in milliseconds
+        :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
-        :param num_tries: The total number of times to check for
-                          the specified number of keys.
+        :param num_tries: The total number of retries for the check
         :type num_tries: int
-        :returns: Returns true if the key is found within the
+        :returns: Returns true if the tensor key is found within the
                   specified number of tries, otherwise false.
         :rtype: bool
-        :raises RedisReplyError: if `poll_tensor` fails
+        :raises RedisReplyError: if an error occurs while polling
         """
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
@@ -570,23 +646,22 @@ class Client(PyClient):
     def poll_dataset(self, name, poll_frequency_ms, num_tries):
         """Check if a dataset exists in the database
 
-        The check will be performed at a
-        specified frequency for a specified number
-        of times. The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The check is repeated at a specified polling interval and for
+        a specified number of retries.
+        The dataset key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The key that will be checked in the database
+        :param key: The dataset key that will be checked in the database
         :type key: int
-        :param poll_frequency_ms: The frequency of checks for the
-                                  key in milliseconds
+        :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
-        :param num_tries: The total number of times to check for
-                          the specified number of keys.
+        :param num_tries: The total number of retries for the check
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.
         :rtype: bool
-        :raises RedisReplyError: if `poll_dataset` fails
+        :raises RedisReplyError: if an error occurs while polling
         """
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
@@ -597,23 +672,22 @@ class Client(PyClient):
     def poll_model(self, name, poll_frequency_ms, num_tries):
         """Check if a model or script exists in the database
 
-        The check will be performed at a
-        specified frequency for a specified number
-        of times. The key associated to the entity will be
-        computed internally based on the current prefix behavior.
+        The check is repeated at a specified polling interval and for
+        a specified number of retries.
+        The model or script key that is used to check for existence
+        may be prefixed. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
 
-        :param key: The key that will be checked in the database
+        :param key: The model or script key that will be checked in the database
         :type key: int
-        :param poll_frequency_ms: The frequency of checks for the
-                                  key in milliseconds
+        :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
-        :param num_tries: The total number of times to check for
-                          the specified number of keys.
+        :param num_tries: The total number of retries for the check
         :type num_tries: int
         :returns: Returns true if the key is found within the
                   specified number of tries, otherwise false.
         :rtype: bool
-        :raises RedisReplyError: if `poll_model` fails
+        :raises RedisReplyError: if an error occurs while polling
         """
         typecheck(name, "name", str)
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
@@ -622,7 +696,10 @@ class Client(PyClient):
 
     @exception_handler
     def set_data_source(self, source_id):
-        """Set the data source (i.e. key prefix for get functions)
+        """Set the data source, a key prefix for future operations
+
+        The selected prefix must have previously been set via
+        one of the environment variables SSKEYOUT and SSKEYIN.
 
         :param source_id: The prefix for retrieval commands
         :type source_id: str
@@ -633,11 +710,14 @@ class Client(PyClient):
 
     @exception_handler
     def use_model_ensemble_prefix(self, use_prefix):
-        """Set whether model and script keys should be prefixed
+        """Control whether model and script keys are
+           prefixed (e.g. in an ensemble) when forming database keys
 
         This function can be used to avoid key collisions in an ensemble.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
+        Keys for entities created before this function is called
+        will not be retroactively prefixed.
         By default, the client does not prefix model and script
         keys.
 
@@ -651,11 +731,14 @@ class Client(PyClient):
 
     @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
-        """Set whether tensor and dataset keys should be prefixed
+        """Control whether tensor and dataset keys are
+           prefixed (e.g. in an ensemble) when forming database keys
 
         This function can be used to avoid key collisions in an ensemble.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
+        Keys for entities created before this function is called
+        will not be retroactively prefixed.
         By default, the client prefixes tensor and dataset
         keys when a prefix is available.
 
@@ -684,7 +767,7 @@ class Client(PyClient):
                 to a specific address to avoid inconsistencies in
                 addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
@@ -710,7 +793,7 @@ class Client(PyClient):
                 to a specific address to avoid inconsistencies in
                 addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
@@ -753,7 +836,7 @@ class Client(PyClient):
                 to a specific address to avoid inconsistencies in
                 addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
@@ -783,7 +866,7 @@ class Client(PyClient):
                 to a specific address to avoid inconsistencies in
                 addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(expression, "expression", str)
@@ -814,7 +897,7 @@ class Client(PyClient):
                 in the cluster to a specific address to avoid inconsistencies
                 in addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(config_param, "config_param", str)
@@ -838,7 +921,7 @@ class Client(PyClient):
                 to a specific address to avoid inconsistencies in
                 addresses retrieved with the CLUSTER SLOTS command.
                 Inconsistencies in node addresses across
-                CLUSTER SLOTS commands will lead to RedisReplyError
+                CLUSTER SLOTS commands can lead to RedisReplyError
                 being thrown.
         """
         typecheck(addresses, "addresses", list)
