@@ -838,9 +838,8 @@ class Client
 
         /*!
         *   \brief Execute a list of commands
-        *   \param cmds The CommandList to execute
-        *   \returns The CommandReply from the last
-        *            command execution
+        *   \param cmd_list The CommandList to execute
+        *   \returns The CommandReply from the last command execution
         */
         inline std::vector<CommandReply> _run(CommandList& cmd_list)
         {
@@ -848,9 +847,8 @@ class Client
         }
 
         /*!
-        *  \brief Set the prefixes that are used for
-        *         set and get methods using SSKEYIN and
-        *         SSKEYOUT environment variables.
+        *  \brief Set the prefixes that are used for set and get methods
+        *         using SSKEYIN and SSKEYOUT environment variables.
         */
         void _set_prefixes_from_env();
 

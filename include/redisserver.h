@@ -157,7 +157,7 @@ class RedisServer {
 
         /*!
          *  \brief Check if address and port maps to database node
-         *  \param addresss address of database
+         *  \param address address of database
          *  \param port port of database
          *  \return True if address is valid
          */
@@ -217,8 +217,8 @@ class RedisServer {
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last Command
         *            execution in the copying of the tensor.
         *            Different implementations may have different

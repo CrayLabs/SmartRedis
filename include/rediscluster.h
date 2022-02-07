@@ -176,7 +176,7 @@ class RedisCluster : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param addresss address of database
+         *  \param address address of database
          *  \param port port of database
          *  \return True if address is valid
          */
@@ -234,8 +234,8 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief Copy a vector of tensors from source keys
         *          to destination keys
-        *   \param src_key Vector of source keys
-        *   \param dest_key Vector of destination keys
+        *   \param src Vector of source keys
+        *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last Command
         *            execution in the copying of the tensor.
         *            Different implementations may have different
@@ -501,7 +501,7 @@ class RedisCluster : public RedisServer
         *           enforce identical hash slot constraint
         *   \param names The keys that need to be updated for identical
         *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param db_prefix The prefix to attach
         *   \returns A vector of updated names
         */
         std::vector<std::string>  _get_tmp_names(std::vector<std::string> names,
@@ -510,13 +510,10 @@ class RedisCluster : public RedisServer
         /*!
         *   \brief  Delete multiple keys with the assumption that all
         *           keys use the same hash slot
-        *   \param names The keys that need to be updated for identical
-        *                hash slot constraint
-        *   \param prefix The prefix to attach
+        *   \param keys The keys to be deleted
         *   \returns A vector of updated names
         */
-        void _delete_keys(std::vector<std::string> key
-                          );
+        void _delete_keys(std::vector<std::string> keys);
 
         /*!
         *   \brief  Run a model in the database that uses dagrun

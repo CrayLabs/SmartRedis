@@ -771,6 +771,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 *             will not be retroactively prefixed.
 *             By default, the client does not prefix model and script keys.
 *
+*   \param c_client The client object to use for communication
 *   \param use_prefix If set to true, all future operations on models and
 *                     scripts will use a prefix, if available.
 *   \return Returns SRNoError on success or an error code on failure
