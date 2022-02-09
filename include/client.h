@@ -106,8 +106,7 @@ class Client
         *   \details The final dataset key under which the dataset is stored
         *            is generated from the name that was supplied when the
         *            dataset was created and may be prefixed. See
-        *            set_data_source() and use_tensor_ensemble_prefix()
-        *            for more details.
+        *            use_tensor_ensemble_prefix() for more details.
         *   \param dataset The DataSet object to send to the database
         *   \throw SmartRedis::Exception if put dataset command fails
         */
@@ -127,8 +126,8 @@ class Client
         /*!
         *   \brief Move a dataset to a new dataset key.  All tensors
         *          and metdata in the dataset will be moved with it.
-        *   \details The dataset key used to locate the dataset to be
-        *            renamed may be prefixed. See set_data_source()
+        *   \details The old and new dataset keys used to find and relocate
+        *            the dataset may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The original dataset key for the dataset
         *   \param new_name The new dataset key for the dataset
@@ -141,9 +140,10 @@ class Client
         *   \brief Copy a dataset to a new dataset key in the database.
         *          All tensors and metadata in the DataSet will
         *          be copied as well.
-        *   \details The dataset key used to locate the dataset to be
-        *            copied may be prefixed. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *   \details The source and destination dataset keys used to
+        *            locate and store the dataset may be prefixed.
+        *            See set_data_source() and use_tensor_ensemble_prefix()
+        *            for more details.
         *   \param src_name The source dataset key
         *   \param dest_name The destination dataset key
         *   \throw SmartRedis::Exception if copy dataset command fails
@@ -167,8 +167,8 @@ class Client
         /*!
         *   \brief Put a tensor into the database
         *   \details The final tensor key under which the tensor is stored
-        *            may be prefixed. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *            may be prefixed. See use_tensor_ensemble_prefix() for
+        *            more details.
         *   \param key The tensor key for this tensor in the database
         *   \param data The data for this tensor
         *   \param dims The number of elements for each dimension
@@ -187,7 +187,7 @@ class Client
         *   \brief Retrieve the tensor data, dimensions, and type for the
         *          provided tensor key. This function will allocate and retain
         *          management of the memory for the tensor data.
-        *   \details The tensor key under used to locate the tensor
+        *   \details The tensor key used to locate the tensor
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *
@@ -224,7 +224,7 @@ class Client
         *          management of the memory for the tensor data. This is a
         *          c-style interface for the tensor dimensions.  Another
         *          function exists for std::vector dimensions.
-        *   \details The tensor key under used to locate the tensor
+        *   \details The tensor key used to locate the tensor
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *
@@ -259,7 +259,7 @@ class Client
         /*!
         *   \brief Retrieve a tensor from the database into memory provided
         *          by the caller
-        *   \details The tensor key under used to locate the tensor
+        *   \details The tensor key used to locate the tensor
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param key  The tensor key for the tensor
@@ -277,8 +277,8 @@ class Client
 
         /*!
         *   \brief Move a tensor to a new tensor key
-        *   \details The tensor key under used to locate the tensor to be
-        *            renamed may be prefixed. See set_data_source()
+        *   \details The old and new tensor keys used to find and relocate
+        *            the tensor may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param key The original tensor key
         *   \param new_key The new tensor key
@@ -289,7 +289,7 @@ class Client
 
         /*!
         *   \brief Delete a tensor from the database
-        *   \details The tensor key under used to locate the tensor to be
+        *   \details The tensor key used to locate the tensor to be
         *            deleted may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param key The tensor key for the tensor to delete
@@ -299,9 +299,10 @@ class Client
 
         /*!
         *   \brief Copy a tensor to a destination tensor key
-        *   \details The tensor key under used to locate the tensor to be
-        *            copied may be prefixed. See set_data_source()
-        *            and use_tensor_ensemble_prefix() for more details.
+        *   \details The source and destination tensor keys used to
+        *            locate and store the tensor may be prefixed.
+        *            See set_data_source() and use_tensor_ensemble_prefix()
+        *            for more details.
         *   \param src_key The source tensor key
         *   \param dest_key The destination tensor key
         *   \throw SmartRedis::Exception if copy tensor command fails
@@ -312,9 +313,11 @@ class Client
         /*!
         *   \brief Set a model (from file) in the database for future
         *          execution
-        *   \details The final model key that is used to store the model
-        *            may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
+        *   \details The final model key used to store the model
+        *            may be prefixed. Similarly, the tensor names in the
+        *            input and output node vectors for TF models may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param key The model key for this model
         *   \param model_file The source file for the model
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -349,9 +352,11 @@ class Client
         /*!
         *   \brief Set a model (from a buffer) in the
         *          database for future execution
-        *   \details The final model key that is used to store the model
-        *            may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
+        *   \details The final model key used to store the model
+        *            may be prefixed. Similarly, the tensor names in the
+        *            input and output node vectors for TF models may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param key The model key to associate with the model
         *   \param model The model as a continuous buffer
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -385,7 +390,7 @@ class Client
 
         /*!
         *   \brief Retrieve a model from the database
-        *   \details The model key that is used to locate the model
+        *   \details The model key used to locate the model
         *            may be prefixed. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param key The model key associated with the model
@@ -400,9 +405,9 @@ class Client
         /*!
         *   \brief Set a script (from file) in the
         *          database for future execution
-        *   \details The final script key that is used to store the script
-        *            may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
+        *   \details The final script key used to store the script
+        *            may be prefixed. See use_model_ensemble_prefix() for
+        *            more details.
         *   \param key The script key to associate with the script
         *   \param device The name of the device for execution. May be either
         *                 CPU or GPU. If multiple GPUs are present, a specific
@@ -418,9 +423,9 @@ class Client
         /*!
         *   \brief Set a script (from buffer) in the
         *          database for future execution
-        *   \details The final script key that is used to store the script
-        *            may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
+        *   \details The final script key used to store the script
+        *            may be prefixed. See use_model_ensemble_prefix()
+        *            for more details.
         *   \param key The script key to associate with the script
         *   \param device The name of the device for execution. May be either
         *                 CPU or GPU. If multiple GPUs are present, a specific
@@ -435,7 +440,7 @@ class Client
 
         /*!
         *   \brief Retrieve a script from the database
-        *   \details The script key that is used to locate the script
+        *   \details The script key used to locate the script
         *            may be prefixed. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param key The key associated with the script
@@ -449,10 +454,11 @@ class Client
 
         /*!
         *   \brief Run a model in the database using the
-        *   \details The model key that is used to locate the model to be run
-        *            may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
-        *          specificed input and output tensors
+        *   \details The model key used to locate the model to be run
+        *            may be prefixed. Similarly, the tensor names in the
+        *            input and output vectors may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param key The model key associated with the model
         *   \param inputs The tensor keys for inputs tensors to use
         *                 in the model
@@ -467,9 +473,11 @@ class Client
         /*!
         *   \brief Run a script function in the database using the
         *          specificed input and output tensors
-        *   \details The script key that is used to locate the script to be
-        *            run may be prefixed. See set_data_source()
-        *            and use_model_ensemble_prefix() for more details.
+        *   \details The script key used to locate the script to be run
+        *            may be prefixed. Similarly, the tensor names in the
+        *            input and output vectors may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param key The script key associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The tensor keys of inputs tensors to use
@@ -494,7 +502,7 @@ class Client
 
         /*!
         *   \brief Check if a model (or script) key exists in the database
-        *   \details The model or script key that is used to check for existence
+        *   \details The model or script key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param name The model/script key to be checked in the database
@@ -505,7 +513,7 @@ class Client
 
         /*!
         *   \brief Check if a tensor key exists in the database
-        *   \details The tensor key that is used to check for existence
+        *   \details The tensor key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The tensor key to be checked in the database
@@ -516,7 +524,7 @@ class Client
 
         /*!
         *   \brief Check if a dataset exists in the database
-        *   \details The dataset key that is used to check for existence
+        *   \details The dataset key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The dataset key to be checked in the database
@@ -543,7 +551,7 @@ class Client
         /*!
         *   \brief Check if a tensor key exists in the database, repeating
 *       *          the check at a specified polling interval
-        *   \details The tensor key that is used to check for existence
+        *   \details The tensor key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The tensor key to be checked in the database
@@ -561,7 +569,7 @@ class Client
         /*!
         *   \brief Check if a dataset key exists in the database, repeating
 *       *          the check at a specified polling interval
-        *   \details The dataset key that is used to check for existence
+        *   \details The dataset key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The dataset key to be checked in the database
@@ -579,7 +587,7 @@ class Client
         /*!
         *   \brief Check if a model (or script) key exists in the database,
         *          repeating the check at a specified polling interval
-        *   \details The model or script key that is used to check for existence
+        *   \details The model or script key used to check for existence
         *            may be prefixed. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param name The model/script key to be checked in the database
@@ -596,9 +604,23 @@ class Client
 
         /*!
         *   \brief Set the data source, a key prefix for future operations.
-        *   \details The selected prefix must have previously been set via
-        *            one of the environment variables SSKEYOUT and SSKEYIN.
-        *   \param source_id The prefix for retrieval commands
+        *   \details When running multiple applications, such as an ensemble
+        *            computation, there is a risk that the same name is used
+        *            for a tensor, dataset, script, or model by more than one
+        *            executing entity. In order to prevent this sort of collision,
+        *            SmartRedis affords the ability to add a prefix to names,
+        *            thereby associating them with the name of the specific
+        *            entity that the prefix corresponds to. For writes to
+        *            the database when prefixing is activated, the prefix
+        *            used is taken from the SSKEYOUT environment variable.
+        *            For reads from the database, the default is to use the
+        *            first prefix from SSKEYIN. If this is the same as the
+        *            prefix from SSKEYOUT, the entity will read back the
+        *            same data it wrote; however, this function allows an entity
+        *            to read from data written by another entity (i.e. use
+        *            the other entity's key.)
+        *   \param source_id The prefix for read operations; must have
+        *          previously been set via the SSKEYIN environment variable
         *   \throw SmartRedis::Exception for failed setting of data source
         */
         void set_data_source(std::string source_id);
@@ -606,7 +628,10 @@ class Client
         /*!
         *   \brief Control whether names of tensor and dataset keys are
         *          prefixed (e.g. in an ensemble) when forming database keys.
-        *   \details Prefixes will only be used if they were previously set
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN to tensor and dataset names.
+        *            Prefixes will only be used if they were previously set
         *            through the environment variables SSKEYOUT and SSKEYIN.
         *            Keys of entities created before this function is called
         *            will not be retroactively prefixed.
@@ -624,7 +649,10 @@ class Client
         /*!
         *   \brief Control whether model and script keys are
         *          prefixed (e.g. in an ensemble) when forming database keys.
-        *   \details Prefixes will only be used if they were previously set
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN to model and script names.
+        *            Prefixes will only be used if they were previously set
         *            through the environment variables SSKEYOUT and SSKEYIN.
         *            Keys of entities created before this function is called
         *            will not be retroactively prefixed.

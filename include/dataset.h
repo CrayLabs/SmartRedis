@@ -96,8 +96,8 @@ class DataSet
         *               within the DataSet
         *   \param data The tensor data
         *   \param dims The number of elements in each dimension of the tensor
-        *   \param type The data type for the provided tensor data
-        *   \param mem_layout The memory layout for the provided tensor data
+        *   \param type The data type of the provided tensor data
+        *   \param mem_layout The memory layout of the provided tensor data
         *   \throw SmartRedis::Exception if add_tensor operation fails
         */
         void add_tensor(const std::string& name,
@@ -112,7 +112,7 @@ class DataSet
         *          For string scalars, use add_meta_string.
         *   \param name The name for the metadata field
         *   \param data The scalar data to be appended to the metadata field
-        *   \param type The data type for the scalar data to be appended to
+        *   \param type The data type of the scalar data to be appended to
         *               the metadata field
         *   \throw SmartRedis::Exception if add_meta_scalar operation fails
         */
@@ -393,7 +393,7 @@ class DataSet
 
         /*!
         *   \brief Throw an exception if a tensor does not exist
-        *   \throw SRRuntimeException if the tensor is not in the DataSet
+        *   \throw RuntimeException if the tensor is not in the DataSet
         */
         inline void _enforce_tensor_exists(const std::string& name);
 

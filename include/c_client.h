@@ -60,8 +60,8 @@ SRError DeleteCClient(void** c_client);
 *   \brief Put a DataSet object into the database
 *   \details The final dataset key under which the dataset is stored
 *            is generated from the name that was supplied when the
-*            dataset was created and may be prefixed. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*            dataset was created and may be prefixed. See
+*            use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param dataset The DataSet object to send
 *   \return Returns SRNoError on success or an error code on failure
@@ -87,9 +87,10 @@ SRError get_dataset(void* c_client,
 
 /*!
 *   \brief Move a DataSet to a new name key
-*   \details The dataset key used to locate the dataset to be renamed
-*            may be prefixed. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*   \details The old and new dataset keys used to
+*            find and relocate the dataset may be prefixed.
+*            See set_data_source() and use_tensor_ensemble_prefix()
+*            for more details.
 *   \param c_client The client object to use for communication
 *   \param name The current name key of the dataset object
 *   \param name_length The length of the current name string,
@@ -107,9 +108,10 @@ SRError rename_dataset(void* c_client,
 
 /*!
 *   \brief Copy a DataSet to a new name key
-*   \details The dataset key used to locate the dataset to be copied
-*            may be prefixed. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*   \details The source and destination dataset keys used to
+*            locate and store the dataset may be prefixed.
+*            See set_data_source() and use_tensor_ensemble_prefix()
+*            for more details.
 *   \param c_client The client object to use for communication
 *   \param src_name The source name key of the dataset object
 *   \param src_name_length The length of the src_name string,
@@ -143,8 +145,8 @@ SRError delete_dataset(void* c_client,
 /*!
 *   \brief Put a tensor into the database
 *   \details The final tensor key under which the tensor is stored
-*            may be prefixed. See set_data_source()
-*            and use_tensor_ensemble_prefix() for more details.
+*            may be prefixed. See use_tensor_ensemble_prefix()
+*            for more details.
 *   \param c_client The client object to use for communication
 *   \param key The key by which the tensor should be accessed
 *   \param key_length The length of the tensor key string,
@@ -172,18 +174,18 @@ SRError put_tensor(void* c_client,
 *          the tensor type will be set based on the tensor retrieved from the
 *          database.  The requested memory layout will be used to shape the
 *          returned memory space pointed to by the data pointer.
-*   \details The final tensor key that is used to retrieve the tensor
+*   \details The final tensor key used to retrieve the tensor
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *
-*            The memory returned in data is valid until the dataset is
+*            The memory returned in data is valid until the client is
 *            destroyed. This method is meant to be used when the dimensions
 *            and type of the tensor are unknown or the user does not want to
 *            manage memory.  However, given that the memory associated with the
-*            return data is valid until dataset destruction, this method should
+*            return data is valid until client destruction, this method should
 *            not be used repeatedly for large tensor data.  Instead  it is
 *            recommended that the user use unpack_tensor() for large tensor
-*            data and to limit memory use by the dataset.
+*            data and to limit memory use by the client.
 *   \param c_client The client object to use for communication
 *   \param key The key from which the tensor should be accessed
 *   \param key_length The length of the tensor key string,
@@ -208,7 +210,7 @@ SRError get_tensor(void* c_client,
 /*!
 *   \brief Retrieve a tensor from the database into memory provided
 *          by the caller
-*   \details The final tensor key that is used to retrieve the tensor
+*   \details The final tensor key used to retrieve the tensor
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -235,8 +237,8 @@ SRError unpack_tensor(void* c_client,
 
 /*!
 *   \brief Move a tensor to a new tensor key
-*   \details The final tensor key that is used to store the renamed tensor
-*            may be prefixed. See set_data_source()
+*   \details The old and new tensor keys used to find and
+*            relocate the tensor may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param key The original key from which the tensor should be accessed
@@ -254,8 +256,8 @@ SRError rename_tensor(void* c_client,
                       const size_t new_key_length);
 
 /*!
-*   \brief Delete a tensor. This also removes the associated tensor key
-*   \details The final tensor key that is used to find the tensor to be
+*   \brief Delete a tensor from the database
+*   \details The final tensor key used to find the tensor to be
 *            deleted may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -270,8 +272,8 @@ SRError delete_tensor(void* c_client,
 
 /*!
 *   \brief Copy a tensor to a destination tensor key
-*   \details The final tensor key that is used to store the renamed tensor
-*            may be prefixed. See set_data_source()
+*   \details The source and destination tensor keys used to locate
+*            and store the tensor may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param src_name The source key from which the tensor should be copied
@@ -290,9 +292,11 @@ SRError copy_tensor(void* c_client,
 
 /*!
 *   \brief Set a model (from file) in the database for future execution
-*   \details The final model key that is used to store the model
-*            may be prefixed. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
+*   \details The final model key used to store the model
+*            may be prefixed. Similarly, the tensor names in the
+*            input and output nodes for TF models may be prefixed.
+*            See set_data_source(), use_model_ensemble_prefix(), and
+*            use_tensor_ensemble_prefix() for more details
 *   \param c_client The client object to use for communication
 *   \param key The key to associate with the model
 *   \param key_length The length of the key string,
@@ -346,9 +350,11 @@ SRError set_model_from_file(void* c_client,
 
 /*!
 *   \brief Set a model (from buffer) in the database for future execution
-*   \details The final model key that is used to store the model
-*            may be prefixed. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
+*   \details The final model key used to store the model
+*            may be prefixed. Similarly, the tensor names in the
+*            input and output nodes for TF models may be prefixed.
+*            See set_data_source(), use_model_ensemble_prefix(), and
+*            use_tensor_ensemble_prefix() for more details
 *   \param c_client The client object to use for communication
 *   \param key The key to associate with the model
 *   \param key_length The length of the key string,
@@ -403,7 +409,7 @@ SRError set_model(void* c_client,
 /*!
 *   \brief Get a model in the database.   The memory associated with the
 *          model string is valid until the client is destroyed.
-*   \details The model key that is used to locate the model
+*   \details The model key used to locate the model
 *            may be prefixed. See set_data_source()
 *            and use_model_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -423,9 +429,8 @@ SRError get_model(void* c_client,
 
 /*!
 *   \brief Set a script from file in the database for future execution
-*   \details The final script key that is used to store the script
-*            may be prefixed. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
+*   \details The final script key used to store the script
+*            may be prefixed. See use_model_ensemble_prefix() for more details
 *   \param c_client The client object to use for communication
 *   \param key The key to associate with the script
 *   \param key_length The length of the key string,
@@ -451,9 +456,8 @@ SRError set_script_from_file(void* c_client,
 
 /*!
 *   \brief Set a script (from buffer) in the database for future execution
-*   \details The final script key that is used to store the script
-*            may be prefixed. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
+*   \details The final script key used to store the script
+*            may be prefixed. See use_model_ensemble_prefix() for more details
 *   \param key The key to associate with the script
 *   \param key_length The length of the key string,
 *                     excluding null terminating character
@@ -479,7 +483,7 @@ SRError set_script(void* c_client,
 /*!
 *   \brief Get a script from the database.  The memory associated with the
 *          script string is valid until the client is destroyed.
-*   \details The script key that is used to locate the script
+*   \details The script key used to locate the script
 *            may be prefixed. See set_data_source()
 *            and use_model_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -500,9 +504,11 @@ SRError get_script(void* c_client,
 /*!
 *   \brief Run a script function in the database using the specificed input
 *          and output tensors
-*   \details The script key that is used to locate the script to be run
-*            may be prefixed. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
+*   \details The script key used to locate the script to be run
+*            may be prefixed. Similarly, the tensor names in the
+*            input and output arrays may be prefixed.
+*            See set_data_source(), use_model_ensemble_prefix(), and
+*            use_tensor_ensemble_prefix() for more details
 *   \param c_client The client object to use for communication
 *   \param key The key associated with the script
 *   \param key_length The length of the key string,
@@ -536,7 +542,7 @@ SRError run_script(void* c_client,
 /*!
 *   \brief Run a model in the database using the specificed input and
 *          output tensors
-*   \details The model key that is used to locate the model to be run
+*   \details The model key used to locate the model to be run
 *            may be prefixed. See set_data_source()
 *            and use_model_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -580,7 +586,7 @@ SRError key_exists(void* c_client,
 
 /*!
 *   \brief Check if a tensor key exists in the database
-*   \details The tensor key that is used to check for tensor existence
+*   \details The tensor key used to check for tensor existence
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -599,7 +605,7 @@ SRError tensor_exists(void* c_client,
 
 /*!
 *   \brief Check if a model or script key exists in the database
-*   \details The model or script key that is used to check for existence
+*   \details The model or script key used to check for existence
 *            may be prefixed. See set_data_source()
 *            and use_model_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -618,7 +624,7 @@ SRError model_exists(void* c_client,
 
 /*!
 *   \brief Check if a dataset name key exists in the database
-*   \details The dataset key that is used to check for dataset existence
+*   \details The dataset key used to check for dataset existence
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -658,7 +664,7 @@ SRError poll_key(void* c_client,
 /*!
 *   \brief Check if a model or script exists in the database, repeating the
 *          check at a specified frequency and number of repetitions
-*   \details The model or script key that is used to check for existence
+*   \details The model or script key used to check for existence
 *            may be prefixed. See set_data_source()
 *            and use_model_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -683,7 +689,7 @@ SRError poll_model(void* c_client,
 /*!
 *   \brief Check if a tensor exists in the database, repeating the check
 *          at a specified frequency and number of repetitions
-*   \details The tensor key that is used to check for tensor existence
+*   \details The tensor key used to check for tensor existence
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -708,7 +714,7 @@ SRError poll_tensor(void* c_client,
 /*!
 *   \brief Check if a dataset exists in the database, repeating the check
 *          at a specified frequency and number of repetitions
-*   \details The dataset key that is used to check for dataset existence
+*   \details The dataset key used to check for dataset existence
 *            may be prefixed. See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
@@ -731,11 +737,25 @@ SRError poll_dataset(void* c_client,
                      bool* exists);
 
 /*!
-*   \brief Set the data source, a key prefix for future operations
-*   \details The selected prefix must have previously been set via
-*            one of the environment variables SSKEYOUT and SSKEYIN.
+*   \brief Set the data source, a key prefix for future read operations
+*   \details When running multiple applications, such as an ensemble
+*            computation, there is a risk that the same name is used
+*            for a tensor, dataset, script, or model by more than one
+*            executing entity. In order to prevent this sort of collision,
+*            SmartRedis affords the ability to add a prefix to names,
+*            thereby associating them with the name of the specific
+*            entity that the prefix corresponds to. For writes to
+*            the database when prefixing is activated, the prefix
+*            used is taken from the SSKEYOUT environment variable.
+*            For reads from the database, the default is to use the
+*            first prefix from SSKEYIN. If this is the same as the
+*            prefix from SSKEYOUT, the entity will read back the
+*            same data it wrote; however, this function allows an entity
+*            to read from data written by another entity (i.e. use
+*            the other entity's key.)
 *   \param c_client The client object to use for communication
-*   \param source_id The prefix for retrieval commands
+*   \param source_id The prefix for read operations; must have
+*          previously been set via the SSKEYIN environment variable
 *   \param source_id_length The length of the source_id string,
 *                           excluding null terminating character
 *   \return Returns SRNoError on success or an error code on failure
@@ -747,13 +767,16 @@ SRError set_data_source(void* c_client,
 /*!
 *   \brief Control whether tensor and dataset keys are
 *          prefixed (e.g. in an ensemble) when forming database keys
-*   \details  Prefixes will only be used if they were previously set through
-*             the environment variables SSKEYOUT and SSKEYIN.
-*             Keys for entities created before this function is called
-*             will not be retroactively prefixed.
-*             By default, the client prefixes tensor and dataset keys
-*             with the first prefix specified with the SSKEYIN
-*             and SSKEYOUT environment variables.
+*   \details This function can be used to avoid key collisions in an
+*            ensemble by prepending the string value from the
+*            environment variable SSKEYIN to tensor and dataset names.
+*            Prefixes will only be used if they were previously set through
+*            Keys for entities created before this function is called
+*            the environment variables SSKEYOUT and SSKEYIN.
+*            will not be retroactively prefixed.
+*            By default, the client prefixes tensor and dataset keys
+*            with the first prefix specified with the SSKEYIN
+*            and SSKEYOUT environment variables.
 *
 *   \param c_client The client object to use for communication
 *   \param use_prefix If true, all future operations on tensors and
@@ -765,11 +788,14 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 /*!
 *   \brief Control whether names of model and script keys are
 *          prefixed (e.g. in an ensemble) when forming database keys
-*   \details  Prefixes will only be used if they were previously set through
-*             the environment variables SSKEYOUT and SSKEYIN.
-*             Keys for entities created before this function is called
-*             will not be retroactively prefixed.
-*             By default, the client does not prefix model and script keys.
+*   \details This function can be used to avoid key collisions in an
+*            ensemble by prepending the string value from the
+*            environment variable SSKEYIN to model and script names.
+*            Prefixes will only be used if they were previously set through
+*            Keys for entities created before this function is called
+*            the environment variables SSKEYOUT and SSKEYIN.
+*            will not be retroactively prefixed.
+*            By default, the client does not prefix model and script keys.
 *
 *   \param c_client The client object to use for communication
 *   \param use_prefix If set to true, all future operations on models and

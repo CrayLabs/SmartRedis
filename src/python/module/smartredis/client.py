@@ -70,8 +70,7 @@ class Client(PyClient):
         """Put a tensor to a Redis database
 
         The final tensor key under which the tensor is stored
-        may be prefixed. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        may be prefixed. See use_tensor_ensemble_prefix() for more details.
 
         :param key: key for tensor for be stored at
         :type key: str
@@ -103,7 +102,7 @@ class Client(PyClient):
 
     @exception_handler
     def delete_tensor(self, key):
-        """Delete a tensor within the database
+        """Delete a tensor from the database
 
         The tensor key used to locate the tensor to be deleted
         may be prefixed. See set_data_source()
@@ -120,8 +119,8 @@ class Client(PyClient):
     def copy_tensor(self, key, dest_key):
         """Copy a tensor at one key to another key
 
-        The tensor key used to locate the tensor to be copied
-        may be prefixed. See set_data_source()
+        The source and destination tensor keys used to locate
+        and store the tensor may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
         :param key: source key of tensor to be copied
@@ -138,8 +137,8 @@ class Client(PyClient):
     def rename_tensor(self, key, new_key):
         """Rename a tensor in the database
 
-        The tensor key used to locate the tensor to be renamed
-        may be prefixed. See set_data_source()
+        The old and new tensor keys used to find and relocate
+        the tensor may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
         :param key: original key of tensor to be renamed
@@ -158,8 +157,8 @@ class Client(PyClient):
 
         The final dataset key under which the dataset is stored
         is generated from the name that was supplied when the
-        dataset was created and may be prefixed. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        dataset was created and may be prefixed. See
+        use_tensor_ensemble_prefix() for more details.
 
         All associated tensors and metadata within the Dataset
         instance will also be stored.
@@ -211,8 +210,8 @@ class Client(PyClient):
     def copy_dataset(self, key, dest_key):
         """Copy a dataset from one key to another
 
-        The dataset key used to locate the dataset to be copied
-        may be prefixed. See set_data_source()
+        The source and destination dataset keys used to
+        locate the dataset may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
         :param key: source name for dataset to be copied
@@ -229,8 +228,8 @@ class Client(PyClient):
     def rename_dataset(self, key, new_key):
         """Rename a dataset in the database
 
-        The dataset key used to locate the dataset to be renamed
-        may be prefixed. See set_data_source()
+        The old and new dataset keys used to find and relocate
+        the dataset may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
         :param key: original name of the dataset to be renamed
@@ -247,9 +246,8 @@ class Client(PyClient):
     def set_function(self, key, function, device="CPU"):
         """Set a callable function into the database
 
-        The final script key that is used to store the function
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The final script key used to store the function may be prefixed.
+        See use_model_ensemble_prefix() for more details.
 
         Function must be a callable TorchScript function and have at least
         one input and one output. Call the function with the Client.run_script
@@ -278,9 +276,8 @@ class Client(PyClient):
     def set_script(self, key, script, device="CPU"):
         """Store a TorchScript at a key in the database
 
-        The final script key that is used to store the script
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The final script key used to store the script may be prefixed.
+        See use_model_ensemble_prefix() for more details.
 
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
@@ -303,9 +300,8 @@ class Client(PyClient):
     def set_script_from_file(self, key, file, device="CPU"):
         """Same as Client.set_script, but from file
 
-        The final script key that is used to store the script
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The final script key used to store the script may be prefixed.
+        See use_model_ensemble_prefix() for more details.
 
         :param key: key to store script under
         :type key: str
@@ -326,9 +322,9 @@ class Client(PyClient):
     def get_script(self, key):
         """Retrieve a Torchscript stored in the database
 
-        The script key that is used to locate the script
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The script key used to locate the script
+        may be prefixed. See set_data_source() and
+        use_model_ensemble_prefix() for more details.
 
         :param key: the key at which script is stored
         :type key: str
@@ -344,9 +340,11 @@ class Client(PyClient):
     def run_script(self, key, fn_name, inputs, outputs):
         """Execute TorchScript stored inside the database
 
-        The script key that is used to locate the script to be run
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The script key used to locate the script to be run
+        may be prefixed. Similarly, the tensor names in the
+        input and output lists may be prefixed. See
+        set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details
 
         :param key: the key the script is stored under
         :type key: str
@@ -369,7 +367,7 @@ class Client(PyClient):
     def get_model(self, key):
         """Get a stored model
 
-        The model key that is used to locate the model
+        The model key used to locate the model
         may be prefixed. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
@@ -398,9 +396,11 @@ class Client(PyClient):
     ):
         """Put a TF, TF-lite, PT, or ONNX model in the database
 
-        The final model key that is used to store the model
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The final model key used to store the model
+        may be prefixed. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
@@ -460,9 +460,11 @@ class Client(PyClient):
     ):
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
 
-        The final model key that is used to store the model
-        may be prefixed. See set_data_source()
-        and use_model_ensemble_prefix() for more details.
+        The final model key used to store the model
+        may be prefixed. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
@@ -513,7 +515,7 @@ class Client(PyClient):
     def run_model(self, key, inputs=None, outputs=None):
         """Execute a stored model
 
-        The model key that is used to locate the model to be run
+        The model key used to locate the model to be run
         may be prefixed. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
@@ -533,7 +535,7 @@ class Client(PyClient):
     def tensor_exists(self, name):
         """Check if a tensor exists in the database
 
-        The tensor key that is used to check for existence
+        The tensor key used to check for existence
         may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
@@ -550,7 +552,7 @@ class Client(PyClient):
     def dataset_exists(self, name):
         """Check if a dataset exists in the database
 
-        The dataset key that is used to check for existence
+        The dataset key used to check for existence
         may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
@@ -567,7 +569,7 @@ class Client(PyClient):
     def model_exists(self, name):
         """Check if a model or script exists in the database
 
-        The model or script key that is used to check for existence
+        The model or script key used to check for existence
         may be prefixed. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
@@ -622,7 +624,7 @@ class Client(PyClient):
 
         The check is repeated at a specified polling interval and for
         a specified number of retries.
-        The tensor key that is used to check for existence
+        The tensor key used to check for existence
         may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
@@ -648,7 +650,7 @@ class Client(PyClient):
 
         The check is repeated at a specified polling interval and for
         a specified number of retries.
-        The dataset key that is used to check for existence
+        The dataset key used to check for existence
         may be prefixed. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
@@ -674,7 +676,7 @@ class Client(PyClient):
 
         The check is repeated at a specified polling interval and for
         a specified number of retries.
-        The model or script key that is used to check for existence
+        The model or script key used to check for existence
         may be prefixed. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
@@ -698,10 +700,25 @@ class Client(PyClient):
     def set_data_source(self, source_id):
         """Set the data source, a key prefix for future operations
 
-        The selected prefix must have previously been set via
-        one of the environment variables SSKEYOUT and SSKEYIN.
+        When running multiple applications, such as an ensemble
+        computation, there is a risk that the same name is used
+        for a tensor, dataset, script, or model by more than one
+        executing entity. In order to prevent this sort of collision,
+        SmartRedis affords the ability to add a prefix to names,
+        thereby associating them with the name of the specific
+        entity that the prefix corresponds to. For writes to
+        the database when prefixing is activated, the prefix
+        used is taken from the SSKEYOUT environment variable.
+        For reads from the database, the default is to use the
+        first prefix from SSKEYIN. If this is the same as the
+        prefix from SSKEYOUT, the entity will read back the
+        same data it wrote; however, this function allows an entity
+        to read from data written by another entity (i.e. use
+        the other entity's key.)
 
-        :param source_id: The prefix for retrieval commands
+        :param source_id: The prefix for read operations; must have
+                          previously been set via the SSKEYIN environment
+                          variable
         :type source_id: str
         :raises RedisReplyError: if set data
         """
@@ -713,7 +730,9 @@ class Client(PyClient):
         """Control whether model and script keys are
            prefixed (e.g. in an ensemble) when forming database keys
 
-        This function can be used to avoid key collisions in an ensemble.
+        This function can be used to avoid key collisions in an ensemble
+        by prepending the string value from the environment variable SSKEYIN
+        to model and script names.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
         Keys for entities created before this function is called
@@ -734,7 +753,9 @@ class Client(PyClient):
         """Control whether tensor and dataset keys are
            prefixed (e.g. in an ensemble) when forming database keys
 
-        This function can be used to avoid key collisions in an ensemble.
+        This function can be used to avoid key collisions in an ensemble
+        by prepending the string value from the environment variable SSKEYIN
+        to tensor and dataset names.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
         Keys for entities created before this function is called

@@ -67,10 +67,10 @@ SRError DeallocateeDataSet(void** dataset);
 *   \param name_length The length of the dataset name string,
 *                      excluding null terminating character
 *   \param data Tensor data to be stored in the dataset
-*   \param dims The number of elements for each dimension of the tensor
+*   \param dims The number of elements in each dimension of the tensor
 *   \param n_dims The number of dimensions for the tensor
-*   \param type The data type for the tensor data
-*   \param mem_layout Memory layout for the provided tensor data
+*   \param type The data type of the tensor data
+*   \param mem_layout Memory layout of the provided tensor data
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError add_tensor(void* dataset,
@@ -91,7 +91,7 @@ SRError add_tensor(void* dataset,
 *   \param name_length The length of the dataset name string,
 *                      excluding null terminating character
 *   \param data The scalar data to be appended to the metadata field
-*   \param type The data type for the metadata scalar
+*   \param type The data type of the metadata scalar
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError add_meta_scalar(void* dataset,
