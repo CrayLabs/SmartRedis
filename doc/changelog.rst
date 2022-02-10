@@ -1,6 +1,61 @@
 Changelog
 =========
 
+0.3.0
+-----
+
+Expected Release on Febuary 11, 2022
+
+Description
+
+ - Update Redis version to 1.3.2 (PR162_)
+ - Streamline ``run`` and ``connect`` commands for Redis and RedisCluster (PR203_)
+ - Update handling of command replies (PR138_) (PR163_)
+ - Add SmartRedis namespace to ``srassert.h`` (PR191_)
+ - Expose Redis commands to the Python client (PR139_) (PR160_)
+ - Extend inverse CRC16 prefixing to all hash slots (PR161_)
+ - Refactor the dataset acknowledgement key for easier communication with ensambles (PR195_)
+ - Add ``poll_dataset`` functionality to all SmartRedis clients (PR184_)
+ - Add commands to retrieve statistics on scripts and models in Python and C++ clients (PR197_)
+ - Add environment variables to control client runtime behavior (PR194_)
+ - Create a Dockerfile for SmartRedis (PR180_)
+ - Simplify SmartRedis build proccess (PR189_)
+ - Impove error handling across all SmartRedis clients (PR159_) (PR199_) (PR205_) (PR206_)
+ - Clean up and standardize the C++ codebase (PR141_)
+ - Add continuous integration for all SmartRedis tests (PR165_) (PR173_) (PR177_)
+ - Fix zero-length array transfer in Fortran ``convert_char_array_to_c`` (PR170_)
+ - Update SmartRedis docstrings (PR200_)
+ - Update SmartRedis documentation and examples (PR202_) (PR208_)
+
+.. _PR138: https://github.com/CrayLabs/SmartRedis/pull/138
+.. _PR139: https://github.com/CrayLabs/SmartRedis/pull/139
+.. _PR141: https://github.com/CrayLabs/SmartRedis/pull/141
+.. _PR159: https://github.com/CrayLabs/SmartRedis/pull/159
+.. _PR160: https://github.com/CrayLabs/SmartRedis/pull/160
+.. _PR161: https://github.com/CrayLabs/SmartRedis/pull/161
+.. _PR162: https://github.com/CrayLabs/SmartRedis/pull/162
+.. _PR163: https://github.com/CrayLabs/SmartRedis/pull/163
+.. _PR165: https://github.com/CrayLabs/SmartRedis/pull/165
+.. _PR170: https://github.com/CrayLabs/SmartRedis/pull/170
+.. _PR173: https://github.com/CrayLabs/SmartRedis/pull/173
+.. _PR177: https://github.com/CrayLabs/SmartRedis/pull/177
+.. _PR180: https://github.com/CrayLabs/SmartRedis/pull/180
+.. _PR183: https://github.com/CrayLabs/SmartRedis/pull/183
+.. _PR184: https://github.com/CrayLabs/SmartRedis/pull/184
+.. _PR189: https://github.com/CrayLabs/SmartRedis/pull/189
+.. _PR191: https://github.com/CrayLabs/SmartRedis/pull/191
+.. _PR194: https://github.com/CrayLabs/SmartRedis/pull/194
+.. _PR195: https://github.com/CrayLabs/SmartRedis/pull/195
+.. _PR197: https://github.com/CrayLabs/SmartRedis/pull/197
+.. _PR198: https://github.com/CrayLabs/SmartRedis/pull/198
+.. _PR199: https://github.com/CrayLabs/SmartRedis/pull/199
+.. _PR200: https://github.com/CrayLabs/SmartRedis/pull/200
+.. _PR202: https://github.com/CrayLabs/SmartRedis/pull/202
+.. _PR203: https://github.com/CrayLabs/SmartRedis/pull/203
+.. _PR205: https://github.com/CrayLabs/SmartRedis/pull/205
+.. _PR206: https://github.com/CrayLabs/SmartRedis/pull/206
+.. _PR208: https://github.com/CrayLabs/SmartRedis/pull/208
+
 0.2.0
 -----
 
@@ -18,6 +73,7 @@ Description
  - Fortran and C interface improvements (PR93_) (PR94_) (PR95_) (PR99_)
  - Add Redis INFO command execution to the Python client (PR83_)
  - Add Redis CLUSTER INFO command execution to the Python client (PR105_)
+
 .. _PR52: https://github.com/CrayLabs/SmartRedis/pull/52
 .. _PR61: https://github.com/CrayLabs/SmartRedis/pull/61
 .. _PR65: https://github.com/CrayLabs/SmartRedis/pull/65
