@@ -115,7 +115,8 @@ class Client
         /*!
         *   \brief Get a DataSet object from the database
         *   \details The dataset key used to locate the dataset
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The name of the dataset to retrieve
         *   \returns DataSet object retrieved from the database
@@ -127,13 +128,14 @@ class Client
         *   \brief Move a dataset to a new dataset key.  All tensors
         *          and metdata in the dataset will be moved with it.
         *   \details The old and new dataset keys used to find and relocate
-        *            the dataset may be prefixed. See set_data_source()
+        *            the dataset may be formed by applying prefixes to the
+        *            supplied old_name and new_name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param name The original dataset key for the dataset
+        *   \param old_name The original dataset key for the dataset
         *   \param new_name The new dataset key for the dataset
         *   \throw SmartRedis::Exception if dataset rename command fails
         */
-        void rename_dataset(const std::string& name,
+        void rename_dataset(const std::string& old_name,
                             const std::string& new_name);
 
         /*!
@@ -141,7 +143,8 @@ class Client
         *          All tensors and metadata in the DataSet will
         *          be copied as well.
         *   \details The source and destination dataset keys used to
-        *            locate and store the dataset may be prefixed.
+        *            locate and store the dataset may be formed by
+        *            applying prefix to the supplied src_name and dest_name.
         *            See set_data_source() and use_tensor_ensemble_prefix()
         *            for more details.
         *   \param src_name The source dataset key
@@ -157,7 +160,8 @@ class Client
         *          tensors and metdata in the dataset will be
         *          deleted.
         *   \details The dataset key used to locate the dataset to be
-        *            deleted may be prefixed. See set_data_source()
+        *            deleted may be formed by applying a prefix to the
+        *            supplied name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The dataset key for the dataset to be deleted.
         *   \throw SmartRedis::Exception if delete dataset command fails
@@ -167,9 +171,10 @@ class Client
         /*!
         *   \brief Put a tensor into the database
         *   \details The final tensor key under which the tensor is stored
-        *            may be prefixed. See use_tensor_ensemble_prefix() for
+        *            may be formed by applying a prefix to the supplied
+        *            name. See use_tensor_ensemble_prefix() for
         *            more details.
-        *   \param key The tensor key for this tensor in the database
+        *   \param name The tensor name for this tensor in the database
         *   \param data The data for this tensor
         *   \param dims The number of elements for each dimension
         *          of the tensor
@@ -177,7 +182,7 @@ class Client
         *   \param mem_layout The memory layout of the provided tensor data
         *   \throw SmartRedis::Exception if put tensor command fails
         */
-        void put_tensor(const std::string& key,
+        void put_tensor(const std::string& name,
                         void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
@@ -187,8 +192,9 @@ class Client
         *   \brief Retrieve the tensor data, dimensions, and type for the
         *          provided tensor key. This function will allocate and retain
         *          management of the memory for the tensor data.
-        *   \details The tensor key used to locate the tensor
-        *            may be prefixed. See set_data_source()
+        *   \details The key used to locate the tensor
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *
         *            The memory of the data pointer is valid
@@ -202,7 +208,7 @@ class Client
         *            data.  Instead  it is recommended that the user
         *            use unpack_tensor() for large tensor data and
         *            to limit memory use by the Client.
-        *   \param key  The tensor key for the tensor
+        *   \param name  The tensor name for the tensor
         *   \param data Receives tensor data
         *   \param dims Receives the number of elements in each dimension
         *               of the tensor data
@@ -211,7 +217,7 @@ class Client
         *                     data should be written
         *   \throw SmartRedis::Exception if get tensor command fails
         */
-        void get_tensor(const std::string& key,
+        void get_tensor(const std::string& name,
                         void*& data,
                         std::vector<size_t>& dims,
                         SRTensorType& type,
@@ -224,8 +230,9 @@ class Client
         *          management of the memory for the tensor data. This is a
         *          c-style interface for the tensor dimensions.  Another
         *          function exists for std::vector dimensions.
-        *   \details The tensor key used to locate the tensor
-        *            may be prefixed. See set_data_source()
+        *   \details The key used to locate the tensor
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *
         *            The memory of the data pointer is valid
@@ -239,7 +246,7 @@ class Client
         *            data.  Instead  it is recommended that the user
         *            use unpack_tensor() for large tensor data and
         *            to limit memory use by the Client.
-        *   \param key  The tensor key for the tensor
+        *   \param name  The name for the tensor
         *   \param data Receives tensor data
         *   \param dims Receives the number of elements in each dimension
         *               of the tensor data
@@ -249,7 +256,7 @@ class Client
         *                     data should be written
         *   \throw SmartRedis::Exception if get tensor command fails
         */
-        void get_tensor(const std::string& key,
+        void get_tensor(const std::string& name,
                         void*& data,
                         size_t*& dims,
                         size_t& n_dims,
@@ -260,65 +267,70 @@ class Client
         *   \brief Retrieve a tensor from the database into memory provided
         *          by the caller
         *   \details The tensor key used to locate the tensor
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param key  The tensor key for the tensor
+        *   \param name  The tensor name for the tensor
         *   \param data A buffer into which to place tensor data
         *   \param dims The dimensions for the provided data buffer
         *   \param type The tensor type for the provided data buffer
         *   \param mem_layout The memory layout for the provided data buffer
         *   \throw SmartRedis::Exception if unpack tensor command fails
         */
-        void unpack_tensor(const std::string& key,
+        void unpack_tensor(const std::string& name,
                            void* data,
                            const std::vector<size_t>& dims,
                            const SRTensorType type,
                            const SRMemoryLayout mem_layout);
 
         /*!
-        *   \brief Move a tensor to a new tensor key
+        *   \brief Move a tensor to a new name
         *   \details The old and new tensor keys used to find and relocate
-        *            the tensor may be prefixed. See set_data_source()
+        *            the tensor may be formed by applying prefixes to the
+        *            supplied old_name and new_name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param key The original tensor key
-        *   \param new_key The new tensor key
+        *   \param old_name The original tensor name
+        *   \param new_name The new tensor name
         *   \throw SmartRedis::Exception if rename tensor command fails
         */
-        void rename_tensor(const std::string& key,
-                           const std::string& new_key);
+        void rename_tensor(const std::string& old_name,
+                           const std::string& new_name);
 
         /*!
         *   \brief Delete a tensor from the database
         *   \details The tensor key used to locate the tensor to be
-        *            deleted may be prefixed. See set_data_source()
+        *            deleted may be formed by applying a prefix to the
+        *            supplied name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param key The tensor key for the tensor to delete
+        *   \param name The name of the tensor to delete
         *   \throw SmartRedis::Exception if delete tensor command fails
         */
-        void delete_tensor(const std::string& key);
+        void delete_tensor(const std::string& name);
 
         /*!
-        *   \brief Copy a tensor to a destination tensor key
+        *   \brief Copy a tensor to a destination tensor name
         *   \details The source and destination tensor keys used to
-        *            locate and store the tensor may be prefixed.
+        *            locate and store the tensor may be formed by applying
+        *            prefixes to the supplied src_name and dest_name.
         *            See set_data_source() and use_tensor_ensemble_prefix()
         *            for more details.
-        *   \param src_key The source tensor key
-        *   \param dest_key The destination tensor key
+        *   \param src_name The source tensor name
+        *   \param dest_name The destination tensor name
         *   \throw SmartRedis::Exception if copy tensor command fails
         */
-        void copy_tensor(const std::string& src_key,
-                         const std::string& dest_key);
+        void copy_tensor(const std::string& src_name,
+                         const std::string& dest_name);
 
         /*!
         *   \brief Set a model (from file) in the database for future
         *          execution
         *   \details The final model key used to store the model
-        *            may be prefixed. Similarly, the tensor names in the
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
         *            input and output node vectors for TF models may be prefixed.
         *            See set_data_source(), use_model_ensemble_prefix(), and
         *            use_tensor_ensemble_prefix() for more details
-        *   \param key The model key for this model
+        *   \param name The model name for this model
         *   \param model_file The source file for the model
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
         *   \param device The name of the device for execution. May be either
@@ -337,7 +349,7 @@ class Client
         *                 empty vector
         *   \throw SmartRedis::Exception if set model from file fails
         */
-        void set_model_from_file(const std::string& key,
+        void set_model_from_file(const std::string& name,
                                  const std::string& model_file,
                                  const std::string& backend,
                                  const std::string& device,
@@ -353,11 +365,12 @@ class Client
         *   \brief Set a model (from a buffer) in the
         *          database for future execution
         *   \details The final model key used to store the model
-        *            may be prefixed. Similarly, the tensor names in the
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
         *            input and output node vectors for TF models may be prefixed.
         *            See set_data_source(), use_model_ensemble_prefix(), and
         *            use_tensor_ensemble_prefix() for more details
-        *   \param key The model key to associate with the model
+        *   \param name The model name to associate with the model
         *   \param model The model as a continuous buffer
         *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
         *   \param device The name of the device for execution. May be either
@@ -376,7 +389,7 @@ class Client
         *                 empty vector
         *   \throw SmartRedis::Exception if set model command fails
         */
-        void set_model(const std::string& key,
+        void set_model(const std::string& name,
                        const std::string_view& model,
                        const std::string& backend,
                        const std::string& device,
@@ -391,24 +404,26 @@ class Client
         /*!
         *   \brief Retrieve a model from the database
         *   \details The model key used to locate the model
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
-        *   \param key The model key associated with the model
+        *   \param name The name associated with the model
         *   \returns A string buffer containing the model.
         *            The memory associated with the model
         *            is managed by this Client object and is valid
         *            until the Client's destruction
         *   \throw SmartRedis::Exception if get model command fails
         */
-        std::string_view get_model(const std::string& key);
+        std::string_view get_model(const std::string& name);
 
         /*!
         *   \brief Set a script (from file) in the
         *          database for future execution
         *   \details The final script key used to store the script
-        *            may be prefixed. See use_model_ensemble_prefix() for
+        *            may be formed by applying a prefix to the supplied
+        *            name. See use_model_ensemble_prefix() for
         *            more details.
-        *   \param key The script key to associate with the script
+        *   \param name The name to associate with the script
         *   \param device The name of the device for execution. May be either
         *                 CPU or GPU. If multiple GPUs are present, a specific
         *                 GPU can be targeted by appending its zero-based
@@ -416,7 +431,7 @@ class Client
         *   \param script_file The source file for the script
         *   \throw SmartRedis::Exception if set script command fails
         */
-        void set_script_from_file(const std::string& key,
+        void set_script_from_file(const std::string& name,
                                   const std::string& device,
                                   const std::string& script_file);
 
@@ -424,9 +439,10 @@ class Client
         *   \brief Set a script (from buffer) in the
         *          database for future execution
         *   \details The final script key used to store the script
-        *            may be prefixed. See use_model_ensemble_prefix()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See use_model_ensemble_prefix()
         *            for more details.
-        *   \param key The script key to associate with the script
+        *   \param name The name to associate with the script
         *   \param device The name of the device for execution. May be either
         *                 CPU or GPU. If multiple GPUs are present, a specific
         *                 GPU can be targeted by appending its zero-based
@@ -434,39 +450,41 @@ class Client
         *   \param script The script source in a string buffer
         *   \throw SmartRedis::Exception if set script command fails
         */
-        void set_script(const std::string& key,
+        void set_script(const std::string& name,
                         const std::string& device,
                         const std::string_view& script);
 
         /*!
         *   \brief Retrieve a script from the database
         *   \details The script key used to locate the script
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
-        *   \param key The key associated with the script
+        *   \param name The name associated with the script
         *   \returns A string buffer containing the script.
         *            The memory associated with the model
         *            is managed by this Client object and is valid
         *            until the Client's destruction
         *   \throw SmartRedis::Exception if get script command fails
         */
-        std::string_view get_script(const std::string& key);
+        std::string_view get_script(const std::string& name);
 
         /*!
         *   \brief Run a model in the database using the
         *   \details The model key used to locate the model to be run
-        *            may be prefixed. Similarly, the tensor names in the
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
         *            input and output vectors may be prefixed.
         *            See set_data_source(), use_model_ensemble_prefix(), and
         *            use_tensor_ensemble_prefix() for more details
-        *   \param key The model key associated with the model
+        *   \param name The name associated with the model
         *   \param inputs The tensor keys for inputs tensors to use
         *                 in the model
         *   \param outputs The tensor keys of output tensors to
         *                 use to capture model results
         *   \throw SmartRedis::Exception if run model command fails
         */
-        void run_model(const std::string& key,
+        void run_model(const std::string& name,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs);
 
@@ -474,11 +492,12 @@ class Client
         *   \brief Run a script function in the database using the
         *          specificed input and output tensors
         *   \details The script key used to locate the script to be run
-        *            may be prefixed. Similarly, the tensor names in the
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
         *            input and output vectors may be prefixed.
         *            See set_data_source(), use_model_ensemble_prefix(), and
         *            use_tensor_ensemble_prefix() for more details
-        *   \param key The script key associated with the script
+        *   \param name The name associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The tensor keys of inputs tensors to use
         *                 in the script
@@ -486,7 +505,7 @@ class Client
         *                  capture script results
         *   \throw SmartRedis::Exception if run script command fails
         */
-        void run_script(const std::string& key,
+        void run_script(const std::string& name,
                         const std::string& function,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs);
@@ -503,7 +522,8 @@ class Client
         /*!
         *   \brief Check if a model (or script) key exists in the database
         *   \details The model or script key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param name The model/script key to be checked in the database
         *   \returns Returns true if the key exists in the database
@@ -514,7 +534,8 @@ class Client
         /*!
         *   \brief Check if a tensor key exists in the database
         *   \details The tensor key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The tensor key to be checked in the database
         *   \returns Returns true if the tensor key exists in the database
@@ -525,7 +546,8 @@ class Client
         /*!
         *   \brief Check if a dataset exists in the database
         *   \details The dataset key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The dataset key to be checked in the database
         *   \returns Returns true if the dataset key exists in the database
@@ -552,7 +574,8 @@ class Client
         *   \brief Check if a tensor key exists in the database, repeating
 *       *          the check at a specified polling interval
         *   \details The tensor key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The tensor key to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
@@ -570,7 +593,8 @@ class Client
         *   \brief Check if a dataset key exists in the database, repeating
 *       *          the check at a specified polling interval
         *   \details The dataset key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
         *   \param name The dataset key to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
@@ -588,7 +612,8 @@ class Client
         *   \brief Check if a model (or script) key exists in the database,
         *          repeating the check at a specified polling interval
         *   \details The model or script key used to check for existence
-        *            may be prefixed. See set_data_source()
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
         *   \param name The model/script key to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
@@ -893,21 +918,21 @@ class Client
         inline std::string _get_prefix();
 
         /*!
-        *  \brief Append a vector of keys with the retrieval prefix
-        *  \param keys The vector of keys to prefix for retrieval
+        *  \brief Append a vector of names with the retrieval prefix
+        *  \param names The vector of names to prefix for retrieval
         */
-        inline void _append_with_get_prefix(std::vector<std::string>& keys);
+        inline void _append_with_get_prefix(std::vector<std::string>& names);
 
         /*!
-        *  \brief Append a vector of keys with the placement prefix
-        *  \param keys The vector of keys to prefix for placement
+        *  \brief Append a vector of names with the placement prefix
+        *  \param names The vector of names to prefix for placement
         */
-        inline void _append_with_put_prefix(std::vector<std::string>& keys);
+        inline void _append_with_put_prefix(std::vector<std::string>& names);
 
         /*!
         *  \brief Execute the command to retrieve the DataSet metadata portion
         *         of the DataSet.
-        *   \param name The name of the DataSet, not prefixed.
+        *   \param name The name of the DataSet
         *   \returns The CommandReply for the command to retrieve the DataSet
         *             metadata
         */
@@ -985,28 +1010,28 @@ class Client
         /*!
         * \brief Build full formatted key of a tensor, based on
         *        current prefix settings.
-        * \param key Tensor key
+        * \param name Unprefixed tensor name
         * \param on_db Indicates whether the key refers to an entity
         *              which is already in the database.
         */
-        inline std::string _build_tensor_key(const std::string& key,
+        inline std::string _build_tensor_key(const std::string& name,
                                              const bool on_db);
 
         /*!
         * \brief Build full formatted key of a model or a script,
         *        based on current prefix settings.
-        * \param key Model or script key
+        * \param name  Unprefixed model or script name
         * \param on_db Indicates whether the key refers to an entity
         *              which is already in the database.
         */
-        inline std::string _build_model_key(const std::string& key,
+        inline std::string _build_model_key(const std::string& name,
                                             const bool on_db);
 
         /*!
         *  \brief Build full formatted key of a dataset, based
         *         on current prefix settings.
-        *  \param dataset_name Name of dataset
-        *  \param on_db Indicates whether the key refers to an entity
+        *  \param dataset_name Unprefixed name of dataset
+        *  \param on_db Indicates whether the name refers to an entity
         *               which is already in the database.
         *  \returns Formatted key.
         */
@@ -1018,7 +1043,7 @@ class Client
         *         in the database
         *  \param dataset_name The name of the dataset
         *  \param tensor_name The name of the tensor
-        *  \param on_db Indicates whether the key refers to an entity
+        *  \param on_db Indicates whether the name refers to an entity
         *               which is already in the database.
         *  \returns A string of the key for the tensor
         */
@@ -1031,8 +1056,8 @@ class Client
         *         in the database
         *  \param dataset_name The name of the dataset
         *  \param tensor_name A std::vector of tensor names
-        *  \param on_db Indicates whether the keys refer to an entity which
-        *               is already in the database.
+        *  \param on_db Indicates whether the names refer to entities which
+        *               are already in the database.
         *  \returns A std::vector<std::string> of the keys for the tensors
         */
         inline std::vector<std::string>
@@ -1044,7 +1069,7 @@ class Client
         *  \brief Create the key for putting or getting DataSet metadata
         *         in the database
         *  \param dataset_name The name of the dataset
-        *  \param on_db Indicates whether the key refers to an entity which
+        *  \param on_db Indicates whether the name refers to an entity which
         *               is already in the database.
         *  \returns A string of the key for the metadata
         */
@@ -1055,7 +1080,7 @@ class Client
         *  \brief Create the key to place an indicator in the database
         *         that the dataset has been successfully stored.
         *  \param dataset_name The name of the dataset
-        *  \param on_db Indicates whether the key refers to an entity which
+        *  \param on_db Indicates whether the name refers to an entity which
         *               is already in the database.
         *  \returns A string of the key for the ack key
         */

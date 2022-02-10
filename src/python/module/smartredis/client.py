@@ -66,90 +66,95 @@ class Client(PyClient):
             raise RedisConnectionError(str(e)) from None
 
     @exception_handler
-    def put_tensor(self, key, data):
+    def put_tensor(self, name, data):
         """Put a tensor to a Redis database
 
         The final tensor key under which the tensor is stored
-        may be prefixed. See use_tensor_ensemble_prefix() for more details.
+        may be formed by applying a prefix to the supplied
+        name. See use_tensor_ensemble_prefix() for more details.
 
-        :param key: key for tensor for be stored at
-        :type key: str
+        :param name: name for tensor for be stored at
+        :type name: str
         :param data: numpy array of tensor data
         :type data: np.array
         :raises RedisReplyError: if put fails
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
-        super().put_tensor(key, dtype, data)
+        super().put_tensor(name, dtype, data)
 
     @exception_handler
-    def get_tensor(self, key):
+    def get_tensor(self, name):
         """Get a tensor from the database
 
-        The tensor key used to locate the tensor
-        may be prefixed. See set_data_source()
+        The tensor name used to locate the tensor
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: key to get tensor from
-        :type key: str
+        :param name: name to get tensor from
+        :type name: str
         :raises RedisReplyError: if get fails
         :return: numpy array of tensor data
         :rtype: np.array
         """
-        typecheck(key, "key", str)
-        return super().get_tensor(key)
+        typecheck(name, "name", str)
+        return super().get_tensor(name)
 
     @exception_handler
-    def delete_tensor(self, key):
+    def delete_tensor(self, name):
         """Delete a tensor from the database
 
-        The tensor key used to locate the tensor to be deleted
-        may be prefixed. See set_data_source()
+        The tensor name used to locate the tensor to be deleted
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: key tensor is stored at
-        :type key: str
+        :param name: name tensor is stored at
+        :type name: str
         :raises RedisReplyError: if deletion fails
         """
-        typecheck(key, "key", str)
-        super().delete_tensor(key)
+        typecheck(name, "name", str)
+        super().delete_tensor(name)
 
     @exception_handler
-    def copy_tensor(self, key, dest_key):
-        """Copy a tensor at one key to another key
+    def copy_tensor(self, src_name, dest_name):
+        """Copy a tensor at one name to another name
 
         The source and destination tensor keys used to locate
-        and store the tensor may be prefixed. See set_data_source()
+        and store the tensor may be formed by applying prefixes
+        to the supplied src_name and dest_name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: source key of tensor to be copied
-        :type key: str
-        :param dest_key: key to store new copy at
-        :type dest_key: str
+        :param src_name: source name of tensor to be copied
+        :type src_name: str
+        :param dest_name: name to store new copy at
+        :type dest_name: str
         :raises RedisReplyError: if copy operation fails
         """
-        typecheck(key, "key", str)
-        typecheck(dest_key, "dest_key", str)
-        super().copy_tensor(key, dest_key)
+        typecheck(src_name, "src_name", str)
+        typecheck(dest_name, "dest_name", str)
+        super().copy_tensor(src_name, dest_name)
 
     @exception_handler
-    def rename_tensor(self, key, new_key):
+    def rename_tensor(self, old_name, new_name):
         """Rename a tensor in the database
 
-        The old and new tensor keys used to find and relocate
-        the tensor may be prefixed. See set_data_source()
+        The old and new tensor names used to find and relocate
+        the tensor may be formed by applying prefixes to the supplied
+        old_name and new_name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: original key of tensor to be renamed
-        :type key: str
-        :param new_key: new name for the tensor
-        :type new_key: str
+        :param old_name: original name of tensor to be renamed
+        :type old_name: str
+        :param new_name: new name for the tensor
+        :type new_name: str
         :raises RedisReplyError: if rename operation fails
         """
-        typecheck(key, "key", str)
-        typecheck(new_key, "new_key", str)
-        super().rename_tensor(key, new_key)
+        typecheck(old_name, "old_name", str)
+        typecheck(new_name, "new_name", str)
+        super().rename_tensor(old_name, new_name)
 
     @exception_handler
     def put_dataset(self, dataset):
@@ -173,80 +178,85 @@ class Client(PyClient):
         super().put_dataset(pybind_dataset)
 
     @exception_handler
-    def get_dataset(self, key):
+    def get_dataset(self, name):
         """Get a dataset from the database
 
         The dataset key used to locate the dataset
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: key the dataset is stored under
-        :type key: str
+        :param name: name the dataset is stored under
+        :type name: str
         :raises RedisReplyError: if retrieval fails
         :return: Dataset instance
         :rtype: Dataset
         """
-        typecheck(key, "key", str)
-        dataset = super().get_dataset(key)
+        typecheck(name, "name", str)
+        dataset = super().get_dataset(name)
         python_dataset = Dataset.from_pybind(dataset)
         return python_dataset
 
     @exception_handler
-    def delete_dataset(self, key):
+    def delete_dataset(self, name):
         """Delete a dataset within the database
 
         The dataset key used to locate the dataset to be deleted
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: name of the dataset
-        :type key: str
+        :param name: name of the dataset
+        :type name: str
         :raises RedisReplyError: if deletion fails
         """
-        typecheck(key, "key", str)
-        super().delete_dataset(key)
+        typecheck(name, "name", str)
+        super().delete_dataset(name)
 
     @exception_handler
-    def copy_dataset(self, key, dest_key):
+    def copy_dataset(self, src_name, dest_name):
         """Copy a dataset from one key to another
 
         The source and destination dataset keys used to
-        locate the dataset may be prefixed. See set_data_source()
+        locate the dataset may be formed by applying prefixes
+        to the supplied src_name and dest_name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: source name for dataset to be copied
-        :type key: str
-        :param dest_key: new name of dataset
-        :type dest_key: str
+        :param src_name: source name for dataset to be copied
+        :type src_name: str
+        :param dest_name: new name of dataset
+        :type dest_name: str
         :raises RedisReplyError: if copy operation fails
         """
-        typecheck(key, "key", str)
-        typecheck(dest_key, "dest_key", str)
-        super().copy_dataset(key, dest_key)
+        typecheck(src_name, "src_name", str)
+        typecheck(dest_name, "dest_name", str)
+        super().copy_dataset(src_name, dest_name)
 
     @exception_handler
-    def rename_dataset(self, key, new_key):
+    def rename_dataset(self, old_name, new_name):
         """Rename a dataset in the database
 
         The old and new dataset keys used to find and relocate
-        the dataset may be prefixed. See set_data_source()
+        the dataset may be formed by applying prefixes to the supplied
+        old_name and new_name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: original name of the dataset to be renamed
-        :type key: str
-        :param new_key: new name for the dataset
-        :type new_key: str
+        :param old_name: original name of the dataset to be renamed
+        :type old_name: str
+        :param new_name: new name for the dataset
+        :type new_name: str
         :raises RedisReplyError: if rename operation fails
         """
-        typecheck(key, "key", str)
-        typecheck(new_key, "new_key", str)
-        super().rename_dataset(key, new_key)
+        typecheck(old_name, "old_name", str)
+        typecheck(new_name, "new_name", str)
+        super().rename_dataset(old_name, new_name)
 
     @exception_handler
-    def set_function(self, key, function, device="CPU"):
+    def set_function(self, name, function, device="CPU"):
         """Set a callable function into the database
 
-        The final script key used to store the function may be prefixed.
+        The final script key used to store the function may be formed
+        by applying a prefix to the supplied name.
         See use_model_ensemble_prefix() for more details.
 
         Function must be a callable TorchScript function and have at least
@@ -255,8 +265,8 @@ class Client(PyClient):
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
-        :param key: key to store function at
-        :type key: str
+        :param name: name to store function at
+        :type name: str
         :param function: callable function
         :type function: callable
         :param device: device to run function on, defaults to "CPU"
@@ -264,127 +274,132 @@ class Client(PyClient):
         :raises TypeError: if argument was not a callable function
         :raises RedisReplyError: if function failed to set
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(device, "device", str)
         if not callable(function):
             raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         device = self.__check_device(device)
         fn_src = inspect.getsource(function)
-        super().set_script(key, device, fn_src)
+        super().set_script(name, device, fn_src)
 
     @exception_handler
-    def set_script(self, key, script, device="CPU"):
+    def set_script(self, name, script, device="CPU"):
         """Store a TorchScript at a key in the database
 
-        The final script key used to store the script may be prefixed.
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
         See use_model_ensemble_prefix() for more details.
 
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
-        :param key: key to store the script under
-        :type key: str
+        :param name: name to store the script under
+        :type name: str
         :param script: TorchScript code
         :type script: str
         :param device: device for script execution, defaults to "CPU"
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(script, "script", str)
         typecheck(device, "device", str)
         device = self.__check_device(device)
-        super().set_script(key, device, script)
+        super().set_script(name, device, script)
 
     @exception_handler
-    def set_script_from_file(self, key, file, device="CPU"):
+    def set_script_from_file(self, name, file, device="CPU"):
         """Same as Client.set_script, but from file
 
-        The final script key used to store the script may be prefixed.
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
         See use_model_ensemble_prefix() for more details.
 
-        :param key: key to store script under
-        :type key: str
+        :param name: key to store script under
+        :type name: str
         :param file: path to text file containing TorchScript code
         :type file: str
         :param device: device for script execution, defaults to "CPU"
         :type device: str, optional
         :raises RedisReplyError: if script fails to set
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(file, "file", str)
         typecheck(device, "device", str)
         device = self.__check_device(device)
         file_path = self.__check_file(file)
-        super().set_script_from_file(key, device, file_path)
+        super().set_script_from_file(name, device, file_path)
 
     @exception_handler
-    def get_script(self, key):
+    def get_script(self, name):
         """Retrieve a Torchscript stored in the database
 
         The script key used to locate the script
-        may be prefixed. See set_data_source() and
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source() and
         use_model_ensemble_prefix() for more details.
 
-        :param key: the key at which script is stored
-        :type key: str
+        :param name: the name at which script is stored
+        :type name: str
         :raises RedisReplyError: if script retrieval fails
-        :return: TorchScript stored at key
+        :return: TorchScript stored at name
         :rtype: str
         """
-        typecheck(key, "key", str)
-        script = super().get_script(key)
+        typecheck(name, "name", str)
+        script = super().get_script(name)
         return script
 
     @exception_handler
-    def run_script(self, key, fn_name, inputs, outputs):
+    def run_script(self, name, fn_name, inputs, outputs):
         """Execute TorchScript stored inside the database
 
         The script key used to locate the script to be run
-        may be prefixed. Similarly, the tensor names in the
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
         input and output lists may be prefixed. See
         set_data_source(), use_model_ensemble_prefix(), and
         use_tensor_ensemble_prefix() for more details
 
-        :param key: the key the script is stored under
-        :type key: str
+        :param name: the name the script is stored under
+        :type name: str
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
-        :param inputs: database tensor keys to use as script inputs
+        :param inputs: database tensor names to use as script inputs
         :type inputs: list[str]
-        :param outputs: database tensor keys to receive script outputs
+        :param outputs: database tensor names to receive script outputs
         :type outputs: list[str]
         :raises RedisReplyError: if script execution fails
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
         typecheck(inputs, "inputs", list)
         typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_script(key, fn_name, inputs, outputs)
+        super().run_script(name, fn_name, inputs, outputs)
 
     @exception_handler
-    def get_model(self, key):
+    def get_model(self, name):
         """Get a stored model
 
         The model key used to locate the model
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
-        :param key: key of stored model
-        :type key: str
+        :param name: name of stored model
+        :type name: str
         :raises RedisReplyError: if retrieval fails
         :return: model
         :rtype: bytes
         """
-        typecheck(key, "key", str)
-        model = super().get_model(key)
+        typecheck(name, "name", str)
+        model = super().get_model(name)
         return model
 
     @exception_handler
     def set_model(
         self,
-        key,
+        name,
         model,
         backend,
         device="CPU",
@@ -397,15 +412,16 @@ class Client(PyClient):
         """Put a TF, TF-lite, PT, or ONNX model in the database
 
         The final model key used to store the model
-        may be prefixed. Similarly, the tensor names in the
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
         input and output nodes for TF models may be prefixed.
         See set_data_source(), use_model_ensemble_prefix(), and
         use_tensor_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
-        :param key: key to store model under
-        :type key: str
+        :param name: name to store model under
+        :type name: str
         :param model: serialized model
         :type model: bytes
         :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
@@ -424,7 +440,7 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(backend, "backend", str)
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
@@ -434,7 +450,7 @@ class Client(PyClient):
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().set_model(
-            key,
+            name,
             model,
             backend,
             device,
@@ -448,7 +464,7 @@ class Client(PyClient):
     @exception_handler
     def set_model_from_file(
         self,
-        key,
+        name,
         model_file,
         backend,
         device="CPU",
@@ -461,15 +477,16 @@ class Client(PyClient):
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
 
         The final model key used to store the model
-        may be prefixed. Similarly, the tensor names in the
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
         input and output nodes for TF models may be prefixed.
         See set_data_source(), use_model_ensemble_prefix(), and
         use_tensor_ensemble_prefix() for more details.
         Device selection is either "GPU" or "CPU". If many GPUs are present,
         a zero-based index can be passed for specification e.g. "GPU:1".
 
-        :param key: key to store model under
-        :type key: str
+        :param name: name to store model under
+        :type name: str
         :param model_file: serialized model
         :type model_file: file path to model
         :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
@@ -488,7 +505,7 @@ class Client(PyClient):
         :type outputs: list[str], optional
         :raises RedisReplyError: if model fails to set
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         typecheck(model_file, "model_file", str)
         typecheck(backend, "backend", str)
         typecheck(device, "device", str)
@@ -500,7 +517,7 @@ class Client(PyClient):
         m_file = self.__check_file(model_file)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().set_model_from_file(
-            key,
+            name,
             m_file,
             backend,
             device,
@@ -512,35 +529,37 @@ class Client(PyClient):
         )
 
     @exception_handler
-    def run_model(self, key, inputs=None, outputs=None):
+    def run_model(self, name, inputs=None, outputs=None):
         """Execute a stored model
 
         The model key used to locate the model to be run
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
-        :param key: key for stored model
-        :type key: str
-        :param inputs: keys of stored inputs to provide model, defaults to None
+        :param name: name for stored model
+        :type name: str
+        :param inputs: names of stored inputs to provide model, defaults to None
         :type inputs: list[str], optional
-        :param outputs: keys to store outputs under, defaults to None
+        :param outputs: names to store outputs under, defaults to None
         :type outputs: list[str], optional
         :raises RedisReplyError: if model execution fails
         """
-        typecheck(key, "key", str)
+        typecheck(name, "name", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model(key, inputs, outputs)
+        super().run_model(name, inputs, outputs)
 
     @exception_handler
     def tensor_exists(self, name):
         """Check if a tensor exists in the database
 
         The tensor key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The tensor name that will be checked in the database
-        :type key: str
+        :param name: The tensor name that will be checked in the database
+        :type name: str
         :returns: Returns true if the tensor exists in the database
         :rtype: bool
         :raises RedisReplyError: if checking for tensor existence causes an error
@@ -553,11 +572,12 @@ class Client(PyClient):
         """Check if a dataset exists in the database
 
         The dataset key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The dataset name that will be checked in the database
-        :type key: str
+        :param name: The dataset name that will be checked in the database
+        :type name: str
         :returns: Returns true if the dataset exists in the database
         :rtype: bool
         :raises RedisReplyError: if `dataset_exists` fails (i.e. causes an error)
@@ -570,11 +590,12 @@ class Client(PyClient):
         """Check if a model or script exists in the database
 
         The model or script key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
-        :param key: The model or script name that will be checked in the database
-        :type key: str
+        :param name: The model or script name that will be checked in the database
+        :type name: str
         :returns: Returns true if the model exists in the database
         :rtype: bool
         :raises RedisReplyError: if `model_exists` fails (i.e. causes an error)
@@ -603,7 +624,7 @@ class Client(PyClient):
         a specified number of retries.
 
         :param key: The key that will be checked in the database
-        :type key: int
+        :type key: str
         :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of retries for the check
@@ -625,11 +646,12 @@ class Client(PyClient):
         The check is repeated at a specified polling interval and for
         a specified number of retries.
         The tensor key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The tensor key that will be checked in the database
-        :type key: int
+        :param name: The tensor name that will be checked in the database
+        :type name: str
         :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of retries for the check
@@ -651,11 +673,12 @@ class Client(PyClient):
         The check is repeated at a specified polling interval and for
         a specified number of retries.
         The dataset key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
 
-        :param key: The dataset key that will be checked in the database
-        :type key: int
+        :param name: The dataset name that will be checked in the database
+        :type name: str
         :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of retries for the check
@@ -677,11 +700,12 @@ class Client(PyClient):
         The check is repeated at a specified polling interval and for
         a specified number of retries.
         The model or script key used to check for existence
-        may be prefixed. See set_data_source()
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
         and use_model_ensemble_prefix() for more details.
 
-        :param key: The model or script key that will be checked in the database
-        :type key: int
+        :param name: The model or script name that will be checked in the database
+        :type name: str
         :param poll_frequency_ms: The polling interval, in milliseconds
         :type poll_frequency_ms: int
         :param num_tries: The total number of retries for the check
