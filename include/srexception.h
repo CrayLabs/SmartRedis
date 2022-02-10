@@ -128,19 +128,19 @@ class Exception: public std::exception
     *   \brief Exception assignment operator
     *   \param other Exception to assign
     */
-    Exception& operator=(const Exception &other) = default;
+    Exception& operator=(const Exception& other) = default;
 
     /*!
     *   \brief Exception move constructor
     *   \param other Exception to move
     */
-    Exception(Exception &&) = default;
+    Exception(Exception&&) = default;
 
     /*!
     *   \brief Exception move assignment operator
     *   \param other Exception to move
     */
-    Exception& operator=(Exception &&) = default;
+    Exception& operator=(Exception&& other) = default;
 
     /*!
     *   \brief Exception destructor

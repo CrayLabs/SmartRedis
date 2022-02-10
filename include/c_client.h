@@ -475,6 +475,7 @@ SRError set_script_from_file(void* c_client,
 *   \details The final script key used to store the script
 *            may be formed by applying a prefix to the supplied
 *            name. See use_model_ensemble_prefix() for more details
+*   \param c_client The client object to use for communication
 *   \param name The name to associate with the script
 *   \param name_length The length of the name string,
 *                      excluding null terminating character

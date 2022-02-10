@@ -1055,7 +1055,7 @@ class Client
         *  \brief Create keys for putting or getting a DataSet tensors
         *         in the database
         *  \param dataset_name The name of the dataset
-        *  \param tensor_name A std::vector of tensor names
+        *  \param tensor_names A std::vector of tensor names
         *  \param on_db Indicates whether the names refer to entities which
         *               are already in the database.
         *  \returns A std::vector<std::string> of the keys for the tensors
