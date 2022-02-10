@@ -134,7 +134,7 @@ class Exception: public std::exception
     *   \brief Exception move constructor
     *   \param other Exception to move
     */
-    Exception(Exception&&) = default;
+    Exception(Exception&& other) = default;
 
     /*!
     *   \brief Exception move assignment operator
