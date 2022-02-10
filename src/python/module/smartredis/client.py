@@ -88,7 +88,7 @@ class Client(PyClient):
     def get_tensor(self, name):
         """Get a tensor from the database
 
-        The tensor name used to locate the tensor
+        The tensor key used to locate the tensor
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
@@ -106,7 +106,7 @@ class Client(PyClient):
     def delete_tensor(self, name):
         """Delete a tensor from the database
 
-        The tensor name used to locate the tensor to be deleted
+        The tensor key used to locate the tensor to be deleted
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
@@ -141,7 +141,7 @@ class Client(PyClient):
     def rename_tensor(self, old_name, new_name):
         """Rename a tensor in the database
 
-        The old and new tensor names used to find and relocate
+        The old and new tensor keys used to find and relocate
         the tensor may be formed by applying prefixes to the supplied
         old_name and new_name. See set_data_source()
         and use_tensor_ensemble_prefix() for more details.
@@ -848,6 +848,7 @@ class Client(PyClient):
     def get_ai_info(self, address, key, reset_stat=False):
         """Returns AI.INFO command reply information for the
         script or model key at the provided addresses.
+
         :param addresses: The addresses of the database nodes
         :type address: list[str]
         :param key: The key associated with the model or script

@@ -243,7 +243,7 @@ SRError unpack_tensor(void* c_client,
                      SRMemoryLayout mem_layout);
 
 /*!
-*   \brief Move a tensor to a new tensor key
+*   \brief Move a tensor to a new name
 *   \details The old and new tensor keys used to find and
 *            relocate the tensor may be formed by applying
 *            prefixes to the supplied old_name and new_name.
@@ -251,7 +251,7 @@ SRError unpack_tensor(void* c_client,
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param old_name The original name by which the tensor should be accessed
-*   \param old_name_length The length of the key string,
+*   \param old_name_length The length of the old_name string,
 *                          excluding null terminating character
 *   \param new_name The new tensor name
 *   \param new_name_length The length of the supplied new_name string,
@@ -272,7 +272,7 @@ SRError rename_tensor(void* c_client,
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param name The tensor name for the tensor to delete
-*   \param name_length The length of the tensor name string,
+*   \param name_length The length of the name string,
 *                      excluding null terminating character
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -288,10 +288,10 @@ SRError delete_tensor(void* c_client,
 *            See set_data_source()
 *            and use_tensor_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
-*   \param src_name The source key from which the tensor should be copied
+*   \param src_name The source name from which the tensor should be copied
 *   \param src_name_length The length of the src_name string,
 *                          excluding null terminating character
-*   \param dest_name The destination key to which the tensor should be copied
+*   \param dest_name The destination name to which the tensor should be copied
 *   \param dest_name_length The length of the dest_name string,
 *                           excluding null terminating character
 *   \return Returns SRNoError on success or an error code on failure
@@ -312,7 +312,7 @@ SRError copy_tensor(void* c_client,
 *            use_tensor_ensemble_prefix() for more details
 *   \param c_client The client object to use for communication
 *   \param name The name to associate with the model
-*   \param name_length The length of the key string,
+*   \param name_length The length of the name string,
 *                      excluding null terminating character
 *   \param model_file The source file for the model
 *   \param model_file_length The length of the model_file string,
@@ -421,7 +421,7 @@ SRError set_model(void* c_client,
                   const size_t n_outputs);
 
 /*!
-*   \brief Get a model in the database.   The memory associated with the
+*   \brief Get a model in the database. The memory associated with the
 *          model string is valid until the client is destroyed.
 *   \details The model key used to locate the model
 *            may be formed by applying a prefix to the supplied

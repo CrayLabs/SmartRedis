@@ -125,7 +125,7 @@ class Client
         DataSet get_dataset(const std::string& name);
 
         /*!
-        *   \brief Move a dataset to a new dataset key.  All tensors
+        *   \brief Move a dataset to a new name.  All tensors
         *          and metdata in the dataset will be moved with it.
         *   \details The old and new dataset keys used to find and relocate
         *            the dataset may be formed by applying prefixes to the
@@ -139,9 +139,8 @@ class Client
                             const std::string& new_name);
 
         /*!
-        *   \brief Copy a dataset to a new dataset key in the database.
-        *          All tensors and metadata in the DataSet will
-        *          be copied as well.
+        *   \brief Copy a dataset to a new name. All tensors and metadata
+        *          in the DataSet will be copied as well.
         *   \details The source and destination dataset keys used to
         *            locate and store the dataset may be formed by
         *            applying prefix to the supplied src_name and dest_name.
@@ -208,7 +207,7 @@ class Client
         *            data.  Instead  it is recommended that the user
         *            use unpack_tensor() for large tensor data and
         *            to limit memory use by the Client.
-        *   \param name  The tensor name for the tensor
+        *   \param name The tensor name for the tensor
         *   \param data Receives tensor data
         *   \param dims Receives the number of elements in each dimension
         *               of the tensor data
@@ -525,8 +524,8 @@ class Client
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
-        *   \param name The model/script key to be checked in the database
-        *   \returns Returns true if the key exists in the database
+        *   \param name The model/script name to be checked in the database
+        *   \returns Returns true if the model exists in the database
         *   \throw SmartRedis::Exception if model exists command fails
         */
         bool model_exists(const std::string& name);
@@ -537,8 +536,8 @@ class Client
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param name The tensor key to be checked in the database
-        *   \returns Returns true if the tensor key exists in the database
+        *   \param name The tensor name to be checked in the database
+        *   \returns Returns true if the tensor exists in the database
         *   \throw SmartRedis::Exception if tensor exists command fails
         */
         bool tensor_exists(const std::string& name);
@@ -549,8 +548,8 @@ class Client
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param name The dataset key to be checked in the database
-        *   \returns Returns true if the dataset key exists in the database
+        *   \param name The dataset name to be checked in the database
+        *   \returns Returns true if the dataset exists in the database
         *   \throw SmartRedis::Exception if dataset exists command fails
         */
         bool dataset_exists(const std::string& name);
@@ -571,17 +570,17 @@ class Client
                       int num_tries);
 
         /*!
-        *   \brief Check if a tensor key exists in the database, repeating
+        *   \brief Check if a tensor exists in the database, repeating
 *       *          the check at a specified polling interval
         *   \details The tensor key used to check for existence
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param name The tensor key to be checked in the database
+        *   \param name The tensor name to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
-        *   \param num_tries The total number of times to check for the key
-        *   \returns Returns true if the key is found within the
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the tensor is found within the
         *            specified number of tries, otherwise false.
         *   \throw SmartRedis::Exception if poll tensor command fails
         */
@@ -590,17 +589,17 @@ class Client
                          int num_tries);
 
         /*!
-        *   \brief Check if a dataset key exists in the database, repeating
+        *   \brief Check if a dataset exists in the database, repeating
 *       *          the check at a specified polling interval
         *   \details The dataset key used to check for existence
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_tensor_ensemble_prefix() for more details.
-        *   \param name The dataset key to be checked in the database
+        *   \param name The dataset name to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
-        *   \param num_tries The total number of times to check for the key
-        *   \returns Returns true if the key is found within the
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the dataset is found within the
         *            specified number of tries, otherwise false.
         *   \throw SmartRedis::Exception if poll dataset command fails
         */
@@ -609,17 +608,17 @@ class Client
                           int num_tries);
 
         /*!
-        *   \brief Check if a model (or script) key exists in the database,
+        *   \brief Check if a model (or script) exists in the database,
         *          repeating the check at a specified polling interval
         *   \details The model or script key used to check for existence
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source()
         *            and use_model_ensemble_prefix() for more details.
-        *   \param name The model/script key to be checked in the database
+        *   \param name The model/script name to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
-        *   \param num_tries The total number of times to check for the key
-        *   \returns Returns true if the key is found within the
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the model/script is found within the
         *            specified number of tries, otherwise false.
         *   \throw SmartRedis::Exception if poll model command fails
         */
@@ -752,6 +751,13 @@ class Client
         *   \param address The address of the database node (host:port)
         *   \throw SmartRedis::Exception if the command fails or if the
         *          address is not addressable by this client.
+        *          When using a cluster of database nodes,
+        *          it is best practice to bind each node in the cluster
+        *          to a specific address to avoid inconsistencies in
+        *          addresses retrieved with the CLUSTER SLOTS command.
+        *          Inconsistencies in node addresses across
+        *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
+        *          being thrown.
         */
         void flush_db(std::string address);
 
