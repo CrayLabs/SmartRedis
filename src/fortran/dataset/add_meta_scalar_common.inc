@@ -24,6 +24,13 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+  !** Beginning of code common to all add_meta_scalar subroutines
+
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  MODULE ADD_META_SCALAR_COMMON
+#endif
+
   character(kind=c_char, len=len_trim(name))  :: c_name
   integer(kind=enum_kind) :: c_data_type, expected_data_type
   integer(kind=c_size_t) :: name_length
@@ -34,3 +41,10 @@
   meta_ptr = c_loc(meta)
 
   code = add_meta_scalar_c(self%dataset_ptr, c_name, name_length, meta_ptr, meta_type)
+
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  END
+#endif
+
+  !** End of code common to all add_meta_scalar subroutines

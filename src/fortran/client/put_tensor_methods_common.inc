@@ -26,6 +26,11 @@
 
   !** Beginning of code common to all put_tensor subroutines
 
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  MODULE PUT_TENSOR_METHODS_COMMON
+#endif
+
   class(client_type),                    intent(in) :: self !< Fortran SLIC client
   character(len=*),                      intent(in) :: key  !< The unique key used to store in the database
   integer, dimension(:),                 intent(in) :: dims !< The length of each dimension
@@ -51,5 +56,10 @@
 
   c_dims(:) = dims(:)
   c_dims_ptr = c_loc(c_dims)
+
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  END
+#endif
 
   !** End of code common to all put_tensor subroutines

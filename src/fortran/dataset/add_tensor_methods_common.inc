@@ -24,7 +24,12 @@
 ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  !** Beginning of code common to all put_tensor subroutines
+  !** Beginning of code common to all add_tensor subroutines
+
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  MODULE ADD_TENSOR_COMMON
+#endif
 
   class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
@@ -51,4 +56,9 @@
   c_dims(:) = dims(:)
   c_dims_ptr = c_loc(c_dims)
 
-  !** End of code common to all put_tensor subroutines
+#ifdef DOXYGEN
+  ! Lie to Doxygen to get it to process these parameters
+  END
+#endif
+
+  !** End of code common to all add_tensor subroutines
