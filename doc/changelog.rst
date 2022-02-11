@@ -8,10 +8,17 @@ Release on Febuary 11, 2022
 
 Description
 
- - Impove error handling across all SmartRedis clients (PR159_) (PR191_) (PR199_) (PR205_) (PR206_)
+ - Improve error handling across all SmartRedis clients (PR159_) (PR191_) (PR199_) (PR205_) (PR206_)
+  
+  - Includes changes to C and Fortran function prototypes that are not backwards compatible
+  - Includes changes to error class names and enum type names that are not backwards compatible
+ 
  - Add ``poll_dataset`` functionality to all SmartRedis clients (PR184_)
- - Add environment variables to control client runtime behavior (PR194_)
- - Add commands to retrieve statistics on scripts and models in Python and C++ clients (PR197_)
+
+  - Due to other breaking changes made this release, applications using methods other than ``poll_dataset`` to check for the existence of a dataset should now use ``poll_dataset``
+
+ - Add environment variables to control client connection and command timeout behavior (PR194_)
+ - Add AI.INFO command to retrieve statistics on scripts and models via Python and C++ clients (PR197_)
  - Create a Dockerfile for SmartRedis (PR180_)
  - Update ``redis-plus-plus`` version to 1.3.2 (PR162_)
  - Internal client performance and API improvements (PR138_) (PR141_) (PR163_) (PR203_)
@@ -22,7 +29,7 @@ Description
  - Fix zero-length array transfer in Fortran ``convert_char_array_to_c`` (PR170_)
  - Add continuous integration for all SmartRedis tests (PR165_) (PR173_) (PR177_)
  - Update SmartRedis docstrings (PR200_) (PR207_)
- - Update SmartRedis documentation and examples (PR202_) (PR208_)
+ - Update SmartRedis documentation and examples (PR202_) (PR208_) (PR210_)
 
 .. _PR138: https://github.com/CrayLabs/SmartRedis/pull/138
 .. _PR139: https://github.com/CrayLabs/SmartRedis/pull/139
@@ -53,6 +60,7 @@ Description
 .. _PR206: https://github.com/CrayLabs/SmartRedis/pull/206
 .. _PR207: https://github.com/CrayLabs/SmartRedis/pull/207
 .. _PR208: https://github.com/CrayLabs/SmartRedis/pull/208
+.. _PR210: https://github.com/CrayLabs/SmartRedis/pull/210
 
 0.2.0
 -----
