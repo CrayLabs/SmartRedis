@@ -4,27 +4,24 @@ Changelog
 0.3.0
 -----
 
-Expected Release on Febuary 11, 2022
+Release on Febuary 11, 2022
 
 Description
 
- - Update Redis version to 1.3.2 (PR162_)
- - Streamline ``run`` and ``connect`` commands for Redis and RedisCluster (PR203_)
- - Update handling of command replies (PR138_) (PR163_)
- - Add SmartRedis namespace to ``srassert.h`` (PR191_)
- - Expose Redis commands to the Python client (PR139_) (PR160_)
- - Extend inverse CRC16 prefixing to all hash slots (PR161_)
- - Refactor the dataset acknowledgement key for easier communication with ensambles (PR195_)
+ - Impove error handling across all SmartRedis clients (PR159_) (PR191_) (PR199_) (PR205_) (PR206_)
  - Add ``poll_dataset`` functionality to all SmartRedis clients (PR184_)
- - Add commands to retrieve statistics on scripts and models in Python and C++ clients (PR197_)
  - Add environment variables to control client runtime behavior (PR194_)
+ - Add commands to retrieve statistics on scripts and models in Python and C++ clients (PR197_)
  - Create a Dockerfile for SmartRedis (PR180_)
+ - Update ``redis-plus-plus`` version to 1.3.2 (PR162_)
+ - Internal client performance and API improvements (PR138_) (PR141_) (PR163_) (PR203_)
+ - Expose Redis ``FLUSHDB``, ``CONFIG GET``, ``CONFIG SET``, and ``SAVE`` commands to the Python client (PR139_) (PR160_)
+ - Extend inverse CRC16 prefixing to all hash slots (PR161_)
+ - Improve backend dataset representation to enable performance optimization (PR195_)
  - Simplify SmartRedis build proccess (PR189_)
- - Impove error handling across all SmartRedis clients (PR159_) (PR199_) (PR205_) (PR206_)
- - Clean up and standardize the C++ codebase (PR141_)
- - Add continuous integration for all SmartRedis tests (PR165_) (PR173_) (PR177_)
  - Fix zero-length array transfer in Fortran ``convert_char_array_to_c`` (PR170_)
- - Update SmartRedis docstrings (PR200_)
+ - Add continuous integration for all SmartRedis tests (PR165_) (PR173_) (PR177_)
+ - Update SmartRedis docstrings (PR200_) (PR207_)
  - Update SmartRedis documentation and examples (PR202_) (PR208_)
 
 .. _PR138: https://github.com/CrayLabs/SmartRedis/pull/138
@@ -54,6 +51,7 @@ Description
 .. _PR203: https://github.com/CrayLabs/SmartRedis/pull/203
 .. _PR205: https://github.com/CrayLabs/SmartRedis/pull/205
 .. _PR206: https://github.com/CrayLabs/SmartRedis/pull/206
+.. _PR207: https://github.com/CrayLabs/SmartRedis/pull/207
 .. _PR208: https://github.com/CrayLabs/SmartRedis/pull/208
 
 0.2.0
