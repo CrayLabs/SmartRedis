@@ -26,11 +26,6 @@
 
   !** Beginning of code common to all add_tensor subroutines
 
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  MODULE ADD_TENSOR_COMMON
-#endif
-
   class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
@@ -55,10 +50,5 @@
 
   c_dims(:) = dims(:)
   c_dims_ptr = c_loc(c_dims)
-
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  END
-#endif
 
   !** End of code common to all add_tensor subroutines

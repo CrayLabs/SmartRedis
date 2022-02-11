@@ -26,12 +26,6 @@
 
   !** Beginning of code common to all unpack_dataset_tensor subroutines
 
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  MODULE UNPACK_DATASET_TENSOR_COMMON
-#endif
-
-
   class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
   character(len=*),                     intent(in) :: name !< The name to use to place the tensor
   integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
@@ -52,10 +46,5 @@
   c_n_dims = size(dims)
   c_dims_ptr = c_loc(c_dims)
   mem_layout = c_fortran_contiguous
-
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  END
-#endif
 
   !** End of code common to all unpack_dataset_tensor subroutines

@@ -26,12 +26,6 @@
 
   !** Beginning of code common to all get_meta_scalar subroutines
 
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  MODULE GET_META_SCALAR_COMMON
-#endif
-
-
   character(kind=c_char, len=len_trim(name))  :: c_name
   integer(kind=enum_kind) :: c_data_type
   integer(kind=c_size_t) :: name_length, meta_length
@@ -41,10 +35,5 @@
   name_length = len_trim(name)
   code = get_meta_scalars_c(self%dataset_ptr, c_name, name_length, meta_length, c_data_type, result_ptr)
   call c_f_pointer(result_ptr, meta, [meta_length])
-
-#ifdef DOXYGEN
-  ! Lie to Doxygen to get it to process these parameters
-  END
-#endif
 
   !** End of code common to all get_meta_scalar subroutines
