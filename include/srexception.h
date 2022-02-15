@@ -159,7 +159,7 @@ class Exception: public std::exception
     *   \brief Retrieve the message for an exception
     *   \returns String of message data
     */
-    virtual const char* what() const noexcept{
+    const char* what() const noexcept override {
         return _msg.c_str();
     }
 
@@ -197,7 +197,7 @@ class BadAllocException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRBadAllocError;
     }
 };
@@ -221,7 +221,7 @@ class DatabaseException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRDatabaseError;
     }
 };
@@ -245,7 +245,7 @@ class RuntimeException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRRuntimeError;
     }
 };
@@ -269,7 +269,7 @@ class ParameterException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRParameterError;
     }
 };
@@ -293,7 +293,7 @@ class TimeoutException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRTimeoutError;
     }
 };
@@ -317,7 +317,7 @@ class InternalException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRInternalError;
     }
 };
@@ -341,7 +341,7 @@ class KeyException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRKeyError;
     }
 };
@@ -364,7 +364,7 @@ class TypeException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRTypeError;
     }
 };
