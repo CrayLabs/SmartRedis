@@ -280,7 +280,7 @@ class DataSet
         /*!
         *  \brief The name of the DataSet
         */
-        std::string name;
+        std::string _name;
 
         friend class Client;
         friend class PyDataset;
