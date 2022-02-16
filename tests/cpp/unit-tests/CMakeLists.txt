@@ -65,6 +65,21 @@ set(UNIT_TESTS
     test_redisserver.cpp
 )
 
+# Compare the number of files given above to the number of CPP files
+# in the directory. If the two numbers aren't equal, we're not testing
+# coverate completely. It is not recommended to use globbed file lists
+# in add_executable()
+list(LENGTH SOURCES source_count)
+
+file(GLOB cpp_files ../../../src/cpp/*.cpp)
+
+list(LENGTH cpp_files cpp_file_count)
+
+if(NOT (source_count EQUAL cpp_file_count))
+	message(FATAL_ERROR "CPP test coverage sources (${source_count}) does not match \
+count of cpp source files: ${cpp_file_count}")
+endif()
+
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
 
 target_link_libraries(cpp_unit_tests ${SR_LIB})
