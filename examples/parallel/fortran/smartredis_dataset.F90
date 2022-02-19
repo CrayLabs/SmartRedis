@@ -71,4 +71,7 @@ program main
   call mpi_finalize(err_code)
   if (pe_id == 0) write(*,*) "SmartRedis Fortran MPI Dataset example finished without errors."
 
+  ! Done
+  call exit()
+
 end program main

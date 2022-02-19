@@ -30,4 +30,7 @@ program main
   result = client%unpack_tensor("send_array", recv_array_real_64, shape(recv_array_real_64))
   if (result .ne. SRNoError) stop 'client%unpack_tensor failed'
 
+  ! Done
+  call exit()
+
 end program main

@@ -51,6 +51,9 @@ program mnist_example
     print *, "SmartRedis Fortran MPI MNIST example finished without errors."
   endif
 
+  ! Done
+  call exit()
+
 contains
 
 subroutine run_mnist( client, key_suffix, model_name, script_name )

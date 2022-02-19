@@ -57,4 +57,7 @@ program main
   result = client%put_dataset(dataset)
   if (result .ne. SRNoError) stop 'client%put_dataset failed'
 
+  ! Done
+  call exit()
+
 end program main

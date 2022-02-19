@@ -46,4 +46,7 @@ program main
   call mpi_finalize(err_code)
   if (pe_id == 0) write(*,*) "SmartRedis MPI Fortran example 3D put/get finished."
 
+  ! Done
+  call exit()
+
 end program main
