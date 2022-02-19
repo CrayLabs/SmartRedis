@@ -84,7 +84,7 @@ jobs:
           echo "CC=icc" >> $GITHUB_ENV &&
           echo "CXX=icpc" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
-          
+
       - name: Install Cmake Linux
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get install cmake
@@ -116,3 +116,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           files: ./tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir/coverage.info
+
+      - name: Build and run examples
+        run: make test-examples
