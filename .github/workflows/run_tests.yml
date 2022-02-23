@@ -89,11 +89,9 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get install cmake
 
-#      - name: Install MPI for parallel examples
-#        if: contains(matrix.os, 'ubuntu')
-#        run: |
-#            sudo apt-get update -y &&
-#            sudo apt-get install -y mpich
+      - name: Install MPI for parallel examples
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo apt-get install -y mpich
 
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev]
