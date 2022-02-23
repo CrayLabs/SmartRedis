@@ -177,8 +177,8 @@ class PyClient
         *   \throw RuntimeException for all client errors
         */
         void set_script_from_file(const std::string& name,
-                                const std::string& device,
-                                const std::string& script_file);
+                                  const std::string& device,
+                                  const std::string& script_file);
 
         /*!
         *   \brief Set a script from std::string_view buffer in the
@@ -210,7 +210,7 @@ class PyClient
         *   \param name The name associated with the script
         *   \param function The name of the function in the script
         *                   to run
-        *   \param inputs The names of inputs tensors to use
+        *   \param inputs The names of input tensors to use
         *                 in the script
         *   \param outputs The names of output tensors that
         *                 will be used to save script results
@@ -289,7 +289,7 @@ class PyClient
         *   \brief Run a model in the database using the
         *          specificed input and output tensors
         *   \param name The name associated with the model
-        *   \param inputs The names of inputs tensors to use
+        *   \param inputs The names of input tensors to use
         *                 in the model
         *   \param outputs The names of output tensors that
         *                 will be used to save model results
@@ -352,8 +352,7 @@ class PyClient
         *   \param key The key that will be checked in the database
         *   \param poll_frequency_ms The frequency of checks for the
         *                            key in milliseconds
-        *   \param num_tries The total number of times to check for
-        *                    the specified number of keys.
+        *   \param num_tries The total number of times to check for the key.
         *   \returns Returns true if the key is found within the
         *            specified number of tries, otherwise false.
         */
@@ -370,8 +369,8 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of names.
-        *   \returns Returns true if the name is found within the
+        *                    the tensor.
+        *   \returns Returns true if the tensor is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_tensor(const std::string& name,
@@ -390,8 +389,8 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of names.
-        *   \returns Returns true if the name is found within the
+        *                    the dataset.
+        *   \returns Returns true if the dataset is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_dataset(const std::string& name,
@@ -407,8 +406,8 @@ class PyClient
         *   \param poll_frequency_ms The frequency of checks for the
         *                            name in milliseconds
         *   \param num_tries The total number of times to check for
-        *                    the specified number of names.
-        *   \returns Returns true if the name is found within the
+        *                    the model or script.
+        *   \returns Returns true if the model or script is found within the
         *            specified number of tries, otherwise false.
         */
         bool poll_model(const std::string& name,
