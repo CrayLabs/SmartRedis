@@ -146,9 +146,8 @@ CommandReply Redis::put_tensor(TensorBase& tensor)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd << "AI.TENSORSET" << Keyfield(tensor.name()) << tensor.type_str();
-    cmd.add_fields(tensor.dims());
-    cmd << "BLOB" << tensor.buf();
+    cmd << "AI.TENSORSET" << Keyfield(tensor.name()) << tensor.type_str()
+        << tensor.dims() << "BLOB" << tensor.buf();
 
     // Run it
     return run(cmd);
@@ -213,9 +212,8 @@ CommandReply Redis::copy_tensor(const std::string& src_key,
     // Build a PUT command to send the tensor back to the database
     // under the new key
     MultiKeyCommand cmd_put;
-    cmd_put << "AI.TENSORSET" << Keyfield(dest_key) << TENSOR_STR_MAP.at(type);
-    cmd_put.add_fields(dims);
-    cmd_put << "BLOB" << blob;
+    cmd_put << "AI.TENSORSET" << Keyfield(dest_key) << TENSOR_STR_MAP.at(type)
+            << dims << "BLOB" << blob;
 
     // Run the PUT command
     return run(cmd_put);
@@ -276,12 +274,10 @@ CommandReply Redis::set_model(const std::string& model_name,
         cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
     }
     if (inputs.size() > 0) {
-        cmd << "INPUTS";
-        cmd.add_fields(inputs);
+        cmd << "INPUTS" << inputs;
     }
     if (outputs.size() > 0) {
-        cmd << "OUTPUTS";
-        cmd.add_fields(outputs);
+        cmd << "OUTPUTS" << outputs;
     }
     cmd << "BLOB" << model;
 
@@ -309,10 +305,8 @@ CommandReply Redis::run_model(const std::string& key,
 {
     // Build the command
     CompoundCommand cmd;
-    cmd << "AI.MODELRUN" << Keyfield(key) << "INPUTS";
-    cmd.add_fields(inputs);
-    cmd << "OUTPUTS";
-    cmd.add_fields(outputs);
+    cmd << "AI.MODELRUN" << Keyfield(key)
+        << "INPUTS" << inputs << "OUTPUTS" << outputs;
 
     // Run it
     return run(cmd);
@@ -327,10 +321,8 @@ CommandReply Redis::run_script(const std::string& key,
 {
     // Build the command
     CompoundCommand cmd;
-    cmd << "AI.SCRIPTRUN" << Keyfield(key) << function << "INPUTS";
-    cmd.add_fields(inputs);
-    cmd << "OUTPUTS";
-    cmd.add_fields(outputs);
+    cmd << "AI.SCRIPTRUN" << Keyfield(key) << function
+        << "INPUTS" << inputs << "OUTPUTS" << outputs;
 
     // Run it
     return run(cmd);

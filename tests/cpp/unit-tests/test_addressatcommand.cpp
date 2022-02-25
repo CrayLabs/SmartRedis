@@ -85,9 +85,7 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
             // add fields
             *cmd << field_1 << field_2 << field_3;
             cmd->add_field_ptr(field_4, field_size_4);
-            *cmd << field_5;
-            cmd->add_fields(fields_1);
-            *cmd << field_sv;
+            *cmd << field_5 << fields_1 << field_sv;
 
             THEN("The AddressAtCommand can be copied with the assign "
                 "operator and then can be deleted while preserving "

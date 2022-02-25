@@ -58,8 +58,7 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
             // add the fields to the Command
             cmd << field_1 << field_2 << field_3;
             cmd.add_field_ptr(field_4, field_size_4);
-            cmd << field_5;
-            cmd.add_fields(fields_1);
+            cmd << field_5 << fields_1;
 
 
             THEN("The AddressAnyCommand object can be copied "

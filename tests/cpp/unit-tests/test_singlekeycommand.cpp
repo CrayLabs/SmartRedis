@@ -79,7 +79,7 @@ SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCom
         *cmd << field_1 << Keyfield(field_2) << Keyfield(field_3);
         cmd->add_field_ptr(field_4, field_size_4);
         *cmd << field_5;
-        cmd->add_fields(fields_1, true);
+        cmd->add_keys(fields_1);
         *cmd << field_sv;
 
         THEN("The SingleKeyCommand can be copied with the copy "

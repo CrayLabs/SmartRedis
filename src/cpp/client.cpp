@@ -167,7 +167,7 @@ void Client::delete_dataset(const std::string& name)
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
     std::vector<std::string> tensor_keys =
         _build_dataset_tensor_keys(dataset.get_name(), tensor_names, true);
-    cmd.add_fields(tensor_keys, true);
+    cmd.add_keys(tensor_keys);
 
     // Run the command
     reply = _run(cmd);
@@ -1096,9 +1096,8 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
         std::string tensor_key = _build_dataset_tensor_key(
             dataset.get_name(), tensor->name(), false);
         SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
-        *cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str();
-        cmd->add_fields(tensor->dims());
-        *cmd << "BLOB" << tensor->buf();
+        *cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str()
+             << tensor->dims() << "BLOB" << tensor->buf();
     }
 }
 

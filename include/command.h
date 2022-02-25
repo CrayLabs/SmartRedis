@@ -140,6 +140,33 @@ class Command
         }
 
         /*!
+        *   \brief Add a vector of strings to the command.
+        *   \details The string values are copied to the command.
+        *            To add a vector of keys, use the add_keys()
+        *            method.
+        *   \param fields The strings to add to the command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const std::vector<std::string>& fields) {
+            add_fields(fields);
+            return *this;
+        }
+
+        /*!
+        *   \brief Add a vector of strings to the command.
+        *   \details The string values are copied to the command.
+        *            To add a vector of keys, use the add_keys()
+        *            method.
+        *   \param fields The strings to add to the command
+        *   \returns The command object, for chaining.
+        */
+        template <class T>
+        Command& operator<<(const std::vector<T>& fields) {
+            add_fields(fields);
+            return *this;
+        }
+
+        /*!
         *   \brief Command move assignment operator
         */
         Command& operator=(Command&& cmd) = default;
@@ -227,7 +254,6 @@ class Command
         */
         void add_field_ptr(std::string_view field);
 
-        public:
         /*!
         *   \brief Add fields to the Command
         *          from a vector of strings.
@@ -239,7 +265,6 @@ class Command
         */
         void add_fields(const std::vector<std::string>& fields, bool is_key=false);
 
-
         /*!
         *   \brief Add fields to the Command
         *          from a vector of type T
@@ -248,13 +273,37 @@ class Command
         *            to a string via std::to_string.
         *   \tparam T Any type that can be converted
         *             to a string via std::to_string.
-        *
         *   \param fields The fields to add to the Command
         *   \param is_key Boolean indicating if the all
         *                 of the fields are Command keys
         */
         template <class T>
         void add_fields(const std::vector<T>& fields, bool is_key=false);
+
+    public:
+        /*!
+        *   \brief Add key fields to the Command
+        *          from a vector of strings.
+        *   \details The string key field values are copied to the
+        *            Command.
+        *   \param fields The key fields to add to the Command
+        *   \param is_key Boolean indicating if the all
+        *                 of the fields are Command keys
+        */
+        void add_keys(const std::vector<std::string>& fields);
+
+        /*!
+        *   \brief Add key fields to the Command
+        *          from a vector of type T
+        *   \details The key field values are copied to the
+        *            Command.  The type T must be convertable
+        *            to a string via std::to_string.
+        *   \tparam T Any type that can be converted
+        *             to a string via std::to_string.
+        *   \param keyfields The key fields to add to the Command
+        */
+        template <class T>
+        void add_keys(const std::vector<T>& fields);
 
         /*!
         *   \brief Return true if the Command has keys
