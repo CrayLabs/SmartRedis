@@ -156,8 +156,7 @@ bool RedisCluster::key_exists(const std::string& key)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("EXISTS");
-    cmd.add_field(key, true);
+    cmd << "EXISTS" << Keyfield(key);
 
     // Run it
     CommandReply reply = run(cmd);
@@ -173,9 +172,7 @@ bool RedisCluster::hash_field_exists(const std::string& key,
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("HEXISTS");
-    cmd.add_field(key, true);
-    cmd.add_field(field);
+    cmd << "HEXISTS" << Keyfield(key) << field;
 
     // Run it
     CommandReply reply = run(cmd);
@@ -199,12 +196,9 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.TENSORSET");
-    cmd.add_field(tensor.name(), true);
-    cmd.add_field(tensor.type_str());
+    cmd << "AI.TENSORSET" << Keyfield(tensor.name()) << tensor.type_str();
     cmd.add_fields(tensor.dims());
-    cmd.add_field("BLOB");
-    cmd.add_field_ptr(tensor.buf());
+    cmd << "BLOB" << tensor.buf();
 
     // Run it
     return run(cmd);
@@ -215,10 +209,7 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
 {
     // Build the command
     GetTensorCommand cmd;
-    cmd.add_field("AI.TENSORGET");
-    cmd.add_field(key, true);
-    cmd.add_field("META");
-    cmd.add_field("BLOB");
+    cmd << "AI.TENSORGET"<< Keyfield(key) << "META" << "BLOB";
 
     // Run it
     return run(cmd);
@@ -237,9 +228,7 @@ CommandReply RedisCluster::rename_tensor(const std::string& key,
     if (key_hash_slot == new_key_hash_slot) {
         // Build the command
         CompoundCommand cmd;
-        cmd.add_field("RENAME");
-        cmd.add_field(key, true);
-        cmd.add_field(new_key, true);
+        cmd << "RENAME" << Keyfield(key) << Keyfield(new_key);
 
         // Run it
         reply = run(cmd);
@@ -260,8 +249,7 @@ CommandReply RedisCluster::delete_tensor(const std::string& key)
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("UNLINK");
-    cmd.add_field(key, true);
+    cmd << "UNLINK" << Keyfield(key);
 
     // Run it
     return run(cmd);
@@ -275,10 +263,7 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 
     // Build the GET command
     GetTensorCommand cmd_get;
-    cmd_get.add_field("AI.TENSORGET");
-    cmd_get.add_field(src_key, true);
-    cmd_get.add_field("META");
-    cmd_get.add_field("BLOB");
+    cmd_get << "AI.TENSORGET" << Keyfield(src_key) << "META" << "BLOB";
 
     // Run the GET command
     CommandReply cmd_get_reply = run(cmd_get);
@@ -292,12 +277,9 @@ CommandReply RedisCluster::copy_tensor(const std::string& src_key,
 
     // Build the PUT command
     MultiKeyCommand cmd_put;
-    cmd_put.add_field("AI.TENSORSET");
-    cmd_put.add_field(dest_key, true);
-    cmd_put.add_field(TENSOR_STR_MAP.at(type));
+    cmd_put << "AI.TENSORSET" << Keyfield(dest_key) << TENSOR_STR_MAP.at(type);
     cmd_put.add_fields(dims);
-    cmd_put.add_field("BLOB");
-    cmd_put.add_field_ptr(blob);
+    cmd_put << "BLOB" << blob;
 
     // Run the PUT command
     return run(cmd_put);
@@ -350,34 +332,27 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
 
         // Build the MODELSET commnd
         CompoundCommand cmd;
-        cmd.add_field("AI.MODELSET");
-        cmd.add_field(prefixed_key, true);
-        cmd.add_field(backend);
-        cmd.add_field(device);
+        cmd << "AI.MODELSET" << Keyfield(prefixed_key) << backend << device;
 
         // Add optional fields as requested
         if (tag.size() > 0) {
-            cmd.add_field("TAG");
-            cmd.add_field(tag);
+            cmd << "TAG" << tag;
         }
         if (batch_size > 0) {
-            cmd.add_field("BATCHSIZE");
-            cmd.add_field(std::to_string(batch_size));
+            cmd << "BATCHSIZE" << std::to_string(batch_size);
         }
         if (min_batch_size > 0) {
-            cmd.add_field("MINBATCHSIZE");
-            cmd.add_field(std::to_string(min_batch_size));
+            cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
         }
         if ( inputs.size() > 0) {
-            cmd.add_field("INPUTS");
+            cmd << "INPUTS";
             cmd.add_fields(inputs);
         }
         if (outputs.size() > 0) {
-            cmd.add_field("OUTPUTS");
+            cmd << "OUTPUTS";
             cmd.add_fields(outputs);
         }
-        cmd.add_field("BLOB");
-        cmd.add_field_ptr(model);
+        cmd << "BLOB" << model;
 
         // Run the command
         reply = run(cmd);
@@ -403,11 +378,8 @@ CommandReply RedisCluster::set_script(const std::string& key,
 
         // Build the SCRIPTSET command
         SingleKeyCommand cmd;
-        cmd.add_field("AI.SCRIPTSET");
-        cmd.add_field(prefix_key, true);
-        cmd.add_field(device);
-        cmd.add_field("SOURCE");
-        cmd.add_field_ptr(script);
+        cmd << "AI.SCRIPTSET" << Keyfield(prefix_key) << device
+            << "SOURCE" << script;
 
         // Run the command
         reply = run(cmd);
@@ -449,11 +421,9 @@ CommandReply RedisCluster::run_model(const std::string& key,
     // Build the MODELRUN command
     std::string model_name = "{" + db->prefix + "}." + std::string(key);
     CompoundCommand cmd;
-    cmd.add_field("AI.MODELRUN");
-    cmd.add_field(model_name, true);
-    cmd.add_field("INPUTS");
+    cmd << "AI.MODELRUN" << Keyfield(model_name) << "INPUTS";
     cmd.add_fields(tmp_inputs);
-    cmd.add_field("OUTPUTS");
+    cmd << "OUTPUTS";
     cmd.add_fields(tmp_outputs);
 
     // Run it
@@ -506,17 +476,14 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
     // Build the SCRIPTRUN command
     CompoundCommand cmd;
-    CommandReply reply;
-    cmd.add_field("AI.SCRIPTRUN");
-    cmd.add_field(script_name, true);
-    cmd.add_field(function);
-    cmd.add_field("INPUTS");
+    cmd << "AI.SCRIPTRUN" << Keyfield(script_name) << function 
+        << "INPUTS";
     cmd.add_fields(tmp_inputs);
-    cmd.add_field("OUTPUTS");
+    cmd << "OUTPUTS";
     cmd.add_fields(tmp_outputs);
 
     // Run it
-    reply = run(cmd);
+    CommandReply reply = run(cmd);
     if (reply.has_error() > 0) {
         std::string error("run_model failed for node ");
         error += db_index;
@@ -548,9 +515,7 @@ CommandReply RedisCluster::get_model(const std::string& key)
 
     // Build the MODELGET command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.MODELGET");
-    cmd.add_field(prefixed_str, true);
-    cmd.add_field("BLOB");
+    cmd << "AI.MODELGET" << Keyfield(prefixed_str) << "BLOB";
 
     // Run it
     return run(cmd);
@@ -559,12 +524,14 @@ CommandReply RedisCluster::get_model(const std::string& key)
 // Retrieve the script from the database
 CommandReply RedisCluster::get_script(const std::string& key)
 {
+    // Build the node prefix
     std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
 
+    // Build the SCRIPTGET command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.SCRIPTGET");
-    cmd.add_field(prefixed_str, true);
-    cmd.add_field("SOURCE");
+    cmd << "AI.SCRIPTGET" << Keyfield(prefixed_str) << "SOURCE";
+
+    // Run it
     return run(cmd);
 }
 
@@ -592,12 +559,11 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
 
     // Build the Command
     cmd.set_exec_address_port(host, port);
-    cmd.add_field("AI.INFO");
-    cmd.add_field(prefixed_key);
+    cmd << "AI.INFO" << Keyfield(prefixed_key);
 
     // Optionally add RESETSTAT to the command
     if (reset_stat) {
-        cmd.add_field("RESETSTAT");
+        cmd << "RESETSTAT";
     }
 
     return run(cmd);
@@ -730,8 +696,7 @@ inline void RedisCluster::_map_cluster()
 
     // Build the CLUSTER SLOTS command
     AddressAnyCommand cmd;
-    cmd.add_field("CLUSTER");
-    cmd.add_field("SLOTS");
+    cmd << "CLUSTER" << "SLOTS";
 
     // Run it
     CommandReply reply(_redis_cluster->
@@ -968,7 +933,7 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
 {
     // Build the command
     MultiKeyCommand cmd;
-    cmd.add_field("DEL");
+    cmd << "DEL";
     cmd.add_fields(keys, true);
 
     // Run it, ignoring failure
@@ -1032,19 +997,14 @@ void RedisCluster::__run_model_dagrun(const std::string& key,
     // Build the DAGRUN command
     std::string model_name = "{" + db->prefix + "}." + key;
     CompoundCommand cmd;
-    cmd.add_field("AI.DAGRUN");
-    cmd.add_field("LOAD");
-    cmd.add_field(std::to_string(inputs.size()));
+    cmd << "AI.DAGRUN" << "LOAD"<< std::to_string(inputs.size());
     cmd.add_fields(inputs);
-    cmd.add_field("PERSIST");
-    cmd.add_field(std::to_string(outputs.size()));
+    cmd << "PERSIST"<< std::to_string(outputs.size());
     cmd.add_fields(outputs);
-    cmd.add_field("|>");
-    cmd.add_field("AI.MODELRUN");
-    cmd.add_field(model_name, true);
-    cmd.add_field("INPUTS");
+    cmd << "|>" << "AI.MODELRUN"<< Keyfield(model_name);
+    cmd << "INPUTS";
     cmd.add_fields(inputs);
-    cmd.add_field("OUTPUTS");
+    cmd << "OUTPUTS";
     cmd.add_fields(outputs);
 
     // Run it

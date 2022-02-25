@@ -1073,15 +1073,15 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     }
 
     SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
-    del_cmd << "DEL" << Keyfield(meta_key);
+    *del_cmd << "DEL" << Keyfield(meta_key);
 
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     if (cmd == NULL) {
         throw SRRuntimeException("Failed to create SingleKeyCommand.");
     }
-    cmd << "HMSET" << Keyfield(meta_key);
+    *cmd << "HMSET" << Keyfield(meta_key);
     for (size_t i = 0; i < mdf.size(); i++) {
-        cmd << mdf[i].first << mdf[i].second;
+        *cmd << mdf[i].first << mdf[i].second;
     }
 }
 
@@ -1096,9 +1096,9 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
         std::string tensor_key = _build_dataset_tensor_key(
             dataset.get_name(), tensor->name(), false);
         SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
-        cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str();
+        *cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str();
         cmd->add_fields(tensor->dims());
-        cmd << "BLOB" << tensor->buf();
+        *cmd << "BLOB" << tensor->buf();
     }
 }
 
@@ -1108,7 +1108,7 @@ void Client::_append_dataset_ack_command(CommandList& cmd_list, DataSet& dataset
 {
     std::string key = _build_dataset_ack_key(dataset.get_name(), false);
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
-    cmd << "HSET" << Keyfield(key) << _DATASET_ACK_FIELD << "1";
+    *cmd << "HSET" << Keyfield(key) << _DATASET_ACK_FIELD << "1";
 }
 
 // Put the metadata fields embedded in a CommandReply into the DataSet

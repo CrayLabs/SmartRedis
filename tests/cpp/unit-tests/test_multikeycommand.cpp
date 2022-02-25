@@ -56,11 +56,9 @@ SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
             std::vector<std::string> cmd_keys;
 
             // add the fields to the Command
-            cmd.add_field(field_1, false);
-            cmd.add_field(field_2, true);
-            cmd.add_field(field_3, true);
+            cmd << field_1 << Keyfield(field_2) << Keyfield(field_3);
             cmd.add_field_ptr(field_4, field_size_4);
-            cmd.add_field_ptr(field_5);
+            cmd << field_5;
             cmd.add_fields(fields_1, true);
 
             THEN("The MultiKeyCommand object is structured correctly")

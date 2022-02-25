@@ -43,7 +43,19 @@
 namespace SmartRedis {
 
 class RedisServer;
-class Keyfield;
+
+/*!
+*   \brief The Keyfield class marks a command field as being a key.
+*   \details Keyfield inherits everything from std::string and has
+*            no additional functionality. RTTI enables differentiation
+*            between Keyfields and other command fields.
+*/
+class Keyfield: public std::string
+{
+    public:
+    Keyfield(std::string s) : _s(s) {};
+    std::string _s;
+};
 
 /*!
 *   \brief The Command class constructs Client commands.
@@ -81,40 +93,51 @@ class Command
         Command& operator=(const Command& cmd);
 
         /*!
-        *   \brief Add a field to the Command from a string.
+        *   \brief Add a field to thecCommand from a string.
         *   \details The string field value is copied
-        *            to the Command.
-        *   \param field The field to add to the Command
+        *            to the command.
+        *   \param field The field to add to the command
         *   \returns The command object, for chaining.
         */
-        virtual Command& operator<<(const std::string& field);
+        virtual Command& operator<<(const std::string& field) {
+            add_field(field, false);
+            return *this;
+        }
 
         /*!
-        *   \brief Add a field to the Command from a string_view.
+        *   \brief Add a field to the command from a string_view.
         *   \details The string_view field value is copied
-        *            to the Command.
-        *   \param field The field to add to the Command
+        *            to the command.
+        *   \param field The field to add to the command
         *   \returns The command object, for chaining.
         */
-        virtual Command& operator<<(const std::string_view& field);
+        virtual Command& operator<<(const std::string_view& field) {
+            add_field_ptr(field);
+            return *this;
+        }
 
         /*!
-        *   \brief Add a field to the Command from a c-string.
+        *   \brief Add a field to the command from a c-string.
         *   \details The c-string field value is copied
-        *            to the Command.
-        *   \param field The field to add to the Command
+        *            to the command.
+        *   \param field The field to add to the command
         *   \returns The command object, for chaining.
         */
-        virtual Command& operator<<(const char* field);
-
+        virtual Command& operator<<(const char* field) {
+            add_field(field, false);
+            return *this;
+        }
 
         /*!
-        *   \brief Add a key field to the Command.
-        *   \details The key field value is copied to the Command.
-        *   \param key The key field to add to the Command
+        *   \brief Add a key field to the command.
+        *   \details The key field value is copied to the command.
+        *   \param key The key field to add to the command
         *   \returns The command object, for chaining.
         */
-        virtual Command& operator<<(const Keyfield& key);
+        virtual Command& operator<<(const Keyfield& key) {
+            add_field(key._s, true);
+            return *this;
+        }
 
         /*!
         *   \brief Command move assignment operator
@@ -148,6 +171,22 @@ class Command
         */
         virtual CommandReply run_me(RedisServer* server) = 0;
 
+        /*!
+        *   \brief Add a field to the Command from a c-string.
+        *   \details The c-string will not be copied to the
+        *            Command object.  A pointer is kept that
+        *            points to the c-string location in
+        *            memory.  As a result, the c-string
+        *            memory must be valid up until the
+        *            execution of the Command.  A field
+        *            that is not copied cannot be a Command
+        *            key.
+        *   \param field The field to add to the Command
+        *   \param field_size The length of the c-string
+        */
+        void add_field_ptr(char* field, size_t field_size);
+
+
         protected:
         /*!
         *   \brief Add a field to the Command from a string.
@@ -171,21 +210,6 @@ class Command
         *                 Command.
         */
         void add_field(const char* field, bool is_key=false);
-
-        /*!
-        *   \brief Add a field to the Command from a c-string.
-        *   \details The c-string will not be copied to the
-        *            Command object.  A pointer is kept that
-        *            points to the c-string location in
-        *            memory.  As a result, the c-string
-        *            memory must be valid up until the
-        *            execution of the Command.  A field
-        *            that is not copied cannot be a Command
-        *            key.
-        *   \param field The field to add to the Command
-        *   \param field_size The length of the c-string
-        */
-        void add_field_ptr(char* field, size_t field_size);
 
         /*!
         *   \brief Add a field to the Command from a
@@ -338,20 +362,6 @@ class Command
         *   \brief Helper function for emptying the Command
         */
         void make_empty();
-};
-
-
-/*!
-*   \brief The Keyfield class marks a command field as being a key.
-*   \details Keyfield inherits everything from std::string and has
-*            no additional functionality. RTTI enables differentiation
-*            between Keyfields and other command fields.
-*/
-class Keyfield: public std::string
-{
-    public:
-    Keyfield(std::string s) : _s(s) {};
-    std::string _s;
 };
 
 #include "command.tcc"
