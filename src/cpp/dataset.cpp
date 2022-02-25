@@ -34,7 +34,7 @@ using namespace SmartRedis;
 
 // DataSet constructor
 DataSet::DataSet(const std::string& name)
- : _name(name)
+ : _dsname(name)
 {
     // NOP
 }
@@ -245,7 +245,8 @@ inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
 {
     if (!_tensorpack.tensor_exists(tensorname)) {
         throw SRKeyException("The tensor \"" + std::string(tensorname) +
-                             "\" does not exist in dataset \"" + _name + "\".");
+                             "\" does not exist in dataset \"" +
+                             _dsname + "\".");
     }
 }
 
