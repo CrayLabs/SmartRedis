@@ -93,8 +93,8 @@ file(GLOB UNIT_TEST_FILES *.cpp)
 list(LENGTH UNIT_TEST_FILES cpp_unit_test_file_count)
 
 if(NOT (unit_test_count EQUAL cpp_unit_test_file_count))
-	message(FATAL_ERROR "CPP test coverage sources count (${unit_test_count}) \
-does not match count of cpp source files: ${cpp_unit_test_file_count}")
+	message(FATAL_ERROR "CPP unit test count (${unit_test_count}) \
+does not match count of cpp unit test files: ${cpp_unit_test_file_count}")
 endif()
 
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
