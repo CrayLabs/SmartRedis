@@ -66,6 +66,8 @@ class SingleKeyCommand : public KeyedCommand
         *            type.
         */
         virtual Command* clone();
+
+
 };
 
 } //namespace SmartRedis

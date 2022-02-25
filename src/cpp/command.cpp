@@ -89,6 +89,31 @@ Command::~Command()
     make_empty();
 }
 
+// Add a string field to the command
+Command& Command::operator<<(const std::string& field) {
+    add_field(field, false);
+    return *this;
+}
+
+// Add a string_view field to the command
+Command& Command::operator<<(const std::string_view& field) {
+    add_field_ptr(field);
+    return *this;
+}
+
+// Add a C-string field to the command
+Command& Command::operator<<(const char* field) {
+    add_field(field, false);
+    return *this;
+}
+
+// Add a key field to the command
+Command& Command::operator<<(const Keyfield& key) {
+    add_field(key._s, true);
+    return *this;
+}
+
+
 // Add a field to the Command from a string.
 void Command::add_field(std::string field, bool is_key)
 {

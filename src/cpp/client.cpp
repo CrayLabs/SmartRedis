@@ -159,12 +159,14 @@ void Client::delete_dataset(const std::string& name)
     DataSet dataset(name);
     _unpack_dataset_metadata(dataset, reply);
 
-    // Build the delete command
-    MultiKeyCommand cmd;
-
     // Delete the metadata (which contains the ack key)
+<<<<<<< HEAD
     cmd.add_field("DEL");
     cmd.add_field(_build_dataset_meta_key(dataset.get_name(), true), true);
+=======
+    MultiKeyCommand cmd;
+    cmd << "DEL" << Keyfield(_build_dataset_meta_key(dataset.name, true));
+>>>>>>> aca1091 (interrim)
 
     // Add in all the tensors to be deleted
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
@@ -757,9 +759,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
     uint64_t port = cmd.parse_port(address);
 
     cmd.set_exec_address_port(host, port);
-
-    cmd.add_field("INFO");
-    cmd.add_field("EVERYTHING");
+    cmd << "INFO" << "EVERYTHING";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
         throw SRRuntimeException("INFO EVERYTHING command failed on server");
@@ -781,9 +781,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
     uint64_t port = cmd.parse_port(address);
 
     cmd.set_exec_address_port(host, port);
-
-    cmd.add_field("CLUSTER");
-    cmd.add_field("INFO");
+    cmd << "CLUSTER" << "INFO";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
         throw SRRuntimeException("CLUSTER INFO command failed on server");
@@ -848,8 +846,7 @@ void Client::flush_db(std::string address)
                                  "is not a valid database node address.");
     }
     cmd.set_exec_address_port(host, port);
-
-    cmd.add_field("FLUSHDB");
+    cmd << "FLUSHDB";
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
@@ -865,10 +862,7 @@ Client::config_get(std::string expression, std::string address)
     uint64_t port = cmd.parse_port(address);
 
     cmd.set_exec_address_port(host, port);
-
-    cmd.add_field("CONFIG");
-    cmd.add_field("GET");
-    cmd.add_field(expression);
+    cmd << "CONFIG" << "GET" << expression;
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
@@ -892,11 +886,7 @@ void Client::config_set(std::string config_param, std::string value, std::string
     uint64_t port = cmd.parse_port(address);
 
     cmd.set_exec_address_port(host, port);
-
-    cmd.add_field("CONFIG");
-    cmd.add_field("SET");
-    cmd.add_field(config_param);
-    cmd.add_field(value);
+    cmd << "CONFIG" << "SET" << config_param << value;
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
@@ -910,7 +900,7 @@ void Client::save(std::string address)
     uint64_t port = cmd.parse_port(address);
 
     cmd.set_exec_address_port(host, port);
-    cmd.add_field("SAVE");
+    cmd << "SAVE";
 
     CommandReply reply = _run(cmd);
     if (reply.has_error() > 0)
@@ -992,8 +982,7 @@ inline void Client::_append_with_put_prefix(std::vector<std::string>& keys)
 inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 {
     SingleKeyCommand cmd;
-    cmd.add_field("HGETALL");
-    cmd.add_field(_build_dataset_meta_key(name, true), true);
+    cmd << "HGETALL" << Keyfield(_build_dataset_meta_key(name, true));
     return _run(cmd);
 }
 
@@ -1089,18 +1078,15 @@ void Client::_append_dataset_metadata_commands(CommandList& cmd_list,
     }
 
     SingleKeyCommand* del_cmd = cmd_list.add_command<SingleKeyCommand>();
-    del_cmd->add_field("DEL");
-    del_cmd->add_field(meta_key, true);
+    del_cmd << "DEL" << Keyfield(meta_key);
 
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
     if (cmd == NULL) {
         throw SRRuntimeException("Failed to create SingleKeyCommand.");
     }
-    cmd->add_field("HMSET");
-    cmd->add_field (meta_key, true);
+    cmd << "HMSET" << Keyfield(meta_key);
     for (size_t i = 0; i < mdf.size(); i++) {
-        cmd->add_field(mdf[i].first);
-        cmd->add_field(mdf[i].second);
+        cmd << mdf[i].first << mdf[i].second;
     }
 }
 
@@ -1113,14 +1099,16 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
     for ( ; it != dataset.tensor_end(); it++) {
         TensorBase* tensor = *it;
         std::string tensor_key = _build_dataset_tensor_key(
+<<<<<<< HEAD
             dataset.get_name(), tensor->name(), false);
+=======
+            dataset.name, tensor->name(), false);
+
+>>>>>>> aca1091 (interrim)
         SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
-        cmd->add_field("AI.TENSORSET");
-        cmd->add_field(tensor_key, true);
-        cmd->add_field(tensor->type_str());
+        cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str();
         cmd->add_fields(tensor->dims());
-        cmd->add_field("BLOB");
-        cmd->add_field_ptr(tensor->buf());
+        cmd << "BLOB" << tensor->buf();
     }
 }
 
@@ -1130,10 +1118,7 @@ void Client::_append_dataset_ack_command(CommandList& cmd_list, DataSet& dataset
 {
     std::string key = _build_dataset_ack_key(dataset.get_name(), false);
     SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
-    cmd->add_field("HSET");
-    cmd->add_field(key, true);
-    cmd->add_field(_DATASET_ACK_FIELD);
-    cmd->add_field("1");
+    cmd << "HSET" << Keyfield(key) << _DATASET_ACK_FIELD << "1";
 }
 
 // Put the metadata fields embedded in a CommandReply into the DataSet

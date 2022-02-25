@@ -43,6 +43,7 @@
 namespace SmartRedis {
 
 class RedisServer;
+class Keyfield;
 
 /*!
 *   \brief The Command class constructs Client commands.
@@ -80,6 +81,42 @@ class Command
         Command& operator=(const Command& cmd);
 
         /*!
+        *   \brief Add a field to the Command from a string.
+        *   \details The string field value is copied
+        *            to the Command.
+        *   \param field The field to add to the Command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const std::string& field);
+
+        /*!
+        *   \brief Add a field to the Command from a string_view.
+        *   \details The string_view field value is copied
+        *            to the Command.
+        *   \param field The field to add to the Command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const std::string_view& field);
+
+        /*!
+        *   \brief Add a field to the Command from a c-string.
+        *   \details The c-string field value is copied
+        *            to the Command.
+        *   \param field The field to add to the Command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const char* field);
+
+
+        /*!
+        *   \brief Add a key field to the Command.
+        *   \details The key field value is copied to the Command.
+        *   \param key The key field to add to the Command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const Keyfield& key);
+
+        /*!
         *   \brief Command move assignment operator
         */
         Command& operator=(Command&& cmd) = default;
@@ -111,6 +148,7 @@ class Command
         */
         virtual CommandReply run_me(RedisServer* server) = 0;
 
+        protected:
         /*!
         *   \brief Add a field to the Command from a string.
         *   \details The string field value is copied to the
@@ -165,6 +203,7 @@ class Command
         */
         void add_field_ptr(std::string_view field);
 
+        public:
         /*!
         *   \brief Add fields to the Command
         *          from a vector of strings.
@@ -299,6 +338,20 @@ class Command
         *   \brief Helper function for emptying the Command
         */
         void make_empty();
+};
+
+
+/*!
+*   \brief The Keyfield class marks a command field as being a key.
+*   \details Keyfield inherits everything from std::string and has
+*            no additional functionality. RTTI enables differentiation
+*            between Keyfields and other command fields.
+*/
+class Keyfield: public std::string
+{
+    public:
+    Keyfield(std::string s) : _s(s) {};
+    std::string _s;
 };
 
 #include "command.tcc"
