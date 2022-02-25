@@ -160,13 +160,8 @@ void Client::delete_dataset(const std::string& name)
     _unpack_dataset_metadata(dataset, reply);
 
     // Delete the metadata (which contains the ack key)
-<<<<<<< HEAD
-    cmd.add_field("DEL");
-    cmd.add_field(_build_dataset_meta_key(dataset.get_name(), true), true);
-=======
     MultiKeyCommand cmd;
-    cmd << "DEL" << Keyfield(_build_dataset_meta_key(dataset.name, true));
->>>>>>> aca1091 (interrim)
+    cmd << "DEL" << Keyfield(_build_dataset_meta_key(dataset.get_name(), true));
 
     // Add in all the tensors to be deleted
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
@@ -1099,12 +1094,7 @@ void Client::_append_dataset_tensor_commands(CommandList& cmd_list,
     for ( ; it != dataset.tensor_end(); it++) {
         TensorBase* tensor = *it;
         std::string tensor_key = _build_dataset_tensor_key(
-<<<<<<< HEAD
             dataset.get_name(), tensor->name(), false);
-=======
-            dataset.name, tensor->name(), false);
-
->>>>>>> aca1091 (interrim)
         SingleKeyCommand* cmd = cmd_list.add_command<SingleKeyCommand>();
         cmd << "AI.TENSORSET" << Keyfield(tensor_key) << tensor->type_str();
         cmd->add_fields(tensor->dims());
