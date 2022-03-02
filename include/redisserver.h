@@ -419,6 +419,12 @@ class RedisServer {
             "SR_CMD_INTERVAL";
 
         /*!
+        *   \brief Environment variable for model execution timeout
+        */
+        inline static const std::string _MODEL_TIMEOUT_ENV_VAR =
+            "SR_MODEL_TIMEOUT";
+
+        /*!
         *   \brief Retrieve a single address, randomly
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment

@@ -281,7 +281,7 @@ CommandReply Redis::set_model(const std::string& model_name,
 {
     // Build the command
     SingleKeyCommand cmd;
-    cmd.add_field("AI.MODELSET");
+    cmd.add_field("AI.MODELSTORE");
     cmd.add_field(model_name);
     cmd.add_field(backend);
     cmd.add_field(device);
@@ -301,10 +301,12 @@ CommandReply Redis::set_model(const std::string& model_name,
     }
     if (inputs.size() > 0) {
         cmd.add_field("INPUTS");
+        cmd.add_field(std::to_string(inputs.size()));
         cmd.add_fields(inputs);
     }
     if (outputs.size() > 0) {
         cmd.add_field("OUTPUTS");
+        cmd.add_field(std::to_string(outputs.size()));
         cmd.add_fields(outputs);
     }
     cmd.add_field("BLOB");
@@ -336,14 +338,23 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
+    // Check for a non-default timeout setting
+    int run_timeout;
+    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                           60 * 60 * 1000); // 1 hr
+
     // Build the command
     CompoundCommand cmd;
-    cmd.add_field("AI.MODELRUN");
+    cmd.add_field("AI.MODELEXECUTE");
     cmd.add_field(key);
     cmd.add_field("INPUTS");
+    cmd.add_field(std::to_string(inputs.size()));
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
+    cmd.add_field(std::to_string(outputs.size()));
     cmd.add_fields(outputs);
+    cmd.add_field("TIMEOUT");
+    cmd.add_field(std::to_string(run_timeout));
 
     // Run it
     return run(cmd);
