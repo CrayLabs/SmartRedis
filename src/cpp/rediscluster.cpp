@@ -603,6 +603,79 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
     return run(cmd);
 }
 
+// Establish a list of GPUs to use for models and scripts
+CommandReply RedisCluster::select_gpus(std::vector<std::string> gpu_list)
+{
+    std::string gpu("GPU");
+    CommandReply reply;
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Build the node prefix
+        std::string prefixed_key = "{" + node->prefix + "}." + _DB_GPU_KEY;
+
+        SingleKeyCommand cmd;
+        cmd.add_field("HMSET");
+        cmd.add_field (prefixed_key, true);
+        for (size_t i = 0; i < gpu_list.size(); i++) {
+            cmd.add_field(gpu + std::to_string(i));
+            cmd.add_field(gpu_list[i]);
+        }
+
+        // Run the command
+        reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("select_gpus failed for node " + node->name);
+        }
+    }
+
+    // Done
+    return reply;
+}
+
+// Retrieve the list of GPUs to use for models and scripts
+std::vector<std::string> RedisCluster::_get_gpu_selection()
+{
+    std::vector<std::string> result;
+
+    // We will use the list of GPUs from the first node
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    std::string gpus_key = "{" + node->prefix + "}." + _DB_GPU_KEY;
+
+    // If the key exists, we'll use what's stored there
+    if (key_exists(gpus_key)) {
+        // Build the command
+        SingleKeyCommand cmd;
+        cmd.add_field("HGETALL");
+        cmd.add_field (gpus_key, true);
+
+        // Run it
+        CommandReply reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("failed to retrieve selected GPUs for node " + node->name);
+        }
+
+        // Make sure we have paired elements
+        if ((reply.n_elements() % 2) != 0)
+            throw SRRuntimeException("The GPU selection reply "\
+                                    "contains the wrong number of "\
+                                    "elements.");
+
+        // Extract the GPU selections
+        for (size_t i = 0; i < reply.n_elements(); i += 2) {
+            std::string gpu_selection(reply[i + 1].str(), reply[i + 1].str_len());
+            result.push_back(gpu_selection);
+        }
+    }
+
+    // Otherwise, we'll just use default behavior
+    else {
+        result.push_back("GPU");
+    }
+
+    // Done
+    return result;
+}
+
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());

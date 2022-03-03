@@ -551,6 +551,16 @@ class PyClient
         */
         void save(std::vector<std::string> addresses);
 
+        /*!
+        *   \brief Configure which GPUs to use for scripts and models.
+        *   \param gpu_list a semicolon delimited list of GPUs to use for scripts
+        *                   and models, in the form "GPU:0; GPU:1; ..."
+        *   \throw RuntimeException if the command fails. Note that
+        *          this method makes no effort to verify that the requested
+        *          GPUs are present.
+        */
+        void select_gpus(std::string gpu_list);
+
     private:
 
         /*!

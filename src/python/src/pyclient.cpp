@@ -869,4 +869,24 @@ void PyClient::save(std::vector<std::string> addresses)
     }
 }
 
+void PyClient::select_gpus(std::string gpu_list)
+{
+    try {
+        _client->select_gpus(gpu_list);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                    "while executing select_gpus.");
+    }
+}
+
 // EOF

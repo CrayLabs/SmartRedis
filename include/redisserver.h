@@ -341,6 +341,16 @@ class RedisServer {
                                  const std::string& key,
                                  const bool reset_stat) = 0;
 
+
+        /*!
+        *   \brief Establish a list of GPUs to use for models and scripts
+        *   \param gpu_list A vector of GPU selections to select
+        *   \returns The CommandReply that contains the result
+        *            of adding the GPU list to the server
+        */
+        virtual CommandReply
+        select_gpus(std::vector<std::string> gpu_list) = 0;
+
     protected:
 
         /*!
@@ -419,6 +429,12 @@ class RedisServer {
             "SR_CMD_INTERVAL";
 
         /*!
+        *   \brief Database key for the current GPU selection menu
+        */
+        inline static const std::string _DB_GPU_KEY =
+            "__SMARTSIM_GPUS";
+
+        /*!
         *   \brief Retrieve a single address, randomly
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
@@ -469,7 +485,12 @@ class RedisServer {
         */
         void _check_runtime_variables();
 
-
+        /*!
+        *   \brief Retrieve the list of GPUs to use for models and scripts
+        *   \returns A vector of GPU selections
+        *   \throw SmartRedis::RuntimeException if retrieval fails
+        */
+        virtual std::vector<std::string> _get_gpu_selection() = 0;
 };
 
 } // namespace SmartRedis

@@ -414,7 +414,7 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                  "non-cluster client connection.");
     }
 
-    //Build the Command
+    // Build the Command
     cmd.set_exec_address_port(host, port);
     cmd.add_field("AI.INFO");
     cmd.add_field(key);
@@ -425,6 +425,64 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
     }
 
     return run(cmd);
+}
+
+// Establish a list of GPUs to use for models and scripts
+CommandReply Redis::select_gpus(std::vector<std::string> gpu_list)
+{
+    // Build the command to add the GPU list
+    std::string gpu("GPU");
+    CommandReply reply;
+    SingleKeyCommand cmd;
+    cmd.add_field("HMSET");
+    cmd.add_field (_DB_GPU_KEY, true);
+    for (size_t i = 0; i < gpu_list.size(); i++) {
+        cmd.add_field(gpu + std::to_string(i));
+        cmd.add_field(gpu_list[i]);
+    }
+
+    // Run the command
+    return run(cmd);
+}
+
+// Retrieve the list of GPUs to use for models and scripts
+std::vector<std::string> Redis::_get_gpu_selection()
+{
+    std::vector<std::string> result;
+
+    // If the key exists, we'll use what's stored there
+    if (key_exists(_DB_GPU_KEY)) {
+        // Build the command
+        SingleKeyCommand cmd;
+        cmd.add_field("HGETALL");
+        cmd.add_field(_DB_GPU_KEY, true);
+
+        // Run it
+        CommandReply reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("failed to retrieve selected GPUs");
+        }
+
+        // Make sure we have paired elements
+        if ((reply.n_elements() % 2) != 0)
+            throw SRRuntimeException("The GPU selection reply "\
+                                    "contains the wrong number of "\
+                                    "elements.");
+
+        // Extract the GPU selections
+        for (size_t i = 0; i < reply.n_elements(); i += 2) {
+            std::string gpu_selection(reply[i + 1].str(), reply[i + 1].str_len());
+            result.push_back(gpu_selection);
+        }
+    }
+
+    // Otherwise, we'll just use default behavior
+    else {
+        result.push_back("GPU");
+    }
+
+    // Done
+    return result;
 }
 
 inline CommandReply Redis::_run(const Command& cmd)

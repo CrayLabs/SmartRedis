@@ -973,6 +973,20 @@ class Client(PyClient):
         typecheck(addresses, "addresses", list)
         super().save(addresses)
 
+    @exception_handler
+    def select_gpus(self, gpu_list):
+        """Configures which GPUs to use for scripts and models.
+
+        :param gpu_list: a semicolon delimited list of GPUs to use for scripts
+                         and models, in the form "GPU:0; GPU:1; ..."
+        :type gpu_list: str
+        :raises RedisReplyError: if the command fails. Note that
+                                 this method makes no effort to verify that
+                                 the requested GPUs are present.
+        """
+        typecheck(gpu_list, "gpu_list", str)
+        super().select_gpus(gpu_list)
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod

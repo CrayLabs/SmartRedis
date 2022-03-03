@@ -812,7 +812,7 @@ class Client
         /*!
         *   \brief Performs a synchronous save of the database shard,
         *          capturing a snapshot of all the data inside the Redis
-        *          instance  in the form of an RDB file.
+        *          instance in the form of an RDB file.
         *   \param address The address of the database node (host:port)
         *   \throw SmartRedis::Exception if the command fails or if the
         *          address is not addressable by this client.
@@ -825,6 +825,16 @@ class Client
         *          being thrown.
         */
         void save(std::string address);
+
+        /*!
+        *   \brief Configure which GPUs to use for scripts and models.
+        *   \param gpu_list a semicolon delimited list of GPUs to use for scripts
+        *                   and models, in the form "GPU:0; GPU:1; ..."
+        *   \throw SmartRedis::Exception if the command fails. Note that
+        *          this method makes no effort to verify that the requested
+        *          GPUs are present.
+        */
+        void select_gpus(std::string gpu_list);
 
     protected:
 

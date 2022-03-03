@@ -351,6 +351,15 @@ class RedisCluster : public RedisServer
                                  const std::string& key,
                                  const bool reset_stat);
 
+        /*!
+        *   \brief Establish a list of GPUs to use for models and scripts
+        *   \param gpu_list A vector of GPU selections to select
+        *   \returns The CommandReply that contains the result
+        *            of adding the GPU list to the server
+        */
+        virtual CommandReply
+        select_gpus(std::vector<std::string> gpu_list);
+
     protected:
 
         /*!
@@ -361,6 +370,13 @@ class RedisCluster : public RedisServer
         *          or if hash_slot is greater than 16384.
         */
         std::string _get_crc16_prefix(uint64_t hash_slot);
+
+        /*!
+        *   \brief Retrieve the list of GPUs to use for models and scripts
+        *   \returns A vector of GPU selections
+        *   \throw SmartRedis::RuntimeException if retrieval fails
+        */
+        virtual std::vector<std::string> _get_gpu_selection();
 
     private:
 

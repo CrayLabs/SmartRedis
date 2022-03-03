@@ -903,6 +903,7 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw SRRuntimeException("CONFIG SET command failed");
 }
 
+// Performs a synchronous save of the database shard
 void Client::save(std::string address)
 {
     AddressAtCommand cmd;
@@ -916,6 +917,29 @@ void Client::save(std::string address)
     if (reply.has_error() > 0)
         throw SRRuntimeException("SAVE command failed");
 }
+
+// Configure which GPUs to use for scripts and models.
+void Client::select_gpus(std::string gpu_list)
+{
+    // Parse the string to extract the GPU list
+    std::vector<std::string> parsed_list;
+    const char *start = gpu_list.c_str();
+    const char *gpus = gpu_list.c_str();
+    do {
+        while (*start != '\0') {
+            if (*start == ';')
+                break;
+        }
+        std::string gpu(gpus, start-gpus);
+        parsed_list.push_back(gpu);
+        gpus = start + 1;
+    }
+    while (*start != '\0');
+
+    // Stuff the gpu list into the SMARTSIM key
+    _redis_server->select_gpus(parsed_list);
+}
+
 
 // Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.

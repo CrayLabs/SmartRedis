@@ -74,7 +74,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("flush_db", &PyClient::flush_db)
         .def("config_set", &PyClient::config_set)
         .def("config_get", &PyClient::config_get)
-        .def("save", &PyClient::save);
+        .def("save", &PyClient::save)
+        .def("select_gpus", &PyClient::select_gpus);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")
