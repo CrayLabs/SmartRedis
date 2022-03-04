@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <random>
 #include "rediscluster.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
@@ -331,6 +332,26 @@ CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
     return reply;
 }
 
+std::string RedisCluster::_select_device(std::string request)
+{
+    static std::vector<std::string> gpu_list;
+    static bool gpu_list_cached = false;
+
+    // If the user didn't request GPU, or requested a specific GPU,
+    // honor their choice
+    std::string GPU("GPU");
+    if (request.compare(GPU) == 0 || request.size() != GPU.size())
+        return request;
+
+    // Otherwise, pick a random GPU from the list
+    if (!gpu_list_cached) {
+        gpu_list = _get_gpu_selection();
+        gpu_list_cached = true;
+    }
+    std::uniform_int_distribution<> distrib(0, gpu_list.size() - 1);
+    return gpu_list[distrib(_gen)];
+}
+
 // Set a model from a string buffer in the database for future execution
 CommandReply RedisCluster::set_model(const std::string& model_name,
                                      std::string_view model,
@@ -344,6 +365,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
 {
     std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
     CommandReply reply;
+
     for ( ; node != _db_nodes.cend(); node++) {
         // Build the node prefix
         std::string prefixed_key = "{" + node->prefix + "}." + model_name;
@@ -353,7 +375,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
         cmd.add_field("AI.MODELSET");
         cmd.add_field(prefixed_key, true);
         cmd.add_field(backend);
-        cmd.add_field(device);
+        cmd.add_field(_select_device(device));
 
         // Add optional fields as requested
         if (tag.size() > 0) {
@@ -405,7 +427,7 @@ CommandReply RedisCluster::set_script(const std::string& key,
         SingleKeyCommand cmd;
         cmd.add_field("AI.SCRIPTSET");
         cmd.add_field(prefix_key, true);
-        cmd.add_field(device);
+        cmd.add_field(_select_device(device));
         cmd.add_field("SOURCE");
         cmd.add_field_ptr(script);
 

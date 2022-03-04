@@ -926,13 +926,19 @@ void Client::select_gpus(std::string gpu_list)
     const char *start = gpu_list.c_str();
     const char *gpus = gpu_list.c_str();
     do {
+        while (iswspace(*start))
+            start++;
+        gpus = start;
         while (*start != '\0') {
             if (*start == ';')
                 break;
+            start++;
         }
-        std::string gpu(gpus, start-gpus);
+        std::string gpu(gpus, start - gpus);
         parsed_list.push_back(gpu);
-        gpus = start + 1;
+        if (*start != '\0')
+            start++;
+        gpus = start;
     }
     while (*start != '\0');
 

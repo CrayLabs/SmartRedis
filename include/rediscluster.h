@@ -378,6 +378,16 @@ class RedisCluster : public RedisServer
         */
         virtual std::vector<std::string> _get_gpu_selection();
 
+        /*!
+        *   \brief Select a device for a script or model based on user request
+        *   \details If the user requests "GPU" and a set of GPUs have been
+        *            previously offered for execution, we give a random GPU
+        *            selection. Otherwise, we honor the user's request.
+        *   \param request The user request
+        *   \returns The selected device
+        */
+        std::string _select_device(std::string request);
+
     private:
 
         /*!

@@ -284,7 +284,7 @@ CommandReply Redis::set_model(const std::string& model_name,
     cmd.add_field("AI.MODELSET");
     cmd.add_field(model_name);
     cmd.add_field(backend);
-    cmd.add_field(device);
+    cmd.add_field(_select_device(device));
 
     // Add optional fields if requested
     if (tag.size() > 0) {
@@ -323,7 +323,7 @@ CommandReply Redis::set_script(const std::string& key,
     SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTSET");
     cmd.add_field(key, true);
-    cmd.add_field(device);
+    cmd.add_field(_select_device(device));
     cmd.add_field("SOURCE");
     cmd.add_field_ptr(script);
 
@@ -483,6 +483,26 @@ std::vector<std::string> Redis::_get_gpu_selection()
 
     // Done
     return result;
+}
+
+std::string Redis::_select_device(std::string request)
+{
+    static std::vector<std::string> gpu_list;
+    static bool gpu_list_cached = false;
+
+    // If the user didn't request GPU, or requested a specific GPU,
+    // honor their choice
+    std::string GPU("GPU");
+    if (request.compare(GPU) == 0 || request.size() != GPU.size())
+        return request;
+
+    // Otherwise, pick a random GPU from the list
+    if (!gpu_list_cached) {
+        gpu_list = _get_gpu_selection();
+        gpu_list_cached = true;
+    }
+    std::uniform_int_distribution<> distrib(0, gpu_list.size() - 1);
+    return gpu_list[distrib(_gen)];
 }
 
 inline CommandReply Redis::_run(const Command& cmd)

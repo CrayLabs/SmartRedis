@@ -32,6 +32,7 @@
 #include <thread>
 #include <iostream>
 #include "limits.h"
+#include <random>
 
 #include <sw/redis++/redis++.h>
 
@@ -382,6 +383,16 @@ class RedisServer {
         *   \brief The number of client command execution attempts
         */
         int _command_attempts;
+
+        /*!
+        *   \brief Seeding for the random number engine
+        */
+        std::random_device _rd;
+
+        /*!
+        *   \brief Random number generator
+        */
+        std::mt19937 _gen;
 
         /*!
         *   \brief Default value of connection timeout (seconds)

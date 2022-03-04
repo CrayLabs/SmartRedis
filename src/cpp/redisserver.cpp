@@ -38,6 +38,7 @@ static bool ___srand_seeded = false;
 
 // RedisServer constructor
 RedisServer::RedisServer()
+    : _gen(_rd())
 {
     _init_integer_from_env(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
                            _DEFAULT_CONN_TIMEOUT);
