@@ -373,10 +373,11 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief Get the list of devices registered for a model or script
-        *   \returns A vector of device names
+        *   \param key the key under which model/script devices were registered
+        *   \param result Receives a vector of device names
         *   \throw SmartRedis::RuntimeException if retrieval fails
         */
-        std::vector<std::string> _get_device_list(std::string key);
+        void _get_device_list(std::string key, std::vector<std::string>& result);
 
         /*!
         *   \brief Retrieve the list of GPUs to use for models and scripts

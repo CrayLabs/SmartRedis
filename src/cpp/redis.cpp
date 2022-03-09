@@ -283,7 +283,7 @@ CommandReply Redis::set_model(const std::string& model_name,
     // Make a list of the devices to apply this model to
     std::vector<std::string> device_list;
     std::string GPU("GPU");
-    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+    if (device.compare(GPU) != 0)
         device_list.push_back(device);
     else
         device_list = _get_gpu_selection();
@@ -292,7 +292,10 @@ CommandReply Redis::set_model(const std::string& model_name,
     SingleKeyCommand register_cmd;
     register_cmd.add_field("HMSET");
     register_cmd.add_field(model_name + ".devices", true);
-    register_cmd.add_fields(device_list);
+    for (size_t i = 0; i < device_list.size(); i++) {
+        register_cmd.add_field(std::to_string(i));
+        register_cmd.add_field(device_list[i]);
+    }
     CommandReply result = run(register_cmd);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to register device list for model");
@@ -350,7 +353,7 @@ CommandReply Redis::set_script(const std::string& script_name,
     // Make a list of the devices to apply this script to
     std::vector<std::string> device_list;
     std::string GPU("GPU");
-    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+    if (device.compare(GPU) != 0)
         device_list.push_back(device);
     else
         device_list = _get_gpu_selection();
@@ -359,7 +362,10 @@ CommandReply Redis::set_script(const std::string& script_name,
     SingleKeyCommand register_cmd;
     register_cmd.add_field("HMSET");
     register_cmd.add_field(script_name + ".devices", true);
-    register_cmd.add_fields(device_list);
+    for (size_t i = 0; i < device_list.size(); i++) {
+        register_cmd.add_field(std::to_string(i));
+        register_cmd.add_field(device_list[i]);
+    }
     CommandReply result = run(register_cmd);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to register device list for script");
@@ -392,7 +398,10 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> outputs)
 {
     // Pick a device to run the model on
-    std::vector<std::string> device_list = _get_device_list(key);
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Model not found!");
     std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
     std::string device = device_list[distrib(_gen)];
 
@@ -417,7 +426,10 @@ CommandReply Redis::run_script(const std::string& key,
                               std::vector<std::string> outputs)
 {
     // Pick a device to run the script on
-    std::vector<std::string> device_list = _get_device_list(key);
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Script not found!");
     std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
     std::string device = device_list[distrib(_gen)];
 
@@ -439,7 +451,10 @@ CommandReply Redis::run_script(const std::string& key,
 CommandReply Redis::get_model(const std::string& key)
 {
     // Pick a device to get the model for
-    std::vector<std::string> device_list = _get_device_list(key + ".devices");
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Model not found!");
     std::string device = device_list[0];
 
     // Build the command
@@ -456,7 +471,10 @@ CommandReply Redis::get_model(const std::string& key)
 CommandReply Redis::get_script(const std::string& key)
 {
     // Pick a device to get the script for
-    std::vector<std::string> device_list = _get_device_list(key + ".devices");
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Script not found!");
     std::string device = device_list[0];
 
     // Build the command
@@ -488,7 +506,10 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
     }
 
     // Pick a device to get info for
-    std::vector<std::string> device_list = _get_device_list(key);
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Model/script not found!");
     std::string device = device_list[0];
 
     // Build the Command
@@ -523,9 +544,9 @@ CommandReply Redis::select_gpus(std::vector<std::string> gpu_list)
 }
 
 // Get the list of devices registered for a model or script
-std::vector<std::string> Redis::_get_device_list(std::string key)
+void Redis::_get_device_list(std::string key, std::vector<std::string>& result)
 {
-    std::vector<std::string> result;
+    result.empty();
     std::string devices_key = key + ".devices";
 
     // Build the command
@@ -550,9 +571,6 @@ std::vector<std::string> Redis::_get_device_list(std::string key)
         std::string gpu_selection(reply[i + 1].str(), reply[i + 1].str_len());
         result.push_back(gpu_selection);
     }
-
-    // Done
-    return result;
 }
 
 // Retrieve the list of GPUs to use for models and scripts

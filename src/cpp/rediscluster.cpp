@@ -142,15 +142,8 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
 // Check if a model or script key exists in the database
 bool RedisCluster::model_key_exists(const std::string& key)
 {
-    // Add model prefix to the key
-    // We'll check for the device registration on the first node
-    DBNode* node = &(_db_nodes[0]);
-    if (node == NULL)
-        return false;
-    std::string prefixed_key = '{' + node->prefix + "}." + key + ".devices";
-
-    // And perform key existence check
-    return key_exists(prefixed_key);
+    // We'll check for the device registration
+    return key_exists(key + ".devices");
 }
 
 // Check if a key exists in the database
@@ -347,7 +340,7 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     // Make a list of the devices to apply this model to
     std::vector<std::string> device_list;
     std::string GPU("GPU");
-    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+    if (device.compare(GPU) != 0)
         device_list.push_back(device);
     else
         device_list = _get_gpu_selection();
@@ -355,21 +348,23 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
     CommandReply reply;
 
+    // Register the device selection for this model
+    SingleKeyCommand register_cmd;
+    register_cmd.add_field("HSET");
+    register_cmd.add_field(model_name + ".devices", true);
+    for (size_t i = 0; i < device_list.size(); i++) {
+        register_cmd.add_field("device" + std::to_string(i));
+        register_cmd.add_field(device_list[i]);
+    }
+    CommandReply result = run(register_cmd);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to register device list for model");
+    }
+
     for ( ; node != _db_nodes.cend(); node++) {
         // Build the node prefix
         std::string prefixed_key = "{" + node->prefix + "}." + model_name;
 
-        // Register the device selection for this model
-        SingleKeyCommand register_cmd;
-        register_cmd.add_field("HMSET");
-        register_cmd.add_field(prefixed_key + ".devices", true);
-        register_cmd.add_fields(device_list);
-        CommandReply result = run(register_cmd);
-        if (result.has_error() > 0) {
-            throw SRRuntimeException(
-                "Failed to register device list for script on node" +
-                node->name);
-        }
 
         // Send the model to Redis for each device
         for (size_t i = 0; i < device_list.size(); i++) {
@@ -417,35 +412,37 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
 }
 
 // Set a script from a string buffer in the database for future execution
-CommandReply RedisCluster::set_script(const std::string& key,
+CommandReply RedisCluster::set_script(const std::string& script_name,
                                       const std::string& device,
                                       std::string_view script)
 {
     // Make a list of the devices to apply this script to
     std::vector<std::string> device_list;
     std::string GPU("GPU");
-    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+    if (device.compare(GPU) != 0)
         device_list.push_back(device);
     else
         device_list = _get_gpu_selection();
 
     CommandReply reply;
     std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+
+    // Register the device selection for this script
+    SingleKeyCommand register_cmd;
+    register_cmd.add_field("HSET");
+    register_cmd.add_field(script_name + ".devices", true);
+    for (size_t i = 0; i < device_list.size(); i++) {
+        register_cmd.add_field("device" + std::to_string(i));
+        register_cmd.add_field(device_list[i]);
+    }
+    CommandReply result = run(register_cmd);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to register device list for script");
+    }
+
     for ( ; node != _db_nodes.cend(); node++) {
         // Build the node prefix
-        std::string prefix_key = "{" + node->prefix + "}." + key;
-
-        // Register the device selection for this script
-        SingleKeyCommand register_cmd;
-        register_cmd.add_field("HMSET");
-        register_cmd.add_field(prefix_key + ".devices", true);
-        register_cmd.add_fields(device_list);
-        CommandReply result = run(register_cmd);
-        if (result.has_error() > 0) {
-            throw SRRuntimeException(
-                "Failed to register device list for script on node" +
-                node->name);
-        }
+        std::string prefix_key = "{" + node->prefix + "}." + script_name;
 
         // Send the script to Redis for each device
         for (size_t i = 0; i < device_list.size(); i++) {
@@ -470,7 +467,7 @@ CommandReply RedisCluster::set_script(const std::string& key,
 }
 
 // Run a model in the database using the specificed input and output tensors
-CommandReply RedisCluster::run_model(const std::string& key,
+CommandReply RedisCluster::run_model(const std::string& name,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
 {
@@ -489,8 +486,11 @@ CommandReply RedisCluster::run_model(const std::string& key,
     }
 
     // Pick a device to run the model on
-    std::string model_name = "{" + db->prefix + "}." + std::string(key);
-    std::vector<std::string> device_list = _get_device_list(model_name);
+    std::string model_key = "{" + db->prefix + "}." + name;
+    std::vector<std::string> device_list;
+    _get_device_list(name, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Model not found!");
     std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
     std::string device = device_list[distrib(_gen)];
 
@@ -504,7 +504,7 @@ CommandReply RedisCluster::run_model(const std::string& key,
     // Build the MODELRUN command
     CompoundCommand cmd;
     cmd.add_field("AI.MODELRUN");
-    cmd.add_field(model_name + "." + device, true);
+    cmd.add_field(model_key + "." + device, true);
     cmd.add_field("INPUTS");
     cmd.add_fields(tmp_inputs);
     cmd.add_field("OUTPUTS");
@@ -552,7 +552,10 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
     // Pick a device to run the script on
     std::string script_key = "{" + db->prefix + "}." + std::string(key);
-    std::vector<std::string> device_list = _get_device_list(script_key);
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Script not found!");
     std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
     std::string device = device_list[distrib(_gen)];
 
@@ -600,19 +603,22 @@ CommandReply RedisCluster::run_script(const std::string& key,
 }
 
 // Retrieve the model from the database
-CommandReply RedisCluster::get_model(const std::string& key)
+CommandReply RedisCluster::get_model(const std::string& name)
 {
     // Build the node prefix
-    std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
+    std::string prefixed_key = "{" + _db_nodes[0].prefix + "}." + name;
 
     // Pick a device to get the model for
-    std::vector<std::string> device_list = _get_device_list(prefixed_str + ".devices");
+    std::vector<std::string> device_list;
+    _get_device_list(name, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Model not found!");
     std::string device = device_list[0];
 
     // Build the MODELGET command
     SingleKeyCommand cmd;
     cmd.add_field("AI.MODELGET");
-    cmd.add_field(prefixed_str + "." + device, true);
+    cmd.add_field(prefixed_key + "." + device, true);
     cmd.add_field("BLOB");
 
     // Run it
@@ -620,19 +626,22 @@ CommandReply RedisCluster::get_model(const std::string& key)
 }
 
 // Retrieve the script from the database
-CommandReply RedisCluster::get_script(const std::string& key)
+CommandReply RedisCluster::get_script(const std::string& script_name)
 {
     // Build the node prefix
-    std::string prefixed_str = "{" + _db_nodes[0].prefix + "}." + key;
+    std::string prefixed_key = "{" + _db_nodes[0].prefix + "}." + script_name;
 
-    // Pick a device to get the model for
-    std::vector<std::string> device_list = _get_device_list(prefixed_str + ".devices");
+    // Pick a device to get the script for
+    std::vector<std::string> device_list;
+    _get_device_list(script_name, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Script not found!");
     std::string device = device_list[0];
 
     // Build the SCRIPTGET command
     SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTGET");
-    cmd.add_field(prefixed_str + "." + device, true);
+    cmd.add_field(prefixed_key + "." + device, true);
     cmd.add_field("SOURCE");
 
     // Run it
@@ -662,7 +671,10 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
     std::string prefixed_key = "{" + db_prefix + "}." + key;
 
     // Pick a device to get the model for
-    std::vector<std::string> device_list = _get_device_list(prefixed_key + ".devices");
+    std::vector<std::string> device_list;
+    _get_device_list(key, device_list);
+    if (device_list.size() == 0)
+        throw SRRuntimeException("Script/model not found!");
     std::string device = device_list[0];
 
     // Build the Command
@@ -708,9 +720,9 @@ CommandReply RedisCluster::select_gpus(std::vector<std::string> gpu_list)
 }
 
 // Get the list of devices registered for a model or script
-std::vector<std::string> RedisCluster::_get_device_list(std::string key)
+void RedisCluster::_get_device_list(std::string key, std::vector<std::string>& result)
 {
-    std::vector<std::string> result;
+    result.empty();
     std::string devices_key = key + ".devices";
 
     // Build the command
@@ -720,24 +732,24 @@ std::vector<std::string> RedisCluster::_get_device_list(std::string key)
 
     // Run it
     CommandReply reply = run(cmd);
-    if (reply.has_error() > 0) {
+    if (reply.has_error() > 0 /*|| reply.n_elements() == 0*/) {
         throw SRRuntimeException("no devices registered for script/model");
     }
 
+std::cout << "Found " << std::to_string(reply.n_elements()/2) << " devices for " << key << std::endl;
+
     // Make sure we have paired elements
-    if ((reply.n_elements() % 2) != 0)
+    if ((reply.n_elements() % 2) != 0) {
         throw SRRuntimeException("The device registration reply "\
                                 "contains the wrong number of "\
                                 "elements.");
+    }
 
     // Extract the GPU selections
     for (size_t i = 0; i < reply.n_elements(); i += 2) {
         std::string gpu_selection(reply[i + 1].str(), reply[i + 1].str_len());
         result.push_back(gpu_selection);
     }
-
-    // Done
-    return result;
 }
 
 // Retrieve the list of GPUs to use for models and scripts
