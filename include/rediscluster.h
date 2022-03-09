@@ -372,21 +372,18 @@ class RedisCluster : public RedisServer
         std::string _get_crc16_prefix(uint64_t hash_slot);
 
         /*!
+        *   \brief Get the list of devices registered for a model or script
+        *   \returns A vector of device names
+        *   \throw SmartRedis::RuntimeException if retrieval fails
+        */
+        std::vector<std::string> _get_device_list(std::string key);
+
+        /*!
         *   \brief Retrieve the list of GPUs to use for models and scripts
         *   \returns A vector of GPU selections
         *   \throw SmartRedis::RuntimeException if retrieval fails
         */
         virtual std::vector<std::string> _get_gpu_selection();
-
-        /*!
-        *   \brief Select a device for a script or model based on user request
-        *   \details If the user requests "GPU" and a set of GPUs have been
-        *            previously offered for execution, we give a random GPU
-        *            selection. Otherwise, we honor the user's request.
-        *   \param request The user request
-        *   \returns The selected device
-        */
-        std::string _select_device(std::string request);
 
     private:
 

@@ -98,7 +98,8 @@ std::vector<CommandReply> Redis::run(CommandList& cmds)
 // Check if a model or script key exists in the database
 bool Redis::model_key_exists(const std::string& key)
 {
-    return key_exists(key);
+    // We'll check for the device registration
+    return key_exists(key + ".devices");
 }
 
 // Check if a key exists in the database
@@ -279,56 +280,110 @@ CommandReply Redis::set_model(const std::string& model_name,
                               const std::vector<std::string>& outputs
                               )
 {
-    // Build the command
-    SingleKeyCommand cmd;
-    cmd.add_field("AI.MODELSET");
-    cmd.add_field(model_name);
-    cmd.add_field(backend);
-    cmd.add_field(_select_device(device));
+    // Make a list of the devices to apply this model to
+    std::vector<std::string> device_list;
+    std::string GPU("GPU");
+    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+        device_list.push_back(device);
+    else
+        device_list = _get_gpu_selection();
 
-    // Add optional fields if requested
-    if (tag.size() > 0) {
-        cmd.add_field("TAG");
-        cmd.add_field(tag);
+    // Register the device selection for this model
+    SingleKeyCommand register_cmd;
+    register_cmd.add_field("HMSET");
+    register_cmd.add_field(model_name + ".devices", true);
+    register_cmd.add_fields(device_list);
+    CommandReply result = run(register_cmd);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to register device list for model");
     }
-    if (batch_size > 0) {
-        cmd.add_field("BATCHSIZE");
-        cmd.add_field(std::to_string(batch_size));
-    }
-    if (min_batch_size > 0) {
-        cmd.add_field("MINBATCHSIZE");
-        cmd.add_field(std::to_string(min_batch_size));
-    }
-    if (inputs.size() > 0) {
-        cmd.add_field("INPUTS");
-        cmd.add_fields(inputs);
-    }
-    if (outputs.size() > 0) {
-        cmd.add_field("OUTPUTS");
-        cmd.add_fields(outputs);
-    }
-    cmd.add_field("BLOB");
-    cmd.add_field_ptr(model);
 
-    // Run it
-    return run(cmd);
+    // Send the model to Redis for each device
+    for (size_t i = 0; i < device_list.size(); i++) {
+        // Build the command
+        SingleKeyCommand cmd;
+        cmd.add_field("AI.MODELSET");
+        cmd.add_field(model_name + "." + device_list[i], true);
+        cmd.add_field(backend);
+        cmd.add_field(device_list[i]);
+
+        // Add optional fields if requested
+        if (tag.size() > 0) {
+            cmd.add_field("TAG");
+            cmd.add_field(tag);
+        }
+        if (batch_size > 0) {
+            cmd.add_field("BATCHSIZE");
+            cmd.add_field(std::to_string(batch_size));
+        }
+        if (min_batch_size > 0) {
+            cmd.add_field("MINBATCHSIZE");
+            cmd.add_field(std::to_string(min_batch_size));
+        }
+        if (inputs.size() > 0) {
+            cmd.add_field("INPUTS");
+            cmd.add_fields(inputs);
+        }
+        if (outputs.size() > 0) {
+            cmd.add_field("OUTPUTS");
+            cmd.add_fields(outputs);
+        }
+        cmd.add_field("BLOB");
+        cmd.add_field_ptr(model);
+
+        // Run it
+        result = run(cmd);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Setting model failed for device: " + device_list[i]);
+        }
+    }
+
+    // Done
+    return result;
 }
 
 // Set a script from a string_view buffer in the database for future execution
-CommandReply Redis::set_script(const std::string& key,
+CommandReply Redis::set_script(const std::string& script_name,
                                const std::string& device,
                                std::string_view script)
 {
-    // Build the command
-    SingleKeyCommand cmd;
-    cmd.add_field("AI.SCRIPTSET");
-    cmd.add_field(key, true);
-    cmd.add_field(_select_device(device));
-    cmd.add_field("SOURCE");
-    cmd.add_field_ptr(script);
+    // Make a list of the devices to apply this script to
+    std::vector<std::string> device_list;
+    std::string GPU("GPU");
+    if (device.compare(GPU) == 0 || device.size() != GPU.size())
+        device_list.push_back(device);
+    else
+        device_list = _get_gpu_selection();
 
-    // Run it
-    return run(cmd);
+    // Register the device selection for this script
+    SingleKeyCommand register_cmd;
+    register_cmd.add_field("HMSET");
+    register_cmd.add_field(script_name + ".devices", true);
+    register_cmd.add_fields(device_list);
+    CommandReply result = run(register_cmd);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to register device list for script");
+    }
+
+    // Send the script to Redis for each device
+    for (size_t i = 0; i < device_list.size(); i++) {
+        // Build the command
+        SingleKeyCommand cmd;
+        cmd.add_field("AI.SCRIPTSET");
+        cmd.add_field(script_name + "." + device_list[i], true);
+        cmd.add_field(device_list[i]);
+        cmd.add_field("SOURCE");
+        cmd.add_field_ptr(script);
+
+        // Run it
+        result = run(cmd);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Setting script failed for device: " + device_list[i]);
+        }
+    }
+
+    // Done
+    return result;
 }
 
 // Run a model in the database using the specificed input and output tensors
@@ -336,10 +391,15 @@ CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
+    // Pick a device to run the model on
+    std::vector<std::string> device_list = _get_device_list(key);
+    std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
+    std::string device = device_list[distrib(_gen)];
+
     // Build the command
     CompoundCommand cmd;
     cmd.add_field("AI.MODELRUN");
-    cmd.add_field(key);
+    cmd.add_field(key + "." + device);
     cmd.add_field("INPUTS");
     cmd.add_fields(inputs);
     cmd.add_field("OUTPUTS");
@@ -356,10 +416,15 @@ CommandReply Redis::run_script(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
 {
+    // Pick a device to run the script on
+    std::vector<std::string> device_list = _get_device_list(key);
+    std::uniform_int_distribution<> distrib(0, device_list.size() - 1);
+    std::string device = device_list[distrib(_gen)];
+
     // Build the command
     CompoundCommand cmd;
     cmd.add_field("AI.SCRIPTRUN");
-    cmd.add_field(key);
+    cmd.add_field(key + "." + device);
     cmd.add_field(function);
     cmd.add_field("INPUTS");
     cmd.add_fields(inputs);
@@ -373,10 +438,14 @@ CommandReply Redis::run_script(const std::string& key,
 // Retrieve the model from the database
 CommandReply Redis::get_model(const std::string& key)
 {
+    // Pick a device to get the model for
+    std::vector<std::string> device_list = _get_device_list(key + ".devices");
+    std::string device = device_list[0];
+
     // Build the command
     SingleKeyCommand cmd;
     cmd.add_field("AI.MODELGET");
-    cmd.add_field(key);
+    cmd.add_field(key + "." + device);
     cmd.add_field("BLOB");
 
     // Run it
@@ -386,10 +455,14 @@ CommandReply Redis::get_model(const std::string& key)
 // Retrieve the script from the database
 CommandReply Redis::get_script(const std::string& key)
 {
+    // Pick a device to get the script for
+    std::vector<std::string> device_list = _get_device_list(key + ".devices");
+    std::string device = device_list[0];
+
     // Build the command
     SingleKeyCommand cmd;
     cmd.add_field("AI.SCRIPTGET");
-    cmd.add_field(key, true);
+    cmd.add_field(key + "." + device, true);
     cmd.add_field("SOURCE");
 
     // Run it
@@ -414,10 +487,14 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                  "non-cluster client connection.");
     }
 
+    // Pick a device to get info for
+    std::vector<std::string> device_list = _get_device_list(key);
+    std::string device = device_list[0];
+
     // Build the Command
     cmd.set_exec_address_port(host, port);
     cmd.add_field("AI.INFO");
-    cmd.add_field(key);
+    cmd.add_field(key + "." + device);
 
     // Optionally add RESETSTAT to the command
     if (reset_stat) {
@@ -443,6 +520,39 @@ CommandReply Redis::select_gpus(std::vector<std::string> gpu_list)
 
     // Run the command
     return run(cmd);
+}
+
+// Get the list of devices registered for a model or script
+std::vector<std::string> Redis::_get_device_list(std::string key)
+{
+    std::vector<std::string> result;
+    std::string devices_key = key + ".devices";
+
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd.add_field("HGETALL");
+    cmd.add_field(devices_key, true);
+
+    // Run it
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0) {
+        throw SRRuntimeException("no devices registered for script/model");
+    }
+
+    // Make sure we have paired elements
+    if ((reply.n_elements() % 2) != 0)
+        throw SRRuntimeException("The device registration reply "\
+                                "contains the wrong number of "\
+                                "elements.");
+
+    // Extract the GPU selections
+    for (size_t i = 0; i < reply.n_elements(); i += 2) {
+        std::string gpu_selection(reply[i + 1].str(), reply[i + 1].str_len());
+        result.push_back(gpu_selection);
+    }
+
+    // Done
+    return result;
 }
 
 // Retrieve the list of GPUs to use for models and scripts
@@ -483,26 +593,6 @@ std::vector<std::string> Redis::_get_gpu_selection()
 
     // Done
     return result;
-}
-
-std::string Redis::_select_device(std::string request)
-{
-    static std::vector<std::string> gpu_list;
-    static bool gpu_list_cached = false;
-
-    // If the user didn't request GPU, or requested a specific GPU,
-    // honor their choice
-    std::string GPU("GPU");
-    if (request.compare(GPU) == 0 || request.size() != GPU.size())
-        return request;
-
-    // Otherwise, pick a random GPU from the list
-    if (!gpu_list_cached) {
-        gpu_list = _get_gpu_selection();
-        gpu_list_cached = true;
-    }
-    std::uniform_int_distribution<> distrib(0, gpu_list.size() - 1);
-    return gpu_list[distrib(_gen)];
 }
 
 inline CommandReply Redis::_run(const Command& cmd)
