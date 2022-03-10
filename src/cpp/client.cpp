@@ -843,7 +843,7 @@ void Client::flush_db(std::string address)
     AddressAtCommand cmd;
     std::string host = cmd.parse_host(address);
     uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
+    if (host.empty() || port == 0){
         throw SRRuntimeException(std::string(address) +
                                  "is not a valid database node address.");
     }

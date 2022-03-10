@@ -546,7 +546,7 @@ CommandReply Redis::select_gpus(std::vector<std::string> gpu_list)
 // Get the list of devices registered for a model or script
 void Redis::_get_device_list(std::string key, std::vector<std::string>& result)
 {
-    result.empty();
+    result.clear();
     std::string devices_key = key + ".devices";
 
     // Build the command
