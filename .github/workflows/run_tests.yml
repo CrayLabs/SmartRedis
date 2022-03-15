@@ -89,10 +89,6 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get install cmake
 
-      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
-        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
-        run: sudo apt-get install -y mpich
-
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev]
 
