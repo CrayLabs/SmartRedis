@@ -327,8 +327,6 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     for ( ; node != _db_nodes.cend(); node++) {
         // Build the node prefix
         std::string prefixed_key = "{" + node->prefix + "}." + model_name;
-        std::vector<std::string> tmp_inputs = _get_tmp_names(inputs, node->prefix);
-        std::vector<std::string> tmp_outputs = _get_tmp_names(outputs, node->prefix);
 
         // Build the MODELSET commnd
         CompoundCommand cmd;
@@ -345,10 +343,10 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
             cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
         }
         if ( inputs.size() > 0) {
-            cmd << "INPUTS" << std::to_string(tmp_inputs.size()) << inputs;
+            cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
         }
         if (outputs.size() > 0) {
-            cmd << "OUTPUTS" << std::to_string(tmp_outputs.size()) << outputs;
+            cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
         }
         cmd << "BLOB" << model;
 
