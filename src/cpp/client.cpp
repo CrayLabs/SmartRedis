@@ -27,6 +27,8 @@
  */
 
 #include <ctype.h>
+#include <filesystem>
+
 #include "client.h"
 #include "srexception.h"
 
@@ -446,6 +448,18 @@ void Client::set_model_from_file(const std::string& name,
     if (model_file.size() == 0) {
         throw SRParameterException("model_file is a required "
                                    "parameter of set_model_from_file.");
+    }
+
+    // Check the size of the file
+    try {
+        std::filesystem::path m = model_file;
+        int length = std::filesystem::file_size(m);
+        if (length > model_file.max_size()) {
+            throw SRRuntimeException("Model file " + model_file + " is too large to process.");
+        }
+    }
+    catch (std::filesystem::filesystem_error& e) {
+        throw SRRuntimeException("Unable to process model file " + model_file + ": " + e.what());
     }
 
     std::ifstream fin(model_file, std::ios::binary);
