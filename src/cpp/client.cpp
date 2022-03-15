@@ -615,11 +615,31 @@ std::string_view Client::get_model(const std::string& name)
     if (reply.has_error())
         throw SRRuntimeException("failed to get model from server");
 
-    char* model = _model_queries.allocate(reply.str_len());
-    if (model == NULL)
-        throw SRBadAllocException("model query");
-    std::memcpy(model, reply.str(), reply.str_len());
-    return std::string_view(model, reply.str_len());
+    // In most cases, the reply will be a single string
+    // consisting of the serialized model
+    if (!reply.is_array()) {
+        char* model = _model_queries.allocate(reply.str_len());
+        if (model == NULL)
+            throw SRBadAllocException("model query");
+        std::memcpy(model, reply.str(), reply.str_len());
+        return std::string_view(model, reply.str_len());
+    }
+
+    // Otherwise, we need to concatenate the segments together
+    else {
+        size_t model_length = 0;
+        size_t offset = 0;
+        for (int i = 0; i < reply.n_elements(); i++) {
+            model_length += reply[i].str_len();
+        }
+        char* model = _model_queries.allocate(model_length);
+        if (model == NULL)
+            throw SRBadAllocException("model query");
+        for (int i = 0; i < reply.n_elements(); i++) {
+            std::memcpy(model + offset, reply[i].str(), reply[i].str_len());
+        }
+        return std::string_view(model, model_length);
+    }
 }
 
 // Set a script from file in the database for future execution
