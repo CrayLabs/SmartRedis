@@ -453,8 +453,7 @@ void Client::set_model_from_file(const std::string& name,
 
     // Check the size of the file
     try {
-        std::filesystem::path m = model_file;
-        int length = std::filesystem::file_size(m);
+        int length = std::filesystem::file_size(model_file);
         if (length > model_file.max_size()) {
             throw SRRuntimeException("Model file " + model_file + " is too large to process.");
         }
