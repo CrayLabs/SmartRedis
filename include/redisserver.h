@@ -389,6 +389,11 @@ class RedisServer {
         static constexpr int _DEFAULT_CMD_TIMEOUT = 100;
 
         /*!
+        *   \brief Default value of model execution timeout (milliseconds)
+        */
+        static constexpr int _DEFAULT_MODEL_TIMEOUT = 60 * 1000 * 1000;
+
+        /*!
         *   \brief Default value of command execution attempt
         *          intervals (milliseconds)
         */

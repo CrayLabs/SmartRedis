@@ -396,7 +396,7 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
     // Check for a non-default timeout setting
     int run_timeout;
     _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           60 * 60 * 1000); // 1 hr
+                           _DEFAULT_MODEL_TIMEOUT);
 
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select
