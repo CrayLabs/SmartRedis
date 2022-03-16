@@ -847,6 +847,7 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     }
 }
 
+// Perform an immediate save of the database
 void PyClient::save(std::vector<std::string> addresses)
 {
     for (size_t address_index = 0; address_index < addresses.size(); address_index++) {
@@ -869,4 +870,24 @@ void PyClient::save(std::vector<std::string> addresses)
     }
 }
 
-// EOF
+// Configure the Redis model chunk size
+void PyClient::set_model_chunk_size(int chunk_size)
+{
+    try {
+        _client->set_model_chunk_size(chunk_size);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_chunk_size.");
+    }
+
+}

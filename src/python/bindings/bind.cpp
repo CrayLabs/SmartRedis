@@ -74,7 +74,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("flush_db", &PyClient::flush_db)
         .def("config_set", &PyClient::config_set)
         .def("config_get", &PyClient::config_get)
-        .def("save", &PyClient::save);
+        .def("save", &PyClient::save)
+        .def("set_model_chunk_size", &PyClient::set_model_chunk_size);
 
     // Python Dataset class
     py::class_<PyDataset>(m, "PyDataset")

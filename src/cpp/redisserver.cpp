@@ -55,6 +55,8 @@ RedisServer::RedisServer()
 
     _command_attempts = (_command_timeout * 1000) /
                          _command_interval + 1;
+                         
+    _model_chunk_size = _DEFAULT_MODEL_CHUNK_SIZE;
 }
 
 // Retrieve a single address, randomly chosen from a list of addresses if

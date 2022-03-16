@@ -249,7 +249,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
 
 // Set a model from std::string_view buffer in the database for future execution
 CommandReply Redis::set_model(const std::string& model_name,
-                              std::string_view model,
+                              const std::vector<std::string_view>& model,
                               const std::string& backend,
                               const std::string& device,
                               int batch_size,

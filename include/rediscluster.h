@@ -248,7 +248,7 @@ class RedisCluster : public RedisServer
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the model
-        *   \param model The model as a continuous buffer string_view
+        *   \param model The model as a sequence of buffer string_view chunks
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
         *   \param device The name of the device for execution
@@ -265,7 +265,7 @@ class RedisCluster : public RedisServer
         *   \returns The CommandReply from the set_model Command
         */
         virtual CommandReply set_model(const std::string& key,
-                                       std::string_view model,
+                                       const std::vector<std::string_view>& model,
                                        const std::string& backend,
                                        const std::string& device,
                                        int batch_size = 0,

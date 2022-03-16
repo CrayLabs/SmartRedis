@@ -313,7 +313,7 @@ CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
 
 // Set a model from a string buffer in the database for future execution
 CommandReply RedisCluster::set_model(const std::string& model_name,
-                                     std::string_view model,
+                                     const std::vector<std::string_view>& model,
                                      const std::string& backend,
                                      const std::string& device,
                                      int batch_size,
@@ -483,7 +483,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
     // Run it
     CommandReply reply = run(cmd);
     if (reply.has_error() > 0) {
-        std::string error("run_model failed for node ");
+        std::string error("run_script failed for node ");
         error += db_index;
         throw SRRuntimeException(error);
     }

@@ -973,6 +973,26 @@ class Client(PyClient):
         typecheck(addresses, "addresses", list)
         super().save(addresses)
 
+
+    @exception_handler
+    def set_model_chunk_size(self, chunk_size):
+        """Reconfigures the chunking size that Redis uses for model
+           serialization, replication, and the model_get command.
+
+           This method triggers the AI.CONFIG method in the Redis
+           database to change the model chunking size. The default
+           size of 511MB should be fine for most applications, so
+           it is expected to be very rare that a client calls this
+           method.
+
+        :param chunk_size: The new chunk size
+        :type addresses: int
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(chunk_size, "chunk_size", int)
+        super().set_model_chunk_size(chunk_size)
+
     # ---- helpers --------------------------------------------------------
 
     @staticmethod
