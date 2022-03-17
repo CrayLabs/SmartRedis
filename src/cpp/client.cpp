@@ -26,6 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+////// THIS IS A POINTLESS CHANGE. DO NOT MERGE IT INTO THE CODEBASE!!!!//////
+
+
 #include <ctype.h>
 #include "client.h"
 #include "srexception.h"
