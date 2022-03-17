@@ -28,6 +28,10 @@
 
 #include <ctype.h>
 #include <filesystem>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "client.h"
 #include "srexception.h"
@@ -451,14 +455,13 @@ void Client::set_model_from_file(const std::string& name,
     }
 
     // Check the size of the file
-    try {
-        size_t length = std::filesystem::file_size(model_file);
-        if (length > model_file.max_size()) {
-            throw SRRuntimeException("Model file " + model_file + " is too large to process.");
-        }
+    int fd = open(model_file.c_str(), O_RDONLY);
+    if (fd == -1) {
+        throw SRRuntimeException("Unable to access model file " + model_file);
     }
-    catch (std::filesystem::filesystem_error& e) {
-        throw SRRuntimeException("Unable to process model file " + model_file + ": " + e.what());
+    size_t length = (size_t)lseek(fd, 0, SEEK_END);
+    if (length > model_file.max_size()) {
+        throw SRRuntimeException("Model file " + model_file + " is too large to process.");
     }
 
     std::ifstream fin(model_file, std::ios::binary);
