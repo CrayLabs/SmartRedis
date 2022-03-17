@@ -353,7 +353,7 @@ class RedisServer {
         *   \brief Store the current model chunk size
         *   \param chunk_size The updated model chunk size
         */
-        virtual int store_model_chunk_size(int chunk_size) {
+        virtual void store_model_chunk_size(int chunk_size) {
             _model_chunk_size = chunk_size;
         }
 
@@ -393,7 +393,7 @@ class RedisServer {
         *   \brief The chunk size into which models need to be broken for
         *          transfer to Redis
         */
-        size_t _model_chunk_size;
+        int _model_chunk_size;
 
         /*!
         *   \brief Default value of connection timeout (seconds)
