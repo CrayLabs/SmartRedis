@@ -452,7 +452,7 @@ void Client::set_model_from_file(const std::string& name,
 
     // Check the size of the file
     try {
-        int length = std::filesystem::file_size(model_file);
+        size_t length = std::filesystem::file_size(model_file);
         if (length > model_file.max_size()) {
             throw SRRuntimeException("Model file " + model_file + " is too large to process.");
         }
@@ -652,13 +652,13 @@ std::string_view Client::get_model(const std::string& name)
     else {
         size_t model_length = 0;
         size_t offset = 0;
-        for (int i = 0; i < reply.n_elements(); i++) {
+        for (size_t i = 0; i < reply.n_elements(); i++) {
             model_length += reply[i].str_len();
         }
         char* model = _model_queries.allocate(model_length);
         if (model == NULL)
             throw SRBadAllocException("model query");
-        for (int i = 0; i < reply.n_elements(); i++) {
+        for (size_t i = 0; i < reply.n_elements(); i++) {
             std::memcpy(model + offset, reply[i].str(), reply[i].str_len());
         }
         return std::string_view(model, model_length);
