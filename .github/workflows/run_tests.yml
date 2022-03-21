@@ -152,5 +152,5 @@ jobs:
         run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
 
       - name: Run testing with redis cluster
-        run: PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv -s ./tests # make test-verbose without rebuilding tests
+        run: make test-verbose
 
