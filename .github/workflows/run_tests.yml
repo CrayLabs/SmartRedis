@@ -118,7 +118,7 @@ jobs:
         with:
           files: ./tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir/coverage.info
 
-      - name: Cluster setup: Install docker and redis-server
+      - name: Install docker and redis-server
         run: |
           sudo apt-get update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
           # Add latest redis to apt sources
@@ -130,25 +130,25 @@ jobs:
           sudo apt-get update && \
           sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-server
 
-      - name: Cluster setup: Copy redisai from docker image
+      - name: Copy redisai from docker image
         run: |
           docker create --name redisai --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
           docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
           sudo mkdir -p /usr/lib/redis/modules/ &&
           sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/
 
-      - name: Cluster setup: Setup local redis servers
+      - name: Setup local redis servers
         run: |
           redis-server --port 7000 --daemonize yes --cluster-enabled yes --cluster-config-file 7000.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
           redis-server --port 7001 --daemonize yes --cluster-enabled yes --cluster-config-file 7001.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so  &
           redis-server --port 7002 --daemonize yes --cluster-enabled yes --cluster-config-file 7002.conf --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
 
-      - name: Cluster setup: Overwrite redis cluster env vars
+      - name: Overwrite redis cluster env vars
         run: |
          echo "SSDB=127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" >> $GITHUB_ENV &&
          echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV
 
-      - name: Cluster setup: Start redis cluster
+      - name: Start redis cluster
         run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
 
       - name: Run testing with redis cluster
