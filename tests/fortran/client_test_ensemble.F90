@@ -138,7 +138,24 @@ endif
 result = client%model_exists(script_key, exists)
 if (result .ne. SRNoError) stop
 if (.not. exists) then
-  write(STDERR,*) "Script does not exist: "//script_key
+  write(STDERR,*) "Model does not exist: "//script_key
+  error stop
+endif
+
+result = client%delete_model(model_key)
+if (result .ne. SRNoError) stop
+result = client%model_exists(model_key, exists)
+if (result .ne. SRNoError) stop
+if (exists) then
+  write(STDERR,*) "Model exists after deletion: "//model_key
+  error stop
+endif
+result = client%delete_script(script_key)
+if (result .ne. SRNoError) stop
+result = client%model_exists(script_key, exists)
+if (result .ne. SRNoError) stop
+if (exists) then
+  write(STDERR,*) "Script exists after deletion: "//script_key
   error stop
 endif
 
