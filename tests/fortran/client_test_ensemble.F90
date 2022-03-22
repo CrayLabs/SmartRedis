@@ -138,7 +138,7 @@ endif
 result = client%model_exists(script_key, exists)
 if (result .ne. SRNoError) stop
 if (.not. exists) then
-  write(STDERR,*) "Model does not exist: "//script_key
+  write(STDERR,*) "Script does not exist: "//script_key
   error stop
 endif
 
