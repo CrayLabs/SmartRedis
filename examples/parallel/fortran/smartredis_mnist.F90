@@ -40,8 +40,7 @@ program mnist_example
   character(len=*), parameter :: script_file = "../../../common/mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
-  integer :: err_code, pe_id
-  integer(kind=enum_kind) :: result
+  integer :: err_code, pe_id, result
   character(len=2) :: key_suffix
 
   ! Initialize MPI and get the rank of the processor
