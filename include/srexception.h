@@ -159,7 +159,7 @@ class Exception: public std::exception
     *   \brief Retrieve the message for an exception
     *   \returns String of message data
     */
-    virtual const char* what() const noexcept{
+    const char* what() const noexcept override {
         return _msg.c_str();
     }
 
@@ -197,14 +197,13 @@ class BadAllocException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRBadAllocError;
     }
 };
 
 /*!
-*   \def SRBadAllocException Instantiate a BadAllocException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a BadAllocException with message
 */
 #define SRBadAllocException(txt) BadAllocException(txt, __FILE__, __LINE__)
 
@@ -221,14 +220,13 @@ class DatabaseException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRDatabaseError;
     }
 };
 
 /*!
-*   \def SRDatabaseException Instantiate a DatabaseException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a DatabaseException with message
 */
 #define SRDatabaseException(txt) DatabaseException(txt, __FILE__, __LINE__)
 
@@ -245,15 +243,14 @@ class RuntimeException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRRuntimeError;
     }
 };
 
 /*!
-*   \def SRRuntimeException Instantiate a RuntimeException with message
-*                           \a txt for file \a __FILE__, line \a __LINE__
-*/
+*   \brief Instantiate a RuntimeException with message
+\*/
 #define SRRuntimeException(txt) RuntimeException(txt, __FILE__, __LINE__)
 
 
@@ -269,14 +266,13 @@ class ParameterException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRParameterError;
     }
 };
 
 /*!
-*   \def SRParameterException Instantiate a ParameterException with message
-*                             \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a ParameterException with message
 */
 #define SRParameterException(txt) ParameterException(txt, __FILE__, __LINE__)
 
@@ -293,14 +289,13 @@ class TimeoutException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRTimeoutError;
     }
 };
 
 /*!
-*   \def SRTimeoutException Instantiate a TimeoutException with message
-*                           \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a TimeoutException with message
 */
 #define SRTimeoutException(txt) TimeoutException(txt, __FILE__, __LINE__)
 
@@ -317,14 +312,13 @@ class InternalException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRInternalError;
     }
 };
 
 /*!
-*   \def SRInternalException Instantiate a InternalException with message
-*                            \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a InternalException with message
 */
 #define SRInternalException(txt) InternalException(txt, __FILE__, __LINE__)
 
@@ -341,14 +335,13 @@ class KeyException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRKeyError;
     }
 };
 
 /*!
-*   \def SRKeyException Instantiate a KeyException with message
-*                       \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a KeyException with message
 */
 #define SRKeyException(txt) KeyException(txt, __FILE__, __LINE__)
 
@@ -364,14 +357,13 @@ class TypeException: public Exception
     *   \brief Retrieve an error code matching the exception type
     *   \returns Error code corresponding to the exception type
     */
-    virtual SRError to_error_code() const noexcept {
+    SRError to_error_code() const noexcept override {
         return SRTypeError;
     }
 };
 
 /*!
-*   \def SRTypeException Instantiate a TypeException with message
-*                        \a txt for file \a __FILE__, line \a __LINE__
+*   \brief Instantiate a TypeException with message
 */
 #define SRTypeException(txt) TypeException(txt, __FILE__, __LINE__)
 
