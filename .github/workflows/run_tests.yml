@@ -1,5 +1,7 @@
 name: run_tests
 
+# This file is for tests that are to be run frequently, with each push to a PR.
+
 on:
   push:
     branches:
