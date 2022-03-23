@@ -514,7 +514,7 @@ CommandReply RedisCluster::delete_model(const std::string& key)
         // Build the node prefix
         std::string prefixed_key = "{" + node->prefix + "}." + key;
 
-        // Build the SCRIPTSET command
+        // Build the MODELDEL command
         SingleKeyCommand cmd;
         cmd << "AI.MODELDEL" << Keyfield(prefixed_key);
 
