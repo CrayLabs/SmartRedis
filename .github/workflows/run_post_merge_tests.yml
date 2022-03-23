@@ -1,4 +1,4 @@
-name: run_one_off
+name: run_post_merge_tests
 
 # This file is for tests that are to be run rarely, once on each merge.
 
