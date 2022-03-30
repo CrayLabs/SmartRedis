@@ -283,6 +283,37 @@ class Client(PyClient):
         super().set_script(name, device, fn_src)
 
     @exception_handler
+    def set_function_multigpu(self, name, function, num_gpus):
+        """Set a callable function into the database for use
+        in a multi-GPU system
+
+        The final script key used to store the function may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        Function must be a callable TorchScript function and have at least
+        one input and one output. Call the function with the Client.run_script
+        method.
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
+
+        :param name: name to store function at
+        :type name: str
+        :param function: callable function
+        :type function: callable
+        :param num_gpus: the number of GPUs in the system's nodes
+        :type num_gpus: int
+        :raises TypeError: if argument was not a callable function
+        :raises RedisReplyError: if function failed to set
+        """
+        typecheck(name, "name", str)
+        typecheck(num_gpus, "num_gpus", int)
+        if not callable(function):
+            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
+        fn_src = inspect.getsource(function)
+        super().set_script_multigpu(name, num_gpus, fn_src)
+
+    @exception_handler
     def set_script(self, name, script, device="CPU"):
         """Store a TorchScript at a key in the database
 
@@ -308,6 +339,31 @@ class Client(PyClient):
         super().set_script(name, device, script)
 
     @exception_handler
+    def set_script_multigpu(self, name, script, num_gpus):
+        """Store a TorchScript at a key in the database
+
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
+
+        :param name: name to store the script under
+        :type name: str
+        :param script: TorchScript code
+        :type script: str
+        :param num_gpus: the number of GPUs in the system's nodes
+        :type num_gpus: int
+        :raises RedisReplyError: if script fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(script, "script", str)
+        typecheck(num_gpus, "num_gpus", int)
+        device = self.__check_device(device)
+        super().set_script_multigpu(name, script, num_gpus)
+
+    @exception_handler
     def set_script_from_file(self, name, file, device="CPU"):
         """Same as Client.set_script, but from file
 
@@ -329,6 +385,28 @@ class Client(PyClient):
         device = self.__check_device(device)
         file_path = self.__check_file(file)
         super().set_script_from_file(name, device, file_path)
+
+    @exception_handler
+    def set_script_from_file_multigpu(self, name, file, num_gpus):
+        """Same as Client.set_script_multigpu, but from file
+
+        The final script key used to store the script may be formed
+        by applying a prefix to the supplied name.
+        See use_model_ensemble_prefix() for more details.
+
+        :param name: key to store script under
+        :type name: str
+        :param file: path to text file containing TorchScript code
+        :type file: str
+        :param num_gpus: the number of GPUs in the system's nodes
+        :type num_gpus: int
+        :raises RedisReplyError: if script fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(file, "file", str)
+        typecheck(num_gpus, "num_gpus", int)
+        file_path = self.__check_file(file)
+        super().set_script_from_file_multigpu(name, device, file_path)
 
     @exception_handler
     def get_script(self, name):
@@ -376,6 +454,41 @@ class Client(PyClient):
         typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_script(name, fn_name, inputs, outputs)
+
+    @exception_handler
+    def run_script_multigpu(self, name, fn_name, inputs, outputs, image_id, num_gpus):
+        """Execute TorchScript stored inside the database
+
+        The script key used to locate the script to be run
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output lists may be prefixed. See
+        set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details
+
+        :param name: the name the script is stored under
+        :type name: str
+        :param fn_name: name of a function within the script to execute
+        :type fn_name: str
+        :param inputs: database tensor names to use as script inputs
+        :type inputs: list[str]
+        :param outputs: database tensor names to receive script outputs
+        :type outputs: list[str]
+        :param image_id: index of the current image, such as a processor ID
+                         or MPI rank
+        :type image_id: int
+        :param num_gpus: the number of gpus for which the model was stored
+        :type num_gpus: int
+        :raises RedisReplyError: if script execution fails
+        """
+        typecheck(name, "name", str)
+        typecheck(fn_name, "fn_name", str)
+        typecheck(inputs, "inputs", list)
+        typecheck(outputs, "outputs", list)
+        typecheck(image_id, "image_id", list)
+        typecheck(num_gpus, "num_gpus", list)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().run_script_multigpu(name, fn_name, inputs, outputs, image_id, num_gpus)
 
     @exception_handler
     def delete_script(self, name):
@@ -478,6 +591,71 @@ class Client(PyClient):
         )
 
     @exception_handler
+    def set_model_multigpu(
+        self,
+        name,
+        model,
+        backend,
+        num_gpus,
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model in the database for use
+        in a multi-GPU system
+
+        The final model key used to store the model
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
+
+        :param name: name to store model under
+        :type name: str
+        :param model: serialized model
+        :type model: bytes
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param num_gpus: the number of GPUs in the system's nodes
+        :type device: int
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outputs (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(backend, "backend", str)
+        typecheck(num_gpus, "num_gpus", int)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
+        backend = self.__check_backend(backend)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().set_model_multigpu(
+            name,
+            model,
+            backend,
+            num_gpus,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs
+        )
+
+    @exception_handler
     def set_model_from_file(
         self,
         name,
@@ -545,6 +723,73 @@ class Client(PyClient):
         )
 
     @exception_handler
+    def set_model_from_file_multigpu(
+        self,
+        name,
+        model_file,
+        backend,
+        num_gpus,
+        batch_size=0,
+        min_batch_size=0,
+        tag="",
+        inputs=None,
+        outputs=None,
+    ):
+        """Put a TF, TF-lite, PT, or ONNX model from file in the database
+        for use in a multi-GPU system
+
+        The final model key used to store the model
+        may be formed by applying a prefix to the supplied
+        name. Similarly, the tensor names in the
+        input and output nodes for TF models may be prefixed.
+        See set_data_source(), use_model_ensemble_prefix(), and
+        use_tensor_ensemble_prefix() for more details.
+        Device selection is either "GPU" or "CPU". If many GPUs are present,
+        a zero-based index can be passed for specification e.g. "GPU:1".
+
+        :param name: name to store model under
+        :type name: str
+        :param model_file: serialized model
+        :type model_file: file path to model
+        :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
+        :type backend: str
+        :param num_gpus: the number of GPUs in the system's nodes
+        :type num_gpus: int
+        :param batch_size: batch size for execution, defaults to 0
+        :type batch_size: int, optional
+        :param min_batch_size: minimum batch size for model execution, defaults to 0
+        :type min_batch_size: int, optional
+        :param tag: additional tag for model information, defaults to ""
+        :type tag: str, optional
+        :param inputs: model inputs (TF only), defaults to None
+        :type inputs: list[str], optional
+        :param outputs: model outupts (TF only), defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model fails to set
+        """
+        typecheck(name, "name", str)
+        typecheck(model_file, "model_file", str)
+        typecheck(backend, "backend", str)
+        typecheck(num_gpus, "num_gpus", int)
+        typecheck(batch_size, "batch_size", int)
+        typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(tag, "tag", str)
+        backend = self.__check_backend(backend)
+        m_file = self.__check_file(model_file)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().set_model_from_file_multigpu(
+            name,
+            m_file,
+            backend,
+            num_gpus,
+            batch_size,
+            min_batch_size,
+            tag,
+            inputs,
+            outputs,
+        )
+
+    @exception_handler
     def run_model(self, name, inputs=None, outputs=None):
         """Execute a stored model
 
@@ -564,6 +809,40 @@ class Client(PyClient):
         typecheck(name, "name", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_model(name, inputs, outputs)
+
+    @exception_handler
+    def run_model_multigpu(
+        self,
+        name,
+        image_id,
+        num_gpus,
+        inputs=None,
+        outputs=None):
+        """Execute a model stored for a multi-GPU system
+
+        The model key used to locate the model to be run
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
+        and use_model_ensemble_prefix() for more details.
+
+        :param name: name for stored model
+        :type name: str
+        :param image_id: index of the current image, such as a processor ID
+                         or MPI rank
+        :type image_id: int
+        :param num_gpus: the number of gpus for which the model was stored
+        :type num_gpus: int
+        :param inputs: names of stored inputs to provide model, defaults to None
+        :type inputs: list[str], optional
+        :param outputs: names to store outputs under, defaults to None
+        :type outputs: list[str], optional
+        :raises RedisReplyError: if model execution fails
+        """
+        typecheck(name, "name", str)
+        typecheck(image_id, "image_id", int)
+        typecheck(num_gpus, "num_gpus", int)
+        inputs, outputs = self.__check_tensor_args(inputs, outputs)
+        super().run_model_multigpu(name, image_id, num_gpus, inputs, outputs)
 
     @exception_handler
     def delete_model(self, name):
