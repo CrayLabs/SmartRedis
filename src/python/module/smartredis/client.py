@@ -477,7 +477,7 @@ class Client(PyClient):
         :param image_id: index of the current image, such as a processor ID
                          or MPI rank
         :type image_id: int
-        :param num_gpus: the number of gpus for which the model was stored
+        :param num_gpus: the number of gpus for which the script was stored
         :type num_gpus: int
         :raises RedisReplyError: if script execution fails
         """
@@ -622,7 +622,7 @@ class Client(PyClient):
         :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
         :type backend: str
         :param num_gpus: the number of GPUs in the system's nodes
-        :type device: int
+        :type num_gpus: int
         :param batch_size: batch size for execution, defaults to 0
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
