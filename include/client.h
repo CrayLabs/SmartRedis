@@ -636,8 +636,8 @@ class Client
         */
         void run_script_multigpu(const std::string& name,
                                  const std::string& function,
-                                 std::vector<std::string>& inputs,
-                                 std::vector<std::string>& outputs,
+                                 std::vector<std::string> inputs,
+                                 std::vector<std::string> outputs,
                                  int image_id,
                                  int num_gpus);
 

@@ -406,7 +406,7 @@ class Client(PyClient):
         typecheck(file, "file", str)
         typecheck(num_gpus, "num_gpus", int)
         file_path = self.__check_file(file)
-        super().set_script_from_file_multigpu(name, device, file_path)
+        super().set_script_from_file_multigpu(name, file_path, num_gpus)
 
     @exception_handler
     def get_script(self, name):
