@@ -46,6 +46,7 @@ Client::Client(bool cluster)
     _set_prefixes_from_env();
     _use_tensor_prefix = true;
     _use_model_prefix = false;
+    _use_list_prefix = true;
 }
 
 // Destructor
@@ -79,6 +80,8 @@ DataSet Client::get_dataset(const std::string& name)
 {
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(name);
+
+    // If the reply has no elements, it didn't exist
     if (reply.n_elements() == 0) {
         throw SRKeyException("The requested DataSet, \"" +
                              name + "\", does not exist.");
@@ -91,15 +94,11 @@ DataSet Client::get_dataset(const std::string& name)
 
     // Retrieve DataSet tensors and fill the DataSet object
     for(size_t i = 0; i < tensor_names.size(); i++) {
+        // Build the tensor key
         std::string tensor_key =
             _build_dataset_tensor_key(name, tensor_names[i], true);
-        CommandReply reply = this->_redis_server->get_tensor(tensor_key);
-        std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
-        std::string_view blob = GetTensorCommand::get_data_blob(reply);
-        SRTensorType type = GetTensorCommand::get_data_type(reply);
-        dataset._add_to_tensorpack(tensor_names[i],
-                                   (void*)blob.data(), reply_dims,
-                                   type, SRMemLayoutContiguous);
+        // Retrieve tensor and add it to the dataset
+        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_key);
     }
 
     return dataset;
@@ -922,6 +921,18 @@ void Client::use_model_ensemble_prefix(bool use_prefix)
     _use_model_prefix = use_prefix;
 }
 
+// Set whether names of aggregation lists should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be
+// used if they were previously set through the environment variables
+// SSKEYOUT and SSKEYIN. Keys of entities created before this function
+// is called will not be affected. By default, the client prefixes
+// aggregation list keys.
+void Client::use_list_ensemble_prefix(bool use_prefix)
+{
+    _use_list_prefix = use_prefix;
+}
+
+
 // Set whether names of tensor and dataset entities should be prefixed
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
@@ -1090,6 +1101,121 @@ void Client::save(std::string address)
         throw SRRuntimeException("SAVE command failed");
 }
 
+void Client::append_to_list(const std::string& list_name,
+                            const DataSet& dataset)
+{
+    // Build the list key
+    std::string list_key = _build_list_key(list_name, false);
+
+    // The aggregation list stores dataset key (not the meta key)
+    std::string dataset_key = _build_dataset_key(dataset.get_name(), false);
+
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "RPUSH" << Keyfield(list_key) << dataset_key;
+
+    // Run the command
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("RPUSH command failed. DataSet could not "\
+                                 "be added to the aggregation list.");
+}
+
+void Client::delete_list(const std::string& list_name)
+{
+    // Build the list key
+    std::string list_key = _build_list_key(list_name, true);
+
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "DEL" << Keyfield(list_key);
+
+    // Run the command
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("DEL command failed.");
+}
+
+void Client::copy_list(const std::string& src_name,
+                       const std::string& dest_name)
+{
+    // TODO implement
+}
+
+void Client::rename_list(const std::string& src_name,
+                         const std::string& dest_name)
+{
+    // TODO implement this
+}
+
+// Get the length of the list
+int Client::get_list_length(const std::string& list_name)
+{
+    // Build the list key
+    std::string list_key = _build_list_key(list_name, false);
+
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "LLEN" << Keyfield(list_key);
+
+    // Run the command
+    CommandReply reply = _run(cmd);
+
+    // Check for errors and return value
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("LLEN command failed. The list "\
+                                 "length could not be retrieved.");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_INTEGER")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for list length.");
+
+    int list_length = reply.integer();
+
+    if (list_length < 0)
+        throw SRRuntimeException("An invalid, negative value was "
+                                 "returned for list length.");
+
+    return list_length;
+}
+
+bool Client::poll_list_length(const std::string& name, size_t list_length,
+                              int poll_frequency_ms, int num_tries)
+{
+    // Check for the requested list length, return if found
+    for (int i = 0; i < num_tries; i++) {
+        if (get_list_length(name) >= list_length)
+            return true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    }
+
+    return false;
+}
+
+// Retrieve datasets in aggregation list
+std::vector<DataSet> Client::get_datasets_from_list(const std::string& list_name)
+{
+    if (list_name.size() == 0) {
+        throw SRParameterException("The list name must have length "\
+                                   "greater than zero");
+    }
+
+    return _get_dataset_list_range(list_name, 0, -1);
+}
+
+// Retrieve a subset of datsets in the aggregation list
+std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name,
+                                                    const int start_index,
+                                                    const int end_index)
+{
+    if (list_name.size() == 0) {
+        throw SRParameterException("The list name must have length "\
+                                   "greater than zero");
+    }
+
+    return _get_dataset_list_range(list_name, start_index, end_index);
+}
+
 // Set the prefixes that are used for set and get methods using SSKEYIN
 // and SSKEYOUT environment variables.
 void Client::_set_prefixes_from_env()
@@ -1169,6 +1295,103 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     return _run(cmd);
 }
 
+// Retrieve a tensor and add it to the dataset
+inline void Client::_get_and_add_dataset_tensor(DataSet& dataset,
+                                                const std::string& name,
+                                                const std::string& key)
+{
+    // Run tensor retrieval command
+    CommandReply reply = _redis_server->get_tensor(key);
+
+    // Extract tensor properties from command reply
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
+    std::string_view blob = GetTensorCommand::get_data_blob(reply);
+    SRTensorType type = GetTensorCommand::get_data_type(reply);
+
+    // Add tensor to the dataset
+    dataset._add_to_tensorpack(name, (void*)blob.data(), reply_dims,
+                               type, SRMemLayoutContiguous);
+}
+
+inline std::vector<DataSet>
+Client::_get_dataset_list_range(const std::string& list_name,
+                                const int start_index,
+                                const int end_index)
+{
+    // Build the list key
+    std::string list_key = _build_list_key(list_name, true);
+
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "LRANGE" << Keyfield(list_key);
+    cmd << std::to_string(start_index);
+    cmd << std::to_string(end_index);
+
+    // Run the command
+    CommandReply reply = _run(cmd);
+
+    // Check for errors and return value
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("GET command failed. The aggregation "\
+                                 "list could not be retrieved.");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_ARRAY")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for the aggregation list.");
+
+    std::vector<DataSet> dataset_list;
+
+    // TODO we are doing the base case of looping through all
+    // keys in a non-parallel fashion,
+    for(size_t i = 0; i < reply.n_elements(); i++) {
+
+        if (reply[i].redis_reply_type() != "REDIS_REPLY_STRING") {
+            throw SRRuntimeException("Element " + std::to_string(i) +
+                                     " in the aggregation list has an "\
+                                     "unexpected type: " +
+                                     reply.redis_reply_type());
+        }
+
+        if(reply[i].str_len() == 0) {
+            throw SRRuntimeException("Element " + std::to_string(i) +
+                                     " contains an empty key, which is "\
+                                     "not permitted.");
+        }
+
+        // Get the dataset key from the list entry
+        std::string dataset_key(reply[i].str(), reply[i].str_len());
+
+        // Build the metadata retrieval key
+        SingleKeyCommand metadata_cmd;
+        metadata_cmd << "HGETALL" << Keyfield(dataset_key + ".meta");
+
+        // Retreive the dataset metadata
+        CommandReply metadata_reply = _run(metadata_cmd);
+
+        //TODO do we want to have the name be the name or the key
+        if (metadata_reply.has_error() > 0) {
+            throw SRRuntimeException("An error was encountered in "\
+                                     "metdata retrieval.");
+        }
+
+        // Unpack the dataset
+        DataSet dataset(dataset_key);
+        _unpack_dataset_metadata(dataset, metadata_reply);
+
+        // Retrieve DataSet tensors and fill the DataSet object
+        std::vector<std::string> tensor_names = dataset.get_tensor_names();
+        for(size_t j = 0; j < tensor_names.size(); j++) {
+            std::string tensor_key = dataset.get_name() + "." + tensor_names[j];
+            _get_and_add_dataset_tensor(dataset, tensor_names[j], tensor_key);
+        }
+
+        // Store the finalized dataset
+        dataset_list.push_back(std::move(dataset));
+    }
+
+    return dataset_list;
+}
+
 // Build full formatted key of a tensor, based on current prefix settings.
 inline std::string Client::_build_tensor_key(const std::string& key,
                                              const bool on_db)
@@ -1234,6 +1457,19 @@ Client::_build_dataset_meta_key(const std::string& dataset_name,
 {
     return _build_dataset_key(dataset_name, on_db) + ".meta";
 }
+
+// Create the key for putting or getting aggregation list in the dataset
+inline std::string
+Client::_build_list_key(const std::string& list_name,
+                                    const bool on_db)
+{
+    std::string prefix;
+    if (_use_list_prefix)
+        prefix = on_db ? _get_prefix() : _put_prefix();
+
+    return prefix + list_name;
+}
+
 
 // Create the key to place an indicator in the database that the
 // dataset has been successfully stored.
