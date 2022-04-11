@@ -162,8 +162,8 @@ RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         //TODO we need to split _get_db_node_prefix because it would be
         // more efficient to use indicies instead of a map with prefix
         std::string prefix = _get_db_node_prefix(**cmd);
-        std::cout<<"Pushing back "<<(size_t)(cmd - cmd_list.begin())<<std::endl;
-        std::cout<<"prefix = "<<prefix<<std::endl;
+        //std::cout<<"Pushing back "<<(size_t)(cmd - cmd_list.begin())<<std::endl;
+        //std::cout<<"prefix = "<<prefix<<std::endl;
         shard_pipes[prefix].push_back(cmd - cmd_list.begin());
 
         cmd++;
@@ -184,7 +184,7 @@ RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         for (size_t i = 0; i < pipe_it->second.size(); i++) {
             // Get the index of the command
             size_t cmd_index = pipe_it->second[i];
-            std::cout<<"Executing cmd_index "<<cmd_index<<std::endl;
+            // std::cout<<"Executing cmd_index "<<cmd_index<<std::endl;
             // Add the command ot the pipe
             Command* current_command = *(cmd_list.begin() + cmd_index);
             pipeline.command(current_command->cbegin(), current_command->cend());
@@ -200,15 +200,15 @@ RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
             redisReply& d_reply = q_reply.get(i);
             // TODO get rid of this deep copy
             aggregate_replies[pipe_it->second[i]] = CommandReply::deep_clone_reply(&d_reply);
-            std::cout<<"Made assignment "<<std::endl;
-            std::cout<<"The placed reply has type "<<aggregate_replies[pipe_it->second[i]].redis_reply_type()<<std::endl;
+            //std::cout<<"Made assignment "<<std::endl;
+            //std::cout<<"The placed reply has type "<<aggregate_replies[pipe_it->second[i]].redis_reply_type()<<std::endl;
         }
 
         // Increment the iterator to the next set of pipelined commands
         pipe_it++;
     }
 
-    std::cout<<"Aggregate_replies has length "<<aggregate_replies.size()<<std::endl;
+    //std::cout<<"Aggregate_replies has length "<<aggregate_replies.size()<<std::endl;
 
     return aggregate_replies;
 }
