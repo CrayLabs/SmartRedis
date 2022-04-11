@@ -1397,7 +1397,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
         dataset_list.push_back(std::move(dataset));
     }
 
-    std::cout<<"Dataset list has "<<dataset_list.size()<<std::endl;
+    // std::cout<<"Dataset list has "<<dataset_list.size()<<std::endl;
 
     return dataset_list;
 }
