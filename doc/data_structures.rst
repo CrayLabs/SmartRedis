@@ -420,6 +420,32 @@ ensemble compatibility features are used.
     but the name provided to ``run_model()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.
 
+Support on Systems with Multiple GPUs
+-------------------------------------
+
+SmartRedis has special support for models on systems with multiple GPUs.
+On these systems, the model can be set via the ``Client.set_model_multigpu()``
+function, which differs from the ``Client.set_model()`` function only in that
+(1) there is no need to specify a device (GPU is implicit) and (2) the caller
+must supply the number of GPUs on the system's nodes. The function will then
+create separate copies of the model for each GPU by appending ``.GPU:n`` to
+the supplied name, where ``n`` is a number from zero to the number of GPUs
+minus one.
+
+Executing models on systems with multiple GPUs may done via the
+``Client.run_model_multigpu()`` function. This method parallels
+``Client.run_model()`` except that it requires two additional parameters:
+the number of GPUs in the system's nodes, and and index for the currently
+executing image. The model execution is then dispatched to the copy of the
+model on the GPU corresponding to the image index modulo the number of GPUs
+in the system's nodes.  The image index may be an MPI rank, or a thread ID,
+or any other indexing scheme.
+
+.. note::
+
+    In order for a model to be executed via ``Client.run_model_multigpu()``,
+    it must have been set via ``Client.set_model_multigpu()``.
+
 Script
 ======
 
@@ -504,3 +530,29 @@ ensemble compatibility features are used.
     DataSet tensors can be used as ``run_script()`` input tensors,
     but the name provided to ``run_script()`` must be prefixed with
     the ``DataSet`` name in the pattern ``{dataset_name}.tensor_name``.
+
+Support on Systems with Multiple GPUs
+-------------------------------------
+
+SmartRedis has special support for scripts on systems with multiple GPUs.
+On these systems, the script can be set via the ``Client.set_script_multigpu()``
+function, which differs from the ``Client.set_script()`` function only in that
+(1) there is no need to specify a device (GPU is implicit) and (2) the caller
+must supply the number of GPUs on the system's nodes. The function will then
+create separate copies of the script for each GPU by appending ``.GPU:n`` to
+the supplied name, where ``n`` is a number from zero to the number of GPUs
+minus one.
+
+Executing scripts on systems with multiple GPUs may done via the
+``Client.run_script_multigpu()`` function. This method parallels
+``Client.run_script()`` except that it requires two additional parameters:
+the number of GPUs in the system's nodes, and and index for the currently
+executing image. The script execution is then dispatched to the copy of the
+script on the GPU corresponding to the image index modulo the number of GPUs
+in the system's nodes.  The image index may be an MPI rank, or a thread ID,
+or any other indexing scheme.
+
+.. note::
+
+    In order for a script to be executed via ``Client.run_script_multigpu()``,
+    it must have been set via ``Client.set_script_multigpu()``.

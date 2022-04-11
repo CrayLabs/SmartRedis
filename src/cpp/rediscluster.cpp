@@ -416,7 +416,7 @@ CommandReply RedisCluster::set_script(const std::string& key,
         // Run the command
         reply = run(cmd);
         if (reply.has_error() > 0) {
-            throw SRRuntimeException("SetModel failed for node " + node->name);
+            throw SRRuntimeException("SetScript failed for node " + node->name);
         }
     }
 
@@ -449,6 +449,7 @@ void RedisCluster::set_script_multigpu(const std::string& name,
         throw SRRuntimeException("Failed to set general script");
     }
 }
+
 // Run a model in the database using the specificed input and output tensors
 CommandReply RedisCluster::run_model(const std::string& model_name,
                                      std::vector<std::string> inputs,
@@ -603,49 +604,10 @@ void RedisCluster::run_script_multigpu(const std::string& name,
                                        int image_id,
                                        int num_gpus)
 {
-    // Locate the DB node for the script
-    uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size() - 1);
-    DBNode* db = &(_db_nodes[db_index]);
-    if (db == NULL) {
-        throw SRRuntimeException("Missing DB node found in run_script");
-    }
-
-    // Generate temporary names so that all keys go to same slot
-    std::vector<std::string> tmp_inputs = _get_tmp_names(inputs, db->prefix);
-    std::vector<std::string> tmp_outputs = _get_tmp_names(outputs, db->prefix);
-
-    // Copy all input tensors to temporary names to align hash slots
-    copy_tensors(inputs, tmp_inputs);
     std::string device = "GPU:" + std::to_string(image_id % num_gpus);
-    std::string script_name = "{" + db->prefix + "}." + std::string(name) + "." + device;
-
-    // Build the SCRIPTRUN command
-    CompoundCommand cmd;
-    cmd << "AI.SCRIPTRUN" << Keyfield(script_name) << function
-        << "INPUTS" << tmp_inputs << "OUTPUTS" << tmp_outputs;
-
-    // Run it
-    CommandReply reply = run(cmd);
-    if (reply.has_error() > 0) {
-        std::string error("run_model failed for node ");
-        error += db_index;
-        throw SRRuntimeException(error);
-    }
-
-    // Store the output back to the database
-    copy_tensors(tmp_outputs, outputs);
-
-    // Clean up temp keys
-    std::vector<std::string> keys_to_delete;
-    keys_to_delete.insert(
-        keys_to_delete.end(), tmp_outputs.begin(), tmp_outputs.end());
-    keys_to_delete.insert(
-        keys_to_delete.end(), tmp_inputs.begin(), tmp_inputs.end());
-    _delete_keys(keys_to_delete);
-
-    // Done
-    if (reply.has_error() > 0) {
+    std::string target_script = name + "." + device;
+    CommandReply result = run_script(target_script, function, inputs, outputs);
+    if (result.has_error() > 0) {
         throw SRRuntimeException(
             "An error occurred while executing the script on " + device);
     }
