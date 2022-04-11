@@ -138,6 +138,81 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
     return replies;
 }
 
+// Run multiple single-key or single-hash slot Command on the server.
+// Commands are grouped by shard and run in pipelines.
+std::vector<CommandReply>
+RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
+{
+    // Commands will be grouped by shards.  This map will store
+    // the shard prefix and all of the commands that map to that
+    // shard prefix.  The shard prefix can then be used to create
+    // a pipeline.
+    std::unordered_map<std::string, std::vector<size_t>> shard_pipes;
+
+    CommandList::iterator cmd = cmd_list.begin();
+
+    while (cmd != cmd_list.end()) {
+
+        if ((*cmd)->has_keys() == false) {
+            throw SRInternalException("A Command without keys is not "\
+                                      "supported by "\
+                                      "RedisCluster::run_via_unordered_pipelines.");
+        }
+
+        //TODO we need to split _get_db_node_prefix because it would be
+        // more efficient to use indicies instead of a map with prefix
+        std::string prefix = _get_db_node_prefix(**cmd);
+        std::cout<<"Pushing back "<<(size_t)(cmd - cmd_list.begin())<<std::endl;
+        std::cout<<"prefix = "<<prefix<<std::endl;
+        shard_pipes[prefix].push_back(cmd - cmd_list.begin());
+
+        cmd++;
+    }
+
+    std::unordered_map<std::string, std::vector<size_t>>::iterator pipe_it =
+        shard_pipes.begin();
+
+    std::vector<CommandReply> aggregate_replies;
+    aggregate_replies.resize(cmd_list.size());
+
+    while (pipe_it != shard_pipes.end()) {
+
+        // Create the pipeline
+        sw::redis::Pipeline pipeline = _redis_cluster->pipeline(pipe_it->first, false);
+
+        // Loop over all commands and add to the pipeline
+        for (size_t i = 0; i < pipe_it->second.size(); i++) {
+            // Get the index of the command
+            size_t cmd_index = pipe_it->second[i];
+            std::cout<<"Executing cmd_index "<<cmd_index<<std::endl;
+            // Add the command ot the pipe
+            Command* current_command = *(cmd_list.begin() + cmd_index);
+            pipeline.command(current_command->cbegin(), current_command->cend());
+        }
+
+        // TODO this is going to do an unnecessary copy assignment operator
+        // TODO encapsulate this in error handling
+        // Run the pipeline
+        sw::redis::QueuedReplies q_reply = pipeline.exec();
+
+        // Put the individual command replies into a vector of replies
+        for (size_t i = 0; i < q_reply.size(); i++) {
+            redisReply& d_reply = q_reply.get(i);
+            // TODO get rid of this deep copy
+            aggregate_replies[pipe_it->second[i]] = CommandReply::deep_clone_reply(&d_reply);
+            std::cout<<"Made assignment "<<std::endl;
+            std::cout<<"The placed reply has type "<<aggregate_replies[pipe_it->second[i]].redis_reply_type()<<std::endl;
+        }
+
+        // Increment the iterator to the next set of pipelined commands
+        pipe_it++;
+    }
+
+    std::cout<<"Aggregate_replies has length "<<aggregate_replies.size()<<std::endl;
+
+    return aggregate_replies;
+}
+
 // Check if a model or script key exists in the database
 bool RedisCluster::model_key_exists(const std::string& key)
 {

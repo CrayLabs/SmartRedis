@@ -41,6 +41,7 @@ CommandReply::CommandReply(const CommandReply& reply)
 
 CommandReply::CommandReply(const redisReply* reply)
 {
+    std::cout<<"Deep copy constructor being used "<<std::endl;
     _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply),
                                  sw::redis::ReplyDeleter());
     _reply = _uptr_reply.get();
@@ -56,6 +57,7 @@ CommandReply::CommandReply(RedisReplyUPtr&& reply)
 // Move constructor with redisReply as input
 CommandReply::CommandReply(redisReply*&& reply)
 {
+    std::cout<<"Move constructor being used "<<std::endl;
     _uptr_reply = NULL;
     _reply = std::move(reply);
 }
@@ -71,6 +73,7 @@ CommandReply::CommandReply(CommandReply&& reply)
 
 CommandReply& CommandReply::operator=(const CommandReply& reply)
 {
+    std::cout<<"Deep copy constructor being used "<<std::endl;
     if (this != &reply) {
         _uptr_reply.reset(NULL);
         _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply._reply), sw::redis::ReplyDeleter());
@@ -81,6 +84,7 @@ CommandReply& CommandReply::operator=(const CommandReply& reply)
 
 CommandReply& CommandReply::operator=(const redisReply* reply)
 {
+    std::cout<<"Deep copy assignment being used "<<std::endl;
     _uptr_reply.reset(NULL);
     _uptr_reply = RedisReplyUPtr(deep_clone_reply(reply),
                                  sw::redis::ReplyDeleter());
@@ -99,6 +103,7 @@ CommandReply& CommandReply::operator=(RedisReplyUPtr&& reply)
 // Move assignment operator with redisReply as input.
 CommandReply& CommandReply::operator=(redisReply*&& reply)
 {
+    std::cout<<"Move assignment being used "<<std::endl;
     _uptr_reply = NULL;
     _reply = std::move(reply);
     return *this;

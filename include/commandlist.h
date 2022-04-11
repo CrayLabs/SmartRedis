@@ -129,6 +129,12 @@ class CommandList
         */
         const_iterator cend();
 
+        /*!
+        *   \brief Return the number of Command in the CommandList
+        *   \returns The number of Command in CommandList
+        */
+        size_t size();
+
     private:
 
         /*!

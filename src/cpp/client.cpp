@@ -1341,9 +1341,10 @@ Client::_get_dataset_list_range(const std::string& list_name,
 
     std::vector<DataSet> dataset_list;
 
-    // TODO we are doing the base case of looping through all
-    // keys in a non-parallel fashion,
-    for(size_t i = 0; i < reply.n_elements(); i++) {
+    // Get all of the dataset metada in a single pipeline
+    CommandList metadata_cmd_list;
+
+    for (size_t i = 0; i < reply.n_elements(); i++) {
 
         if (reply[i].redis_reply_type() != "REDIS_REPLY_STRING") {
             throw SRRuntimeException("Element " + std::to_string(i) +
@@ -1362,22 +1363,29 @@ Client::_get_dataset_list_range(const std::string& list_name,
         std::string dataset_key(reply[i].str(), reply[i].str_len());
 
         // Build the metadata retrieval key
-        SingleKeyCommand metadata_cmd;
-        metadata_cmd << "HGETALL" << Keyfield(dataset_key + ".meta");
+        SingleKeyCommand* metadata_cmd =
+            metadata_cmd_list.add_command<SingleKeyCommand>();
+        (*metadata_cmd) << "HGETALL" << Keyfield(dataset_key + ".meta");
 
-        // Retreive the dataset metadata
-        CommandReply metadata_reply = _run(metadata_cmd);
+    }
 
-        //TODO do we want to have the name be the name or the key
+    std::vector<CommandReply> metadata_replies =
+        _redis_server->run_via_unordered_pipelines(metadata_cmd_list);
+
+    for (size_t i = 0; i < metadata_replies.size(); i++) {
+
+        CommandReply& metadata_reply = metadata_replies[i];
+
         if (metadata_reply.has_error() > 0) {
             throw SRRuntimeException("An error was encountered in "\
-                                     "metdata retrieval.");
+                                        "metdata retrieval.");
         }
 
         // Unpack the dataset
-        DataSet dataset(dataset_key);
+        DataSet dataset(std::string(reply[i].str(), reply[i].str_len()));
         _unpack_dataset_metadata(dataset, metadata_reply);
 
+        //TODO Need to turn this into pipelines across all tensors
         // Retrieve DataSet tensors and fill the DataSet object
         std::vector<std::string> tensor_names = dataset.get_tensor_names();
         for(size_t j = 0; j < tensor_names.size(); j++) {
@@ -1388,6 +1396,8 @@ Client::_get_dataset_list_range(const std::string& list_name,
         // Store the finalized dataset
         dataset_list.push_back(std::move(dataset));
     }
+
+    std::cout<<"Dataset list has "<<dataset_list.size()<<std::endl;
 
     return dataset_list;
 }

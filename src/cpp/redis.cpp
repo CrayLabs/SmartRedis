@@ -95,6 +95,12 @@ std::vector<CommandReply> Redis::run(CommandList& cmds)
     return replies;
 }
 
+std::vector<CommandReply>
+Redis::run_via_unordered_pipelines(CommandList& cmd_list)
+{
+    return {};
+}
+
 // Check if a model or script key exists in the database
 bool Redis::model_key_exists(const std::string& key)
 {

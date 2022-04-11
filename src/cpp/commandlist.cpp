@@ -102,3 +102,9 @@ CommandList::const_iterator CommandList::cend()
 {
     return _commands.cend();
 }
+
+// Returns the number of elements
+size_t CommandList::size()
+{
+    return _commands.size();
+}
