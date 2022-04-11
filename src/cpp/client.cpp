@@ -1372,6 +1372,10 @@ Client::_get_dataset_list_range(const std::string& list_name,
     std::vector<CommandReply> metadata_replies =
         _redis_server->run_via_unordered_pipelines(metadata_cmd_list);
 
+
+    CommandList tensor_cmd_list;
+    std::vector<std::vector<std::pair<std::string,size_t>>> metadata_reply_tensor_cmd_map;
+
     for (size_t i = 0; i < metadata_replies.size(); i++) {
 
         CommandReply& metadata_reply = metadata_replies[i];
@@ -1385,12 +1389,57 @@ Client::_get_dataset_list_range(const std::string& list_name,
         DataSet dataset(std::string(reply[i].str(), reply[i].str_len()));
         _unpack_dataset_metadata(dataset, metadata_reply);
 
-        //TODO Need to turn this into pipelines across all tensors
-        // Retrieve DataSet tensors and fill the DataSet object
+        // Loop through tensor names in the dataset
         std::vector<std::string> tensor_names = dataset.get_tensor_names();
+
+        metadata_reply_tensor_cmd_map.push_back({});
+
         for(size_t j = 0; j < tensor_names.size(); j++) {
+            // Make the tensor key
             std::string tensor_key = dataset.get_name() + "." + tensor_names[j];
-            _get_and_add_dataset_tensor(dataset, tensor_names[j], tensor_key);
+
+            // Build the tensor retrieval cmd
+            SingleKeyCommand* tensor_cmd =
+                tensor_cmd_list.add_command<SingleKeyCommand>();
+
+            (*tensor_cmd) << "AI.TENSORGET" << Keyfield(tensor_key) << "META" << "BLOB";
+
+            metadata_reply_tensor_cmd_map.back().push_back({tensor_names[j],tensor_cmd_list.size()-1});
+        }
+    }
+
+    std::vector<CommandReply> tensor_replies =
+        _redis_server->run_via_unordered_pipelines(tensor_cmd_list);
+
+    for (size_t i = 0; i < metadata_replies.size(); i++) {
+
+        CommandReply& metadata_reply = metadata_replies[i];
+
+        if (metadata_reply.has_error() > 0) {
+            throw SRRuntimeException("An error was encountered in "\
+                                        "metdata retrieval.");
+        }
+
+        // Unpack the dataset
+        DataSet dataset(std::string(reply[i].str(), reply[i].str_len()));
+        _unpack_dataset_metadata(dataset, metadata_reply);
+
+        // Add the tensor replies as tensors
+        for (size_t j = 0; j < metadata_reply_tensor_cmd_map[i].size(); j++) {
+
+            size_t tensor_reply_index = metadata_reply_tensor_cmd_map[i][j].second;
+            std::string& tensor_name = metadata_reply_tensor_cmd_map[i][j].first;
+
+            CommandReply& tensor_reply = tensor_replies[tensor_reply_index];
+
+            // Extract tensor properties from command reply
+            std::vector<size_t> reply_dims = GetTensorCommand::get_dims(tensor_reply);
+            std::string_view blob = GetTensorCommand::get_data_blob(tensor_reply);
+            SRTensorType type = GetTensorCommand::get_data_type(tensor_reply);
+
+            // Add tensor to the dataset
+            dataset._add_to_tensorpack(tensor_name, (void*)blob.data(), reply_dims,
+                                    type, SRMemLayoutContiguous);
         }
 
         // Store the finalized dataset
