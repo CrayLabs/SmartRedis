@@ -79,6 +79,16 @@ CommandList::~CommandList()
         delete (*it);
 }
 
+// Return a reference to the Command at the index
+Command& CommandList::operator[](size_t index)
+{
+    if (index >= _commands.size())
+        throw SRInternalException("Index " + std::to_string(index) +
+                                  " is beyond the CommandList size of " +
+                                  std::to_string(_commands.size()) + ".");
+    return *(_commands[index]);
+}
+
 // Returns an iterator pointing to the first Command
 CommandList::iterator CommandList::begin()
 {

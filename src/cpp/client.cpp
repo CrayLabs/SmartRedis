@@ -1321,16 +1321,16 @@ Client::_get_dataset_list_range(const std::string& list_name,
     // Build the list key
     std::string list_key = _build_list_key(list_name, true);
 
-    // Build the command
+    // Build the command to retrieve the list
     SingleKeyCommand cmd;
     cmd << "LRANGE" << Keyfield(list_key);
     cmd << std::to_string(start_index);
     cmd << std::to_string(end_index);
 
-    // Run the command
+    // Run the command to retrive the list
     CommandReply reply = _run(cmd);
 
-    // Check for errors and return value
+    // Check for reply errors and correct type
     if (reply.has_error() > 0)
         throw SRRuntimeException("GET command failed. The aggregation "\
                                  "list could not be retrieved.");
@@ -1339,13 +1339,15 @@ Client::_get_dataset_list_range(const std::string& list_name,
         throw SRRuntimeException("An unexpected type was returned for "
                                  "for the aggregation list.");
 
+    // Start a lists of datasets that will be returned to the users
     std::vector<DataSet> dataset_list;
 
-    // Get all of the dataset metada in a single pipeline
+    // Create CommandListfor retrieving all metadata values in pipeline
     CommandList metadata_cmd_list;
 
     for (size_t i = 0; i < reply.n_elements(); i++) {
 
+        // Check that the ith entry is a string (i.e. key)
         if (reply[i].redis_reply_type() != "REDIS_REPLY_STRING") {
             throw SRRuntimeException("Element " + std::to_string(i) +
                                      " in the aggregation list has an "\
@@ -1353,6 +1355,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
                                      reply.redis_reply_type());
         }
 
+        // Check that the string length is not zero
         if(reply[i].str_len() == 0) {
             throw SRRuntimeException("Element " + std::to_string(i) +
                                      " contains an empty key, which is "\
@@ -1360,16 +1363,17 @@ Client::_get_dataset_list_range(const std::string& list_name,
         }
 
         // Get the dataset key from the list entry
-        std::string dataset_key(reply[i].str(), reply[i].str_len());
+        std::string dataset_key_prefix(reply[i].str(), reply[i].str_len());
 
         // Build the metadata retrieval key
         SingleKeyCommand* metadata_cmd =
             metadata_cmd_list.add_command<SingleKeyCommand>();
-        (*metadata_cmd) << "HGETALL" << Keyfield(dataset_key + ".meta");
+        (*metadata_cmd) << "HGETALL" << Keyfield(dataset_key_prefix + ".meta");
 
     }
 
-    std::vector<CommandReply> metadata_replies =
+    // Run the commands via unordered pipeline
+    PipelineReply metadata_replies =
         _redis_server->run_via_unordered_pipelines(metadata_cmd_list);
 
 
@@ -1378,7 +1382,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
 
     for (size_t i = 0; i < metadata_replies.size(); i++) {
 
-        CommandReply& metadata_reply = metadata_replies[i];
+        CommandReply metadata_reply = metadata_replies[i];
 
         if (metadata_reply.has_error() > 0) {
             throw SRRuntimeException("An error was encountered in "\
@@ -1408,12 +1412,12 @@ Client::_get_dataset_list_range(const std::string& list_name,
         }
     }
 
-    std::vector<CommandReply> tensor_replies =
+    PipelineReply tensor_replies =
         _redis_server->run_via_unordered_pipelines(tensor_cmd_list);
 
     for (size_t i = 0; i < metadata_replies.size(); i++) {
 
-        CommandReply& metadata_reply = metadata_replies[i];
+        CommandReply metadata_reply = metadata_replies[i];
 
         if (metadata_reply.has_error() > 0) {
             throw SRRuntimeException("An error was encountered in "\
@@ -1430,7 +1434,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
             size_t tensor_reply_index = metadata_reply_tensor_cmd_map[i][j].second;
             std::string& tensor_name = metadata_reply_tensor_cmd_map[i][j].first;
 
-            CommandReply& tensor_reply = tensor_replies[tensor_reply_index];
+            CommandReply tensor_reply = tensor_replies[tensor_reply_index];
 
             // Extract tensor properties from command reply
             std::vector<size_t> reply_dims = GetTensorCommand::get_dims(tensor_reply);

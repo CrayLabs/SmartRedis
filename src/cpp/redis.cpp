@@ -95,7 +95,7 @@ std::vector<CommandReply> Redis::run(CommandList& cmds)
     return replies;
 }
 
-std::vector<CommandReply>
+PipelineReply
 Redis::run_via_unordered_pipelines(CommandList& cmd_list)
 {
     return {};

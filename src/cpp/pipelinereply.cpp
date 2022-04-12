@@ -31,47 +31,76 @@
 
 using namespace SmartRedis;
 
-// Move assignment constructor from QueuedReplies object
-PipelineReply::PipelineReply(QueuedReplies&& queued_reply)
+/*
+void set_queued_reply_object(sw::redis::QueuedReplies&& queued_reply,
+                             std::vector<std::vector<size_t>>&& index_map)
 {
-    // Move the QueuedReplies
-    _replies = std::move(queued_reply);
-}
+    if (queued_reply.size() != index_map.size()) {
+        throw SRInternalException("Pipeline construction failed.  "
+                                  "The queued_reply parameter has length " +
+                                  std::to_string(queued_reply.size()) +
+                                  " and the index_map parameter has length " +
+                                  std::to_string(index_map.size() +
+                                  ": both must have the same length.");
+    }
 
-// Copy assignment operator from QueuedReplies object
-PipelineReply& PipelineReply::operator=(QueuedReplies&& queued_reply)
-{
-    // Move the QueuedReplies
     _replies = std::move(queued_reply);
-    return *this;
+    _cmd_to_reply_index_map = std::move(index_map);
+}
+*/
+
+// Append the replies inside of the QueuedReplies object into the
+// PipelineReply object
+void PipelineReply::append_queued_reply(sw::redis::QueuedReplies&& queued_reply)
+{
+    if (queued_reply.size() > 0) {
+        _queued_replies.push_back(QueuedReplies(std::move(queued_reply)));
+        size_t last_index = _queued_replies.size() - 1;
+        for (size_t i = 0; i < _queued_replies[last_index].size(); i++) {
+            _all_replies.push_back(&(_queued_replies[last_index].get(i)));
+        }
+    }
 }
 
 // Return an entry in the PipelineReply
 CommandReply PipelineReply::operator[](int index)
 {
-    if (index > _replies.size()) {
+    if (index > _all_replies.size()) {
         throw SRInternalException("An attempt was made to access index " +
                                   std::to_string(index) +
                                   " of the PipelineReply, which is beyond the "\
                                   " PipelineReply length of " +
-                                  std::to_string(_replies.size()));
+                                  std::to_string(_all_replies.size()));
     }
 
-    return CommandReply(&_replies.get(index));
+    return CommandReply::shallow_clone(_all_replies[index]);
 }
 
 // Get the number of CommandReply in the PipelineReply
 size_t PipelineReply::size()
 {
-    return _replies.size();
+    return _all_replies.size();
 }
 
 // Check if any CommandReply has error
 bool PipelineReply::has_error()
 {
-    for (size_t i = 0; i < _replies.size(); i++) {
-        if (CommandReply(&_replies.get(i)).has_error() > 0)
+    for (size_t i = 0; i < _all_replies.size(); i++) {
+        if (CommandReply::shallow_clone(_all_replies[i]).has_error() > 0)
             return true;
     }
     return false;
+}
+
+
+// Reorder the internal order of pipeline command replies
+void PipelineReply::reorder(std::vector<size_t> indices)
+{
+    for (size_t i = 0; i < indices.size(); i++) {
+        while(i != indices[i]) {
+            size_t swap_index = indices[i];
+            std::swap(_all_replies[i], _all_replies[swap_index]);
+            std::swap(indices[i], indices[swap_index]);
+        }
+    }
 }

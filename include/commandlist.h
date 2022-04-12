@@ -90,6 +90,15 @@ class CommandList
         T* add_command();
 
         /*!
+        *   \brief Return a reference to a Command in the
+        *          CommandList
+        *   \param index The index of the Command in the CommandList
+        *   \return A reference to the Command at the specified index
+        *   \throw Internal exception if index is not valid
+        */
+        Command& operator[](size_t index);
+
+        /*!
         *   \brief An iterator type for iterating
         *            over all Commands
         */

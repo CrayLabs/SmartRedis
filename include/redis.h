@@ -151,7 +151,7 @@ class Redis : public RedisServer
         *            in the CommandList. The order of the result
         *            matches the order of the input CommandList.
         */
-        virtual std::vector<CommandReply>
+        virtual PipelineReply
         run_via_unordered_pipelines(CommandList& cmd_list);
 
         /*!
