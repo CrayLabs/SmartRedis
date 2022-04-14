@@ -537,6 +537,14 @@ class RedisCluster : public RedisServer
         std::string _get_db_node_prefix(Command& cmd);
 
         /*!
+        *   \brief Get the index of the database node corresponding
+        *          to the provided key
+        *   \param key The command key
+        *   \returns The index in _db_nodes corresponding to the key
+        */
+        inline uint16_t _get_db_node_index(const std::string& key);
+
+        /*!
         *   \brief Processes the CommandReply for CLUSTER SLOTS
         *          to build DBNode information
         *   \param reply The CommandReply for CLUSTER SLOTS
@@ -615,9 +623,9 @@ class RedisCluster : public RedisServer
         *              search (inclusive)
         *   \returns DBNode index responsible for the hash slot
         */
-        uint16_t _get_dbnode_index(uint16_t hash_slot,
-                                   unsigned lhs,
-                                   unsigned rhs);
+        uint16_t _db_node_hash_search(uint16_t hash_slot,
+                                      unsigned lhs,
+                                      unsigned rhs);
 
         /*!
         *   \brief  Attaches a prefix and constant suffix to keys to

@@ -1339,14 +1339,10 @@ Client::_get_dataset_list_range(const std::string& list_name,
         throw SRRuntimeException("An unexpected type was returned for "
                                  "for the aggregation list.");
 
-    // Start a lists of datasets that will be returned to the users
-    std::vector<DataSet> dataset_list;
-
-    // Create CommandListfor retrieving all metadata values in pipeline
+    // Create CommandList for retrieving all metadata values in pipeline
     CommandList metadata_cmd_list;
 
     for (size_t i = 0; i < reply.n_elements(); i++) {
-
         // Check that the ith entry is a string (i.e. key)
         if (reply[i].redis_reply_type() != "REDIS_REPLY_STRING") {
             throw SRRuntimeException("Element " + std::to_string(i) +
@@ -1365,11 +1361,10 @@ Client::_get_dataset_list_range(const std::string& list_name,
         // Get the dataset key from the list entry
         std::string dataset_key_prefix(reply[i].str(), reply[i].str_len());
 
-        // Build the metadata retrieval key
+        // Build the metadata retrieval command
         SingleKeyCommand* metadata_cmd =
             metadata_cmd_list.add_command<SingleKeyCommand>();
         (*metadata_cmd) << "HGETALL" << Keyfield(dataset_key_prefix + ".meta");
-
     }
 
     // Run the commands via unordered pipeline
@@ -1377,63 +1372,71 @@ Client::_get_dataset_list_range(const std::string& list_name,
         _redis_server->run_via_unordered_pipelines(metadata_cmd_list);
 
 
+    // Start a lists of datasets that will be returned to the users
+    std::vector<DataSet> dataset_list;
+
+    // Command list for all tensorget commands
     CommandList tensor_cmd_list;
-    std::vector<std::vector<std::pair<std::string,size_t>>> metadata_reply_tensor_cmd_map;
 
     for (size_t i = 0; i < metadata_replies.size(); i++) {
 
+        // Shallow copy of the underlying PipelineReply entry
         CommandReply metadata_reply = metadata_replies[i];
 
+        // Check if metadata_reply has any errors
         if (metadata_reply.has_error() > 0) {
             throw SRRuntimeException("An error was encountered in "\
                                         "metdata retrieval.");
         }
 
-        // Unpack the dataset
-        DataSet dataset(std::string(reply[i].str(), reply[i].str_len()));
+        //TODO We need to extract the actual dataset name not the key
+        //     later on we use dataset.get_name, so we need to be aware
+        //     of this when constructing the tensor get commands
+        std::string dataset_name(reply[i].str(), reply[i].str_len());
+
+        // Unpack the dataset to get tensor names
+        dataset_list.push_back(DataSet(dataset_name));
+        DataSet& dataset = dataset_list.back();
+
+        // Unpack the metadata
         _unpack_dataset_metadata(dataset, metadata_reply);
 
         // Loop through tensor names in the dataset
-        std::vector<std::string> tensor_names = dataset.get_tensor_names();
-
-        metadata_reply_tensor_cmd_map.push_back({});
+        std::vector<std::string> tensor_names =
+            dataset.get_tensor_names();
 
         for(size_t j = 0; j < tensor_names.size(); j++) {
+
             // Make the tensor key
-            std::string tensor_key = dataset.get_name() + "." + tensor_names[j];
+            std::string tensor_key = dataset.get_name() + "." +
+                                     tensor_names[j];
 
             // Build the tensor retrieval cmd
             SingleKeyCommand* tensor_cmd =
                 tensor_cmd_list.add_command<SingleKeyCommand>();
 
-            (*tensor_cmd) << "AI.TENSORGET" << Keyfield(tensor_key) << "META" << "BLOB";
-
-            metadata_reply_tensor_cmd_map.back().push_back({tensor_names[j],tensor_cmd_list.size()-1});
+            (*tensor_cmd) << "AI.TENSORGET" << Keyfield(tensor_key)
+                          << "META" << "BLOB";
         }
     }
 
+    // Run the tensor get pipeline
     PipelineReply tensor_replies =
         _redis_server->run_via_unordered_pipelines(tensor_cmd_list);
 
-    for (size_t i = 0; i < metadata_replies.size(); i++) {
+    // Unpack tensor replies
+    size_t tensor_reply_index = 0;
+    for (size_t i = 0; i < dataset_list.size(); i++) {
 
-        CommandReply metadata_reply = metadata_replies[i];
+        DataSet& dataset = dataset_list[i];
 
-        if (metadata_reply.has_error() > 0) {
-            throw SRRuntimeException("An error was encountered in "\
-                                        "metdata retrieval.");
-        }
-
-        // Unpack the dataset
-        DataSet dataset(std::string(reply[i].str(), reply[i].str_len()));
-        _unpack_dataset_metadata(dataset, metadata_reply);
+        std::vector<std::string> tensor_names =
+            dataset_list[i].get_tensor_names();
 
         // Add the tensor replies as tensors
-        for (size_t j = 0; j < metadata_reply_tensor_cmd_map[i].size(); j++) {
+        for (size_t j = 0; j < tensor_names.size(); j++) {
 
-            size_t tensor_reply_index = metadata_reply_tensor_cmd_map[i][j].second;
-            std::string& tensor_name = metadata_reply_tensor_cmd_map[i][j].first;
-
+            // Shallow copy of the pipeline reply for this tensor
             CommandReply tensor_reply = tensor_replies[tensor_reply_index];
 
             // Extract tensor properties from command reply
@@ -1441,16 +1444,14 @@ Client::_get_dataset_list_range(const std::string& list_name,
             std::string_view blob = GetTensorCommand::get_data_blob(tensor_reply);
             SRTensorType type = GetTensorCommand::get_data_type(tensor_reply);
 
-            // Add tensor to the dataset
-            dataset._add_to_tensorpack(tensor_name, (void*)blob.data(), reply_dims,
-                                    type, SRMemLayoutContiguous);
+            // Add tensor to the dataset (deep copy)
+            dataset._add_to_tensorpack(tensor_names[j], (void*)blob.data(), reply_dims,
+                                       type, SRMemLayoutContiguous);
+
+            // Increment tensor reply index
+            tensor_reply_index++;
         }
-
-        // Store the finalized dataset
-        dataset_list.push_back(std::move(dataset));
     }
-
-    // std::cout<<"Dataset list has "<<dataset_list.size()<<std::endl;
 
     return dataset_list;
 }

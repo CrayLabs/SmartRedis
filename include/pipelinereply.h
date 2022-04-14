@@ -42,7 +42,7 @@ namespace SmartRedis {
 class PipelineReply;
 
 /*!
-*   \brief Redis++ pipeline command type
+*   \brief Redis++ pipeline command reply type
 */
 typedef sw::redis::QueuedReplies QueuedReplies;
 
@@ -50,15 +50,19 @@ typedef sw::redis::QueuedReplies QueuedReplies;
 /*!
 *   \brief The PipelineReply class stores and processes replies
 *          from pipelined commands
-*   \details The PipelineReply is built around processing
+*   \details PipelineReply is built around processing
 *            redis-plus-plus QueuedReplies.  The redis-plus-plus
 *            generic pipeline execution returns a QueuedReplies
-*            object.  The destructor of the QueuedReplies object
-*            will call the destructor for each unique ptr inside
-*            of the QueuedReplies object.  The QueuedReplies
-*            object does not allow for copy semantics, and only
-*            moved semantics, so we are restricted to using
-*            move semantics.
+*            object.  The QueuedReplies object consists of a
+*            vector of unique_ptr to redisReply objects.
+*            Because this vector is a private member variable without
+*            sufficient access methods, the underlying unique_ptr
+*            cannot be moved out of the QueuedReplies vector.  As
+*            a result, this class is limited in some functionality
+*            compared to CommandReply.  Additionally,
+*            because of the implementation of QueuedReplies,
+*            PipelineReply is limited to only move semantics (no
+*            copy constructor or copy assignment operator).
 */
 class PipelineReply {
 
@@ -75,13 +79,13 @@ class PipelineReply {
         ~PipelineReply() = default;
 
         /*!
-        *   \brief PipelineReply copy constructor
+        *   \brief PipelineReply copy constructor (not allowed)
         *   \param reply The PipelineReply to copy
         */
         PipelineReply(const PipelineReply& reply) = delete;
 
         /*!
-        *   \brief PipelineReply copy assignment operator
+        *   \brief PipelineReply copy assignment operator (not allowed)
         *   \param reply The PipelineReply to copy
         *   \returns PipelineReply reference
         */
@@ -100,32 +104,33 @@ class PipelineReply {
         */
         PipelineReply& operator=(PipelineReply&& reply) = default;
 
-        /*
-        *   \brief Set the QueuedReplies of the PipelineReply object
-        *   \details Because sw::redis::QueuedReplies only has move
-        *            semantics, only rvalue interface is provided.
-        *            The queued_reply and index_map parameters
-        *            must be of the same length.
-        *   \param queued_reply The sw::redis::QueuedReplies object
-        *   \param index_map Mapping between pipeline provided command index
-        *          and executed (i.e. pipeline response) index.
-        *   \throw InternalException if the queue_reply and index_map
-        *          parameters do not have same length.
-       void set_queued_reply_object(sw::redis::QueuedReplies&& queued_reply,
-                                    std::vector<std::vector<size_t>>&& index_map);
-         */
-
         /*!
-        *   \brief Append the replies in a QueuedReplies object to the
-        *          PipelineReply object
-        *   \param queued_reply The sw::redis::QueuedReplies object
+        *   \brief PipelineReply move constructor using QueuedReplies
+        *   \param reply The QueuedReplies used for construction
         */
-        void append_queued_reply(sw::redis::QueuedReplies&& queued_reply);
+        PipelineReply(QueuedReplies&& reply);
 
         /*!
-        *   \brief Index operator for PipelineReply
-        *          that will return the indexed element
-        *          of the PipelineReply
+        *   \brief PipelineReply move assignment operator
+        *          using QueuedReplies
+        *   \param reply The QueuedReplies for assignment
+        *   \returns PipelineReply reference
+        */
+        PipelineReply& operator=(QueuedReplies&& reply);
+
+        /*!
+        *   \brief Add QueuedReplies content to Pipeline object
+        *          via move semantics
+        *   \param reply QueuedReplies object
+        */
+        void operator+=(QueuedReplies&& reply);
+
+        /*!
+        *   \brief Index operator for PipelineReply that will
+        *          return the indexed element of the PipelineReply.
+        *          Note that this is a shallow copy and the referenced
+        *          memory is only valid as long as the PipelineReply
+        *          has not been destroyed.
         *   \param index Index to retrieve
         *   \returns The indexed CommandReply
         */
@@ -149,13 +154,14 @@ class PipelineReply {
         *          on the provided index vector.
         *   \details This function allows a user to reorder the stored command
         *            replies in the cases where the operator [] should align
-        *            to some other sequence not created by the append() function.
-        *   \param indices A std::vector<size_t> of indices where each
-        *                  entry should be moved
+        *            to some other sequence not maintained by the append()
+        *            function.
+        *   \param index_order A std::vector<size_t> of indices where each
+        *                      entry should be moved
         *   \throw SmartRedis::InternalError if indices does not match
         *          the length of the internal container for replies
         */
-        void reorder(std::vector<size_t> indices);
+        void reorder(std::vector<size_t> index_order);
 
     private:
 
@@ -166,24 +172,22 @@ class PipelineReply {
         */
         std::vector<sw::redis::QueuedReplies> _queued_replies;
 
-        // TODO We could use std::reference_wrapper here instead of pointers
         /*!
         *   \brief This is an aggregate vector of all of the
-        *          redisReply references from _queued_replies.
-        *          This will make for easier random access in the
-        *          future.
+        *          redisReply references in _queued_replies.
+        *          This is used for simpler random access of replies.
         */
         std::vector<redisReply*> _all_replies;
 
-
         /*!
-        *   \brief Mapping between pipeline provided command index
-        *          and executed (i.e. pipeline response) index.
-        *          This is necessary because we don't have the ability
-        *          to reorder the redis++ vector because it is a
-        *          private member variable.
+        *   \brief Add a QueuedReplies object ot the internal
+        *          inventory of QueuedReplies.  This also
+        *          adds the replies contained within the
+        *          QueuedReplies object to the internal inventory
+        *          of replies.
+        *   \param reply The QueuedReplies object to add
         */
-        std::vector<std::vector<size_t>> _cmd_to_reply_index_map;
+        void _add_queuedreplies(QueuedReplies&& reply);
 
 };
 

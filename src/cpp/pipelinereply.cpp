@@ -31,38 +31,28 @@
 
 using namespace SmartRedis;
 
-/*
-void set_queued_reply_object(sw::redis::QueuedReplies&& queued_reply,
-                             std::vector<std::vector<size_t>>&& index_map)
+// Move constructor with QueuedReplies
+PipelineReply::PipelineReply(QueuedReplies&& reply)
 {
-    if (queued_reply.size() != index_map.size()) {
-        throw SRInternalException("Pipeline construction failed.  "
-                                  "The queued_reply parameter has length " +
-                                  std::to_string(queued_reply.size()) +
-                                  " and the index_map parameter has length " +
-                                  std::to_string(index_map.size() +
-                                  ": both must have the same length.");
-    }
-
-    _replies = std::move(queued_reply);
-    _cmd_to_reply_index_map = std::move(index_map);
-}
-*/
-
-// Append the replies inside of the QueuedReplies object into the
-// PipelineReply object
-void PipelineReply::append_queued_reply(sw::redis::QueuedReplies&& queued_reply)
-{
-    if (queued_reply.size() > 0) {
-        _queued_replies.push_back(QueuedReplies(std::move(queued_reply)));
-        size_t last_index = _queued_replies.size() - 1;
-        for (size_t i = 0; i < _queued_replies[last_index].size(); i++) {
-            _all_replies.push_back(&(_queued_replies[last_index].get(i)));
-        }
-    }
+    _add_queuedreplies(std::forward<QueuedReplies>(reply));
 }
 
-// Return an entry in the PipelineReply
+// Move assignment with QueuedReplies
+PipelineReply& PipelineReply::operator=(QueuedReplies&& reply)
+{
+    _queued_replies.clear();
+    _all_replies.clear();
+    _add_queuedreplies(std::forward<QueuedReplies>(reply));
+    return *this;
+}
+
+// Add QueuedReplies content to Pipeline ojbect via move semantics
+void PipelineReply::operator+=(QueuedReplies&& reply)
+{
+    _add_queuedreplies(std::forward<QueuedReplies>(reply));
+}
+
+// Return a shallow copy of an entry in the PipelineReply
 CommandReply PipelineReply::operator[](int index)
 {
     if (index > _all_replies.size()) {
@@ -94,13 +84,26 @@ bool PipelineReply::has_error()
 
 
 // Reorder the internal order of pipeline command replies
-void PipelineReply::reorder(std::vector<size_t> indices)
+void PipelineReply::reorder(std::vector<size_t> index_order)
 {
-    for (size_t i = 0; i < indices.size(); i++) {
-        while(i != indices[i]) {
-            size_t swap_index = indices[i];
+    for (size_t i = 0; i < index_order.size(); i++) {
+        while(i != index_order[i]) {
+            size_t swap_index = index_order[i];
             std::swap(_all_replies[i], _all_replies[swap_index]);
-            std::swap(indices[i], indices[swap_index]);
+            std::swap(index_order[i], index_order[swap_index]);
         }
+    }
+}
+
+// Add the QueuedReplies object to the inventory
+void PipelineReply::_add_queuedreplies(QueuedReplies&& reply)
+{
+    // Move the QueuedReplies into the inventory
+    _queued_replies.push_back(std::forward<QueuedReplies>(reply));
+
+    // Add redisReply contained in the QueuedReplies into the inventory
+    size_t n_replies = _queued_replies.back().size();
+    for (size_t i = 0; i < n_replies; i++) {
+        _all_replies.push_back(&(_queued_replies.back().get(i)));
     }
 }

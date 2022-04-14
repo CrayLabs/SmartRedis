@@ -139,58 +139,70 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
 }
 
 // Run multiple single-key or single-hash slot Command on the server.
-// Commands are grouped by shard and run in pipelines.
 PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 {
-    // Map from shard prefix to the indicies of cmd_list that should
-    // be executed on this shard
-    std::unordered_map<std::string, std::vector<size_t>> shard_cmd_index_list;
+    // Map for shard index to Command indices
+    std::vector<std::vector<size_t>> shard_cmd_index_list(_db_nodes.size());
 
-    // Iterate over all Command in CommandList and calculate shard
-    // for execution
+    // Calculate shard for execution of each Command
     CommandList::iterator cmd = cmd_list.begin();
     size_t cmd_num = 0;
-    while (cmd != cmd_list.end()) {
 
+    for ( ; cmd != cmd_list.end(); cmd++, cmd_num++) {
+
+        // Make sure we have at least one key
         if ((*cmd)->has_keys() == false) {
-            throw SRInternalException("A Command without keys is not "\
-                                      "supported by "\
-                                      "RedisCluster::run_via_unordered_pipelines.");
+            throw SRInternalException("Only single key commands are supported "\
+                                      "by RedisCluster::run_via_unordered"\
+                                      "_pipelines.");
         }
 
-        //TODO we need to split _get_db_node_prefix because it would be
-        // more efficient to use indicies instead of a map with prefix
-        std::string prefix = _get_db_node_prefix(**cmd);
-        shard_cmd_index_list[prefix].push_back(cmd_num);
-        cmd_num++;
-        cmd++;
+        // Get keys for the command
+        std::vector<std::string> keys = (*cmd)->get_keys();
+
+        // Check that there is only one key
+        if (keys.size() != 1) {
+            throw SRInternalException("Only single key commands are supported "\
+                                      "by RedisCluster::run_via_unordered_"\
+                                      "pipelines.");
+        }
+
+        // Get the shard index for the first key
+        size_t db_index = _get_db_node_index(keys[0]);
+
+        // Push back the command shard list of commands
+        shard_cmd_index_list[db_index].push_back(cmd_num);
     }
 
-
-    // Define an empty PipelineReply
+    // Define an empty PipelineReply object to store all shard replies
     PipelineReply all_replies;
 
     // Keep track of CommandList index order of execution (ooe)
-    // for later reordering
     std::vector<size_t> cmd_list_index_ooe;
 
-    // Loop over and execute all commands in a pipeline
-    std::unordered_map<std::string, std::vector<size_t>>::iterator shard_cmd_it =
-        shard_cmd_index_list.begin();
+    // Loop over all shards and execute pipelines
+    for (size_t s = 0; s < shard_cmd_index_list.size(); s++) {
 
-    while (shard_cmd_it != shard_cmd_index_list.end()) {
+        // Only execute if there are commands
+        if (shard_cmd_index_list[s].size() == 0)
+            continue;
 
-        // Create the pipeline for this pipeline
+        // Get shard prefix
+        std::string shard_prefix = _db_nodes[s].prefix;
+
+        // Get pipeline object for shard (no new connection)
         sw::redis::Pipeline pipeline =
-            _redis_cluster->pipeline(shard_cmd_it->first, false);
+            _redis_cluster->pipeline(shard_prefix, false);
 
         // Loop over all commands and add to the pipeline
-        for (size_t i = 0; i < shard_cmd_it->second.size(); i++) {
+        for (size_t c = 0; c < shard_cmd_index_list[s].size(); c++) {
             // Get the index of the command
-            size_t cmd_list_index = shard_cmd_it->second[i];
+            size_t cmd_list_index = shard_cmd_index_list[s][c];
+
             // Add the CommandList index to the vector tracking
             // order of execution
             cmd_list_index_ooe.push_back(cmd_list_index);
+
             // Add the command to the pipe
             Command& shard_cmd = cmd_list[cmd_list_index];
             pipeline.command(shard_cmd.cbegin(), shard_cmd.cend());
@@ -200,17 +212,12 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         sw::redis::QueuedReplies reply = pipeline.exec();
 
         // Append to all_replies via move
-        all_replies.append_queued_reply(std::move(reply));
-
-        // Increment the iterator to the next set of pipelined commands
-        shard_cmd_it++;
+        all_replies += std::move(reply);
     }
 
     // Reorder the command replies in all_replies to align
-    // with the order of the original CommandList provided by the caller
+    // with order of execution
     all_replies.reorder(cmd_list_index_ooe);
-
-    //std::cout<<"Aggregate_replies has length "<<aggregate_replies.size()<<std::endl;
 
     return all_replies;
 }
@@ -547,7 +554,7 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
     */
 
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size()-1);
+    uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size()-1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_model");
@@ -621,7 +628,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
 {
     // Locate the DB node for the script
     uint16_t hash_slot = _get_hash_slot(inputs[0]);
-    uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size() - 1);
+    uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size() - 1);
     DBNode* db = &(_db_nodes[db_index]);
     if (db == NULL) {
         throw SRRuntimeException("Missing DB node found in run_script");
@@ -961,9 +968,7 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
     std::string prefix;
     std::vector<std::string>::iterator key_it = keys.begin();
     for ( ; key_it != keys.end(); key_it++) {
-        uint16_t hash_slot = _get_hash_slot(*key_it);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0,
-                                           _db_nodes.size() - 1);
+        uint16_t db_index = _get_db_node_index(*key_it);
         if (prefix.size() == 0) {
             prefix = _db_nodes[db_index].prefix;
         }
@@ -975,6 +980,13 @@ std::string RedisCluster::_get_db_node_prefix(Command& cmd)
 
     // Done
     return prefix;
+}
+
+// Get the index in _db_nodes for the provided key
+inline uint16_t RedisCluster::_get_db_node_index(const std::string& key)
+{
+    uint16_t hash_slot = _get_hash_slot(key);
+    return  _db_node_hash_search(hash_slot, 0, _db_nodes.size() - 1);
 }
 
 // Process the CommandReply for CLUSTER SLOTS to build DBNode information
@@ -1129,8 +1141,9 @@ uint16_t RedisCluster::_get_hash_slot(const std::string& key)
 }
 
 // Get the index of the DBNode responsible for the hash slot
-uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
-                                   unsigned lhs, unsigned rhs)
+uint16_t RedisCluster::_db_node_hash_search(uint16_t hash_slot,
+                                            unsigned lhs,
+                                            unsigned rhs)
 {
     // Find the DBNode via binary search
     uint16_t m = (lhs + rhs) / 2;
@@ -1144,9 +1157,9 @@ uint16_t RedisCluster::_get_dbnode_index(uint16_t hash_slot,
     // Otherwise search in the appropriate half
     else {
         if (_db_nodes[m].lower_hash_slot > hash_slot)
-            return _get_dbnode_index(hash_slot, lhs, m - 1);
+            return _db_node_hash_search(hash_slot, lhs, m - 1);
         else
-            return _get_dbnode_index(hash_slot, m + 1, rhs);
+            return _db_node_hash_search(hash_slot, m + 1, rhs);
     }
 }
 
@@ -1275,13 +1288,13 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
 
     for (size_t i = 0; i < inputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(inputs[i]);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
+        uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
     for (size_t i = 0; i < outputs.size(); i++) {
         uint16_t hash_slot = _get_hash_slot(outputs[i]);
-        uint16_t db_index = _get_dbnode_index(hash_slot, 0, _db_nodes.size());
+        uint16_t db_index = _db_node_hash_search(hash_slot, 0, _db_nodes.size());
         hash_slot_tally[db_index]++;
     }
 
