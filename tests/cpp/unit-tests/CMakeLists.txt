@@ -60,6 +60,7 @@ set(SOURCES
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/multikeycommand.cpp
 	../../../src/cpp/nonkeyedcommand.cpp
+    ../../../src/cpp/pipelinereply.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
