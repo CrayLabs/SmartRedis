@@ -897,13 +897,13 @@ class Client
         *   \brief Control whether aggregation lists are prefixed
         *   \details This function can be used to avoid key collisions in an
         *            ensemble by prepending the string value from the
-        *            environment variable SSKEYIN to aggregation list names.
-        *            Prefixes will only be used if they were previously set
-        *            through the environment variables SSKEYOUT and SSKEYIN.
-        *            Keys of entities created before this function is called
-        *            will not be retroactively prefixed.
-        *            By default, the client prefixes aggregation list keys
-        *            with the first prefix specified with the SSKEYIN
+        *            environment variable SSKEYIN and/or SSKEYOUT to
+        *            aggregation list names.  Prefixes will only be used if
+        *            they were previously set through the environment variables
+        *            SSKEYOUT and SSKEYIN. Keys for aggregation lists created
+        *            before this function is called will not be retroactively
+        *            prefixed. By default, the client prefixes aggregation
+        *            list keys with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.  Note that
         *            use_tensor_ensemble_prefix() controls prefixing
         *            for the entities in the aggregation list, and
@@ -1063,7 +1063,7 @@ class Client
         *            must be placed into the database with a separate call
         *            to put_dataset().
         *   \param list_name The name of the aggregation list
-        *   \param dataset The DataSet to append ot the aggregation list
+        *   \param dataset The DataSet to append
         *   \throw SmartRedis::Exception if the command fails
         */
         void append_to_list(const std::string& list_name,

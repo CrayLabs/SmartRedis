@@ -179,6 +179,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 
     // Keep track of CommandList index order of execution (ooe)
     std::vector<size_t> cmd_list_index_ooe;
+    cmd_list_index_ooe.reserve(cmd_list.size());
 
     // Loop over all shards and execute pipelines
     for (size_t s = 0; s < shard_cmd_index_list.size(); s++) {
@@ -199,14 +200,20 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
             // Get the index of the command
             size_t cmd_list_index = shard_cmd_index_list[s][c];
 
-            // Add the CommandList index to the vector tracking
-            // order of execution
-            cmd_list_index_ooe.push_back(cmd_list_index);
-
             // Add the command to the pipe
             Command& shard_cmd = cmd_list[cmd_list_index];
             pipeline.command(shard_cmd.cbegin(), shard_cmd.cend());
         }
+
+        // NOTE The three commands below would need to be
+        // atomic when multi-threading, but otherwise the
+        // loop should work multithreaded without other major
+        // modifications
+
+        // Add the CommandList indices into vector for later reordering
+        cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
+                                  shard_cmd_index_list[s].begin(),
+                                  shard_cmd_index_list[s].end());
 
         // Execute the pipeline
         sw::redis::QueuedReplies reply = pipeline.exec();
