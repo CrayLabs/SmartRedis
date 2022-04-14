@@ -283,7 +283,7 @@ class Client(PyClient):
         super().set_script(name, device, fn_src)
 
     @exception_handler
-    def set_function_multigpu(self, name, function, num_gpus):
+    def set_function_multigpu(self, name, function, first_gpu, num_gpus):
         """Set a callable function into the database for use
         in a multi-GPU system
 
@@ -299,17 +299,20 @@ class Client(PyClient):
         :type name: str
         :param function: callable function
         :type function: callable
-        :param num_gpus: the number of GPUs in the system's nodes
+        :param first_gpu: the first GPU (zero-based) to use in processing this function
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use for this function
         :type num_gpus: int
         :raises TypeError: if argument was not a callable function
         :raises RedisReplyError: if function failed to set
         """
         typecheck(name, "name", str)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         if not callable(function):
             raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         fn_src = inspect.getsource(function)
-        super().set_script_multigpu(name, num_gpus, fn_src)
+        super().set_script_multigpu(name, first_gpu, num_gpus, fn_src)
 
     @exception_handler
     def set_script(self, name, script, device="CPU"):
@@ -337,7 +340,7 @@ class Client(PyClient):
         super().set_script(name, device, script)
 
     @exception_handler
-    def set_script_multigpu(self, name, script, num_gpus):
+    def set_script_multigpu(self, name, script, first_gpu, num_gpus):
         """Store a TorchScript at a key in the database
 
         The final script key used to store the script may be formed
@@ -348,15 +351,18 @@ class Client(PyClient):
         :type name: str
         :param script: TorchScript code
         :type script: str
-        :param num_gpus: the number of GPUs in the system's nodes
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this script
         :type num_gpus: int
         :raises RedisReplyError: if script fails to set
         """
         typecheck(name, "name", str)
         typecheck(script, "script", str)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         device = self.__check_device(device)
-        super().set_script_multigpu(name, script, num_gpus)
+        super().set_script_multigpu(name, script, first_gpu, num_gpus)
 
     @exception_handler
     def set_script_from_file(self, name, file, device="CPU"):
@@ -382,7 +388,7 @@ class Client(PyClient):
         super().set_script_from_file(name, device, file_path)
 
     @exception_handler
-    def set_script_from_file_multigpu(self, name, file, num_gpus):
+    def set_script_from_file_multigpu(self, name, file, first_gpu, num_gpus):
         """Same as Client.set_script_multigpu, but from file
 
         The final script key used to store the script may be formed
@@ -393,15 +399,18 @@ class Client(PyClient):
         :type name: str
         :param file: path to text file containing TorchScript code
         :type file: str
-        :param num_gpus: the number of GPUs in the system's nodes
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this script
         :type num_gpus: int
         :raises RedisReplyError: if script fails to set
         """
         typecheck(name, "name", str)
         typecheck(file, "file", str)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         file_path = self.__check_file(file)
-        super().set_script_from_file_multigpu(name, file_path, num_gpus)
+        super().set_script_from_file_multigpu(name, file_path, first_gpu, num_gpus)
 
     @exception_handler
     def get_script(self, name):
@@ -451,7 +460,8 @@ class Client(PyClient):
         super().run_script(name, fn_name, inputs, outputs)
 
     @exception_handler
-    def run_script_multigpu(self, name, fn_name, inputs, outputs, image_id, num_gpus):
+    def run_script_multigpu(
+        self, name, fn_name, inputs, outputs, image_id, first_gpu, num_gpus):
         """Execute TorchScript stored inside the database
 
         The script key used to locate the script to be run
@@ -472,6 +482,8 @@ class Client(PyClient):
         :param image_id: index of the current image, such as a processor ID
                          or MPI rank
         :type image_id: int
+        :param first_gpu: the first GPU (zero-based) to use in processing this script
+        :type first_gpu: int
         :param num_gpus: the number of gpus for which the script was stored
         :type num_gpus: int
         :raises RedisReplyError: if script execution fails
@@ -481,9 +493,11 @@ class Client(PyClient):
         typecheck(inputs, "inputs", list)
         typecheck(outputs, "outputs", list)
         typecheck(image_id, "image_id", int)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_script_multigpu(name, fn_name, inputs, outputs, image_id, num_gpus)
+        super().run_script_multigpu(
+            name, fn_name, inputs, outputs, image_id, first_gpu, num_gpus)
 
     @exception_handler
     def delete_script(self, name):
@@ -591,6 +605,7 @@ class Client(PyClient):
         name,
         model,
         backend,
+        first_gpu,
         num_gpus,
         batch_size=0,
         min_batch_size=0,
@@ -614,7 +629,9 @@ class Client(PyClient):
         :type model: bytes
         :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
         :type backend: str
-        :param num_gpus: the number of GPUs in the system's nodes
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this model
         :type num_gpus: int
         :param batch_size: batch size for execution, defaults to 0
         :type batch_size: int, optional
@@ -630,6 +647,7 @@ class Client(PyClient):
         """
         typecheck(name, "name", str)
         typecheck(backend, "backend", str)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
@@ -640,6 +658,7 @@ class Client(PyClient):
             name,
             model,
             backend,
+            first_gpu,
             num_gpus,
             batch_size,
             min_batch_size,
@@ -721,6 +740,7 @@ class Client(PyClient):
         name,
         model_file,
         backend,
+        first_gpu,
         num_gpus,
         batch_size=0,
         min_batch_size=0,
@@ -744,7 +764,9 @@ class Client(PyClient):
         :type model_file: file path to model
         :param backend: name of the backend (TORCH, TF, TFLITE, ONNX)
         :type backend: str
-        :param num_gpus: the number of GPUs in the system's nodes
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
+        :param num_gpus: the number of GPUs to use in processing this model
         :type num_gpus: int
         :param batch_size: batch size for execution, defaults to 0
         :type batch_size: int, optional
@@ -761,6 +783,7 @@ class Client(PyClient):
         typecheck(name, "name", str)
         typecheck(model_file, "model_file", str)
         typecheck(backend, "backend", str)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
@@ -772,6 +795,7 @@ class Client(PyClient):
             name,
             m_file,
             backend,
+            first_gpu,
             num_gpus,
             batch_size,
             min_batch_size,
@@ -806,6 +830,7 @@ class Client(PyClient):
         self,
         name,
         image_id,
+        first_gpu,
         num_gpus,
         inputs=None,
         outputs=None):
@@ -821,6 +846,8 @@ class Client(PyClient):
         :param image_id: index of the current image, such as a processor ID
                          or MPI rank
         :type image_id: int
+        :param first_gpu: the first GPU (zero-based) to use in processing this model
+        :type first_gpu: int
         :param num_gpus: the number of gpus for which the model was stored
         :type num_gpus: int
         :param inputs: names of stored inputs to provide model, defaults to None
@@ -831,9 +858,10 @@ class Client(PyClient):
         """
         typecheck(name, "name", str)
         typecheck(image_id, "image_id", int)
+        typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model_multigpu(name, image_id, num_gpus, inputs, outputs)
+        super().run_model_multigpu(name, image_id, first_gpu, num_gpus, inputs, outputs)
 
     @exception_handler
     def delete_model(self, name):

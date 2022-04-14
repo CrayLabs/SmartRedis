@@ -267,7 +267,8 @@ class Redis : public RedisServer
         *   \param model The model as a continuous buffer string_view
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_gpu The first GPU to use with this model
+        *   \param num_gpus The number of GPUs to use with this model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
@@ -282,6 +283,7 @@ class Redis : public RedisServer
         virtual void set_model_multigpu(const std::string& name,
                                         const std::string_view& model,
                                         const std::string& backend,
+                                        int first_gpu,
                                         int num_gpus,
                                         int batch_size = 0,
                                         int min_batch_size = 0,
@@ -309,11 +311,13 @@ class Redis : public RedisServer
         *          database for future execution in a multi-GPU system
         *   \param name The name to associate with the script
         *   \param script The script source in a std::string_view
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_gpu The first GPU to use with this script
+        *   \param num_gpus The number of GPUs to use with this script
         *   \throw RuntimeException for all client errors
         */
         virtual void set_script_multigpu(const std::string& name,
                                          const std::string_view& script,
+                                         int first_cpu,
                                          int num_gpus);
 
         /*!
@@ -340,6 +344,7 @@ class Redis : public RedisServer
         *                  to save model results
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this model
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw RuntimeException for all client errors
         */
@@ -347,6 +352,7 @@ class Redis : public RedisServer
                                         std::vector<std::string> inputs,
                                         std::vector<std::string> outputs,
                                         int image_id,
+                                        int first_gpu,
                                         int num_gpus);
 
         /*!
@@ -376,6 +382,7 @@ class Redis : public RedisServer
         *                  to save script results
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
+        *   \param first_gpu The first GPU to use with this script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw RuntimeException for all client errors
         */
@@ -384,6 +391,7 @@ class Redis : public RedisServer
                                          std::vector<std::string>& inputs,
                                          std::vector<std::string>& outputs,
                                          int image_id,
+                                         int first_gpu,
                                          int num_gpus);
 
         /*!

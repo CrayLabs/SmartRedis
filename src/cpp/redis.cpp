@@ -290,6 +290,7 @@ CommandReply Redis::set_model(const std::string& model_name,
 void Redis::set_model_multigpu(const std::string& name,
                                const std::string_view& model,
                                const std::string& backend,
+                               int first_gpu,
                                int num_gpus,
                                int batch_size,
                                int min_batch_size,
@@ -298,7 +299,7 @@ void Redis::set_model_multigpu(const std::string& name,
                                const std::vector<std::string>& outputs)
 {
     // Store a copy of the model for each GPU
-    for (int i = 0; i < num_gpus; i++) {
+    for (int i = first_gpu; i < num_gpus; i++) {
         // Build the command
         SingleKeyCommand cmd;
         std::string device = "GPU:" + std::to_string(i);
@@ -355,10 +356,11 @@ CommandReply Redis::set_script(const std::string& key,
 // database for future execution in a multi-GPU system
 void Redis::set_script_multigpu(const std::string& name,
                                 const std::string_view& script,
+                                int first_gpu,
                                 int num_gpus)
 {
     // Store a copy of the script for each GPU
-    for (int i = 0; i < num_gpus; i++) {
+    for (int i = first_gpu; i < num_gpus; i++) {
         // Build the command
         SingleKeyCommand cmd;
         std::string device = "GPU:" + std::to_string(i);
@@ -406,9 +408,10 @@ void Redis::run_model_multigpu(const std::string& name,
                                std::vector<std::string> inputs,
                                std::vector<std::string> outputs,
                                int image_id,
+                               int first_gpu,
                                int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(image_id % num_gpus);
+    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
     CommandReply result = run_model(name + "." + device, inputs, outputs);
     if (result.has_error() > 0) {
         throw SRRuntimeException(
@@ -450,9 +453,10 @@ void Redis::run_script_multigpu(const std::string& name,
                                 std::vector<std::string>& inputs,
                                 std::vector<std::string>& outputs,
                                 int image_id,
+                                int first_gpu,
                                 int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(image_id % num_gpus);
+    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
     CommandReply result = run_script(
         name + "." + device, function, inputs, outputs);
     if (result.has_error() > 0) {

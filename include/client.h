@@ -376,7 +376,8 @@ class Client
         *   \param model_file The source file for the model
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus The number of GPUs to use with the model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
@@ -391,6 +392,7 @@ class Client
         void set_model_from_file_multigpu(const std::string& name,
                                 const std::string& model_file,
                                 const std::string& backend,
+                                int first_gpu,
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
@@ -453,7 +455,8 @@ class Client
         *   \param model The model as a continuous buffer string_view
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus The number of GPUs to use with the model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
@@ -468,6 +471,7 @@ class Client
         void set_model_multigpu(const std::string& name,
                                 const std::string_view& model,
                                 const std::string& backend,
+                                int first_gpu,
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
@@ -520,11 +524,13 @@ class Client
         *            for more details.
         *   \param name The name to associate with the script
         *   \param script_file The source file for the script
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus The number of GPUs to use with the script
         *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
         void set_script_from_file_multigpu(const std::string& name,
                                            const std::string& script_file,
+                                           int first_gpu,
                                            int num_gpus);
 
         /*!
@@ -555,11 +561,13 @@ class Client
         *            for more details.
         *   \param name The name to associate with the script
         *   \param script The script source in a std::string_view
-        *   \param num_gpus The number of GPUs in the system's nodes
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus The number of GPUs to use with the script
         *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
         void set_script_multigpu(const std::string& name,
                                  const std::string_view& script,
+                                 int first_gpu,
                                  int num_gpus);
 
         /*!
@@ -620,6 +628,7 @@ class Client
         *                  to save model results
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
+        *   \param first_cpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if run model command fails
         */
@@ -627,6 +636,7 @@ class Client
                                 std::vector<std::string> inputs,
                                 std::vector<std::string> outputs,
                                 int image_id,
+                                int first_gpu,
                                 int num_gpus);
 
         /*!
@@ -667,6 +677,7 @@ class Client
         *                  to save script results
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
+        *   \param first_cpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if run script command fails
         */
@@ -675,6 +686,7 @@ class Client
                                  std::vector<std::string> inputs,
                                  std::vector<std::string> outputs,
                                  int image_id,
+                                 int first_gpu,
                                  int num_gpus);
 
         /*!

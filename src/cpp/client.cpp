@@ -464,6 +464,7 @@ void Client::set_model_from_file(const std::string& name,
 void Client::set_model_from_file_multigpu(const std::string& name,
                                           const std::string& model_file,
                                           const std::string& backend,
+                                          int first_gpu,
                                           int num_gpus,
                                           int batch_size,
                                           int min_batch_size,
@@ -483,7 +484,7 @@ void Client::set_model_from_file_multigpu(const std::string& name,
     const std::string tmp = ostream.str();
     std::string_view model(tmp.data(), tmp.length());
 
-    set_model_multigpu(name, model, backend, num_gpus, batch_size,
+    set_model_multigpu(name, model, backend, first_gpu, num_gpus, batch_size,
                        min_batch_size, tag, inputs, outputs);
 }
 // Set a model from a string buffer in the database for future execution
@@ -543,6 +544,7 @@ void Client::set_model(const std::string& name,
 void Client::set_model_multigpu(const std::string& name,
                                 const std::string_view& model,
                                 const std::string& backend,
+                                int first_gpu,
                                 int num_gpus,
                                 int batch_size,
                                 int min_batch_size,
@@ -553,7 +555,6 @@ void Client::set_model_multigpu(const std::string& name,
     if (name.size() == 0) {
         throw SRParameterException("name is a required parameter of set_model.");
     }
-
     if (backend.size() == 0) {
         throw SRParameterException("backend is a required "\
                                    "parameter of set_model.");
@@ -570,6 +571,9 @@ void Client::set_model_multigpu(const std::string& name,
         }
     }
 
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be avnon-negative integer");
+    }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
     }
@@ -584,7 +588,7 @@ void Client::set_model_multigpu(const std::string& name,
 
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
-        key, model, backend, num_gpus,
+        key, model, backend, first_gpu, num_gpus,
         batch_size, min_batch_size,
         tag, inputs, outputs);
 }
@@ -626,6 +630,7 @@ void Client::set_script_from_file(const std::string& name,
 // in a multi-GPU system
 void Client::set_script_from_file_multigpu(const std::string& name,
                                            const std::string& script_file,
+                                           int first_gpu,
                                            int num_gpus)
 {
     // Read the script from the file
@@ -637,7 +642,7 @@ void Client::set_script_from_file_multigpu(const std::string& name,
     std::string_view script(tmp.data(), tmp.length());
 
     // Send it to the database
-    set_script_multigpu(name, script, num_gpus);
+    set_script_multigpu(name, script, first_gpu, num_gpus);
 }
 
 // Set a script from a string buffer in the database for future execution
@@ -661,14 +666,18 @@ void Client::set_script(const std::string& name,
 // Set a script in the database for future execution in a multi-GPU system
 void Client::set_script_multigpu(const std::string& name,
                                  const std::string_view& script,
+                                 int first_gpu,
                                  int num_gpus)
 {
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer.");
+    }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_script_multigpu(key, script, num_gpus);
+    _redis_server->set_script_multigpu(key, script, first_gpu, num_gpus);
 }
 
 // Retrieve the script from the database
@@ -703,8 +712,12 @@ void Client::run_model_multigpu(const std::string& name,
                                 std::vector<std::string> inputs,
                                 std::vector<std::string> outputs,
                                 int image_id,
+                                int first_gpu,
                                 int num_gpus)
 {
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer.");
+    }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
     }
@@ -720,7 +733,7 @@ void Client::run_model_multigpu(const std::string& name,
         _append_with_put_prefix(outputs);
     }
     _redis_server->run_model_multigpu(
-        key, inputs, outputs, image_id, num_gpus);
+        key, inputs, outputs, image_id, first_gpu, num_gpus);
 }
 
 // Run a script function in the database using the specificed input and output tensors
@@ -745,8 +758,12 @@ void Client::run_script_multigpu(const std::string& name,
                                  std::vector<std::string> inputs,
                                  std::vector<std::string> outputs,
                                  int image_id,
+                                 int first_gpu,
                                  int num_gpus)
 {
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer");
+    }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
     }
@@ -762,7 +779,7 @@ void Client::run_script_multigpu(const std::string& name,
         _append_with_put_prefix(outputs);
     }
     _redis_server->run_script_multigpu(
-        key, function, inputs, outputs, image_id, num_gpus);
+        key, function, inputs, outputs, image_id, first_gpu, num_gpus);
 }
 
 // Delete a model from the database

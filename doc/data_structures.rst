@@ -427,24 +427,26 @@ SmartRedis has special support for models on systems with multiple GPUs.
 On these systems, the model can be set via the ``Client.set_model_multigpu()``
 function, which differs from the ``Client.set_model()`` function only in that
 (1) there is no need to specify a device (GPU is implicit) and (2) the caller
-must supply the number of GPUs on the system's nodes. The function will then
-create separate copies of the model for each GPU by appending ``.GPU:n`` to
-the supplied name, where ``n`` is a number from zero to the number of GPUs
-minus one.
+must supply the index of the first GPU to use with the model and the total
+number of GPUs on the system's nodes to use with the model. The function will
+then create separate copies of the model for each GPU by appending ``.GPU:n``
+to the supplied name, where ``n`` is a number from ``first_gpu`` to
+``first_gpu + num_gpus - 1``, inclusive.
 
 Executing models on systems with multiple GPUs may be done via the
 ``Client.run_model_multigpu()`` function. This method parallels
-``Client.run_model()`` except that it requires two additional parameters:
-the number of GPUs in the system's nodes, and and index for the currently
-executing image. The model execution is then dispatched to the copy of the
-model on the GPU corresponding to the image index modulo the number of GPUs
-in the system's nodes.  The image index may be an MPI rank, or a thread ID,
-or any other indexing scheme.
+``Client.run_model()`` except that it requires three additional parameters:
+the first GPU to use for execution, the number of GPUs to use for execution,
+and and index for the currently executing image. The model execution is then
+dispatched to the copy of the model on the GPU corresponding to
+``first_gpu`` plus the image index modulo ``num_gpus``.  The image index may
+be an MPI rank, or a thread ID, or any other indexing scheme.
 
 .. note::
 
     In order for a model to be executed via ``Client.run_model_multigpu()``,
-    it must have been set via ``Client.set_model_multigpu()``.
+    it must have been set via ``Client.set_model_multigpu()``. The
+    ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.
 
 Script
 ======
@@ -538,21 +540,23 @@ SmartRedis has special support for scripts on systems with multiple GPUs.
 On these systems, the script can be set via the ``Client.set_script_multigpu()``
 function, which differs from the ``Client.set_script()`` function only in that
 (1) there is no need to specify a device (GPU is implicit) and (2) the caller
-must supply the number of GPUs on the system's nodes. The function will then
-create separate copies of the script for each GPU by appending ``.GPU:n`` to
-the supplied name, where ``n`` is a number from zero to the number of GPUs
-minus one.
+must supply the index of the first GPU to use with the script and the total
+number of GPUs on the system's nodes to use with the script. The function will
+then create separate copies of the script for each GPU by appending ``.GPU:n``
+to the supplied name, where ``n`` is a number from ``first_gpu`` to
+``first_gpu + num_gpus - 1``, inclusive.
 
 Executing scripts on systems with multiple GPUs may be done via the
 ``Client.run_script_multigpu()`` function. This method parallels
-``Client.run_script()`` except that it requires two additional parameters:
-the number of GPUs in the system's nodes, and and index for the currently
-executing image. The script execution is then dispatched to the copy of the
-script on the GPU corresponding to the image index modulo the number of GPUs
-in the system's nodes.  The image index may be an MPI rank, or a thread ID,
-or any other indexing scheme.
+``Client.run_script()`` except that it requires three additional parameters:
+the first GPU to use for execution, the number of GPUs to use for execution,
+and and index for the currently executing image. The script execution is then
+dispatched to the copy of the script on the GPU corresponding to
+``first_gpu`` plus the image index modulo ``num_gpus``.  The image index may
+be an MPI rank, or a thread ID, or any other indexing scheme.
 
 .. note::
 
     In order for a script to be executed via ``Client.run_script_multigpu()``,
-    it must have been set via ``Client.set_script_multigpu()``.
+    it must have been set via ``Client.set_script_multigpu()``. The
+    ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.

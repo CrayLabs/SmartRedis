@@ -360,10 +360,11 @@ void PyClient::set_script_from_file(const std::string& name,
 
 void PyClient::set_script_from_file_multigpu(const std::string& name,
                                              const std::string& script_file,
+                                             int first_gpu,
                                              int num_gpus)
 {
     try {
-        _client->set_script_from_file_multigpu(name, script_file, num_gpus);
+        _client->set_script_from_file_multigpu(name, script_file, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -405,10 +406,11 @@ void PyClient::set_script(const std::string& name,
 
 void PyClient::set_script_multigpu(const std::string& name,
                                    const std::string_view& script,
+                                   int first_gpu,
                                    int num_gpus)
 {
     try {
-        _client->set_script_multigpu(name, script, num_gpus);
+        _client->set_script_multigpu(name, script, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -475,11 +477,12 @@ void PyClient::run_script_multigpu(const std::string& name,
                                    std::vector<std::string>& inputs,
                                    std::vector<std::string>& outputs,
                                    int image_id,
+                                   int first_gpu,
                                    int num_gpus)
 {
     try {
       _client->run_script_multigpu(
-          name, function, inputs, outputs, image_id, num_gpus);
+          name, function, inputs, outputs, image_id, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -571,6 +574,7 @@ void PyClient::set_model(const std::string& name,
 void PyClient::set_model_multigpu(const std::string& name,
                                   const std::string_view& model,
                                   const std::string& backend,
+                                  int first_gpu,
                                   int num_gpus,
                                   int batch_size,
                                   int min_batch_size,
@@ -579,7 +583,7 @@ void PyClient::set_model_multigpu(const std::string& name,
                                   const std::vector<std::string>& outputs)
 {
     try {
-        _client->set_model_multigpu(name, model, backend, num_gpus,
+        _client->set_model_multigpu(name, model, backend, first_gpu, num_gpus,
                                     batch_size, min_batch_size, tag,
                                     inputs, outputs);
     }
@@ -631,6 +635,7 @@ void PyClient::set_model_from_file(const std::string& name,
 void PyClient::set_model_from_file_multigpu(const std::string& name,
                                             const std::string& model_file,
                                             const std::string& backend,
+                                            int first_gpu,
                                             int num_gpus,
                                             int batch_size,
                                             int min_batch_size,
@@ -640,7 +645,7 @@ void PyClient::set_model_from_file_multigpu(const std::string& name,
 {
     try {
         _client->set_model_from_file_multigpu(
-            name, model_file, backend, num_gpus, batch_size,
+            name, model_file, backend, first_gpu, num_gpus, batch_size,
             min_batch_size, tag, inputs, outputs);
     }
     catch (Exception& e) {
@@ -684,10 +689,11 @@ void PyClient::run_model_multigpu(const std::string& name,
                                   std::vector<std::string> inputs,
                                   std::vector<std::string> outputs,
                                   int image_id,
+                                  int first_gpu,
                                   int num_gpus)
 {
     try {
-        _client->run_model_multigpu(name, inputs, outputs, image_id, num_gpus);
+        _client->run_model_multigpu(name, inputs, outputs, image_id, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
