@@ -294,8 +294,6 @@ class Client(PyClient):
         Function must be a callable TorchScript function and have at least
         one input and one output. Call the function with the Client.run_script
         method.
-        Device selection is either "GPU" or "CPU". If many GPUs are present,
-        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param name: name to store function at
         :type name: str
@@ -345,9 +343,6 @@ class Client(PyClient):
         The final script key used to store the script may be formed
         by applying a prefix to the supplied name.
         See use_model_ensemble_prefix() for more details.
-
-        Device selection is either "GPU" or "CPU". If many GPUs are present,
-        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param name: name to store the script under
         :type name: str
@@ -485,8 +480,8 @@ class Client(PyClient):
         typecheck(fn_name, "fn_name", str)
         typecheck(inputs, "inputs", list)
         typecheck(outputs, "outputs", list)
-        typecheck(image_id, "image_id", list)
-        typecheck(num_gpus, "num_gpus", list)
+        typecheck(image_id, "image_id", int)
+        typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_script_multigpu(name, fn_name, inputs, outputs, image_id, num_gpus)
 
@@ -612,8 +607,6 @@ class Client(PyClient):
         input and output nodes for TF models may be prefixed.
         See set_data_source(), use_model_ensemble_prefix(), and
         use_tensor_ensemble_prefix() for more details.
-        Device selection is either "GPU" or "CPU". If many GPUs are present,
-        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param name: name to store model under
         :type name: str
@@ -744,8 +737,6 @@ class Client(PyClient):
         input and output nodes for TF models may be prefixed.
         See set_data_source(), use_model_ensemble_prefix(), and
         use_tensor_ensemble_prefix() for more details.
-        Device selection is either "GPU" or "CPU". If many GPUs are present,
-        a zero-based index can be passed for specification e.g. "GPU:1".
 
         :param name: name to store model under
         :type name: str

@@ -522,7 +522,7 @@ void Client::set_model(const std::string& name,
     for (size_t i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
     if (!found) {
-        throw SRRuntimeException(backend + " is not a valid backend.");
+        throw SRParameterException(backend + " is not a valid backend.");
     }
 
     if (device.size() == 0) {
@@ -570,12 +570,16 @@ void Client::set_model_multigpu(const std::string& name,
         }
     }
 
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
     const char* backends[] = { "TF", "TFLITE", "TORCH", "ONNX" };
     bool found = false;
     for (size_t i = 0; i < sizeof(backends)/sizeof(backends[0]); i++)
         found = found || (backend.compare(backends[i]) != 0);
     if (!found) {
-        throw SRRuntimeException(backend + " is not a valid backend.");
+        throw SRParameterException(backend + " is not a valid backend.");
     }
 
     std::string key = _build_model_key(name, false);
@@ -659,6 +663,10 @@ void Client::set_script_multigpu(const std::string& name,
                                  const std::string_view& script,
                                  int num_gpus)
 {
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
     std::string key = _build_model_key(name, false);
     _redis_server->set_script_multigpu(key, script, num_gpus);
 }
@@ -697,6 +705,14 @@ void Client::run_model_multigpu(const std::string& name,
                                 int image_id,
                                 int num_gpus)
 {
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    if (image_id < 1) {
+        throw SRParameterException("image_id must be a non-negative integer.");
+    }
+
     std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
@@ -731,6 +747,14 @@ void Client::run_script_multigpu(const std::string& name,
                                  int image_id,
                                  int num_gpus)
 {
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    if (image_id < 1) {
+        throw SRParameterException("image_id must be a non-negative integer.");
+    }
+
     std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {

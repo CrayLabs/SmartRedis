@@ -366,6 +366,12 @@ class Client
         /*!
         *   \brief Set a model from file in the database for future
         *          execution in a multi-GPU system
+        *   \details The final model key used to store the model
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
+        *            input and output node vectors for TF models may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param name The name to associate with the model
         *   \param model_file The source file for the model
         *   \param backend The name of the backend
@@ -380,7 +386,7 @@ class Client
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if multiGPU set model command fails
         */
         void set_model_from_file_multigpu(const std::string& name,
                                 const std::string& model_file,
@@ -437,6 +443,12 @@ class Client
         /*!
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution in a multi-GPU system
+        *   \details The final model key used to store the model
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
+        *            input and output node vectors for TF models may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param name The name to associate with the model
         *   \param model The model as a continuous buffer string_view
         *   \param backend The name of the backend
@@ -451,7 +463,7 @@ class Client
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if multi-GPU set model command fails
         */
         void set_model_multigpu(const std::string& name,
                                 const std::string_view& model,
@@ -502,10 +514,14 @@ class Client
         /*!
         *   \brief Set a script from file in the database for future
         *          execution in a multi-GPU system
+        *   \details The final script key used to store the script
+        *            may be formed by applying a prefix to the supplied
+        *            name. See use_model_ensemble_prefix()
+        *            for more details.
         *   \param name The name to associate with the script
         *   \param script_file The source file for the script
         *   \param num_gpus The number of GPUs in the system's nodes
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
         void set_script_from_file_multigpu(const std::string& name,
                                            const std::string& script_file,
@@ -533,10 +549,14 @@ class Client
         /*!
         *   \brief Set a script from std::string_view buffer in the
         *          database for future execution in a multi-GPU system
+        *   \details The final script key used to store the script
+        *            may be formed by applying a prefix to the supplied
+        *            name. See use_model_ensemble_prefix()
+        *            for more details.
         *   \param name The name to associate with the script
         *   \param script The script source in a std::string_view
         *   \param num_gpus The number of GPUs in the system's nodes
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if multi-GPU set script command fails
         */
         void set_script_multigpu(const std::string& name,
                                  const std::string_view& script,
@@ -584,6 +604,16 @@ class Client
         /*!
         *   \brief Run a model in the database using the
         *          specified input and output tensors in a multi-GPU system
+        *   \details The model key used to locate the model to be run
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
+        *            input and output vectors may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details.
+        *            By default, models will run with a one hour timeout. To
+        *            modify the length of time that a model is allowed to run,
+        *            update the SR_MODEL_TIMEOUT to give a new value, in
+        *            milliseconds.
         *   \param name The name associated with the model
         *   \param inputs The names of input tensors to use in the model
         *   \param outputs The names of output tensors that will be used
@@ -591,7 +621,7 @@ class Client
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
         *   \param num_gpus the number of gpus for which the script was stored
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if run model command fails
         */
         void run_model_multigpu(const std::string& name,
                                 std::vector<std::string> inputs,
@@ -624,6 +654,12 @@ class Client
         /*!
         *   \brief Run a script function in the database using the
         *          specificed input and output tensors in a multi-GPU system
+        *   \details The script key used to locate the script to be run
+        *            may be formed by applying a prefix to the supplied
+        *            name. Similarly, the tensor names in the
+        *            input and output vectors may be prefixed.
+        *            See set_data_source(), use_model_ensemble_prefix(), and
+        *            use_tensor_ensemble_prefix() for more details
         *   \param name The name associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The names of input tensors to use in the script
@@ -632,7 +668,7 @@ class Client
         *   \param image_id index of the current image, such as a processor
         *                   ID or MPI rank
         *   \param num_gpus the number of gpus for which the script was stored
-        *   \throw RuntimeException for all client errors
+        *   \throw SmartRedis::Exception if run script command fails
         */
         void run_script_multigpu(const std::string& name,
                                  const std::string& function,

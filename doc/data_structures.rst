@@ -432,7 +432,7 @@ create separate copies of the model for each GPU by appending ``.GPU:n`` to
 the supplied name, where ``n`` is a number from zero to the number of GPUs
 minus one.
 
-Executing models on systems with multiple GPUs may done via the
+Executing models on systems with multiple GPUs may be done via the
 ``Client.run_model_multigpu()`` function. This method parallels
 ``Client.run_model()`` except that it requires two additional parameters:
 the number of GPUs in the system's nodes, and and index for the currently
@@ -543,7 +543,7 @@ create separate copies of the script for each GPU by appending ``.GPU:n`` to
 the supplied name, where ``n`` is a number from zero to the number of GPUs
 minus one.
 
-Executing scripts on systems with multiple GPUs may done via the
+Executing scripts on systems with multiple GPUs may be done via the
 ``Client.run_script_multigpu()`` function. This method parallels
 ``Client.run_script()`` except that it requires two additional parameters:
 the number of GPUs in the system's nodes, and and index for the currently
