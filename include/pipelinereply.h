@@ -134,7 +134,7 @@ class PipelineReply {
         *   \param index Index to retrieve
         *   \returns The indexed CommandReply
         */
-        CommandReply operator[](int index);
+        CommandReply operator[](size_t index);
 
         /*!
         *   \brief Get the number of CommandReply in the PipelineReply
