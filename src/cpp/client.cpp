@@ -1179,9 +1179,15 @@ int Client::get_list_length(const std::string& list_name)
     return list_length;
 }
 
-bool Client::poll_list_length(const std::string& name, size_t list_length,
+bool Client::poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries)
 {
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
+    }
+
     // Check for the requested list length, return if found
     for (int i = 0; i < num_tries; i++) {
         if (get_list_length(name) >= list_length)

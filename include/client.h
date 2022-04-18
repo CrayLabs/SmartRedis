@@ -1123,6 +1123,7 @@ class Client
         *            name. See set_data_source() and use_list_ensemble_prefix()
         *            for more details.
         *   \param name The name of the list
+        *   \param list_length The desired length of the list
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
         *   \param num_tries The total number of times to check for the name
@@ -1130,7 +1131,7 @@ class Client
         *            than or equal to the provided length, otherwise false
         *   \throw SmartRedis::Exception if poll list length command fails
         */
-        bool poll_list_length(const std::string& name, size_t list_length,
+        bool poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries);
 
         /*!
