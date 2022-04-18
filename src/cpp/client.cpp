@@ -572,7 +572,7 @@ void Client::set_model_multigpu(const std::string& name,
     }
 
     if (first_gpu < 0) {
-        throw SRParameterException("first_gpu must be avnon-negative integer");
+        throw SRParameterException("first_gpu must be a non-negative integer");
     }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
