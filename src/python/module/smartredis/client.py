@@ -312,7 +312,7 @@ class Client(PyClient):
         if not callable(function):
             raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
         fn_src = inspect.getsource(function)
-        super().set_script_multigpu(name, first_gpu, num_gpus, fn_src)
+        super().set_script_multigpu(name, fn_src, first_gpu, num_gpus)
 
     @exception_handler
     def set_script(self, name, script, device="CPU"):
@@ -361,7 +361,6 @@ class Client(PyClient):
         typecheck(script, "script", str)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
-        device = self.__check_device(device)
         super().set_script_multigpu(name, script, first_gpu, num_gpus)
 
     @exception_handler
@@ -861,7 +860,7 @@ class Client(PyClient):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model_multigpu(name, image_id, first_gpu, num_gpus, inputs, outputs)
+        super().run_model_multigpu(name, inputs, outputs, image_id, first_gpu, num_gpus)
 
     @exception_handler
     def delete_model(self, name):
