@@ -53,7 +53,7 @@ void PipelineReply::operator+=(QueuedReplies&& reply)
 }
 
 // Return a shallow copy of an entry in the PipelineReply
-CommandReply PipelineReply::operator[](int index)
+CommandReply PipelineReply::operator[](size_t index)
 {
     if (index > _all_replies.size()) {
         throw SRInternalException("An attempt was made to access index " +
