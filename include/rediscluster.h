@@ -333,7 +333,7 @@ class RedisCluster : public RedisServer
         */
         virtual void set_script_multigpu(const std::string& name,
                                          const std::string_view& script,
-                                         int first_script,
+                                         int first_gpu,
                                          int num_gpus);
 
         /*!

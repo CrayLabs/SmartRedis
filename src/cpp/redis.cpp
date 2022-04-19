@@ -299,40 +299,19 @@ void Redis::set_model_multigpu(const std::string& name,
                                const std::vector<std::string>& outputs)
 {
     // Store a copy of the model for each GPU
+    CommandReply result;
     for (int i = first_gpu; i < num_gpus; i++) {
-        // Build the command
-        SingleKeyCommand cmd;
         std::string device = "GPU:" + std::to_string(i);
         std::string model_key = name + "." + device;
-        cmd << "AI.MODELSTORE" << Keyfield(model_key) << backend << device;
-
-        // Add optional fields if requested
-        if (tag.size() > 0) {
-            cmd << "TAG" << tag;
-        }
-        if (batch_size > 0) {
-            cmd << "BATCHSIZE" << std::to_string(batch_size);
-        }
-        if (min_batch_size > 0) {
-            cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
-        }
-        if (inputs.size() > 0) {
-            cmd << "INPUTS" << std::to_string(inputs.size()) <<  inputs;
-        }
-        if (outputs.size() > 0) {
-            cmd << "OUTPUTS" << std::to_string(outputs.size()) << outputs;
-        }
-        cmd << "BLOB" << model;
-
-        // Run it
-        CommandReply result = run(cmd);
+        result = set_model(
+            name, model_key, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
         if (result.has_error() > 0) {
-            throw SRRuntimeException("Failed to set model for " + device);
+            throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
         }
     }
 
     // Add a version for get_model to find
-    CommandReply result = set_model(
+    result = set_model(
         name, model, backend, "GPU", batch_size, min_batch_size, tag, inputs, outputs);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to set general model");
@@ -360,22 +339,18 @@ void Redis::set_script_multigpu(const std::string& name,
                                 int num_gpus)
 {
     // Store a copy of the script for each GPU
+    CommandReply result;
     for (int i = first_gpu; i < num_gpus; i++) {
-        // Build the command
-        SingleKeyCommand cmd;
         std::string device = "GPU:" + std::to_string(i);
         std::string script_key = name + "." + device;
-        cmd << "AI.SCRIPTSET" << Keyfield(script_key) << device << "SOURCE" << script;
-
-        // Run it
-        CommandReply result = run(cmd);
+        result = set_script(script_key, device, script);
         if (result.has_error() > 0) {
-            throw SRRuntimeException("Failed to set script for " + device);
+            throw SRRuntimeException("Failed to set script for GPU " + std::to_string(i));
         }
     }
 
     // Add a copy for get_script to find
-    CommandReply result = set_script(name, "GPU", script);
+    result = set_script(name, "GPU", script);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to set general script");
     }
