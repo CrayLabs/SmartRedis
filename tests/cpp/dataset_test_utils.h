@@ -152,8 +152,8 @@ void check_nested_3D_tensor(SmartRedis::DataSet& dataset,
 
     //Check that the tensor values are correct
     if(is_equal_3D_array(vals, t_unpack, dims[0], dims[1], dims[2])) {
-        //std::cout<<"Correctly fetched " + tensor_name +
-        //            " with unpack tensor"<<std::endl;
+        std::cout<<"Correctly fetched " + tensor_name +
+                    " with unpack tensor"<<std::endl;
     }
     else {
         throw std::runtime_error(tensor_name +
