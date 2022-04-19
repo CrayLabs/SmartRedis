@@ -382,11 +382,11 @@ CommandReply Redis::run_model(const std::string& key,
 void Redis::run_model_multigpu(const std::string& name,
                                std::vector<std::string> inputs,
                                std::vector<std::string> outputs,
-                               int image_id,
+                               int offset,
                                int first_gpu,
                                int num_gpus)
 {
-    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    int gpu = first_gpu + _modulo(offset, num_gpus);
     std::string device = "GPU:" + std::to_string(gpu);
     CommandReply result = run_model(name + "." + device, inputs, outputs);
     if (result.has_error() > 0) {
@@ -419,7 +419,7 @@ CommandReply Redis::run_script(const std::string& key,
 *   \param inputs The names of input tensors to use in the script
 *   \param outputs The names of output tensors that will be used
 *                  to save script results
-*   \param image_id index of the current image, such as a processor
+*   \param offset index of the current image, such as a processor
 *                   ID or MPI rank
 *   \param num_gpus the number of gpus for which the script was stored
 *   \throw RuntimeException for all client errors
@@ -428,11 +428,11 @@ void Redis::run_script_multigpu(const std::string& name,
                                 const std::string& function,
                                 std::vector<std::string>& inputs,
                                 std::vector<std::string>& outputs,
-                                int image_id,
+                                int offset,
                                 int first_gpu,
                                 int num_gpus)
 {
-    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    int gpu = first_gpu + _modulo(offset, num_gpus);
     std::string device = "GPU:" + std::to_string(gpu);
     CommandReply result = run_script(
         name + "." + device, function, inputs, outputs);

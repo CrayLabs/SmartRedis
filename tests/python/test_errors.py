@@ -322,27 +322,27 @@ def test_bad_type_run_script_multigpu(use_cluster):
     fn_name = "phred"
     inputs = ["list", "of", "strings"]
     outputs = ["another", "string", "list"]
-    image_id = 0
+    offset = 0
     first_gpu = 0
     num_gpus = 1
     with pytest.raises(TypeError):
-        c.run_script_multigpu(42, fn_name, inputs, outputs, image_id, first_gpu, num_gpus)
+        c.run_script_multigpu(42, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
     with pytest.raises(TypeError):
-        c.run_script_multigpu(key, 42, inputs, outputs, image_id, first_gpu, num_gpus)
+        c.run_script_multigpu(key, 42, inputs, outputs, offset, first_gpu, num_gpus)
     with pytest.raises(TypeError):
-        c.run_script_multigpu(key, fn_name, 42, outputs, image_id, first_gpu, num_gpus)
+        c.run_script_multigpu(key, fn_name, 42, outputs, offset, first_gpu, num_gpus)
     with pytest.raises(TypeError):
-        c.run_script_multigpu(key, fn_name, inputs, 42, image_id, first_gpu, num_gpus)
+        c.run_script_multigpu(key, fn_name, inputs, 42, offset, first_gpu, num_gpus)
     with pytest.raises(TypeError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, "not an integer", first_gpu, num_gpus)
     with pytest.raises(TypeError):
-        c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, "not an integer", num_gpus)
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, "not an integer", num_gpus)
     with pytest.raises(TypeError):
-        c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, first_gpu, "not an integer")
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, "not an integer")
     with pytest.raises(ValueError):
-        c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, -1, num_gpus)
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, -1, num_gpus)
     with pytest.raises(ValueError):
-        c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, first_gpu, 0)
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, 0)
 
 
 def test_bad_type_get_model(use_cluster):

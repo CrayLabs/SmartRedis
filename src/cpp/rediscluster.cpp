@@ -521,11 +521,11 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
 void RedisCluster::run_model_multigpu(const std::string& name,
                                       std::vector<std::string> inputs,
                                       std::vector<std::string> outputs,
-                                      int image_id,
+                                      int offset,
                                       int first_gpu,
                                       int num_gpus)
 {
-    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    int gpu = first_gpu + _modulo(offset, num_gpus);
     std::string device = "GPU:" + std::to_string(gpu);
     std::string target_model = name + "." + device;
     CommandReply result = run_model(target_model, inputs, outputs);
@@ -596,7 +596,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
 *   \param inputs The names of input tensors to use in the script
 *   \param outputs The names of output tensors that will be used
 *                  to save script results
-*   \param image_id index of the current image, such as a processor
+*   \param offset index of the current image, such as a processor
 *                   ID or MPI rank
 *   \param num_gpus the number of gpus for which the script was stored
 *   \throw RuntimeException for all client errors
@@ -605,11 +605,11 @@ void RedisCluster::run_script_multigpu(const std::string& name,
                                        const std::string& function,
                                        std::vector<std::string>& inputs,
                                        std::vector<std::string>& outputs,
-                                       int image_id,
+                                       int offset,
                                        int first_gpu,
                                        int num_gpus)
 {
-    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    int gpu = first_gpu + _modulo(offset, num_gpus);
     std::string device = "GPU:" + std::to_string(gpu);
     std::string target_script = name + "." + device;
     CommandReply result = run_script(target_script, function, inputs, outputs);

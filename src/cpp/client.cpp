@@ -711,7 +711,7 @@ void Client::run_model(const std::string& name,
 void Client::run_model_multigpu(const std::string& name,
                                 std::vector<std::string> inputs,
                                 std::vector<std::string> outputs,
-                                int image_id,
+                                int offset,
                                 int first_gpu,
                                 int num_gpus)
 {
@@ -729,7 +729,7 @@ void Client::run_model_multigpu(const std::string& name,
         _append_with_put_prefix(outputs);
     }
     _redis_server->run_model_multigpu(
-        key, inputs, outputs, image_id, first_gpu, num_gpus);
+        key, inputs, outputs, offset, first_gpu, num_gpus);
 }
 
 // Run a script function in the database using the specificed input and output tensors
@@ -753,7 +753,7 @@ void Client::run_script_multigpu(const std::string& name,
                                  const std::string& function,
                                  std::vector<std::string> inputs,
                                  std::vector<std::string> outputs,
-                                 int image_id,
+                                 int offset,
                                  int first_gpu,
                                  int num_gpus)
 {
@@ -771,7 +771,7 @@ void Client::run_script_multigpu(const std::string& name,
         _append_with_put_prefix(outputs);
     }
     _redis_server->run_script_multigpu(
-        key, function, inputs, outputs, image_id, first_gpu, num_gpus);
+        key, function, inputs, outputs, offset, first_gpu, num_gpus);
 }
 
 // Delete a model from the database

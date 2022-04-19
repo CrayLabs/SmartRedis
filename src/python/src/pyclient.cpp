@@ -476,13 +476,13 @@ void PyClient::run_script_multigpu(const std::string& name,
                                    const std::string& function,
                                    std::vector<std::string>& inputs,
                                    std::vector<std::string>& outputs,
-                                   int image_id,
+                                   int offset,
                                    int first_gpu,
                                    int num_gpus)
 {
     try {
       _client->run_script_multigpu(
-          name, function, inputs, outputs, image_id, first_gpu, num_gpus);
+          name, function, inputs, outputs, offset, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -688,12 +688,12 @@ void PyClient::run_model(const std::string& name,
 void PyClient::run_model_multigpu(const std::string& name,
                                   std::vector<std::string> inputs,
                                   std::vector<std::string> outputs,
-                                  int image_id,
+                                  int offset,
                                   int first_gpu,
                                   int num_gpus)
 {
     try {
-        _client->run_model_multigpu(name, inputs, outputs, image_id, first_gpu, num_gpus);
+        _client->run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus);
     }
     catch (Exception& e) {
         // exception is already prepared for caller

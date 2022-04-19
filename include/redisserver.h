@@ -346,7 +346,7 @@ class RedisServer {
         *   \param inputs The names of input tensors to use in the model
         *   \param outputs The names of output tensors that will be used
         *                  to save model results
-        *   \param image_id index of the current image, such as a processor
+        *   \param offset index of the current image, such as a processor
         *                   ID or MPI rank
         *   \param first_gpu The first GPU to use with this model
         *   \param num_gpus the number of gpus for which the script was stored
@@ -355,7 +355,7 @@ class RedisServer {
         virtual void run_model_multigpu(const std::string& name,
                                         std::vector<std::string> inputs,
                                         std::vector<std::string> outputs,
-                                        int image_id,
+                                        int offset,
                                         int first_gpu,
                                         int num_gpus) = 0;
 
@@ -387,7 +387,7 @@ class RedisServer {
         *   \param inputs The names of input tensors to use in the script
         *   \param outputs The names of output tensors that will be used
         *                  to save script results
-        *   \param image_id index of the current image, such as a processor
+        *   \param offset index of the current image, such as a processor
         *                   ID or MPI rank
         *   \param first_gpu The first GPU to use with this script
         *   \param num_gpus the number of gpus for which the script was stored
@@ -397,7 +397,7 @@ class RedisServer {
                                          const std::string& function,
                                          std::vector<std::string>& inputs,
                                          std::vector<std::string>& outputs,
-                                         int image_id,
+                                         int offset,
                                          int first_gpu,
                                          int num_gpus) = 0;
 

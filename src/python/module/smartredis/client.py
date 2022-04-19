@@ -460,7 +460,7 @@ class Client(PyClient):
 
     @exception_handler
     def run_script_multigpu(
-        self, name, fn_name, inputs, outputs, image_id, first_gpu, num_gpus):
+        self, name, fn_name, inputs, outputs, offset, first_gpu, num_gpus):
         """Execute TorchScript stored inside the database
 
         The script key used to locate the script to be run
@@ -478,9 +478,9 @@ class Client(PyClient):
         :type inputs: list[str]
         :param outputs: database tensor names to receive script outputs
         :type outputs: list[str]
-        :param image_id: index of the current image, such as a processor ID
+        :param offset: index of the current image, such as a processor ID
                          or MPI rank
-        :type image_id: int
+        :type offset: int
         :param first_gpu: the first GPU (zero-based) to use in processing this script
         :type first_gpu: int
         :param num_gpus: the number of gpus for which the script was stored
@@ -491,12 +491,12 @@ class Client(PyClient):
         typecheck(fn_name, "fn_name", str)
         typecheck(inputs, "inputs", list)
         typecheck(outputs, "outputs", list)
-        typecheck(image_id, "image_id", int)
+        typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         super().run_script_multigpu(
-            name, fn_name, inputs, outputs, image_id, first_gpu, num_gpus)
+            name, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
 
     @exception_handler
     def delete_script(self, name):
@@ -828,7 +828,7 @@ class Client(PyClient):
     def run_model_multigpu(
         self,
         name,
-        image_id,
+        offset,
         first_gpu,
         num_gpus,
         inputs=None,
@@ -842,9 +842,9 @@ class Client(PyClient):
 
         :param name: name for stored model
         :type name: str
-        :param image_id: index of the current image, such as a processor ID
+        :param offset: index of the current image, such as a processor ID
                          or MPI rank
-        :type image_id: int
+        :type offset: int
         :param first_gpu: the first GPU (zero-based) to use in processing this model
         :type first_gpu: int
         :param num_gpus: the number of gpus for which the model was stored
@@ -856,11 +856,11 @@ class Client(PyClient):
         :raises RedisReplyError: if model execution fails
         """
         typecheck(name, "name", str)
-        typecheck(image_id, "image_id", int)
+        typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        super().run_model_multigpu(name, inputs, outputs, image_id, first_gpu, num_gpus)
+        super().run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus)
 
     @exception_handler
     def delete_model(self, name):

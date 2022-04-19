@@ -437,9 +437,9 @@ Executing models on systems with multiple GPUs may be done via the
 ``Client.run_model_multigpu()`` function. This method parallels
 ``Client.run_model()`` except that it requires three additional parameters:
 the first GPU to use for execution, the number of GPUs to use for execution,
-and and index for the currently executing image. The model execution is then
-dispatched to the copy of the model on the GPU corresponding to
-``first_gpu`` plus the image index modulo ``num_gpus``.  The image index may
+and an offset for the currently executing thread or image. The model execution
+is then dispatched to the copy of the script on the GPU corresponding to
+``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
 be an MPI rank, or a thread ID, or any other indexing scheme.
 
 .. note::
@@ -550,9 +550,9 @@ Executing scripts on systems with multiple GPUs may be done via the
 ``Client.run_script_multigpu()`` function. This method parallels
 ``Client.run_script()`` except that it requires three additional parameters:
 the first GPU to use for execution, the number of GPUs to use for execution,
-and and index for the currently executing image. The script execution is then
-dispatched to the copy of the script on the GPU corresponding to
-``first_gpu`` plus the image index modulo ``num_gpus``.  The image index may
+and an offset for the currently executing thread or image. The script execution
+is then dispatched to the copy of the script on the GPU corresponding to
+``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
 be an MPI rank, or a thread ID, or any other indexing scheme.
 
 .. note::
