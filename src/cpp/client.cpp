@@ -1139,13 +1139,108 @@ void Client::delete_list(const std::string& list_name)
 void Client::copy_list(const std::string& src_name,
                        const std::string& dest_name)
 {
-    // TODO implement
+    // Check for empty string inputs
+    if (src_name.size() == 0) {
+        throw SRParameterException("The src_name parameter cannot "\
+                                   "be an empty string.");
+    }
+
+    if (dest_name.size() == 0) {
+        throw SRParameterException("The dest_name parameter cannot "\
+                                   "be an empty string.");
+    }
+
+    // If the source and destination names are the same, don't execute
+    // any commands
+    if (src_name == dest_name) {
+        return;
+    }
+
+    // Build the source list key
+    std::string src_list_key = _build_list_key(src_name, true);
+
+    // Build the command to retrieve source list contents
+    SingleKeyCommand cmd;
+    cmd << "LRANGE" << Keyfield(src_list_key);
+    cmd << std::to_string(0);
+    cmd << std::to_string(-1);
+
+    // Run the command to retrive the list contents
+    CommandReply reply = _run(cmd);
+
+    // Check for reply errors and correct type
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("GET command failed. The aggregation "\
+                                 "list could not be retrieved.");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_ARRAY")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for the aggregation list.");
+
+    if (reply.n_elements() == 0)
+        throw SRRuntimeException("The source aggregation list does "\
+                                 "not exist.");
+
+    // Delete the current contents of the destination list or it will
+    // be an append to the destination (not act as a renaming
+    // of the original list)
+    delete_list(dest_name);
+
+    // Build the destination list key
+    std::string dest_list_key = _build_list_key(dest_name, false);
+
+    // The aggregation list contents will be directly added to a
+    // Command using Command::add_field_ptr().  This means that
+    // the above CommandReply must stay in scope and not destroy
+    // it's memory.
+    SingleKeyCommand copy_cmd;
+    copy_cmd << "RPUSH" << Keyfield(dest_list_key);
+
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        // Check that the ith entry is a string (i.e. key)
+        if (reply[i].redis_reply_type() != "REDIS_REPLY_STRING") {
+            throw SRRuntimeException("Element " + std::to_string(i) +
+                                     " in the aggregation list has an "\
+                                     "unexpected type: " +
+                                     reply.redis_reply_type());
+        }
+
+        // Check that the string length is not zero
+        if(reply[i].str_len() == 0) {
+            throw SRRuntimeException("Element " + std::to_string(i) +
+                                     " contains an empty key, which is "\
+                                     "not permitted.");
+        }
+        std::cout<<"Adding "<<std::string(reply[i].str(), reply[i].str_len())<<std::endl;
+        copy_cmd.add_field_ptr(reply[i].str(), reply[i].str_len());
+    }
+
+    CommandReply copy_reply = this->_run(copy_cmd);
+
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("Dataset aggregation list copy "
+                                 "operation failed.");
 }
 
 void Client::rename_list(const std::string& src_name,
                          const std::string& dest_name)
 {
-    // TODO implement this
+    if (src_name.size() == 0) {
+        throw SRParameterException("The src_name parameter cannot "\
+                                   "be an empty string.");
+    }
+
+    if (dest_name.size() == 0) {
+        throw SRParameterException("The dest_name parameter cannot "\
+                                   "be an empty string.");
+    }
+
+    if (src_name == dest_name) {
+        return;
+    }
+
+    copy_list(src_name, dest_name);
+    delete_list(src_name);
 }
 
 // Get the length of the list
