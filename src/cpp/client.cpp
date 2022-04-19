@@ -722,10 +722,6 @@ void Client::run_model_multigpu(const std::string& name,
         throw SRParameterException("num_gpus must be a positive integer.");
     }
 
-    if (image_id < 1) {
-        throw SRParameterException("image_id must be a non-negative integer.");
-    }
-
     std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
@@ -766,10 +762,6 @@ void Client::run_script_multigpu(const std::string& name,
     }
     if (num_gpus < 1) {
         throw SRParameterException("num_gpus must be a positive integer.");
-    }
-
-    if (image_id < 1) {
-        throw SRParameterException("image_id must be a non-negative integer.");
     }
 
     std::string key = _build_model_key(name, true);

@@ -340,8 +340,6 @@ def test_bad_type_run_script_multigpu(use_cluster):
     with pytest.raises(TypeError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, first_gpu, "not an integer")
     with pytest.raises(ValueError):
-        c.run_script_multigpu(key, fn_name, inputs, outputs, -1, first_gpu, num_gpus)
-    with pytest.raises(ValueError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, -1, num_gpus)
     with pytest.raises(ValueError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, image_id, first_gpu, 0)
@@ -459,8 +457,6 @@ def test_bad_type_run_model_multigpu(use_cluster):
         c.run_model_multigpu("simple_cnn", 0, "not an integer", 1)
     with pytest.raises(TypeError):
         c.run_model_multigpu("simple_cnn", 0, 0, "not an integer")
-    with pytest.raises(ValueError):
-        c.run_model_multigpu("simple_cnn", -1, 0, 1)
     with pytest.raises(ValueError):
         c.run_model_multigpu("simple_cnn", 0, -1, 1)
     with pytest.raises(ValueError):

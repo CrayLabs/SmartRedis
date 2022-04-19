@@ -878,15 +878,6 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
                                 ParameterException);
             }
         }
-        AND_WHEN("run_model_multigpu() called with invalid image ID")
-        {
-            THEN("An error is thrown")
-            {
-                std::vector<std::string> inputs, outputs;
-                CHECK_THROWS_AS(client.run_model_multigpu(model_key, inputs, outputs, -1, 0, 1),
-                                ParameterException);
-            }
-        }
         AND_WHEN("run_model_multigpu() called with invalid first GPU")
         {
             THEN("An error is thrown")
@@ -902,15 +893,6 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
             {
                 std::vector<std::string> inputs, outputs;
                 CHECK_THROWS_AS(client.run_model_multigpu(model_key, inputs, outputs, 0, 0, 0),
-                                ParameterException);
-            }
-        }
-        AND_WHEN("run_script_multigpu() called with invalid image ID")
-        {
-            THEN("An error is thrown")
-            {
-                std::vector<std::string> inputs, outputs;
-                CHECK_THROWS_AS(client.run_script_multigpu(script_key, "script_function", inputs, outputs, -1, 0, 1),
                                 ParameterException);
             }
         }

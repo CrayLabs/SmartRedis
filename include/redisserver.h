@@ -596,6 +596,15 @@ class RedisServer {
         */
         void _check_runtime_variables();
 
+        /*!
+        *   \brief Modular arithmetic that supports negative numbers
+        *   \param value The number to be modularized
+        *   \param modulus the modulus for the operation
+        *   \returns value modulo modulus
+        */
+        int _modulo(int value, int modulus) {
+            return (((value % modulus) + modulus) % modulus);
+         }
 
 };
 

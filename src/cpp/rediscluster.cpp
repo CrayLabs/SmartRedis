@@ -525,7 +525,8 @@ void RedisCluster::run_model_multigpu(const std::string& name,
                                       int first_gpu,
                                       int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
+    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
     std::string target_model = name + "." + device;
     CommandReply result = run_model(target_model, inputs, outputs);
     if (result.has_error() > 0) {
@@ -608,7 +609,8 @@ void RedisCluster::run_script_multigpu(const std::string& name,
                                        int first_gpu,
                                        int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
+    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
     std::string target_script = name + "." + device;
     CommandReply result = run_script(target_script, function, inputs, outputs);
     if (result.has_error() > 0) {

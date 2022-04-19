@@ -386,7 +386,8 @@ void Redis::run_model_multigpu(const std::string& name,
                                int first_gpu,
                                int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
+    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
     CommandReply result = run_model(name + "." + device, inputs, outputs);
     if (result.has_error() > 0) {
         throw SRRuntimeException(
@@ -431,7 +432,8 @@ void Redis::run_script_multigpu(const std::string& name,
                                 int first_gpu,
                                 int num_gpus)
 {
-    std::string device = "GPU:" + std::to_string(first_gpu + image_id % num_gpus);
+    int gpu = first_gpu + _modulo(image_id, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
     CommandReply result = run_script(
         name + "." + device, function, inputs, outputs);
     if (result.has_error() > 0) {
