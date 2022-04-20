@@ -204,7 +204,7 @@ void add_to_aggregation_list(std::string keyout)
 
     // Check that the ensemble list is present ensemble_member.list_name
     std::string list_key = keyout + "." + list_name;
-    std::cout<<"key = "<<list_key<<std::endl;
+
     if(!client.key_exists(list_key))
         throw std::runtime_error("The dataset aggregation list was not found.");
 
@@ -219,7 +219,6 @@ void add_to_aggregation_list(std::string keyout)
     }
 
     SmartRedis::DataSet& retrieved_dataset = retrieved_datasets[0];
-
 
     DATASET_TEST_UTILS::check_tensor_names(retrieved_dataset,
                                           {t_name_1, t_name_2});
