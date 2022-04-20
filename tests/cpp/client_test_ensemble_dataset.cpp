@@ -202,7 +202,7 @@ void add_to_aggregation_list(std::string keyout)
                                  t_name_2 +
                                  " was not found.");
 
-    // Check that the ensemble list is present ensemble_member.{list_name}
+    // Check that the ensemble list is present ensemble_member.list_name
     std::string list_key = keyout + "." + list_name;
     std::cout<<"key = "<<list_key<<std::endl;
     if(!client.key_exists(list_key))
