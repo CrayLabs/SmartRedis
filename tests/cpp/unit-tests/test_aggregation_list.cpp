@@ -91,6 +91,10 @@ DataSet generate_random_dataset(const std::string& dataset_name,
 template <typename T>
 bool is_same_dataset(DataSet& dataset_1, DataSet& dataset_2)
 {
+    if (dataset_1.get_name() != dataset_2.get_name()) {
+        return false;
+    }
+
     DATASET_TEST_UTILS::check_dataset_metadata(dataset_1);
     DATASET_TEST_UTILS::check_dataset_metadata(dataset_2);
 

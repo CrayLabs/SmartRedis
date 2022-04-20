@@ -68,47 +68,15 @@ SmartRedis::DataSet generate_dataset(void (*fill_array)(T***, int, int, int),
 }
 
 template <typename T>
-SmartRedis::DataSet check_dataset(void (*fill_array)(T***, int, int, int),
-                                  std::vector<size_t> dims,
-                                  SRTensorType type,
-                                  std::string dataset_name)
-{
-    T*** tensor_1 =
-        allocate_3D_array<T>(dims[0], dims[1], dims[2]);
-    fill_array(tensor_1, dims[0], dims[1], dims[2]);
-
-    T*** tensor_2 =
-        allocate_3D_array<T>(dims[0], dims[1], dims[2]);
-    fill_array(tensor_2, dims[0], dims[1], dims[2]);
-
-    T*** tensor_3 =
-        allocate_3D_array<T>(dims[0], dims[1], dims[2]);
-    fill_array(tensor_3, dims[0], dims[1], dims[2]);
-
-    //Create DataSet
-    SmartRedis::DataSet dataset(dataset_name);
-
-    //Add metadata to the DataSet
-    DATASET_TEST_UTILS::fill_dataset_with_metadata(dataset);
-
-    //Add tensors to the DataSet
-    std::string t_name_1 = "tensor_1";
-    std::string t_name_2 = "tensor_2";
-    std::string t_name_3 = "tensor_3";
-
-    dataset.add_tensor(t_name_1, tensor_1, dims, type, SRMemLayoutNested);
-    dataset.add_tensor(t_name_2, tensor_2, dims, type, SRMemLayoutNested);
-    dataset.add_tensor(t_name_3, tensor_3, dims, type, SRMemLayoutNested);
-
-    return dataset;
-}
-
-template <typename T>
 void check_dataset(SmartRedis::DataSet& dataset_1,
                    SmartRedis::DataSet& dataset_2)
 {
-    // TODO we can really make this function how we do all the checks in the future
-    // TODO should we implement a == operator for DataSet
+    if(dataset_1.get_name() != dataset_2.get_name()) {
+        throw std::runtime_error("The dataset name " + dataset_1.get_name() +
+                                 " does not match the other dataset name " +
+                                 dataset_2.get_name());
+    }
+
     std::vector<std::string> d2_tensor_names = dataset_2.get_tensor_names();
 
     DATASET_TEST_UTILS::check_tensor_names(dataset_1, d2_tensor_names);

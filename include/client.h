@@ -1544,6 +1544,20 @@ class Client
         */
         void _unpack_dataset_metadata(DataSet& dataset,
                                       CommandReply& reply);
+
+        /*!
+        *   \brief Determine the dataset name from a aggregation
+        *          list entry
+        *   \details DataSet aggregation lists store the key
+        *            of the DataSet so that metadata and tensor
+        *            keys can be retrieved using the entry.  The list
+        *            entry is of the form ensemble_member.{dataset_name}.
+        *   \param dataset_key The dataset key in the form of
+        *                      ensemble_member.{dataset_name}
+        *   \returns DataSet name
+        */
+        std::string _get_dataset_name_from_list_entry(std::string& dataset_key);
+
 };
 
 } //namespace SmartRedis

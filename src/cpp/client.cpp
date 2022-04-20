@@ -1490,10 +1490,10 @@ Client::_get_dataset_list_range(const std::string& list_name,
                                         "metdata retrieval.");
         }
 
-        //TODO We need to extract the actual dataset name not the key
-        //     later on we use dataset.get_name, so we need to be aware
-        //     of this when constructing the tensor get commands
-        std::string dataset_name(reply[i].str(), reply[i].str_len());
+        std::string dataset_key =
+            std::string(reply[i].str(), reply[i].str_len());
+        std::string dataset_name =
+            _get_dataset_name_from_list_entry(dataset_key);
 
         // Unpack the dataset to get tensor names
         dataset_list.push_back(DataSet(dataset_name));
@@ -1509,7 +1509,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
         for(size_t j = 0; j < tensor_names.size(); j++) {
 
             // Make the tensor key
-            std::string tensor_key = dataset.get_name() + "." +
+            std::string tensor_key = dataset_key + "." +
                                      tensor_names[j];
 
             // Build the tensor retrieval cmd
@@ -1795,4 +1795,35 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
         throw SRBadAllocException("tensor");
     }
     return ptr;
+}
+
+// Determine datset name from aggregation list entry
+std::string Client::_get_dataset_name_from_list_entry(std::string& dataset_key)
+{
+    size_t open_brace_pos = dataset_key.find_first_of('{');
+
+    if (open_brace_pos == std::string::npos) {
+        throw SRInternalException("An aggregation list entry could not be "\
+                                  "converted to a DataSet name because "\
+                                  "the { character is missing.");
+    }
+
+    size_t close_brace_pos = dataset_key.find_last_of('}');
+
+    if (close_brace_pos == std::string::npos) {
+        throw SRInternalException("An aggregation list entry could not be "\
+                                  "converted to a DataSet name because "\
+                                  "the } character is missing.");
+    }
+
+    if (open_brace_pos == close_brace_pos) {
+        throw SRInternalException("An empty DataSet name was encountered.  "\
+                                  "All aggregation list entries must be "\
+                                  "non-empty");
+    }
+
+    open_brace_pos += 1;
+    close_brace_pos -= 1;
+    return dataset_key.substr(open_brace_pos,
+                              close_brace_pos - open_brace_pos + 1);
 }
