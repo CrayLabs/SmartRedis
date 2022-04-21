@@ -1101,6 +1101,7 @@ void Client::save(std::string address)
         throw SRRuntimeException("SAVE command failed");
 }
 
+// Append dataset to aggregation list
 void Client::append_to_list(const std::string& list_name,
                             const DataSet& dataset)
 {
@@ -1121,6 +1122,7 @@ void Client::append_to_list(const std::string& list_name,
                                  "be added to the aggregation list.");
 }
 
+// Delete an aggregation list
 void Client::delete_list(const std::string& list_name)
 {
     // Build the list key
@@ -1136,6 +1138,7 @@ void Client::delete_list(const std::string& list_name)
         throw SRRuntimeException("DEL command failed.");
 }
 
+// Copy aggregation list
 void Client::copy_list(const std::string& src_name,
                        const std::string& dest_name)
 {
@@ -1211,7 +1214,7 @@ void Client::copy_list(const std::string& src_name,
                                      " contains an empty key, which is "\
                                      "not permitted.");
         }
-        std::cout<<"Adding "<<std::string(reply[i].str(), reply[i].str_len())<<std::endl;
+
         copy_cmd.add_field_ptr(reply[i].str(), reply[i].str_len());
     }
 
@@ -1222,6 +1225,7 @@ void Client::copy_list(const std::string& src_name,
                                  "operation failed.");
 }
 
+// Rename an aggregation list
 void Client::rename_list(const std::string& src_name,
                          const std::string& dest_name)
 {
@@ -1274,6 +1278,7 @@ int Client::get_list_length(const std::string& list_name)
     return list_length;
 }
 
+// Poll the list length
 bool Client::poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries)
 {

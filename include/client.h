@@ -759,7 +759,7 @@ class Client
 
         /*!
         *   \brief Check if a key exists in the database, repeating the check
-        *          the check at a specified polling interval
+        *          at a specified polling interval
         *   \param key The key to be checked in the database
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
@@ -1060,8 +1060,8 @@ class Client
         *            by storing its key, so appending a dataset
         *            to an aggregation list does not create a copy of the
         *            dataset.  Also, for this reason, the dataset
-        *            must be placed into the database with a separate call
-        *            to put_dataset().
+        *            must have been previously placed into the database
+        *            with a separate call to put_dataset().
         *   \param list_name The name of the aggregation list
         *   \param dataset The DataSet to append
         *   \throw SmartRedis::Exception if the command fails
@@ -1108,7 +1108,7 @@ class Client
                          const std::string& dest_name);
 
         /*!
-        *   \brief Get the length of an aggregation list
+        *   \brief Get the number of entries in the list
         *   \param list_name The list name
         *   \throw SmartRedis::Exception if the command fails
         */
