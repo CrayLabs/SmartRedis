@@ -188,7 +188,7 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
                 {
                     int list_length = datasets.size();
                     CHECK(client.poll_list_length(list_name,
-                                                  list_length, 5, 100));
+                                                  list_length, 1, 100));
                 }
 
                 AND_THEN("Polling for a list length size too large "\
@@ -225,7 +225,7 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
                     }
                 }
 
-                AND_THEN("a subset of DataSet objects can be retrieved via  "\
+                AND_THEN("A subset of DataSet objects can be retrieved via  "\
                          "the aggregation list and match the original "\
                          "DataSet objects")
                 {
