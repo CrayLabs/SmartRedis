@@ -119,11 +119,11 @@ class PipelineReply {
         PipelineReply& operator=(QueuedReplies&& reply);
 
         /*!
-        *   \brief Add QueuedReplies content to Pipeline object
+        *   \brief Add PipelineReply contents to a PipelineReply object
         *          via move semantics
-        *   \param reply QueuedReplies object
+        *   \param reply PipelineReply object
         */
-        void operator+=(QueuedReplies&& reply);
+        void operator+=(PipelineReply&& reply);
 
         /*!
         *   \brief Index operator for PipelineReply that will

@@ -46,10 +46,14 @@ PipelineReply& PipelineReply::operator=(QueuedReplies&& reply)
     return *this;
 }
 
-// Add QueuedReplies content to Pipeline ojbect via move semantics
-void PipelineReply::operator+=(QueuedReplies&& reply)
+// Add PipelineReply content to Pipeline ojbect via move semantics
+void PipelineReply::operator+=(PipelineReply&& reply)
 {
-    _add_queuedreplies(std::forward<QueuedReplies>(reply));
+    for (size_t i = 0; i < reply._queued_replies.size(); i++) {
+        _add_queuedreplies(std::move(reply._queued_replies[i]));
+    }
+    reply._queued_replies.clear();
+    reply._all_replies.clear();
 }
 
 // Return a shallow copy of an entry in the PipelineReply

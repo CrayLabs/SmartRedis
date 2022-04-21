@@ -670,6 +670,22 @@ class RedisCluster : public RedisServer
         DBNode* _get_model_script_db(const std::string& name,
                                      std::vector<std::string>& inputs,
                                      std::vector<std::string>& outputs);
+
+        /*!
+        *   \brief Execute a pipeline for the provided commands.
+        *          The provided commands MUST be executable on a single
+        *          shard.
+        *   \param cmds Vector of Command pointers to execute
+        *   \param shard_prefix The prefix corresponding to the shard
+        *                       where the pipeline is executed
+        *   \throw SmartRedis::Exception if an error is encountered following
+        *          multiple attempts
+        *   \return A PipelineReply for the provided commands.  The
+        *           PipelineReply will be in the same order as the provided
+        *           Command vector.
+        */
+        PipelineReply _run_pipeline(std::vector<Command*>& cmds,
+                                    std::string& shard_prefix);
 };
 
 } //namespace SmartRedis

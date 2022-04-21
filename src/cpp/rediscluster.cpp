@@ -141,8 +141,11 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
 // Run multiple single-key or single-hash slot Command on the server.
 PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 {
-    // Map for shard index to Command indices
+    // Map for shard index to Command indices so we can track order of execution
     std::vector<std::vector<size_t>> shard_cmd_index_list(_db_nodes.size());
+
+    // Map for shard index to Command pointers so pipelines can be easily rebuilt
+    std::vector<std::vector<Command*>> shard_cmds(_db_nodes.size());
 
     // Calculate shard for execution of each Command
     CommandList::iterator cmd = cmd_list.begin();
@@ -170,8 +173,11 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         // Get the shard index for the first key
         size_t db_index = _get_db_node_index(keys[0]);
 
-        // Push back the command shard list of commands
+        // Push back the command index to the shard list of commands
         shard_cmd_index_list[db_index].push_back(cmd_num);
+
+        // Push back a pointer to the command for pipeline construction
+        shard_cmds[db_index].push_back(*cmd);
     }
 
     // Define an empty PipelineReply object to store all shard replies
@@ -191,32 +197,15 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         // Get shard prefix
         std::string shard_prefix = _db_nodes[s].prefix;
 
-        // Get pipeline object for shard (no new connection)
-        sw::redis::Pipeline pipeline =
-            _redis_cluster->pipeline(shard_prefix, false);
-
-        // Loop over all commands and add to the pipeline
-        for (size_t c = 0; c < shard_cmd_index_list[s].size(); c++) {
-            // Get the index of the command
-            size_t cmd_list_index = shard_cmd_index_list[s][c];
-
-            // Add the command to the pipe
-            Command& shard_cmd = cmd_list[cmd_list_index];
-            pipeline.command(shard_cmd.cbegin(), shard_cmd.cend());
-        }
-
-        // NOTE The three commands below would need to be
-        // atomic when multi-threading, but otherwise the
-        // loop should work multithreaded without other major
-        // modifications
+        // Build and execute the pipeline
+        PipelineReply reply =
+            _run_pipeline(shard_cmds[s], shard_prefix);
 
         // Add the CommandList indices into vector for later reordering
         cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
                                   shard_cmd_index_list[s].begin(),
                                   shard_cmd_index_list[s].end());
 
-        // Execute the pipeline
-        sw::redis::QueuedReplies reply = pipeline.exec();
 
         // Append to all_replies via move
         all_replies += std::move(reply);
@@ -1197,88 +1186,6 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
     (void)run(cmd);
 }
 
-// Run a model in the database that uses dagrun
-void RedisCluster::__run_model_dagrun(const std::string& key,
-                                      std::vector<std::string> inputs,
-                                      std::vector<std::string> outputs)
-{
-    /* This function will run a RedisAI model.  Because the RedisAI
-    AI.RUNMODEL and AI.DAGRUN commands assume that the tensors
-    and model are all on the same node.  As a result, we will
-    have to retrieve all input tensors that are not on the same
-    node as the model and set temporary
-    */
-
-    // TODO We need to make sure that no other clients are using the
-    // same keys and model because we may end up overwriting or having
-    // race conditions on who can use the model, etc.
-
-    DBNode* db = _get_model_script_db(key, inputs, outputs);
-
-    // Create list of input tensors that do not hash to db slots
-    std::unordered_set<std::string> remote_inputs;
-    for (size_t i = 0; i < inputs.size(); i++) {
-        uint16_t hash_slot = _get_hash_slot(inputs[i]);
-        if (hash_slot < db->lower_hash_slot ||
-            hash_slot > db->upper_hash_slot) {
-            remote_inputs.insert(inputs[i]);
-        }
-    }
-
-    // Retrieve tensors that do not hash to db,
-    // rename the tensors to {prefix}.tensor_name.TMP
-    // TODO we need to make sure users don't use the .TMP suffix
-    // or check that the key does not exist
-    for (size_t i = 0; i < inputs.size(); i++) {
-        if (remote_inputs.count(inputs[i]) > 0) {
-            std::string new_key = "{" + db->prefix + "}." + inputs[i] + ".TMP";
-            copy_tensor(inputs[i], new_key);
-            remote_inputs.erase(inputs[i]);
-            remote_inputs.insert(new_key);
-            inputs[i] = new_key;
-        }
-    }
-
-    // Create a renaming scheme for output tensor
-    std::unordered_map<std::string, std::string> remote_outputs;
-    for (size_t i = 0; i < outputs.size(); i++) {
-        uint16_t hash_slot = _get_hash_slot(outputs[i]);
-        if (hash_slot < db->lower_hash_slot ||
-            hash_slot > db->upper_hash_slot) {
-            std::string tmp = "{" + db->prefix + "}." + outputs[i] + ".TMP";
-            remote_outputs.insert({outputs[i], tmp});
-            outputs[i] = remote_outputs[outputs[i]];
-        }
-    }
-
-    // Build the DAGRUN command
-    std::string model_name = "{" + db->prefix + "}." + key;
-    CompoundCommand cmd;
-    cmd << "AI.DAGRUN" << "LOAD" << std::to_string(inputs.size()) << inputs
-        << "PERSIST" << std::to_string(outputs.size()) << outputs
-        << "|>" << "AI.MODELRUN"<< Keyfield(model_name)
-        << "INPUTS" << inputs << "OUTPUTS" << outputs;
-
-    // Run it
-    CommandReply reply = run(cmd);
-    if (reply.has_error()) {
-        throw SRRuntimeException("Failed to execute DAGRUN");
-    }
-
-    // Delete temporary input tensors
-    std::unordered_set<std::string>::const_iterator i_it =
-        remote_inputs.begin();
-    for ( ; i_it !=  remote_inputs.end(); i_it++)
-        delete_tensor(*i_it);
-
-    // Move temporary output to the correct location and
-    // delete temporary output tensors
-    std::unordered_map<std::string, std::string>::const_iterator j_it =
-        remote_outputs.begin();
-    for ( ; j_it != remote_outputs.end(); j_it++)
-        rename_tensor(j_it->second, j_it->first);
-}
-
 // Retrieve the optimum model prefix for the set of inputs
 DBNode* RedisCluster::_get_model_script_db(const std::string& name,
                                            std::vector<std::string>& inputs,
@@ -1315,4 +1222,84 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
         }
     }
     return db;
+}
+
+// Build and run unordered pipeline
+PipelineReply
+RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
+                            std::string& shard_prefix)
+{
+    PipelineReply reply;
+    for (int i = 1; i <= _command_attempts; i++) {
+        try {
+            // Get pipeline object for shard (no new connection)
+            sw::redis::Pipeline pipeline =
+                _redis_cluster->pipeline(shard_prefix, false);
+
+            // Loop over all commands and add to the pipeline
+            for (size_t i = 0; i < cmds.size(); i++) {
+                // Add the commands to the pipeline
+                pipeline.command(cmds[i]->cbegin(), cmds[i]->cend());
+            }
+
+            // Execute the pipeline
+            reply = pipeline.exec();
+
+            // Check the replies
+            if (reply.has_error()) {
+                throw SRRuntimeException("Redis failed to execute the pipeline");
+            }
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
+        }
+        catch (sw::redis::IoError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing the pipeline: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing the "\
+                                "pipeline: ") + e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing the pipeline: ") +
+                    e.what());
+        }
+        catch (std::exception& e) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing the pipeline: ") +
+                    e.what());
+        }
+        catch (...) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing the pipeline");
+        }
+
+        // Sleep before the next attempt
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
+
+        // Return the reply
+        return reply;
+    }
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException("Unable to execute pipeline");
+
+    // Return the reply
+    return reply;
 }
