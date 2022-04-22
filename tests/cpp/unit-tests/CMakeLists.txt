@@ -68,6 +68,7 @@ set(SOURCES
 	../../../src/cpp/stringfield.cpp
 	../../../src/cpp/tensorbase.cpp
 	../../../src/cpp/tensorpack.cpp
+	../../../src/cpp/threadpool.cpp
 )
 
 # The unit tests to be executed
