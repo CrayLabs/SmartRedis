@@ -429,12 +429,34 @@ class RedisCluster : public RedisServer
         CommandReply delete_model(const std::string& key);
 
         /*!
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the model
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus the number of gpus for which the model was stored
+        *   \throw SmartRedis::Exception if model deletion fails
+        */
+        virtual void delete_model_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
+
+        /*!
         *   \brief Remove a script from the database
         *   \param key The key associated with the script
         *   \returns The CommandReply from script delete Command execution
         *   \throw SmartRedis::Exception if script deletion fails
         */
         CommandReply delete_script(const std::string& key);
+
+        /*!
+        *   \brief Remove a script from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the script
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw SmartRedis::Exception if script deletion fails
+        */
+        virtual void delete_script_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Retrieve the model from the database

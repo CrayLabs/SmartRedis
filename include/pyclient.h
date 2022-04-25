@@ -443,11 +443,30 @@ class PyClient
         void delete_model(const std::string& name);
 
         /*!
+        *   \brief Remove a model from the database
+        *   \param name The name associated with the model
+        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param num_gpus the number of gpus for which the model was stored
+        *   \throw RuntimeException for all client errors
+        */
+        void delete_model_multigpu(const std::string& name, int first_gpu, int num_gpus);
+
+        /*!
         *   \brief Remove a script from the database
         *   \param name The name associated with the script
         *   \throw RuntimeException for all client errors
         */
         void delete_script(const std::string& name);
+
+        /*!
+        *   \brief Remove a script from the database that was stored
+        *          for use with multiple GPUs
+        *   \param name The name associated with the script
+        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param num_gpus the number of gpus for which the script was stored
+        *   \throw RuntimeException for all client errors
+        */
+        void delete_script_multigpu(const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Retrieve the model from the database

@@ -664,6 +664,29 @@ CommandReply RedisCluster::delete_model(const std::string& key)
     return reply;
 }
 
+// Remove a model from the database that was stored
+// for use with multiple GPUs
+void RedisCluster::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the model for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+        result = delete_model(model_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove model for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_model to find
+    result = delete_model(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general model");
+    }
+}
+
 // Delete a script from the database
 CommandReply RedisCluster::delete_script(const std::string& key)
 {
@@ -680,6 +703,29 @@ CommandReply RedisCluster::delete_script(const std::string& key)
 
     // Done
     return reply;
+}
+
+// Remove a script from the database that was stored
+// for use with multiple GPUs
+void RedisCluster::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the script for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+        result = delete_script(script_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove script for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_script to find
+    result = delete_script(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general script");
+    }
 }
 
 // Retrieve the model from the database

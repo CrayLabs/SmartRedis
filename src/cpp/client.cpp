@@ -784,6 +784,21 @@ void Client::delete_model(const std::string& name)
         throw SRRuntimeException("AI.MODELDEL command failed on server");
 }
 
+// Delete a multiGPU model from the database
+void Client::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer");
+    }
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    std::string key = _build_model_key(name, true);
+    _redis_server->delete_model_multigpu(key, first_gpu, num_gpus);
+}
+
 // Delete a script from the database
 void Client::delete_script(const std::string& name)
 {
@@ -792,6 +807,21 @@ void Client::delete_script(const std::string& name)
 
     if (reply.has_error())
         throw SRRuntimeException("AI.SCRIPTDEL command failed on server");
+}
+
+// Delete a multiGPU script from the database
+void Client::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer");
+    }
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    std::string key = _build_model_key(name, true);
+    _redis_server->delete_script_multigpu(key, first_gpu, num_gpus);
 }
 
 // Check if the key exists in the database
