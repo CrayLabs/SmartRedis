@@ -17,6 +17,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
         num_threads = std::thread::hardware_concurrency();
 
     // Create worker threads
+	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
         threads.push_back(std::thread(&ThreadPool::perform_jobs, this));
     }

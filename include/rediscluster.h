@@ -30,6 +30,8 @@
 #define SMARTREDIS_CPP_CLUSTER_H
 
 #include <unordered_set>
+#include <mutex>
+
 #include "redisserver.h"
 #include "dbnode.h"
 #include "nonkeyedcommand.h"
@@ -686,6 +688,35 @@ class RedisCluster : public RedisServer
         */
         PipelineReply _run_pipeline(std::vector<Command*>& cmds,
                                     std::string& shard_prefix);
+
+
+        /*!
+        *   \brief Execute pipeline commands for a single shard in a thread.
+        *   \param shard_cmds The Commands to execute
+        *   \param shard_prefix The prefix corresponding to the shard
+        *                       where the pipeline is executed
+        *   \param success_status Receives a status of the result of execution
+        *   \param reply Receives the result of execution if execution succeeds
+        *   \param error_response The exception that was thrown if execution failed
+        *   \param results_lock The mutex protecting results
+        *   \param cmd_list_index_ooe Receives the CommandList index order
+        *   \param shard_cmd_index_list Receives the mapping from commands to their
+        *                               individual results
+        *   \param all_replies Accumulator for the replies
+        *   \param pipeline_completion_count Volatile counter to be incremented when
+        *                                    processing this job finishes
+        */
+        void _threaded_pipeline_executor(
+            std::vector<Command*>& shard_cmds,
+            std::string& shard_prefix,
+            bool& success_status,
+            PipelineReply& reply,
+            Exception& error_response,
+            std::mutex& results_mutex,
+            std::vector<size_t>& cmd_list_index_ooe,
+            std::vector<size_t>& shard_cmd_index_list,
+            PipelineReply& all_replies,
+            volatile int& pipeline_completion_count);
 };
 
 } //namespace SmartRedis

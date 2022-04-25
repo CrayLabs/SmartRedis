@@ -218,6 +218,48 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     return all_replies;
 }
 
+void RedisCluster::_threaded_pipeline_executor(
+    std::vector<Command*>& shard_cmds,
+    std::string& shard_prefix,
+    bool& success_status,
+    PipelineReply& reply,
+    Exception& error_response,
+    std::mutex& results_mutex,
+    std::vector<size_t>& cmd_list_index_ooe,
+    std::vector<size_t>& shard_cmd_index_list,
+    PipelineReply& all_replies,
+    volatile int& pipeline_completion_count)
+{
+    // Run the pipeline, catching any exceptions thrown
+    try {
+        reply = _run_pipeline(shard_cmds, shard_prefix);
+        success_status = true;
+    }
+    catch (Exception& e) {
+        error_response = e;
+        success_status = false;
+    }
+
+    // Acquire the lock to store our results
+    {
+        std::unique_lock<std::mutex> results_lock(results_mutex);
+
+        // Skip storing results if we hit an error
+        if (success_status) {
+            // Add the CommandList indices into vector for later reordering
+            cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
+                                    shard_cmd_index_list.begin(),
+                                    shard_cmd_index_list.end());
+
+            // Store results
+            all_replies += std::move(reply);
+        }
+
+        // Increment completion counter
+        ++pipeline_completion_count;
+    }  // Release the lock
+}
+
 // Check if a model or script key exists in the database
 bool RedisCluster::model_key_exists(const std::string& key)
 {
