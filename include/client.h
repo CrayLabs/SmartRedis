@@ -587,7 +587,7 @@ class Client
 
         /*!
         *   \brief Run a model in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \details The model key used to locate the model to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
@@ -641,7 +641,7 @@ class Client
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \details The script key used to locate the script to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the
@@ -663,7 +663,7 @@ class Client
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors in a multi-GPU system
+        *          specified input and output tensors in a multi-GPU system
         *   \details The script key used to locate the script to be run
         *            may be formed by applying a prefix to the supplied
         *            name. Similarly, the tensor names in the

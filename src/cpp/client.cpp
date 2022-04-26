@@ -692,7 +692,7 @@ std::string_view Client::get_script(const std::string& name)
     return std::string_view(script, reply.str_len());
 }
 
-// Run a model in the database using the specificed input and output tensors
+// Run a model in the database using the specified input and output tensors
 void Client::run_model(const std::string& name,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
@@ -732,7 +732,7 @@ void Client::run_model_multigpu(const std::string& name,
         key, inputs, outputs, offset, first_gpu, num_gpus);
 }
 
-// Run a script function in the database using the specificed input and output tensors
+// Run a script function in the database using the specified input and output tensors
 void Client::run_script(const std::string& name,
                         const std::string& function,
                         std::vector<std::string> inputs,
@@ -748,7 +748,7 @@ void Client::run_script(const std::string& name,
 }
 
 // Run a script function in the database using the
-// specificed input and output tensors in a multi-GPU system
+// specified input and output tensors in a multi-GPU system
 void Client::run_script_multigpu(const std::string& name,
                                  const std::string& function,
                                  std::vector<std::string> inputs,

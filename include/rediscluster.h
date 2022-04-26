@@ -348,7 +348,7 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief Run a model in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the model
         *   \param inputs The keys of inputs tensors to use
         *                 in the model
@@ -383,7 +383,7 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param key The key associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The keys of inputs tensors to use
@@ -400,7 +400,7 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors in a multi-GPU system
+        *          specified input and output tensors in a multi-GPU system
         *   \param name The name associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The names of input tensors to use in the script

@@ -478,7 +478,7 @@ void RedisCluster::set_script_multigpu(const std::string& name,
     }
 }
 
-// Run a model in the database using the specificed input and output tensors
+// Run a model in the database using the specified input and output tensors
 CommandReply RedisCluster::run_model(const std::string& model_name,
                                      std::vector<std::string> inputs,
                                      std::vector<std::string> outputs)
@@ -561,7 +561,7 @@ void RedisCluster::run_model_multigpu(const std::string& name,
     }
 }
 
-// Run a script function in the database using the specificed input
+// Run a script function in the database using the specified input
 // and output tensors
 CommandReply RedisCluster::run_script(const std::string& key,
                                       const std::string& function,
@@ -616,7 +616,7 @@ CommandReply RedisCluster::run_script(const std::string& key,
 
 /*!
 *   \brief Run a script function in the database using the
-*          specificed input and output tensors in a multi-GPU system
+*          specified input and output tensors in a multi-GPU system
 *   \param name The name associated with the script
 *   \param function The name of the function in the script to run
 *   \param inputs The names of input tensors to use in the script

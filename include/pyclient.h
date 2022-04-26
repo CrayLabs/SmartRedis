@@ -234,7 +234,7 @@ class PyClient
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors
+        *          specified input and output tensors
         *   \param name The name associated with the script
         *   \param function The name of the function in the script
         *                   to run
@@ -251,7 +251,7 @@ class PyClient
 
         /*!
         *   \brief Run a script function in the database using the
-        *          specificed input and output tensors in a multi-GPU system
+        *          specified input and output tensors in a multi-GPU system
         *   \param name The name associated with the script
         *   \param function The name of the function in the script to run
         *   \param inputs The names of input tensors to use in the script
