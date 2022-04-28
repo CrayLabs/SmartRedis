@@ -41,10 +41,10 @@ class ThreadPool
     std::condition_variable cv;
 
     // Flag for if the thread pool is shutting down
-    bool shutting_down;
+    volatile bool shutting_down;
 
     // Flag for if the thread pool shut down has completed
-    bool shutdown_complete;
+    volatile bool shutdown_complete;
 };
 
 } // namespace SmartRedis

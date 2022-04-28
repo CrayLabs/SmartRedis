@@ -36,22 +36,16 @@ ThreadPool::~ThreadPool()
     }
 }
 
-// Shut down the thread pool
+// Shut down the thread pool, blocking any further jobs from submission
 void ThreadPool::shutdown()
 {
     // We're closed for business
     shutting_down = true;
 
-    // Wait for the task pool to drain
-    // We go ahead and hold the lock for the rest of
-    // this function to keep others from interfering with us
-    std::unique_lock<std::mutex> lock(queue_mutex);
-    cv.wait(lock, [this]{ return jobs.empty(); });
-
-    // Nuke each worker thread one by one
+    // Wait for worker threads to finish up
     cv.notify_all(); // Wake them up
     for (std::thread& thr : threads) {
-        thr.join();
+        thr.join(); // Blocks until the thread finishes execution
     }
 
     // Done
@@ -71,12 +65,16 @@ void ThreadPool::perform_jobs()
             cv.wait(lock, [this](){
                 return !jobs.empty() || shutting_down;
             });
-            job = jobs.front();
-            jobs.pop();
+            if (!shutting_down) {
+                job = jobs.front();
+                jobs.pop();
+            }
         } // End scope and release lock
 
         // Perform the job
-        job();
+        if (!shutting_down) {
+            job();
+        }
     }
 }
 
