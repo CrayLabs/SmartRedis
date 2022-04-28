@@ -333,7 +333,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         ; // Spin
 
     // Throw an exception if one was generated in processing the threads
-    for (int i = 0; i < num_shards; i++) {
+    for (size_t i = 0; i < num_shards; i++) {
         if (!success_status[i]) {
             throw error_response;
         }
