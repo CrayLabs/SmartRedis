@@ -268,7 +268,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     std::vector<size_t> cmd_list_index_ooe;
     cmd_list_index_ooe.reserve(cmd_list.size());
 
-    volatile int pipeline_completion_count = 0;
+    volatile size_t pipeline_completion_count = 0;
     size_t num_shards = shard_cmd_index_list.size();
     Exception error_response = Exception("no error");
     bool success_status[num_shards];
