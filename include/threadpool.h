@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <condition_variable>
+#include <functional>
 
 #ifndef SMARTREDIS_THREADPOOL_H
 namespace SmartRedis {
