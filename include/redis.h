@@ -52,7 +52,7 @@ class Redis : public RedisServer
         *          Uses address provided to constructor instead
         *          of environment variables.
         *   \param address_port The address and port in the form of
-        *                       "tcp://address:port"
+        *                       "{protocol}://address:port"
         */
         Redis(std::string address_port);
 
@@ -491,13 +491,13 @@ class Redis : public RedisServer
         *   \brief Inserts a string formatted as address:port
                    into _address_node_map. Strips the protocol
                    (tcp:// or unix://) before inserting.
-        *   \param address_port A string formatted as protocol://address:port
+        *   \param address_port A string formatted as {protocol}://address:port
         */
         inline void _add_to_address_map(std::string address_port);
 
         /*!
         *   \brief Connect to the server at the address and port
-        *   \param address_port A string formatted as tcp://address:port
+        *   \param address_port A string formatted as {protocol}://address:port
         *                       for redis connection
         */
         inline void _connect(std::string address_port);

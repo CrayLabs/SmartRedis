@@ -549,6 +549,11 @@ class RedisServer {
         std::mt19937 _gen;
 
         /*!
+        *   \brief Random number generator
+        */
+        bool _is_domain_socket;
+
+        /*!
         *   \brief Environment variable for connection timeout
         */
         inline static const std::string _CONN_TIMEOUT_ENV_VAR =
