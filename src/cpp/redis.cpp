@@ -35,6 +35,8 @@ using namespace SmartRedis;
 Redis::Redis() : RedisServer()
 {
     std::string address_port = _get_ssdb();
+    // Remember whether it's a unix domain socket for later
+    _is_domain_socket = (address_port.compare(0, 7, "unix://") == 0);
     _add_to_address_map(address_port);
     _connect(address_port);
 }

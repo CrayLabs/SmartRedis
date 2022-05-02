@@ -62,7 +62,7 @@ class RedisCluster : public RedisServer
         *          Uses address provided to constructor instead
         *          of environment variables.
         *   \param address_port The address and port in the form of
-        *                       "tcp://address:port"
+        *                       "{protocol}://address:port"
         */
         RedisCluster(std::string address_port);
 

@@ -86,15 +86,20 @@ std::string RedisServer::_get_ssdb()
     size_t i_pos = 0;
     size_t j_pos = env_str.find(delim);
     while (j_pos != std::string::npos) {
-        hosts_ports.push_back("tcp://"+
-        env_str.substr(i_pos, j_pos - i_pos));
+        std::string substr = env_str.substr(i_pos, j_pos - i_pos);
+        if (substr.find('/') == std::string::npos)
+            substr = "tcp://" + substr;
+        hosts_ports.push_back(substr);
         i_pos = j_pos + 1;
         j_pos = env_str.find(delim, i_pos);
     }
     // Catch the last value that does not have a trailing ';'
-    if (i_pos < env_str.size())
-        hosts_ports.push_back("tcp://"+
-        env_str.substr(i_pos, j_pos - i_pos));
+    if (i_pos < env_str.size()) {
+        std::string substr = env_str.substr(i_pos, j_pos - i_pos);
+        if (substr.find('/') == std::string::npos)
+            substr = "tcp://" + substr;
+        hosts_ports.push_back(substr);
+    }
 
     // Pick an entry from the list at random
     std::uniform_int_distribution<> distrib(0, hosts_ports.size() - 1);
@@ -105,7 +110,7 @@ std::string RedisServer::_get_ssdb()
 void RedisServer::_check_ssdb_string(const std::string& env_str) {
     for (size_t i = 0; i < env_str.size(); i++) {
         char c = env_str[i];
-        if (!isalnum(c) && c != '.' && c != ':' && c != ',') {
+        if (!isalnum(c) && c != '.' && c != ':' && c != ',' && c != '/') {
             throw SRRuntimeException("The provided SSDB value, " + env_str +
                                      " is invalid because of character " + c);
         }

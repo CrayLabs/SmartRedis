@@ -581,6 +581,9 @@ class RedisServer {
         *   \brief The thread pool
         */
         ThreadPool *_tp;
+        *   \brief Random number generator
+        */
+        bool _is_domain_socket;
 
         /*!
         *   \brief Environment variable for connection timeout
