@@ -39,7 +39,7 @@ RedisCluster::RedisCluster() : RedisServer()
     std::string address_port = _get_ssdb();
     _is_domain_socket = (address_port.compare(0, 7, "unix://") == 0);
     if (_is_domain_socket) {
-        throw SRRuntimeException("Unix Domain Socket is not supported with clustered Redis: " + address_port);
+        throw SRRuntimeException("Unix Domain Socket is not supported with clustered Redis");
     }
     _connect(address_port);
     _map_cluster();
