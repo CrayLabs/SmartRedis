@@ -98,8 +98,8 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
             CHECK((hp == "tcp://127" || hp == "tcp://128"));
 
             // SSDB points to a unix domain socket and we're using clustered Redis
-            setenv_ssdb ("unix://127.0.0.1:6349");
-            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
+//            setenv_ssdb ("unix://127.0.0.1:6349");
+//            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
 
             setenv_ssdb(old_ssdb);
         }
