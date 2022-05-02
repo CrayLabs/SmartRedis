@@ -22,16 +22,21 @@ library will set the value of ``SSDB`` for the user.
 
 
 The ``SSDB`` environment variable should have the format
-of ``address:port``.  For a cluster, the addresses
-and ports should be separated by a "," character.
-Below is an example of setting ``SSDB`` for a Redis cluster
-at three different addresses using port ``6379``:
+of ``address:port``, and may optionally be prefixed with
+a protocol, such as ``tcp://``.  If no protocol is specified,
+the default will be taken as TCP. Unix domain sockets are
+supported via the protocol prefex ``unix://``.
+
+For a cluster, the addresses and ports should be separated
+by a "," character. Unix domain sockets are not supported
+in clusters. Below is an example of setting ``SSDB``
+for a Redis cluster at three different addresses using port ``6379``:
 
 .. code-block:: bash
 
     export SSDB="10.128.0.153:6379,10.128.0.154:6379,10.128.0.155:6379"
 
-The Python client also relies on ``SSDB`` to determine database
+The Python client relies on ``SSDB`` to determine database
 location.  However, the Python ``Client`` constructor also allows
 for the database location to be set as an input parameter.
 
