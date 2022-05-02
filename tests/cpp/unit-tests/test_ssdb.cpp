@@ -28,7 +28,6 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "redis.h"
-#include "rediscluster.h"
 #include "client.h"
 
 using namespace SmartRedis;
@@ -38,18 +37,6 @@ class TestSSDB : public Redis
 {
     public:
         TestSSDB() : Redis() {}
-
-        std::string get_ssdb()
-        {
-            return this->_get_ssdb();
-        }
-};
-
-// Helper class used for accessing protected members of RedisServer
-class TestSSDBCluster : public RedisCluster
-{
-    public:
-        TestSSDBCluster() : RedisCluster() {}
 
         std::string get_ssdb()
         {
@@ -78,7 +65,6 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb;
-        TestSSDBCluster test_ssdb_cluster;
         Client* c = NULL;
 
         THEN("SSDB environment variable must exist "
@@ -98,8 +84,8 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
             CHECK((hp == "tcp://127" || hp == "tcp://128"));
 
             // SSDB points to a unix domain socket and we're using clustered Redis
-//            setenv_ssdb ("unix://127.0.0.1:6349");
-//            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
+            setenv_ssdb ("unix://127.0.0.1:6349");
+            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
 
             setenv_ssdb(old_ssdb);
         }
