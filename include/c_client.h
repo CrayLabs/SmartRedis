@@ -303,6 +303,42 @@ SRError copy_tensor(void* c_client,
                     const size_t dest_name_length);
 
 /*!
+*   \brief Determine whether the backend is TensorFlow or TensorFlowLite
+*   \details Within the C SmartRedis Client, additional translation needs
+             to be done to the input and output vectors for calls to
+             run_model. This function checks that the backend doesn't match
+             TF or TFLITE
+*   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
+*/
+bool _isTensorFlow(const char* backend);
+
+/*!
+*   \brief Check parameters for all parameters common to set_model methods
+*   \details Make sure that all pointers are not void and that the size
+*            of the inputs and outputs is not zero 
+*   \param c_client The client object to use for communication
+*   \param name The name to associate with the model
+*   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
+*   \param inputs One or more names of model input nodes (TF models only)
+*   \param input_lengths The length of each input name string,
+*                        excluding null terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs One or more names of model output nodes (TF models only)
+*   \param output_lengths The length of each output name string,
+*                         excluding null terminating character
+*   \param n_outputs The number of outputs
+*/
+void _check_params_set_model(void* c_client,
+                            const char* name,
+                            const char* backend,
+                            const char** inputs,
+                            const size_t* input_lengths,
+                            const size_t n_inputs,
+                            const char** outputs,
+                            const size_t* output_lengths,
+                            const size_t n_outputs);
+
+/*!
 *   \brief Set a model (from file) in the database for future execution
 *   \details The final model key used to store the model
 *            may be formed by applying a prefix to the supplied
@@ -477,6 +513,7 @@ SRError set_model(void* c_client,
  
  /*!
 *   \brief Set a model (from buffer) in the database for future execution
+*          in a multi-GPU system
 *   \details The final model key used to store the model
 *            may be formed by applying a prefix to the supplied
 *            name. Similarly, the tensor names in the
@@ -545,23 +582,6 @@ SRError set_model_multigpu(void* c_client,
 *                       excluding null terminating character
 *   \param model Receives the model as a string
 *   \returns Returns SRNoError on success or an error code on failure
-*/                 const size_t n_outputs);
-
-/*!
-*   \brief Get a model in the database. The memory associated with the
-*          model string is valid until the client is destroyed.
-*   \details The model key used to locate the model
-*            may be formed by applying a prefix to the supplied
-*            name. See set_data_source()
-*            and use_model_ensemble_prefix() for more details.
-*   \param c_client The client object to use for communication
-*   \param name The name to use to get the model
-*   \param name_length The length of the name string,
-*                      excluding null terminating character
-*   \param model_length The length of the model buffer string,
-*                       excluding null terminating character
-*   \param model Receives the model as a string
-*   \returns Returns SRNoError on success or an error code on failure
 */
 SRError get_model(void* c_client,
                   const char* name,
@@ -599,6 +619,7 @@ SRError set_script_from_file(void* c_client,
 
 /*!
 *   \brief Set a script from file in the database for future execution
+*          in a multi-GPU system
 *   \details The final script key used to store the script
 *            may be formed by applying a prefix to the supplied
 *            name. See use_model_ensemble_prefix() for more details
@@ -622,8 +643,6 @@ SRError set_script_from_file(void* c_client,
 SRError set_script_from_file_multigpu(void* c_client,
                                       const char* name,
                                       const size_t name_length,
-                                      const char* device,
-                                      const size_t device_length,
                                       const char* script_file,
                                       const size_t script_file_length,
                                       const int first_gpu,
@@ -631,6 +650,7 @@ SRError set_script_from_file_multigpu(void* c_client,
 
 /*!
 *   \brief Set a script (from buffer) in the database for future execution
+*          in a multi-GPU system
 *   \details The final script key used to store the script
 *            may be formed by applying a prefix to the supplied
 *            name. See use_model_ensemble_prefix() for more details
@@ -677,10 +697,10 @@ SRError set_script(void* c_client,
 SRError set_script_multigpu(void* c_client,
                    const char* name,
                    const size_t name_length,
-                   const int first_gpu,
-                   const int num_gpus,
                    const char* script,
-                   const size_t script_length);
+                   const size_t script_length,
+                   const int first_gpu,
+                   const int num_gpus);
 
 /*!
 *   \brief Get a script from the database.  The memory associated with the
@@ -704,6 +724,72 @@ SRError get_script(void* c_client,
                    const char** script,
                    size_t* script_length);
 
+/*!
+*   \brief Check parameters for all parameters common to set_model methods
+*   \details Make sure that all pointers are not void and that the size
+*            of the inputs and outputs is not zero 
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the script
+*   \param function The name of the function in the script to run
+*   \param inputs The tensor keys of inputs tensors to use in the script
+*   \param input_lengths The length of each input name string,
+*                        excluding null terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs The tensor keys of output tensors that will be used
+*                  to save script results
+*   \param output_lengths The length of each output name string,
+*                         excluding null terminating character
+*   \param n_outputs The number of outputs
+*   \return Returns SRNoError on success or an error code on failure
+*/
+void _check_params_run_script(void* c_client,
+                              const char* name,
+                              const char* function,
+                              const char** inputs,
+                              const size_t* input_lengths,
+                              const size_t n_inputs,
+                              const char** outputs,
+                              const size_t* output_lengths,
+                              const size_t n_outputs);
+
+/*!
+*   \brief Run a script function in the database using the specificed input
+*          and output tensors
+*   \details The script key used to locate the script to be run
+*            may be formed by applying a prefix to the supplied
+*            name. Similarly, the tensor names in the
+*            input and output arrays may be prefixed.
+*            See set_data_source(), use_model_ensemble_prefix(), and
+*            use_tensor_ensemble_prefix() for more details
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the script
+*   \param name_length The length of the name string,
+*                      excluding null terminating character
+*   \param function The name of the function in the script to run
+*   \param function_length The length of the function name string,
+*                          excluding null terminating character
+*   \param inputs The tensor keys of inputs tensors to use in the script
+*   \param input_lengths The length of each input name string,
+*                        excluding null terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs The tensor keys of output tensors that will be used
+*                  to save script results
+*   \param output_lengths The length of each output name string,
+*                         excluding null terminating character
+*   \param n_outputs The number of outputs
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError run_script(void* c_client,
+                   const char* name,
+                   const size_t name_length,
+                   const char* function,
+                   const size_t function_length,
+                   const char** inputs,
+                   const size_t* input_lengths,
+                   const size_t n_inputs,
+                   const char** outputs,
+                   const size_t* output_lengths,
+                   const size_t n_outputs);
 /*!
 *   \brief Run a script function in the database using the specificed input
 *          and output tensors
@@ -788,9 +874,34 @@ SRError run_script_multigpu(void* c_client,
                             const int offset,
                             const int first_gpu,
                             const int num_gpus);
+
+/*!
+*   \brief Check parameters for all parameters common to run_model methods
+*   \details Make sure that all pointers are not void and that the size
+*            of the inputs and outputs is not zero 
+*   \param c_client The client object to use for communication
+*   \param name The name to associate with the model
+*   \param inputs One or more names of model input nodes (TF models only)
+*   \param input_lengths The length of each input name string,
+*                        excluding null terminating character
+*   \param n_inputs The number of inputs
+*   \param outputs One or more names of model output nodes (TF models only)
+*   \param output_lengths The length of each output name string,
+*                         excluding null terminating character
+*   \param n_outputs The number of outputs
+*/
+void _check_params_run_model(void* c_client,
+                  const char* name,
+                  const char** inputs,
+                  const size_t* input_lengths,
+                  const size_t n_inputs,
+                  const char** outputs,
+                  const size_t* output_lengths,
+                  const size_t n_outputs);
+
 /*!
 *   \brief Run a model in the database using the specificed input and
-*          output tensors
+*          output tensors using a multi-GPU system
 *   \details The model key used to locate the model to be run
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()
