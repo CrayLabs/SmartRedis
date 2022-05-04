@@ -53,18 +53,31 @@ void ThreadPool::shutdown()
 }
 
 // Worker thread main loop to acquire and perform jobs
+volatile bool dummy = false;
 void ThreadPool::perform_jobs()
 {
+    const int spin_count = 1000;
+
     // Loop foorever processing jobs until we get killed
     std::function<void()> job;
     while (!shutting_down)
     {
+        // Spin for a bit to see if a job appears
+        for (int i = 0; i < spin_count; i++) {
+            if (!jobs.empty()) // Benign race condition; risk of false positive
+                break;
+        }
+
+        // Get a job, blocking until one appears if none immediately available
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
+            if (jobs.empty()) {
+                cv.wait(lock, [this](){
+                    return !jobs.empty() || shutting_down;
+                });
+            }
 
-            cv.wait(lock, [this](){
-                return !jobs.empty() || shutting_down;
-            });
+            // There is a job there for us
             if (!shutting_down) {
                 job = jobs.front();
                 jobs.pop();
