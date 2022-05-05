@@ -32,8 +32,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS --coverage)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_package(Threads REQUIRED)
 
 include_directories(SYSTEM
     /usr/local/include
@@ -128,4 +130,4 @@ endif()
 
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
 
-target_link_libraries(cpp_unit_tests ${SR_LIB})
+target_link_libraries(cpp_unit_tests PUBLIC ${SR_LIB} PRIVATE Threads::Threads)
