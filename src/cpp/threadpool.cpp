@@ -61,6 +61,7 @@ void ThreadPool::perform_jobs(unsigned int tid)
 {
     const int spin_count = 1000;
     #ifdef TIME_THREADPOOL
+    int jobid = 0;
     std::cout << "Thread " << std::to_string(tid) << " reporting for duty" << std::endl;
     #endif
 
@@ -105,7 +106,7 @@ void ThreadPool::perform_jobs(unsigned int tid)
             std::chrono::duration<double> get_job = have_job - start;
             std::chrono::duration<double> execute_job = job_done - have_job;
             std::cout << "Thread " << std::to_string(tid) << " "
-                      << "time to get job: " << get_job.count() << " s; "
+                      << "time to get job " << std::to_string(jobid++) << ": " << get_job.count() << " s; "
                       << "time to execute job: " << execute_job.count() << " s" << std::endl;
             #endif
         }
