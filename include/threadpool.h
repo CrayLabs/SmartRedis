@@ -23,7 +23,7 @@ class ThreadPool
     void shutdown();
 
     // Worker thread main loop to acquire and perform jobs
-    void perform_jobs();
+    void perform_jobs(unsigned int tid);
 
     // Submit a job to threadpool for execution
     void submit_job(std::function<void()> job);

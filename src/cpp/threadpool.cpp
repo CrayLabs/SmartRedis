@@ -3,11 +3,14 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <chrono>
 
 #include "threadpool.h"
 #include "srexception.h"
 
 using namespace SmartRedis;
+
+#define TIME_THREADPOOL
 
 // C-tor
 ThreadPool::ThreadPool(unsigned int num_threads)
@@ -19,7 +22,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
-        threads.push_back(std::thread(&ThreadPool::perform_jobs, this));
+        threads.push_back(std::thread(&ThreadPool::perform_jobs, this, i));
     }
 
     // Announce that we're open for business
@@ -54,14 +57,21 @@ void ThreadPool::shutdown()
 
 // Worker thread main loop to acquire and perform jobs
 volatile bool dummy = false;
-void ThreadPool::perform_jobs()
+void ThreadPool::perform_jobs(unsigned int tid)
 {
     const int spin_count = 1000;
+    #ifdef TIME_THREADPOOL
+    std::cout << "Thread " << std::to_string(tid) << " reporting for duty" << std::endl;
+    #endif
 
     // Loop foorever processing jobs until we get killed
     std::function<void()> job;
     while (!shutting_down)
     {
+        #ifdef TIME_THREADPOOL
+        auto start = std::chrono::steady_clock::now();
+        #endif
+
         // Spin for a bit to see if a job appears
         for (int i = 0; i < spin_count; i++) {
             if (!jobs.empty()) // Benign race condition; risk of false positive
@@ -84,11 +94,25 @@ void ThreadPool::perform_jobs()
             }
         } // End scope and release lock
 
+        #ifdef TIME_THREADPOOL
+        auto have_job = std::chrono::steady_clock::now();
+        #endif
         // Perform the job
         if (!shutting_down) {
             job();
+            #ifdef TIME_THREADPOOL
+            auto job_done = std::chrono::steady_clock::now();
+            std::chrono::duration<double> get_job = have_job - start;
+            std::chrono::duration<double> execute_job = job_done - have_job;
+            std::cout << "Thread " << std::to_string(tid) << " "
+                      << "time to get job: " << get_job.count() << " s; "
+                      << "time to execute job: " << execute_job.count() << " s" << std::endl;
+            #endif
         }
     }
+    #ifdef TIME_THREADPOOL
+    std::cout << "Thread " << std::to_string(tid) << " shutting down" << std::endl;
+    #endif
 }
 
 // Submit a job to threadpool for execution
