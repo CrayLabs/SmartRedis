@@ -16,7 +16,7 @@ using namespace SmartRedis;
 ThreadPool::ThreadPool(unsigned int num_threads)
 {
     // By default, we'll make one thread for each hardware context
-    if (num_threads == 1)
+    if (num_threads == 0)
         num_threads = std::thread::hardware_concurrency();
 
     // Create worker threads
@@ -74,7 +74,7 @@ void ThreadPool::perform_jobs(unsigned int tid)
         #endif
 
         // Spin for a bit to see if a job appears
-        for (int i = 0; i < spin_count; i++) {
+        for (int i = 0; i < spin_count && !!shutting_down; i++) {
             if (!jobs.empty()) // Benign race condition; risk of false positive
                 break;
         }
