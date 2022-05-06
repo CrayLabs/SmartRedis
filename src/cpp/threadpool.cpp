@@ -10,7 +10,11 @@
 
 using namespace SmartRedis;
 
-#define TIME_THREADPOOL
+// TIME_THREADPOOL
+// Enable this flag to display timings for the threadpool activity.
+// Currently, this will be to screen, but eventually it will go to
+// the SmartRedis log
+#undef TIME_THREADPOOL
 
 // C-tor
 ThreadPool::ThreadPool(unsigned int num_threads)
@@ -46,8 +50,8 @@ void ThreadPool::shutdown()
     shutting_down = true;
 
     // Wait for worker threads to finish up
-    cv.notify_all(); // Wake them up
     for (std::thread& thr : threads) {
+        cv.notify_all(); // Wake up all the threads
         thr.join(); // Blocks until the thread finishes execution
     }
 
@@ -59,7 +63,6 @@ void ThreadPool::shutdown()
 volatile bool dummy = false;
 void ThreadPool::perform_jobs(unsigned int tid)
 {
-    const int spin_count = 1000;
     #ifdef TIME_THREADPOOL
     int jobid = 0;
     std::cout << "Thread " << std::to_string(tid) << " reporting for duty" << std::endl;
@@ -73,11 +76,15 @@ void ThreadPool::perform_jobs(unsigned int tid)
         auto start = std::chrono::steady_clock::now();
         #endif
 
+// Spin-then-wait -- disabled unless we determine we need it later
+#if 0
         // Spin for a bit to see if a job appears
+        const int spin_count = 1000;
         for (int i = 0; i < spin_count && !!shutting_down; i++) {
             if (!jobs.empty()) // Benign race condition; risk of false positive
                 break;
         }
+#endif
 
         // Get a job, blocking until one appears if none immediately available
         {
