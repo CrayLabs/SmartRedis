@@ -60,7 +60,6 @@ void ThreadPool::shutdown()
 }
 
 // Worker thread main loop to acquire and perform jobs
-volatile bool dummy = false;
 void ThreadPool::perform_jobs(unsigned int tid)
 {
     #ifdef TIME_THREADPOOL
@@ -76,27 +75,19 @@ void ThreadPool::perform_jobs(unsigned int tid)
         auto start = std::chrono::steady_clock::now();
         #endif
 
-// Spin-then-wait -- disabled unless we determine we need it later
-#if 0
-        // Spin for a bit to see if a job appears
-        const int spin_count = 1000;
-        for (int i = 0; i < spin_count && !!shutting_down; i++) {
-            if (!jobs.empty()) // Benign race condition; risk of false positive
-                break;
-        }
-#endif
-
         // Get a job, blocking until one appears if none immediately available
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
-            if (jobs.empty()) {
-                cv.wait(lock, [this](){
-                    return !jobs.empty() || shutting_down;
-                });
-            }
+            cv.wait(lock, [this](){
+                return !jobs.empty() || shutting_down;
+            });
 
-            // There is a job there for us
+            // We woke up
             if (!shutting_down) {
+                // Check for a spurious wakeup
+                if (jobs.empty())
+                    continue;
+                // Otherwise, there's a job for us. Grab it
                 job = jobs.front();
                 jobs.pop();
             }
