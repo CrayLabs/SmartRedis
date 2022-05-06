@@ -10,41 +10,70 @@
 #ifndef SMARTREDIS_THREADPOOL_H
 namespace SmartRedis {
 
+/*!
+*   \brief  A thread pool for concurrent execution of parallel jobs
+*/
 class ThreadPool
 {
   public:
-    // C-tor
+    /*!
+    *   \brief ThreadPool constructor
+    *   \param num_threads The number of threads to create in the pool,
+    *          or 0 to use one thread per hardware context
+    */
     ThreadPool(unsigned int num_threads=0);
 
-    // D-tor
+    /*!
+    *   \brief ThreadPool destructor
+    */
     ~ThreadPool();
 
-    // Shut down the thread pool
+    /*!
+    *   \brief Shut down the thread pool. Blocks until all threads are terminated
+    */
     void shutdown();
 
-    // Worker thread main loop to acquire and perform jobs
+    /*!
+    *   \brief Worker thread main loop to acquire and perform jobs
+    *   \param tid Thread ID for the current thread
+    */
     void perform_jobs(unsigned int tid);
 
-    // Submit a job to threadpool for execution
+    /*!
+    *   \brief Submit a job to threadpool for execution
+    *   \param job The job to be executed
+    */
     void submit_job(std::function<void()> job);
 
   protected:
-    // The threads in our worker pool
+    /*!
+    *   \brief The threads in our worker pool
+    */
     std::vector<std::thread> threads;
 
-    // The current task queue of jobs waiting to be performed
+    /*!
+    *   \brief The current task queue of jobs waiting to be performed
+    */
     std::queue<std::function<void()>> jobs;
 
-    // Lock, protecting the job queue
+    /*!
+    *   \brief Lock, protecting the job queue
+    */
     std::mutex queue_mutex;
 
-    // Condition variable for signalling worker threads
+    /*!
+    *   \brief Condition variable for signalling worker threads
+    */
     std::condition_variable cv;
 
-    // Flag for if the thread pool is shutting down
+    /*!
+    *   \brief Flag for if thread pool shutdown has been triggered.
+    */
     volatile bool shutting_down;
 
-    // Flag for if the thread pool shut down has completed
+    /*!
+    *   \brief Flag for if the thread pool shut down has completed.
+    */
     volatile bool shutdown_complete;
 };
 
