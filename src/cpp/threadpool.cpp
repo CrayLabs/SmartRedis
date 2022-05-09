@@ -9,6 +9,7 @@
 #include "srexception.h"
 
 using namespace SmartRedis;
+using namespace std::chrono_literals;
 
 // TIME_THREADPOOL
 // Enable this flag to display timings for the threadpool activity.
@@ -84,9 +85,9 @@ void ThreadPool::perform_jobs(unsigned int tid)
         #endif
 
         // Get a job, blocking until one appears if none immediately available
-        {
+        do {
             std::unique_lock<std::mutex> lock(queue_mutex);
-            cv.wait(lock, [this](){
+            cv.wait_for(lock, 250ms, [this](){
                 return !jobs.empty() || shutting_down;
             });
 
@@ -98,8 +99,10 @@ void ThreadPool::perform_jobs(unsigned int tid)
                 // Otherwise, there's a job for us. Grab it
                 job = jobs.front();
                 jobs.pop();
+                break;
             }
         } // End scope and release lock
+        while (!shutting_down);
 
         #ifdef TIME_THREADPOOL
         auto have_job = std::chrono::steady_clock::now();

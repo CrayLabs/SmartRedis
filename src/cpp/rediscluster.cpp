@@ -330,13 +330,9 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         });
     }
 
-    std::cout << "All jobs submitted. Waiting for completion" << std::endl;
-
     // Wait until all jobs have finished
     while (pipeline_completion_count != num_shards)
         ; // Spin
-
-    std::cout << "All jobs completed" << std::endl;
 
     // Throw an exception if one was generated in processing the threads
     for (size_t i = 0; i < num_shards; i++) {
