@@ -14,7 +14,7 @@ using namespace SmartRedis;
 // Enable this flag to display timings for the threadpool activity.
 // Currently, this will be to screen, but eventually it will go to
 // the SmartRedis log
-#undef TIME_THREADPOOL
+#define TIME_THREADPOOL
 
 // C-tor
 ThreadPool::ThreadPool(unsigned int num_threads)
@@ -26,6 +26,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
+        std::cout << "Kicking off thread " + std::to_string(i) << std::endl;
         threads.push_back(std::thread(&ThreadPool::perform_jobs, this, i));
     }
 
@@ -46,16 +47,23 @@ ThreadPool::~ThreadPool()
 // Shut down the thread pool, blocking any further jobs from submission
 void ThreadPool::shutdown()
 {
+    std::cout << "Shutting down thread pool" << std::endl;
+
     // We're closed for business
     shutting_down = true;
 
     // Wait for worker threads to finish up
+    int i = 0;
+    size_t num_threads = threads.size();
     for (std::thread& thr : threads) {
         cv.notify_all(); // Wake up all the threads
+        std::cout << "Waiting for a thread to terminate (" << std::to_string(i++) << " of "
+                  << std::to_string(num_threads) << ")" << std::endl;
         thr.join(); // Blocks until the thread finishes execution
     }
 
     // Done
+    std::cout << "Shutdown complete" << std::endl;
     shutdown_complete = true;
 }
 

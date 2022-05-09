@@ -290,6 +290,8 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
             continue;
         }
 
+        std::cout << "Submitting job for shard " << std::to_string(s) << std::endl;
+
         // Submit a task to execute these commands
         _tp->submit_job([this, &shard_cmds, s, shard_prefix, &success_status,
                          &results_mutex, &cmd_list_index_ooe,
@@ -328,9 +330,13 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
         });
     }
 
+    std::cout << "All jobs submitted. Waiting for completion" << std::endl;
+
     // Wait until all jobs have finished
     while (pipeline_completion_count != num_shards)
         ; // Spin
+
+    std::cout << "All jobs completed" << std::endl;
 
     // Throw an exception if one was generated in processing the threads
     for (size_t i = 0; i < num_shards; i++) {
