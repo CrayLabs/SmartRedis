@@ -20,6 +20,9 @@ using namespace std::chrono_literals;
 // C-tor
 ThreadPool::ThreadPool(unsigned int num_threads)
 {
+    // Flag that we're initializing
+    initialization_complete = false;
+
     // By default, we'll make one thread for each hardware context
     if (num_threads == 0)
         num_threads = std::thread::hardware_concurrency();
@@ -34,6 +37,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Announce that we're open for business
     shutting_down = false;
     shutdown_complete = false;
+    initialization_complete = true;
 }
 
 // D-tor
@@ -48,6 +52,10 @@ ThreadPool::~ThreadPool()
 // Shut down the thread pool, blocking any further jobs from submission
 void ThreadPool::shutdown()
 {
+    // Make sure initialization is complete before we shut down
+    while (!initialization_complete)
+        ; // Spin
+    
     std::cout << "Shutting down thread pool" << std::endl;
 
     // We're closed for business

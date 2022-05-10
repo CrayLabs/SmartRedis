@@ -67,6 +67,11 @@ class ThreadPool
     std::condition_variable cv;
 
     /*!
+    *   \brief Flag if the thread pool initialization has completed
+    */
+    volatile bool initialization_complete;
+
+    /*!
     *   \brief Flag for if thread pool shutdown has been triggered.
     */
     volatile bool shutting_down;
