@@ -138,87 +138,6 @@ std::vector<CommandReply> RedisCluster::run(CommandList& cmds)
     return replies;
 }
 
-#if 0
-// Run multiple single-key or single-hash slot Command on the server.
-PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
-{
-    // Map for shard index to Command indices so we can track order of execution
-    std::vector<std::vector<size_t>> shard_cmd_index_list(_db_nodes.size());
-
-    // Map for shard index to Command pointers so pipelines can be easily rebuilt
-    std::vector<std::vector<Command*>> shard_cmds(_db_nodes.size());
-
-    // Calculate shard for execution of each Command
-    CommandList::iterator cmd = cmd_list.begin();
-    size_t cmd_num = 0;
-
-    for ( ; cmd != cmd_list.end(); cmd++, cmd_num++) {
-
-        // Make sure we have at least one key
-        if ((*cmd)->has_keys() == false) {
-            throw SRInternalException("Only single key commands are supported "\
-                                      "by RedisCluster::run_via_unordered"\
-                                      "_pipelines.");
-        }
-
-        // Get keys for the command
-        std::vector<std::string> keys = (*cmd)->get_keys();
-
-        // Check that there is only one key
-        if (keys.size() != 1) {
-            throw SRInternalException("Only single key commands are supported "\
-                                      "by RedisCluster::run_via_unordered_"\
-                                      "pipelines.");
-        }
-
-        // Get the shard index for the first key
-        size_t db_index = _get_db_node_index(keys[0]);
-
-        // Push back the command index to the shard list of commands
-        shard_cmd_index_list[db_index].push_back(cmd_num);
-
-        // Push back a pointer to the command for pipeline construction
-        shard_cmds[db_index].push_back(*cmd);
-    }
-
-    // Define an empty PipelineReply object to store all shard replies
-    PipelineReply all_replies;
-
-    // Keep track of CommandList index order of execution (ooe)
-    std::vector<size_t> cmd_list_index_ooe;
-    cmd_list_index_ooe.reserve(cmd_list.size());
-
-    // Loop over all shards and execute pipelines
-    for (size_t s = 0; s < shard_cmd_index_list.size(); s++) {
-
-        // Only execute if there are commands
-        if (shard_cmd_index_list[s].size() == 0)
-            continue;
-
-        // Get shard prefix
-        std::string shard_prefix = _db_nodes[s].prefix;
-
-        // Build and execute the pipeline
-        PipelineReply reply =
-            _run_pipeline(shard_cmds[s], shard_prefix);
-
-        // Add the CommandList indices into vector for later reordering
-        cmd_list_index_ooe.insert(cmd_list_index_ooe.end(),
-                                  shard_cmd_index_list[s].begin(),
-                                  shard_cmd_index_list[s].end());
-
-
-        // Append to all_replies via move
-        all_replies += std::move(reply);
-    }
-
-    // Reorder the command replies in all_replies to align
-    // with order of execution
-    all_replies.reorder(cmd_list_index_ooe);
-
-    return all_replies;
-}
-#else
 // Run multiple single-key or single-hash slot Command on the server.
 PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 {
@@ -290,8 +209,6 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
             continue;
         }
 
-        std::cout << "Submitting job for shard " << std::to_string(s) << std::endl;
-
         // Submit a task to execute these commands
         _tp->submit_job([this, &shard_cmds, s, shard_prefix, &success_status,
                          &results_mutex, &cmd_list_index_ooe,
@@ -347,7 +264,6 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 
     return all_replies;
 }
-#endif
 
 // Check if a model or script key exists in the database
 bool RedisCluster::model_key_exists(const std::string& key)
