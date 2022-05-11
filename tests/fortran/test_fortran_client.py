@@ -31,6 +31,18 @@ from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
+# Only test the multigpu methods if PyTorch exists and has more than one GPU
+# available to it
+test_multigpu = False
+try:
+    import torch
+    num_gpus = torch.cuda.device_count()
+    if num_gpus > 1:
+        test_multigpu = True
+except:
+    num_gpus = None
+
+
 RANKS = 1
 TEST_PATH = osp.dirname(osp.abspath(__file__))
 
@@ -40,8 +52,8 @@ def get_test_names():
     """
     glob_path = osp.join(TEST_PATH, "build/client_test*")
     test_names = glob(glob_path)
-    test_names = [(pytest.param(test,
-                                id=osp.basename(test))) for test in test_names]
+    test_names = [(pytest.param(test, id=osp.basename(test)))
+                  for test in test_names if not "multigpu" in test]
     return test_names
 
 
@@ -91,3 +103,17 @@ def execute_cmd(cmd_list):
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
         assert(False)
+
+@pytest.mark.skipif(
+    not test_multigpu,
+    reason="Multi-GPU tests requires PyTorch and more than 1 GPU",
+)
+def test_client_multigpu_set_run_model():
+    """
+    Test setting and running a machine learning model via the Fortran client
+    on an orchestrator with multiple GPUs
+    """
+    
+    tester_path = osp.join(TEST_PATH, "build/client_test_mnist_multigpu")
+    test_fortran_client(tester_path)
+    
