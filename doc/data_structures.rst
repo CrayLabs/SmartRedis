@@ -366,8 +366,11 @@ function to retrieve the ``aggregation list`` contents is shown below:
 
 Additional functions are provided to retrieve only a portion of the
 ``aggregation list`` contents, copy an ``aggregation list``, rename
-an ``aggregation list``, retrieve ``aggregation list`` length, and
-poll for a specified ``aggregation list`` length.
+an ``aggregation list` and retrieve ``aggregation list`` length.
+A blocking method to poll the ``aggregation list`` length is also
+provided as a means to wait for list completion before performing
+another task in the same application or a separate application.
+
 
 Model
 =====
