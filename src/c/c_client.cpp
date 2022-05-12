@@ -1241,7 +1241,6 @@ SRError run_model_multigpu(void* c_client,
   return result;
 }
 
-
 // Remove a model from the database
 extern "C"
 SRError delete_model(void* c_client,
@@ -1270,6 +1269,36 @@ SRError delete_model(void* c_client,
   return result;
 }
 
+// Remove a model from the database on a system with multiple GPUs
+extern "C"
+SRError delete_model_multigpu(void* c_client,
+                              const char* name,
+                              const size_t name_length,
+                              const int first_gpu,
+                              const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Remove a script from the database
 extern "C"
 SRError delete_script(void* c_client,
@@ -1285,6 +1314,36 @@ SRError delete_script(void* c_client,
     std::string name_str(name, name_length);
     Client* s = reinterpret_cast<Client*>(c_client);
     s->delete_script(name_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Remove a script from the database in a system with multiple GPUs
+extern "C"
+SRError delete_script_multigpu(void* c_client,
+                               const char* name,
+                               const size_t name_length,
+                               const int first_gpu,
+                               const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script_multigpu(name_str, first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);

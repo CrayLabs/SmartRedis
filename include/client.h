@@ -690,8 +690,7 @@ class Client
                                  int num_gpus);
 
         /*!
-        *   \brief Remove a model from the database that was stored
-        *          for use with multiple GPUs
+        *   \brief Remove a model from the database
         *   \details The model key used to locate the model to be deleted
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_model_ensemble_prefix()
@@ -702,7 +701,8 @@ class Client
         void delete_model(const std::string& name);
 
         /*!
-        *   \brief Remove a model from the database
+        *   \brief Remove a model from the database that was stored
+        *          for use with multiple GPUs
         *   \details The model key used to locate the model to be deleted
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_model_ensemble_prefix()

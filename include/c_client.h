@@ -980,6 +980,26 @@ SRError run_model_multigpu(void* c_client,
 SRError delete_model(void* c_client,
                      const char* name,
                      const size_t name_length);
+/*!
+*   \brief Remove a model from the database
+*   \details The model key used to locate the model to be deleted
+*            may be formed by applying a prefix to the supplied
+*            name. See set_data_source() and use_model_ensemble_prefix()
+*            for more details.
+*            The first_gpu and num_gpus parameters must match those used
+*            when the model was stored.
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the model
+*   \param name_length The length of the name string,
+*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param num_gpus the number of gpus for which the model was stored
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError delete_model_multigpu(void* c_client,
+                              const char* name,
+                              const size_t name_length,
+                              const int first_gpu,
+                              const int num_gpus);
 
 /*!
 *   \brief Remove a script from the database
@@ -991,6 +1011,28 @@ SRError delete_model(void* c_client,
 SRError delete_script(void* c_client,
                       const char* name,
                       const size_t name_length);
+
+/*!
+*   \brief Remove a script from the database that was stored
+*          for use with multiple GPUs
+*   \details The script key used to locate the script to be deleted
+*            may be formed by applying a prefix to the supplied
+*            name. See set_data_source() and use_model_ensemble_prefix()
+*            for more details.
+*            The first_gpu and num_gpus parameters must match those used
+*            when the script was stored.
+*   \param c_client The client object to use for communication
+*   \param name The name associated with the model
+*   \param name_length The length of the name string,
+*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param num_gpus the number of gpus for which the model was stored
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError delete_script_multigpu(void* c_client,
+                            const char* name,
+                            const size_t name_length,
+                            const int first_gpu,
+                            const int num_gpus);
 
 /*!
 *   \brief Check if a key exists in the database

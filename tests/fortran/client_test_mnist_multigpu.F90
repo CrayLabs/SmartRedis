@@ -39,7 +39,7 @@ program mnist_test
   character(len=*), parameter :: script_key = "mnist_script"
   character(len=*), parameter :: script_file = "../../cpp/mnist_data/data_processing_script.txt"
   integer, parameter :: first_gpu = 0
-  integer, parameter :: num_gpus = 2
+  integer, parameter :: num_gpus = 1
   integer, parameter :: offset = 0
 
   type(client_type) :: client
@@ -102,6 +102,10 @@ subroutine run_mnist_multigpu(client, model_name, script_name, offset, first_gpu
   if (call_result .ne. SRNoError) error stop
   result(:,:) = 0.
   call_result = client%unpack_tensor(out_key, result, shape(result))
+  if (call_result .ne. SRNoError) error stop
+  call_result = client%delete_model_multigpu(model_name, first_gpu, num_gpus)
+  if (call_result .ne. SRNoError) error stop
+  call_result = client%delete_script_multigpu(script_name, first_gpu, num_gpus)
   if (call_result .ne. SRNoError) error stop
 
   print *, "Result: ", result

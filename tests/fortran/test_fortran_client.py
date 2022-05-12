@@ -25,35 +25,25 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import pytest
-from os import path as osp
+import os
 from glob import glob
 from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
-# Only test the multigpu methods if PyTorch exists and has more than one GPU
-# available to it
-test_multigpu = False
-try:
-    import torch
-    num_gpus = torch.cuda.device_count()
-    if num_gpus > 1:
-        test_multigpu = True
-except:
-    num_gpus = None
-
+test_gpu = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
 RANKS = 1
-TEST_PATH = osp.dirname(osp.abspath(__file__))
+TEST_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def get_test_names():
     """Obtain test names by globbing for client_test
     Add tests manually if necessary
     """
-    glob_path = osp.join(TEST_PATH, "build/client_test*")
+    glob_path = os.path.join(TEST_PATH, "build/client_test*")
     test_names = glob(glob_path)
-    test_names = [(pytest.param(test, id=osp.basename(test)))
-                  for test in test_names if not "multigpu" in test]
+    test_names = [(pytest.param(test, id=os.path.basename(test)))
+                  for test in test_names if not "gpu" in test]
     return test_names
 
 
@@ -67,7 +57,7 @@ def test_fortran_client(test):
     """
     cmd = []
     cmd.append(test)
-    print(f"Running test: {osp.basename(test)}")
+    print(f"Running test: {os.path.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     execute_cmd(cmd)
     time.sleep(1)
@@ -76,7 +66,7 @@ def execute_cmd(cmd_list):
     """Execute a command """
 
     # spawning the subprocess and connecting to its output
-    run_path = osp.join(TEST_PATH, "build/")
+    run_path = os.path.join(TEST_PATH, "build/")
     proc = Popen(
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:
@@ -105,15 +95,15 @@ def execute_cmd(cmd_list):
         assert(False)
 
 @pytest.mark.skipif(
-    not test_multigpu,
-    reason="Multi-GPU tests requires PyTorch and more than 1 GPU",
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
 )
-def test_client_multigpu_set_run_model():
+def test_client_multigpu_mnist():
     """
     Test setting and running a machine learning model via the Fortran client
     on an orchestrator with multiple GPUs
     """
     
-    tester_path = osp.join(TEST_PATH, "build/client_test_mnist_multigpu")
+    tester_path = os.path.join(TEST_PATH, "build/client_test_mnist_multigpu")
     test_fortran_client(tester_path)
     

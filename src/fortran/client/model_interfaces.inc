@@ -243,3 +243,16 @@ interface
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
   end function delete_model_c
 end interface
+
+interface
+  function delete_model_multigpu_c(c_client, key, key_length, first_gpu, num_gpus) bind(c, name="delete_model_multigpu")
+    use iso_c_binding, only : c_ptr, c_size_t, c_char, c_int
+    import :: enum_kind
+    integer(kind=enum_kind)                   :: delete_model_multigpu_c
+    type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
+    character(kind=c_char),        intent(in) :: key(*)            !< The key to use to delete the model
+    integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
+    integer(kind=c_int),    value, intent(in) :: first_gpu         !< ID of the first GPU to use the model on
+    integer(kind=c_int),    value, intent(in) :: num_gpus          !< How many GPUs to use in the orchestrator
+  end function delete_model_multigpu_c
+end interface

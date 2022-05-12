@@ -129,8 +129,12 @@ type, public :: client_type
   procedure :: run_model_multigpu
   !> Remove a script from the database
   procedure :: delete_script
+  !> Remove a script from the database with multiple GPUs
+  procedure :: delete_script_multigpu
   !> Remove a model from the database
   procedure :: delete_model
+  !> Remove a model from the database with multiple GPUs
+  procedure :: delete_model_multigpu
   !> Put a SmartRedis dataset into the database
   procedure :: put_dataset
   !> Retrieve a SmartRedis dataset from the database
@@ -1023,6 +1027,27 @@ function delete_model(self, name) result(code)
   code = delete_model_c(self%client_ptr, c_name, name_length)
 end function delete_model
 
+!> Remove a model from the database
+function delete_model_multigpu(self, name, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to remove the model
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  c_first_gpu = first_gpu
+  c_num_gpus  = num_gpus
+
+  code = delete_model_multigpu_c(self%client_ptr, c_name, name_length, c_first_gpu, c_num_gpus )
+end function delete_model_multigpu
+
 !> Retrieve the script from the database
 function get_script(self, name, script) result(code)
   class(client_type), intent(in  ) :: self   !< An initialized SmartRedis client
@@ -1277,6 +1302,28 @@ function delete_script(self, name) result(code)
 
   code = delete_script_c(self%client_ptr, c_name, name_length)
 end function delete_script
+
+!> Remove a script_multigpu from the database
+function delete_script_multigpu(self, name, first_gpu, num_gpus) result(code)
+  class(client_type),             intent(in) :: self    !< An initialized SmartRedis client
+  character(len=*),               intent(in) :: name    !< The name to use to delete the script_multigpu
+  integer,                        intent(in) :: first_gpu !< The first GPU (zero-based) to use with the model
+  integer,                        intent(in) :: num_gpus !< The number of GPUs to use with the model
+  integer(kind=enum_kind)                    :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_int)    :: c_first_gpu, c_num_gpus
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(name)
+  
+  c_first_gpu = first_gpu
+  c_num_gpus = num_gpus
+
+  code = delete_script_multigpu_c(self%client_ptr, c_name, name_length, c_first_gpu, c_num_gpus)
+end function delete_script_multigpu
 
 !> Store a dataset in the database
 function put_dataset(self, dataset) result(code)
