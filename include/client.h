@@ -1609,7 +1609,7 @@ class Client
         *   \param poll_frequency_ms The time delay between checks,
         *                            in milliseconds
         *   \param num_tries The total number of times to check for the name
-        *   \param comparator The comparison function
+        *   \param comp_func The comparison function
         *   \returns Returns true if the list is found with a length greater
         *            than or equal to the provided length, otherwise false
         *   \throw SmartRedis::Exception if poll list length command fails
