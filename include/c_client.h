@@ -791,7 +791,7 @@ SRError run_script(void* c_client,
                    const size_t* output_lengths,
                    const size_t n_outputs);
 /*!
-*   \brief Run a script function in the database using the specificed input
+*   \brief Run a script function in the database using the specified input
 *          and output tensors
 *   \details The script key used to locate the script to be run
 *            may be formed by applying a prefix to the supplied
@@ -830,7 +830,7 @@ SRError run_script(void* c_client,
                    const size_t n_outputs);
 
 /*!
-*   \brief Run a script function in the database using the specificed input
+*   \brief Run a script function in the database using the specified input
 *          and output tensors in a multi-GPU system
 *   \details The script key used to locate the script to be run
 *            may be formed by applying a prefix to the supplied
@@ -900,8 +900,8 @@ void _check_params_run_model(void* c_client,
                   const size_t n_outputs);
 
 /*!
-*   \brief Run a model in the database using the specificed input and
-*          output tensors using a multi-GPU system
+*   \brief Run a model in the database using the specified input and
+*          output tensors
 *   \details The model key used to locate the model to be run
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()
