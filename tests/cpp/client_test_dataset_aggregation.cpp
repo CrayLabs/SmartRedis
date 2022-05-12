@@ -148,41 +148,97 @@ int main(int argc, char* argv[]) {
     client.append_to_list(list_name, dataset_1);
     client.append_to_list(list_name, dataset_2);
 
-    // Do a poll for list length that should fail
-    bool complete_list = client.poll_list_length(list_name, 4, 100, 5);
-
-    if (complete_list == true) {
-        throw std::runtime_error("Polling for list length of 4 returned " \
-                                 "true when known to have length of 2.");
-    }
-
     // Put the final two datasets into the list
     client.put_dataset(dataset_3);
     client.put_dataset(dataset_4);
     client.append_to_list(list_name, dataset_3);
     client.append_to_list(list_name, dataset_4);
 
-    // Confirm that poll for list length returns true
-    complete_list = client.poll_list_length(list_name, 3, 100, 5);
-    if (complete_list == false) {
-        throw std::runtime_error("Polling for list length of 3 returned " \
-                                 "false when known to have length of 4.");
+
+    int actual_length = 4;
+
+    // Confirm that poll for list length works correctly
+    bool poll_result = client.poll_list_length(list_name, actual_length, 100, 5);
+    if (poll_result == false) {
+        throw std::runtime_error("Polling for list length of " +
+                                 std::to_string(actual_length)  +
+                                 " returned false for known length of " +
+                                 std::to_string(actual_length) + ".");
     }
 
-    // Confirm that poll for list length returns true
-    complete_list = client.poll_list_length(list_name, 4, 100, 5);
-    if (complete_list == false) {
-        throw std::runtime_error("Polling for list length of 4 returned " \
-                                 "false when known to have length of 4.");
+    poll_result = client.poll_list_length(list_name, actual_length + 1, 100, 5);
+    if (poll_result == true) {
+        throw std::runtime_error("Polling for list length of " +
+                                 std::to_string(actual_length + 1)  +
+                                 " returned true for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+
+    // Confirm that poll for greater than or equal list length works correctly
+    poll_result = client.poll_list_length_gte(list_name, actual_length - 1, 100, 5);
+    if (poll_result == false) {
+        throw std::runtime_error("Polling for list length greater "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length - 1) +
+                                 " returned false for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+    poll_result = client.poll_list_length_gte(list_name, actual_length, 100, 5);
+    if (poll_result == false) {
+        throw std::runtime_error("Polling for list length greater "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length) +
+                                 " returned false for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+    poll_result = client.poll_list_length_gte(list_name, actual_length + 1, 100, 5);
+    if (poll_result == true) {
+        throw std::runtime_error("Polling for list length greater "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length + 1) +
+                                 " returned true for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+    // Confirm that poll for less than or equal list length works correctly
+    poll_result = client.poll_list_length_lte(list_name, actual_length - 1, 100, 5);
+    if (poll_result == true) {
+        throw std::runtime_error("Polling for list length less "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length - 1) +
+                                 " returned true for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+    poll_result = client.poll_list_length_lte(list_name, actual_length, 100, 5);
+    if (poll_result == false) {
+        throw std::runtime_error("Polling for list length less "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length) +
+                                 " returned false for known length of " +
+                                 std::to_string(actual_length) + ".");
+    }
+
+    poll_result = client.poll_list_length_lte(list_name, actual_length + 1, 100, 5);
+    if (poll_result == false) {
+        throw std::runtime_error("Polling for list length less "\
+                                 "than or equal to " +
+                                 std::to_string(actual_length + 1) +
+                                 " returned false for known length of " +
+                                 std::to_string(actual_length) + ".");
     }
 
     // Check the list length
     int list_length = client.get_list_length(list_name);
 
-    if (list_length != 4) {
+    if (list_length != actual_length) {
         throw std::runtime_error("The list length of " +
                                  std::to_string(list_length) +
-                                 " does not match expected value of 4.");
+                                 " does not match expected value of " +
+                                 std::to_string(actual_length) + ".");
     }
 
     // Retrieve datasets via the aggregation list

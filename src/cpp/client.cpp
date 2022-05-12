@@ -1278,7 +1278,7 @@ int Client::get_list_length(const std::string& list_name)
     return list_length;
 }
 
-// Poll the list length
+// Poll the list length (strictly equal)
 bool Client::poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries)
 {
@@ -1288,12 +1288,36 @@ bool Client::poll_list_length(const std::string& name, int list_length,
                                    "must be provided.");
     }
 
-    // Check for the requested list length, return if found
-    for (int i = 0; i < num_tries; i++) {
-        if (get_list_length(name) >= list_length)
-            return true;
-        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::equal_to<int>());
+}
+
+// Poll the list length (strictly equal)
+bool Client::poll_list_length_gte(const std::string& name, int list_length,
+                                 int poll_frequency_ms, int num_tries)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
     }
+
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::greater_equal<int>());
+}
+
+// Poll the list length (strictly equal)
+bool Client::poll_list_length_lte(const std::string& name, int list_length,
+                                 int poll_frequency_ms, int num_tries)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
+    }
+
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::less_equal<int>());
 
     return false;
 }
@@ -1831,4 +1855,26 @@ std::string Client::_get_dataset_name_from_list_entry(std::string& dataset_key)
     close_brace_pos -= 1;
     return dataset_key.substr(open_brace_pos,
                               close_brace_pos - open_brace_pos + 1);
+}
+
+// Poll aggregation list given a comparison function
+bool Client::_poll_list_length(const std::string& name, int list_length,
+                               int poll_frequency_ms, int num_tries,
+                               std::function<bool(int,int)> comp_func)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
+    }
+
+    // Check for the requested list length, return if found
+    for (int i = 0; i < num_tries; i++) {
+        if (comp_func(get_list_length(name),list_length)) {
+            return true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    }
+
+    return false;
 }

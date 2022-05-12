@@ -1115,9 +1115,9 @@ class Client
         int get_list_length(const std::string& list_name);
 
         /*!
-        *   \brief Poll list length until length is greater or equal
+        *   \brief Poll list length until length is equal
         *          to the provided length.  If maximum number of
-        *          attemps is exceeded, false is returned.
+        *          attempts is exceeded, false is returned.
         *   \details The aggregation list key used to check for list length
         *            may be formed by applying a prefix to the supplied
         *            name. See set_data_source() and use_list_ensemble_prefix()
@@ -1133,6 +1133,46 @@ class Client
         */
         bool poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries);
+
+        /*!
+        *   \brief Poll list length until length is greater than or equal
+        *          to the user-provided length. If maximum number of
+        *          attempts is exceeded, false is returned.
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired minimum length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the list is found with a length greater
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool poll_list_length_gte(const std::string& name, int list_length,
+                                  int poll_frequency_ms, int num_tries);
+
+        /*!
+        *   \brief Poll list length until length is less than or equal
+        *          to the user-provided length. If maximum number of
+        *          attempts is exceeded, false is returned.
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired maximum length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the list is found with a length less
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool poll_list_length_lte(const std::string& name, int list_length,
+                                  int poll_frequency_ms, int num_tries);
 
         /*!
         *   \brief Get datasets from an aggregation list
@@ -1557,6 +1597,26 @@ class Client
         *   \returns DataSet name
         */
         std::string _get_dataset_name_from_list_entry(std::string& dataset_key);
+
+        /*!
+        *   \brief Poll aggregation list length using a custom comparison function
+        *   \details The aggregation list key used to check for list length
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source() and use_list_ensemble_prefix()
+        *            for more details.
+        *   \param name The name of the list
+        *   \param list_length The desired length of the list
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \param comparator The comparison function
+        *   \returns Returns true if the list is found with a length greater
+        *            than or equal to the provided length, otherwise false
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+        bool _poll_list_length(const std::string& name, int list_length,
+                               int poll_frequency_ms, int num_tries,
+                               std::function<bool(int,int)> comp_func);
 
 };
 
