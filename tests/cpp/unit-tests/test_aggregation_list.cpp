@@ -194,7 +194,7 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
                 AND_THEN("Polling for a list length size too large "\
                          "returns false")
                 {
-                    int list_length = datasets.size()+1;
+                    int list_length = datasets.size() + 1;
                     CHECK(client.poll_list_length(list_name,
                                                   list_length, 5, 5) == false);
                 }
@@ -204,7 +204,71 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
                     int list_length = -1;
                     CHECK_THROWS_AS(client.poll_list_length(list_name,
                                                            list_length, 5, 5),
-                                    ParameterException);
+                                                           ParameterException);
+                }
+
+                AND_THEN("Polling for a greater than or equal length exits "\
+                         "immediately when given the correct length")
+                {
+                    int list_length = datasets.size();
+                    CHECK(client.poll_list_length_gte(list_name,
+                                                      list_length, 1, 100));
+                }
+
+                AND_THEN("Polling for a greater than or equal length exits "\
+                         "with false when given a larger length")
+                {
+                    int list_length = datasets.size() + 1;
+                    CHECK(client.poll_list_length_gte(list_name, list_length,
+                                                      5, 5) == false);
+                }
+
+                AND_THEN("Polling for a greater than or equal length exits "\
+                         "with true when given a smaller length")
+                {
+                    int list_length = datasets.size() - 1;
+                    CHECK(client.poll_list_length_gte(list_name, list_length,
+                                                      5, 5) == true);
+                }
+
+                AND_THEN("Polling for a negative list length throws an error")
+                {
+                    int list_length = -1;
+                    CHECK_THROWS_AS(client.poll_list_length_gte(list_name,
+                                                           list_length, 5, 5),
+                                                           ParameterException);
+                }
+
+                AND_THEN("Polling for a less than or equal length exits "\
+                         "with true when given the correct length")
+                {
+                    int list_length = datasets.size();
+                    CHECK(client.poll_list_length_lte(list_name,
+                                                      list_length, 1, 100));
+                }
+
+                AND_THEN("Polling for a less than or equal length exits "\
+                         "with true when given a larger length")
+                {
+                    int list_length = datasets.size() + 1;
+                    CHECK(client.poll_list_length_lte(list_name, list_length,
+                                                      5, 5) == true);
+                }
+
+                AND_THEN("Polling for a less than or equal length exits "\
+                         "with false when given a smaller length")
+                {
+                    int list_length = datasets.size() - 1;
+                    CHECK(client.poll_list_length_lte(list_name, list_length,
+                                                      5, 5) == false);
+                }
+
+                AND_THEN("Polling for a negative list length throws an error")
+                {
+                    int list_length = -1;
+                    CHECK_THROWS_AS(client.poll_list_length_lte(list_name,
+                                                           list_length, 5, 5),
+                                                           ParameterException);
                 }
 
                 AND_THEN("The DataSet objects can be retrieved via  "\
@@ -218,7 +282,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                     // This assumes datasets are in the same order,
                     // and they should be in the current API
-                    // TODO Not checking names yet
                     for (size_t i = 0; i < datasets.size(); i++) {
                         CHECK(is_same_dataset<double>(datasets[i],
                             retrieved_datasets[i]));
@@ -241,7 +304,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                     // This assumes datasets are in the same order,
                     // and they should be in the current API
-                    // TODO Not checking names yet
                     for (size_t i = start_index; i <= end_index; i++) {
                         CHECK(is_same_dataset<double>(datasets[i],
                             retrieved_datasets[i-start_index]));
@@ -320,7 +382,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                         // This assumes datasets are in the same order,
                         // and they should be in the current API
-                        // TODO Not checking names yet
                         for (size_t i = 0; i < datasets.size(); i++) {
                             CHECK(is_same_dataset<double>(datasets[i],
                                 retrieved_datasets[i]));
@@ -353,7 +414,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                         // This assumes datasets are in the same order,
                         // and they should be in the current API
-                        // TODO Not checking names yet
                         for (size_t i = 0; i < datasets.size(); i++) {
                             CHECK(is_same_dataset<double>(datasets[i],
                                 retrieved_datasets[i]));
@@ -378,7 +438,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                         // This assumes datasets are in the same order,
                         // and they should be in the current API
-                        // TODO Not checking names yet
                         for (size_t i = 0; i < datasets.size(); i++) {
                             CHECK(is_same_dataset<double>(datasets[i],
                                 retrieved_datasets[i]));
@@ -429,7 +488,6 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
 
                         // This assumes datasets are in the same order,
                         // and they should be in the current API
-                        // TODO Not checking names yet
                         for (size_t i = 0; i < datasets.size(); i++) {
                             CHECK(is_same_dataset<double>(datasets[i],
                                 retrieved_datasets[i]));

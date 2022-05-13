@@ -691,7 +691,7 @@ std::string_view Client::get_script(const std::string& name)
     return std::string_view(script, reply.str_len());
 }
 
-// Run a model in the database using the specificed input and output tensors
+// Run a model in the database using the specified input and output tensors
 void Client::run_model(const std::string& name,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
@@ -731,7 +731,7 @@ void Client::run_model_multigpu(const std::string& name,
         key, inputs, outputs, offset, first_gpu, num_gpus);
 }
 
-// Run a script function in the database using the specificed input and output tensors
+// Run a script function in the database using the specified input and output tensors
 void Client::run_script(const std::string& name,
                         const std::string& function,
                         std::vector<std::string> inputs,
@@ -747,7 +747,7 @@ void Client::run_script(const std::string& name,
 }
 
 // Run a script function in the database using the
-// specificed input and output tensors in a multi-GPU system
+// specified input and output tensors in a multi-GPU system
 void Client::run_script_multigpu(const std::string& name,
                                  const std::string& function,
                                  std::vector<std::string> inputs,
@@ -783,6 +783,21 @@ void Client::delete_model(const std::string& name)
         throw SRRuntimeException("AI.MODELDEL command failed on server");
 }
 
+// Delete a multiGPU model from the database
+void Client::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer");
+    }
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    std::string key = _build_model_key(name, true);
+    _redis_server->delete_model_multigpu(key, first_gpu, num_gpus);
+}
+
 // Delete a script from the database
 void Client::delete_script(const std::string& name)
 {
@@ -791,6 +806,21 @@ void Client::delete_script(const std::string& name)
 
     if (reply.has_error())
         throw SRRuntimeException("AI.SCRIPTDEL command failed on server");
+}
+
+// Delete a multiGPU script from the database
+void Client::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    if (first_gpu < 0) {
+        throw SRParameterException("first_gpu must be a non-negative integer");
+    }
+    if (num_gpus < 1) {
+        throw SRParameterException("num_gpus must be a positive integer.");
+    }
+
+    std::string key = _build_model_key(name, true);
+    _redis_server->delete_script_multigpu(key, first_gpu, num_gpus);
 }
 
 // Check if the key exists in the database
@@ -960,8 +990,8 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
         throw SRRuntimeException("INFO EVERYTHING command failed on server");
 
     // Parse the results
-    return DBInfoCommand::parse_db_node_info(std::string(reply.str(),
-                                                        reply.str_len()));
+    std::string db_node_info(reply.str(), reply.str_len());
+    return DBInfoCommand::parse_db_node_info(db_node_info);
 }
 
 // Returns the CLUSTER INFO command reply addressed to a single cluster node.
@@ -982,8 +1012,8 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
         throw SRRuntimeException("CLUSTER INFO command failed on server");
 
     // Parse the results
-    return ClusterInfoCommand::parse_db_cluster_info(std::string(reply.str(),
-                                                     reply.str_len()));
+    std::string db_cluster_info(reply.str(), reply.str_len());
+    return ClusterInfoCommand::parse_db_cluster_info(db_cluster_info);
 }
 
 // Returns the AI.INFO command reply
@@ -1278,7 +1308,7 @@ int Client::get_list_length(const std::string& list_name)
     return list_length;
 }
 
-// Poll the list length
+// Poll the list length (strictly equal)
 bool Client::poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries)
 {
@@ -1288,12 +1318,36 @@ bool Client::poll_list_length(const std::string& name, int list_length,
                                    "must be provided.");
     }
 
-    // Check for the requested list length, return if found
-    for (int i = 0; i < num_tries; i++) {
-        if (get_list_length(name) >= list_length)
-            return true;
-        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::equal_to<int>());
+}
+
+// Poll the list length (strictly equal)
+bool Client::poll_list_length_gte(const std::string& name, int list_length,
+                                 int poll_frequency_ms, int num_tries)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
     }
+
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::greater_equal<int>());
+}
+
+// Poll the list length (strictly equal)
+bool Client::poll_list_length_lte(const std::string& name, int list_length,
+                                 int poll_frequency_ms, int num_tries)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
+    }
+
+    return _poll_list_length(name, list_length, poll_frequency_ms,
+                             num_tries, std::less_equal<int>());
 
     return false;
 }
@@ -1831,4 +1885,26 @@ std::string Client::_get_dataset_name_from_list_entry(std::string& dataset_key)
     close_brace_pos -= 1;
     return dataset_key.substr(open_brace_pos,
                               close_brace_pos - open_brace_pos + 1);
+}
+
+// Poll aggregation list given a comparison function
+bool Client::_poll_list_length(const std::string& name, int list_length,
+                               int poll_frequency_ms, int num_tries,
+                               std::function<bool(int,int)> comp_func)
+{
+    // Enforce positive list length
+    if (list_length < 0) {
+        throw SRParameterException("A positive value for list_length "\
+                                   "must be provided.");
+    }
+
+    // Check for the requested list length, return if found
+    for (int i = 0; i < num_tries; i++) {
+        if (comp_func(get_list_length(name),list_length)) {
+            return true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    }
+
+    return false;
 }

@@ -366,8 +366,11 @@ function to retrieve the ``aggregation list`` contents is shown below:
 
 Additional functions are provided to retrieve only a portion of the
 ``aggregation list`` contents, copy an ``aggregation list``, rename
-an ``aggregation list``, retrieve ``aggregation list`` length, and
-poll for a specified ``aggregation list`` length.
+an ``aggregation list` and retrieve ``aggregation list`` length.
+A blocking method to poll the ``aggregation list`` length is also
+provided as a means to wait for list completion before performing
+another task in the same application or a separate application.
+
 
 Model
 =====
@@ -487,9 +490,17 @@ is then dispatched to the copy of the script on the GPU corresponding to
 ``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
 be an MPI rank, or a thread ID, or any other indexing scheme.
 
+Finally, models stored for multiple GPUs may be deleted via the
+``Client.delete_model_multigpu()`` function. This method parallels
+``Client.delete_model()`` except that it requires two additional parameters:
+the first GPU and the number of GPUs that the model was stored with. This
+function will delete all the extra copies of the model that were stored
+via ``Client.set_model_multigpu()``.
+
 .. note::
 
     In order for a model to be executed via ``Client.run_model_multigpu()``,
+    or deleted via ``Client.delete_model_multigpu()``,
     it must have been set via ``Client.set_model_multigpu()``. The
     ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.
 
@@ -600,8 +611,16 @@ is then dispatched to the copy of the script on the GPU corresponding to
 ``first_gpu`` plus the offset modulo ``num_gpus``.  The image offset may
 be an MPI rank, or a thread ID, or any other indexing scheme.
 
+Finally, scripts stored for multiple GPUs may be deleted via the
+``Client.delete_script_multigpu()`` function. This method parallels
+``Client.delete_script()`` except that it requires two additional parameters:
+the first GPU and the number of GPUs that the model was stored with. This
+function will delete all the extra copies of the model that were stored
+via ``Client.set_script_multigpu()``.
+
 .. note::
 
     In order for a script to be executed via ``Client.run_script_multigpu()``,
+    or deleted via ``Client.delete_script_multigpu()``,
     it must have been set via ``Client.set_script_multigpu()``. The
     ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.
