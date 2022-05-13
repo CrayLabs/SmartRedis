@@ -1091,6 +1091,7 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     }
 }
 
+// Save a copy of the database
 void PyClient::save(std::vector<std::string> addresses)
 {
     for (size_t address_index = 0; address_index < addresses.size(); address_index++) {
@@ -1110,6 +1111,224 @@ void PyClient::save(std::vector<std::string> addresses)
             throw SRInternalException("A non-standard exception was encountered "\
                                       "while executing save.");
         }
+    }
+}
+
+
+// Appends a dataset to the aggregation list
+void PyClient::append_to_list(const std::string& list_name, const DataSet& dataset)
+{
+    try {
+        _client->append_to_list(list_name, dataset);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing append_to_list.");
+    }
+}
+
+// Delete an aggregation list
+void PyClient::delete_list(const std::string& list_name)
+{
+    try {
+        _client->delete_list(list_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_list.");
+    }
+}
+
+// Copy an aggregation list
+void PyClient::copy_list(const std::string& src_name, const std::string& dest_name)
+{
+    try {
+        _client->copy_list(src_name, dest_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing copy_list.");
+    }
+}
+
+// Rename an aggregation list
+void PyClient::rename_list(const std::string& src_name, const std::string& dest_name)
+{
+    try {
+        _client->rename_list(src_name, dest_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing rename_list.");
+    }
+}
+
+// Get the number of entries in the list
+int PyClient::get_list_length(const std::string& list_name)
+{
+    try {
+        return _client->get_list_length(list_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_list_length.");
+    }
+}
+
+// Poll list length until length is equal
+bool PyClient::poll_list_length(const std::string& name, int list_length,
+                                int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length.");
+    }
+}
+
+// Poll list length until length is greater than or equal
+bool PyClient::poll_list_length_gte(const std::string& name, int list_length,
+                                    int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length_gte(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length_gte.");
+    }
+}
+
+// Poll list length until length is less than or equal
+bool PyClient::poll_list_length_lte(const std::string& name, int list_length,
+                                   int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length_lte(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length_lte.");
+    }
+}
+
+// Get datasets from an aggregation list
+std::vector<DataSet> PyClient::get_datasets_from_list(const std::string& list_name)
+{
+    try {
+        _client->get_datasets_from_list(list_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_datasets_from_list.");
+    }
+}
+
+// Get a range of datasets (by index) from an aggregation list
+std::vector<DataSet> PyClient::get_dataset_list_range(
+    const std::string& list_name, const int start_index, const int end_index)
+{
+    try {
+        return _client->get_dataset_list_range(list_name, start_index, end_index);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing copy_list.");
     }
 }
 
