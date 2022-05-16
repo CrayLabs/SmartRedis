@@ -684,13 +684,12 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
                              c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
                              c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                              output_lengths_ptr, n_outputs)
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
-  deallocate(c_tag)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model_from_file
 
 !> Load the machine learning model from a file and set the configuration for use in multi-GPU systems
@@ -780,13 +779,13 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
                              c_backend, backend_length, c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, &
                              c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                              output_lengths_ptr, n_outputs)
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
-  deallocate(c_tag)
+
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model_from_file_multigpu
 
 !> Establish a model to run
@@ -849,12 +848,12 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
                  c_device, device_length, batch_size, min_batch_size, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model
 
 !> Set a model from a byte string to run on a system with multiple GPUs
@@ -916,12 +915,12 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
                  c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function set_model_multigpu
 
 !> Run a model in the database using the specified input and output tensors
@@ -955,12 +954,12 @@ function run_model(self, name, inputs, outputs) result(code)
   code = run_model_c(self%client_ptr, c_name, name_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                           output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_model
 
 !> Run a model in the database using the specified input and output tensors in a multi-GPU system
@@ -1003,12 +1002,12 @@ function run_model_multigpu(self, name, inputs, outputs, offset, first_gpu, num_
   code = run_model_multigpu_c(self%client_ptr, c_name, name_length, inputs_ptr, input_lengths_ptr, n_inputs, &
                               outputs_ptr, output_lengths_ptr, n_outputs, c_offset, c_first_gpu, c_num_gpus)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_model_multigpu
 
 !> Remove a model from the database
@@ -1180,7 +1179,7 @@ function set_script_multigpu(self, name, script, first_gpu, num_gpus) result(cod
   integer(kind=c_size_t) :: device_length
   integer(kind=c_int)    :: c_first_gpu, c_num_gpus
 
-  c_name    = trim(name)
+  c_name = trim(name)
   c_script = trim(script)
 
   name_length = len_trim(name)
@@ -1227,12 +1226,12 @@ function run_script(self, name, func, inputs, outputs) result(code)
   code = run_script_c(self%client_ptr, c_name, name_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
                             n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_script
 
 function run_script_multigpu(self, name, func, inputs, outputs, offset, first_gpu, num_gpus) result(code)
@@ -1279,12 +1278,12 @@ function run_script_multigpu(self, name, func, inputs, outputs, offset, first_gp
   code = run_script_multigpu_c(self%client_ptr, c_name, name_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
                             n_inputs, outputs_ptr, output_lengths_ptr, n_outputs, c_offset, c_first_gpu, c_num_gpus)
 
-  deallocate(c_inputs)
-  deallocate(input_lengths)
-  deallocate(ptrs_to_inputs)
-  deallocate(c_outputs)
-  deallocate(output_lengths)
-  deallocate(ptrs_to_outputs)
+  if (allocated(c_inputs))        deallocate(c_inputs)
+  if (allocated(input_lengths))   deallocate(input_lengths)
+  if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
+  if (allocated(c_outputs))       deallocate(c_outputs)
+  if (allocated(output_lengths))  deallocate(output_lengths)
+  if (allocated(ptrs_to_outputs)) deallocate(ptrs_to_outputs)
 end function run_script_multigpu
 
 !> Remove a script from the database

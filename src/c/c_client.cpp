@@ -490,7 +490,7 @@ void _check_params_set_model(void* c_client,
       for (size_t i = 0; i < n_inputs; i++){
         if (inputs[i] == NULL || input_lengths[i] == 0) {
           throw SRParameterException(
-            std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+            "inputs[" + std::to_string(i) + "] is NULL or empty");
         }
       }
     }
@@ -498,7 +498,7 @@ void _check_params_set_model(void* c_client,
       for (size_t i = 0; i < n_outputs; i++) {
         if (outputs[i] == NULL || output_lengths[i] == 0) {
           throw SRParameterException(
-            std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+            "outputs[" + std::to_string(i) + "] is NULL or empty");
         }
       }
     }
@@ -522,10 +522,10 @@ SRError set_model_from_file(void* c_client,
   SRError result = SRNoError;
   try
   {
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
     SR_CHECK_PARAMS(model_file != NULL && device != NULL);
   
     Client* s = reinterpret_cast<Client*>(c_client);
@@ -584,10 +584,10 @@ SRError set_model_from_file_multigpu(void* c_client,
   SRError result = SRNoError;
   try
   {
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
     // Sanity check params. Tag is strictly optional, and inputs/outputs are
     // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
     SR_CHECK_PARAMS(model_file != NULL);
 
     Client* s = reinterpret_cast<Client*>(c_client);
@@ -795,41 +795,6 @@ SRError get_model(void* c_client,
   return result;
 }
 
-// Put a script in the database that is stored in a file in a multi-GPU system
-extern "C"
-SRError set_script_from_file_multigpu(void* c_client,
-                                     const char* name,
-                                     const size_t name_length,
-                                     const char* script_file,
-                                     const size_t script_file_length,
-                                     const int first_gpu,
-                                     const int num_gpus)
-{
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string script_file_str(script_file, script_file_length);
-
-    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
-}
-
-
 // Put a script in the database that is stored in a file.
 extern "C"
 SRError set_script_from_file(void* c_client,
@@ -853,6 +818,40 @@ SRError set_script_from_file(void* c_client,
     std::string script_file_str(script_file, script_file_length);
 
     s->set_script_from_file(name_str, device_str, script_file_str);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+// Put a script in the database that is stored in a file in a multi-GPU system
+extern "C"
+SRError set_script_from_file_multigpu(void* c_client,
+                                     const char* name,
+                                     const size_t name_length,
+                                     const char* script_file,
+                                     const size_t script_file_length,
+                                     const int first_gpu,
+                                     const int num_gpus)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string script_file_str(script_file, script_file_length);
+
+    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -993,13 +992,13 @@ void _check_params_run_script(void* c_client,
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
         throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
         throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
       }
     }
 }
@@ -1130,13 +1129,13 @@ void _check_params_run_model(void* c_client,
     for (size_t i = 0; i < n_inputs; i++){
       if (inputs[i] == NULL || input_lengths[i] == 0) {
         throw SRParameterException(
-          std::string("inputs[") + std::to_string(i) + "] is NULL or empty");
+          "inputs[" + std::to_string(i) + "] is NULL or empty");
       }
     }
     for (size_t i = 0; i < n_outputs; i++) {
       if (outputs[i] == NULL || output_lengths[i] == 0) {
         throw SRParameterException(
-          std::string("outputs[") + std::to_string(i) + "] is NULL or empty");
+          "outputs[" + std::to_string(i) + "] is NULL or empty");
       }
     }
 }                  

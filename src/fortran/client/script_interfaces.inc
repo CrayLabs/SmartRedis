@@ -99,8 +99,8 @@ interface
     type(c_ptr), value,            intent(in) :: c_client          !< Initialized SmartRedis client
     character(kind=c_char),        intent(in) :: key(*)            !< The key to use to place the script
     integer(kind=c_size_t), value, intent(in) :: key_length        !< The length of the key c-string, excluding null
-    character(kind=c_char),        intent(in) :: script(*)     !< The file storing the script
-    integer(kind=c_size_t), value, intent(in) :: script_length !< The length of the file name c-string, excluding
+    character(kind=c_char),        intent(in) :: script(*)         !< The file storing the script
+    integer(kind=c_size_t), value, intent(in) :: script_length     !< The length of the file name c-string, excluding
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: first_gpu         !< ID of the first GPU to set the model on
     integer(kind=c_int),    value, intent(in) :: num_gpus          !< How many GPUs to use in the orchestrator
