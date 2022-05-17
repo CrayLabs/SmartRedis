@@ -1561,7 +1561,7 @@ class Client(PyClient):
         return super().get_datasets_from_list(list_name)
 
     @exception_handler
-    def get_dataset_list_range(list_name, int start_index, end_index):
+    def get_dataset_list_range(list_name, start_index, end_index):
         """Get a range of datasets (by index) from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1595,7 +1595,7 @@ class Client(PyClient):
         typecheck(start_index, "start_index", int)
         typecheck(end_index, "end_index", int)
         return super().get_dataset_list_range(
-            list_name, int start_index, end_index)
+            list_name, start_index, end_index)
 
     # ---- helpers --------------------------------------------------------
 
