@@ -17,7 +17,7 @@ using namespace std::chrono_literals;
 // the SmartRedis log
 #undef TIME_THREADPOOL
 
-// C-tor
+// Constructor
 ThreadPool::ThreadPool(unsigned int num_threads)
 {
     // Flag that we're initializing
@@ -42,7 +42,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     initialization_complete = true;
 }
 
-// D-tor
+// Desstructor
 ThreadPool::~ThreadPool()
 {
     // Shut down the threadpool if it hasn't already been stopped

@@ -34,7 +34,6 @@ set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-#add_link_options(-lpthread)
 
 add_compile_options(-fvisibility=default)
 
