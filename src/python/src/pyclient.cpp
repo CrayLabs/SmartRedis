@@ -1293,7 +1293,7 @@ bool PyClient::poll_list_length_lte(const std::string& name, int list_length,
 std::vector<DataSet> PyClient::get_datasets_from_list(const std::string& list_name)
 {
     try {
-        _client->get_datasets_from_list(list_name);
+        return _client->get_datasets_from_list(list_name);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
