@@ -94,7 +94,7 @@ void ThreadPool::perform_jobs(unsigned int tid)
     std::cout << "Thread " << std::to_string(tid) << " reporting for duty" << std::endl;
     #endif
 
-    // Loop foorever processing jobs until we get killed
+    // Loop forever processing jobs until we get killed
     std::function<void()> job;
     while (!shutting_down)
     {
