@@ -1116,10 +1116,10 @@ void PyClient::save(std::vector<std::string> addresses)
 
 
 // Appends a dataset to the aggregation list
-void PyClient::append_to_list(const std::string& list_name, const DataSet& dataset)
+void PyClient::append_to_list(const std::string& list_name, PyDataset& dataset)
 {
     try {
-        _client->append_to_list(list_name, dataset);
+        _client->append_to_list(list_name, *dataset.get());
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -1290,10 +1290,17 @@ bool PyClient::poll_list_length_lte(const std::string& name, int list_length,
 }
 
 // Get datasets from an aggregation list
-std::vector<DataSet> PyClient::get_datasets_from_list(const std::string& list_name)
+py::list PyClient::get_datasets_from_list(const std::string& list_name)
 {
     try {
-        return _client->get_datasets_from_list(list_name);
+        std::vector<DataSet> datasets = _client->get_datasets_from_list(list_name);
+        std::vector<PyDataset*> result;
+        for (auto it = datasets.begin(); it != datasets.end(); it++) {
+            DataSet* ds = new DataSet(*it);
+            result.push_back(new PyDataset(ds));
+        }
+        py::list result_list = py::cast(result);
+        return result_list;
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -1311,11 +1318,19 @@ std::vector<DataSet> PyClient::get_datasets_from_list(const std::string& list_na
 }
 
 // Get a range of datasets (by index) from an aggregation list
-std::vector<DataSet> PyClient::get_dataset_list_range(
+py::list PyClient::get_dataset_list_range(
     const std::string& list_name, const int start_index, const int end_index)
 {
     try {
-        return _client->get_dataset_list_range(list_name, start_index, end_index);
+        std::vector<DataSet> datasets = _client->get_dataset_list_range(
+            list_name, start_index, end_index);
+        std::vector<PyDataset*> result;
+        for (auto it = datasets.begin(); it != datasets.end(); it++) {
+            DataSet* ds = new DataSet(*it);
+            result.push_back(new PyDataset(ds));
+        }
+        py::list result_list = py::cast(result);
+        return result_list;
     }
     catch (Exception& e) {
         // exception is already prepared for caller

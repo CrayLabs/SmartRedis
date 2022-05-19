@@ -736,7 +736,7 @@ class PyClient
         *   \throw SmartRedis::Exception if the command fails
         */
         void append_to_list(const std::string& list_name,
-                            const DataSet& dataset);
+                            PyDataset& dataset);
 
         /*!
         *   \brief Delete an aggregation list
@@ -854,7 +854,7 @@ class PyClient
         *   \returns A vector containing DataSet objects.
         *   \throw SmartRedis::Exception if retrieval fails.
         */
-        std::vector<DataSet> get_datasets_from_list(const std::string& list_name);
+        py::list get_datasets_from_list(const std::string& list_name);
 
         /*!
         *   \brief Get a range of datasets (by index) from an aggregation list
@@ -882,7 +882,7 @@ class PyClient
         *   \throw SmartRedis::Exception if retrieval fails or
         *          input parameters are invalid
         */
-        std::vector<DataSet> get_dataset_list_range(const std::string& list_name,
+        py::list get_dataset_list_range(const std::string& list_name,
                                                     const int start_index,
                                                     const int end_index);
 

@@ -1347,7 +1347,7 @@ class Client(PyClient):
         super().save(addresses)
 
     @exception_handler
-    def append_to_list(list_name, dataset):
+    def append_to_list(self, list_name, dataset):
         """Appends a dataset to the aggregation list
 
         When appending a dataset to an aggregation list,
@@ -1374,7 +1374,7 @@ class Client(PyClient):
         super().append_to_list(list_name, pybind_dataset)
 
     @exception_handler
-    def delete_list(list_name):
+    def delete_list(self, list_name):
         """Delete an aggregation list
 
         The key used to locate the aggregation list to be
@@ -1391,7 +1391,7 @@ class Client(PyClient):
         super().delete_list(list_name)
 
     @exception_handler
-    def copy_list(src_name, dest_name):
+    def copy_list(self, src_name, dest_name):
         """Copy an aggregation list
 
         The source and destination aggregation list keys used to
@@ -1412,7 +1412,7 @@ class Client(PyClient):
         super().copy_list(src_name, dest_name)
 
     @exception_handler
-    def rename_list(src_name, dest_name):
+    def rename_list(self, src_name, dest_name):
         """Rename an aggregation list
 
         The old and new aggregation list key used to find and
@@ -1432,7 +1432,7 @@ class Client(PyClient):
         super().rename_list(src_name, dest_name)
 
     @exception_handler
-    def get_list_length(list_name):
+    def get_list_length(self, list_name):
         """Get the number of entries in the list
 
         :param  list_name The list name
@@ -1446,7 +1446,7 @@ class Client(PyClient):
         return super().get_list_length(list_name)
 
     @exception_handler
-    def poll_list_length(name, list_length, poll_frequency_ms, num_tries):
+    def poll_list_length(self, name, list_length, poll_frequency_ms, num_tries):
         """Poll list length until length is equal
         to the provided length.  If maximum number of
         attempts is exceeded, returns False
@@ -1478,7 +1478,7 @@ class Client(PyClient):
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def poll_list_length_gte(name, list_length, poll_frequency_ms, num_tries):
+    def poll_list_length_gte(self, name, list_length, poll_frequency_ms, num_tries):
         """Poll list length until length is greater than or equal
         to the user-provided length. If maximum number of
         attempts is exceeded, false is returned.
@@ -1510,7 +1510,7 @@ class Client(PyClient):
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def poll_list_length_lte(name, list_length, poll_frequency_ms, num_tries):
+    def poll_list_length_lte(self, name, list_length, poll_frequency_ms, num_tries):
         """Poll list length until length is less than or equal
         to the user-provided length. If maximum number of
         attempts is exceeded, false is returned.
@@ -1542,7 +1542,7 @@ class Client(PyClient):
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def get_datasets_from_list(list_name):
+    def get_datasets_from_list(self, list_name):
         """Get datasets from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1561,7 +1561,7 @@ class Client(PyClient):
         return super().get_datasets_from_list(list_name)
 
     @exception_handler
-    def get_dataset_list_range(list_name, start_index, end_index):
+    def get_dataset_list_range(self, list_name, start_index, end_index):
         """Get a range of datasets (by index) from an aggregation list
 
         The aggregation list key used to retrieve datasets
