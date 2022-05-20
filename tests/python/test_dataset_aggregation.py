@@ -137,3 +137,19 @@ def create_dataset(name):
     dataset.add_meta_string("test_string", string)
     dataset.add_meta_scalar("test_scalar", scalar)
     return dataset
+
+def check_dataset(ds):
+    comp_array = np.array([1, 2, 3, 4])
+    tensor_name = "test_array"
+    comp_string = "test_meta_strings"
+    string_name = "test_string"
+
+    array = ds.get_tensor(tensor_name)
+    np.testing.assert_array_equal(
+        array, comp_array, "array in retrieved dataset is not correct"
+    )
+
+    string = ds.get_meta_strings(string_name)
+    np.testing.assert_array_equal(
+        string, comp_string, "string in retrieved dataset is not correct"
+    )

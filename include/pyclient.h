@@ -605,6 +605,29 @@ class PyClient
         void use_model_ensemble_prefix(bool use_prefix);
 
         /*!
+        *   \brief Control whether aggregation lists are prefixed
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN and/or SSKEYOUT to
+        *            aggregation list names.  Prefixes will only be used if
+        *            they were previously set through the environment variables
+        *            SSKEYOUT and SSKEYIN. Keys for aggregation lists created
+        *            before this function is called will not be retroactively
+        *            prefixed. By default, the client prefixes aggregation
+        *            list keys with the first prefix specified with the SSKEYIN
+        *            and SSKEYOUT environment variables.  Note that
+        *            use_tensor_ensemble_prefix() controls prefixing
+        *            for the entities in the aggregation list, and
+        *            use_tensor_ensemble_prefix() should be given the
+        *            same value that was used during the initial
+        *            setting of the DataSet into the database.
+        *  \param use_prefix If set to true, all future operations
+        *                    on aggregation lists will use
+        *                    a prefix, if available.
+        */
+        void use_list_ensemble_prefix(bool use_prefix);
+
+        /*!
         * \brief Set whether names of tensors or datasets should be
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
@@ -883,8 +906,8 @@ class PyClient
         *          input parameters are invalid
         */
         py::list get_dataset_list_range(const std::string& list_name,
-                                                    const int start_index,
-                                                    const int end_index);
+                                        const int start_index,
+                                        const int end_index);
 
     private:
 

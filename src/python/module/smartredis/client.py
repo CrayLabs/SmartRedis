@@ -1146,6 +1146,35 @@ class Client(PyClient):
         return super().use_model_ensemble_prefix(use_prefix)
 
     @exception_handler
+    def use_list_ensemble_prefix(self, use_prefix):
+        """Control whether aggregation lists are prefixed
+           when forming database keys
+
+        This function can be used to avoid key collisions in an
+        ensemble by prepending the string value from the
+        environment variable SSKEYIN and/or SSKEYOUT to
+        aggregation list names.  Prefixes will only be used if
+        they were previously set through the environment variables
+        SSKEYOUT and SSKEYIN. Keys for aggregation lists created
+        before this function is called will not be retroactively
+        prefixed. By default, the client prefixes aggregation
+        list keys with the first prefix specified with the SSKEYIN
+        and SSKEYOUT environment variables.  Note that
+        use_tensor_ensemble_prefix() controls prefixing
+        for the entities in the aggregation list, and
+        use_tensor_ensemble_prefix() should be given the
+        same value that was used during the initial
+        setting of the DataSet into the database.
+
+        :param use_prefix: If set to true, all future operations
+                           on aggregation lists will use a prefix, if
+                           available.
+        :type use_prefix: bool
+        """
+        typecheck(use_prefix, "use_prefix", bool)
+        return super().use_list_ensemble_prefix(use_prefix)
+
+    @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
         """Control whether tensor and dataset keys are
            prefixed (e.g. in an ensemble) when forming database keys

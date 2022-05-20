@@ -940,6 +940,12 @@ void PyClient::use_model_ensemble_prefix(bool use_prefix)
   _client->use_model_ensemble_prefix(use_prefix);
 }
 
+void PyClient::use_list_ensemble_prefix(bool use_prefix)
+{
+  _client->use_list_ensemble_prefix(use_prefix);
+}
+
+
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {
     try {
@@ -1296,7 +1302,7 @@ py::list PyClient::get_datasets_from_list(const std::string& list_name)
         std::vector<DataSet> datasets = _client->get_datasets_from_list(list_name);
         std::vector<PyDataset*> result;
         for (auto it = datasets.begin(); it != datasets.end(); it++) {
-            DataSet* ds = new DataSet(*it);
+            DataSet* ds = new DataSet(std::move(*it));
             result.push_back(new PyDataset(ds));
         }
         py::list result_list = py::cast(result);
@@ -1326,7 +1332,7 @@ py::list PyClient::get_dataset_list_range(
             list_name, start_index, end_index);
         std::vector<PyDataset*> result;
         for (auto it = datasets.begin(); it != datasets.end(); it++) {
-            DataSet* ds = new DataSet(*it);
+            DataSet* ds = new DataSet(std::move(*it));
             result.push_back(new PyDataset(ds));
         }
         py::list result_list = py::cast(result);
@@ -1343,7 +1349,7 @@ py::list PyClient::get_dataset_list_range(
     catch (...) {
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing copy_list.");
+                                  "while executing get_dataset_list_range.");
     }
 }
 
