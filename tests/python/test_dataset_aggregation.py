@@ -123,6 +123,8 @@ def test_aggregation(use_cluster):
         raise RuntimeError(
             f"The number of datasets received {len(datasets)} "
             f"does not match expected value of {list_length}.")
+    for ds in datasets:
+        check_dataset(ds)
 
 # ------------ helper functions ---------------------------------
 
