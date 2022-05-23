@@ -1386,11 +1386,11 @@ SRError rename_list(void* c_client,
 *   \param list_name The list name
 *   \param list_name_length The size in bytes of the list name,
 *                           including null terminator
-*   \param result Receives the length of the list
+*   \param result_length Receives the length of the list
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError get_list_length(void* c_client, const char* list_name,
-                        const size_t list_name_length, int* result);
+                        const size_t list_name_length, int* result_length);
 
 /*!
 *   \brief Poll list length until length is equal
@@ -1408,14 +1408,14 @@ SRError get_list_length(void* c_client, const char* list_name,
 *   \param poll_frequency_ms The time delay between checks,
 *                            in milliseconds
 *   \param num_tries The total number of times to check for the name
-*   \param result Receives the result of the poll:
-*                 true if the list is found with a length greater
-*                 than or equal to the provided length, otherwise false
+*   \param poll_result Receives the result of the poll:
+*                      true if the list is found with a length greater
+*                      than or equal to the provided length, otherwise false
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_list_length(void* c_client, const char* name,
                          const size_t name_length, int list_length,
-                         int poll_frequency_ms, int num_tries, bool* result);
+                         int poll_frequency_ms, int num_tries, bool* poll_result);
 
 /*!
 *   \brief Poll list length until length is greater than or equal
@@ -1433,15 +1433,15 @@ SRError poll_list_length(void* c_client, const char* name,
 *   \param poll_frequency_ms The time delay between checks,
 *                            in milliseconds
 *   \param num_tries The total number of times to check for the name
-*   \param result Receives the result of the poll:
-*                 true if the list is found with a length greater
-*                 than or equal to the provided length, otherwise false
+*   \param poll_result Receives the result of the poll:
+*                      true if the list is found with a length greater
+*                      than or equal to the provided length, otherwise false
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_list_length_gte(void* c_client, const char* name,
                              const size_t name_length, int list_length,
                              int poll_frequency_ms, int num_tries,
-                             bool* result);
+                             bool* poll_result);
 
 /*!
 *   \brief Poll list length until length is less than or equal
@@ -1459,15 +1459,15 @@ SRError poll_list_length_gte(void* c_client, const char* name,
 *   \param poll_frequency_ms The time delay between checks,
 *                            in milliseconds
 *   \param num_tries The total number of times to check for the name
-*   \param result Receives the result of the poll:
-*                 true if the list is found with a length less
-*                 than or equal to the provided length, otherwise false
+*   \param poll_result Receives the result of the poll:
+*                      true if the list is found with a length less
+*                      than or equal to the provided length, otherwise false
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError poll_list_length_lte(void* c_client, const char* name,
                              const size_t name_length, int list_length,
                              int poll_frequency_ms, int num_tries,
-                             bool* result);
+                             bool* poll_result);
 
 /*!
 *   \brief Get datasets from an aggregation list
@@ -1519,7 +1519,7 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 */
 SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
-                               const int start_index, const int end_index);
+                               const int start_index, const int end_index,
                                void** datasets, size_t* num_datasets);
 
 #ifdef __cplusplus
