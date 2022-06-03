@@ -1318,7 +1318,7 @@ SRError use_list_ensemble_prefix(void* c_client, bool use_prefix);
 *            with a separate call to put_dataset().
 *   \param c_client The client object to use for communication
 *   \param list_name The name of the aggregation list
-*   \param list_name_length The size in bytes of the list name,
+*   \param list_name_length The size in characters of the list name,
 *                           including null terminator
 *   \param dataset The DataSet to append
 *   \return Returns SRNoError on success or an error code on failure
@@ -1334,7 +1334,7 @@ SRError append_to_list(void* c_client, const char* list_name,
 *            and use_list_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param list_name The name of the aggregation list
-*   \param list_name_length The size in bytes of the list name,
+*   \param list_name_length The size in characters of the list name,
 *                           including null terminator
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1350,10 +1350,10 @@ SRError delete_list(void* c_client, const char* list_name,
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param src_name The source list name
-*   \param src_name_length The size in bytes of the source list name,
+*   \param src_name_length The size in characters of the source list name,
 *                          including null terminator
 *   \param dest_name The destination list name
-*   \param dest_name_length The size in bytes of the destination list name,
+*   \param dest_name_length The size in characters of the destination list name,
 *                           including null terminator
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1369,10 +1369,10 @@ SRError copy_list(void* c_client,
 *            and use_list_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
 *   \param old_name The old list name
-*   \param src_name_length The size in bytes of the old list name,
+*   \param src_name_length The size in characters of the old list name,
 *                          including null terminator
 *   \param new_name The new list name
-*   \param new_name_length The size in bytes of the new list name,
+*   \param new_name_length The size in characters of the new list name,
 *                          including null terminator
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1384,7 +1384,7 @@ SRError rename_list(void* c_client,
 *   \brief Get the number of entries in the list
 *   \param c_client The client object to use for communication
 *   \param list_name The list name
-*   \param list_name_length The size in bytes of the list name,
+*   \param list_name_length The size in characters of the list name,
 *                           including null terminator
 *   \param result_length Receives the length of the list
 *   \return Returns SRNoError on success or an error code on failure
@@ -1402,7 +1402,7 @@ SRError get_list_length(void* c_client, const char* list_name,
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the list
-*   \param name_length The size in bytes of the list name,
+*   \param name_length The size in characters of the list name,
 *                      including null terminator
 *   \param list_length The desired length of the list
 *   \param poll_frequency_ms The time delay between checks,
@@ -1427,7 +1427,7 @@ SRError poll_list_length(void* c_client, const char* name,
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the list
-*   \param name_length The size in bytes of the list name,
+*   \param name_length The size in characters of the list name,
 *                      including null terminator
 *   \param list_length The desired length of the list
 *   \param poll_frequency_ms The time delay between checks,
@@ -1453,7 +1453,7 @@ SRError poll_list_length_gte(void* c_client, const char* name,
 *            for more details.
 *   \param c_client The client object to use for communication
 *   \param name The name of the list
-*   \param name_length The size in bytes of the list name,
+*   \param name_length The size in characters of the list name,
 *                      including null terminator
 *   \param list_length The desired length of the list
 *   \param poll_frequency_ms The time delay between checks,
@@ -1478,7 +1478,7 @@ SRError poll_list_length_lte(void* c_client, const char* name,
 *            aggregation list returns an empty vector.
 *   \param c_client The client object to use for communication
 *   \param list_name The name of the aggregation list
-*   \param list_name_length The size in bytes of the list name,
+*   \param list_name_length The size in characters of the list name,
 *                           including null terminator
 *   \param datasets Receives an array of datasets included in the list
 *   \param num_datasets Receives the number of datasets returned
@@ -1501,7 +1501,7 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 *            than start_index), an empty list of datasets will be returned.
 *   \param c_client The client object to use for communication
 *   \param list_name The name of the aggregation list
-*   \param list_name_length The size in bytes of the list name,
+*   \param list_name_length The size in characters of the list name,
 *                           including null terminator
 *   \param start_index The starting index of the range (inclusive,
 *                      starting at zero).  Negative values are
