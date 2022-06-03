@@ -1281,6 +1281,7 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
 SRError use_model_ensemble_prefix(void* c_client, bool use_prefix);
 
 /*!
+<<<<<<< HEAD
 *   \brief Control whether aggregation lists are prefixed
 *   \details This function can be used to avoid key collisions in an
 *            ensemble by prepending the string value from the
@@ -1490,6 +1491,10 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 
 /*!
 *   \brief Get a range of datasets (by index) from an aggregation list
+=======
+*   \brief Get a range of datasets (by index) from an aggregation list and
+           copy them into an already allocated vector of datasets
+>>>>>>> f2e1049 (Implement dataset aggregation for Fortran)
 *   \details The aggregation list key used to retrieve datasets
 *            may be formed by applying a prefix to the supplied
 *            name. See set_data_source()  and use_list_ensemble_prefix()
@@ -1501,7 +1506,11 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 *            than start_index), an empty list of datasets will be returned.
 *   \param c_client The client object to use for communication
 *   \param list_name The name of the aggregation list
+<<<<<<< HEAD
 *   \param list_name_length The size in characters of the list name,
+=======
+*   \param list_name_length The size in bytes of the list name,
+>>>>>>> f2e1049 (Implement dataset aggregation for Fortran)
 *                           including null terminator
 *   \param start_index The starting index of the range (inclusive,
 *                      starting at zero).  Negative values are
@@ -1517,10 +1526,17 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 *   \param num_datasets Receives the number of datasets returned
 *   \return Returns SRNoError on success or an error code on failure
 */
+<<<<<<< HEAD
 SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
                                void*** datasets, size_t* num_datasets);
+=======
+SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
+                                         const size_t list_name_length,
+                                         const int start_index, const int end_index,
+                                         void** datasets);
+>>>>>>> f2e1049 (Implement dataset aggregation for Fortran)
 
 #ifdef __cplusplus
 }

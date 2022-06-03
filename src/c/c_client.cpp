@@ -2019,3 +2019,41 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
 
   return result;
 }
+// Get a range of datasets (by index) from an aggregation list into an
+// already allocated vector of datasets
+extern "C"
+SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
+                               const size_t list_name_length,
+                               const int start_index, const int end_index,
+                               void** datasets)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL);
+    int num_datasets = result_datasets.size();
+    if ( num_datasets != (end_index-start_index+1)) {
+      SRSetLastError(SRInternalException(
+        "Returned dataset list is not equal to the requested range"
+      ));
+    }
+
+    if (num_datasets > 0) {
+      for (size_t i = 0; i < num_datasets; i++) {
+        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+      }
+    }
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
