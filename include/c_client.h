@@ -1486,7 +1486,11 @@ SRError poll_list_length_lte(void* c_client, const char* name,
 */
 SRError get_datasets_from_list(void* c_client, const char* list_name,
                                const size_t list_name_length,
+<<<<<<< HEAD
                                void*** datasets, size_t* num_datasets);
+=======
+                               void** datasets, size_t* num_datasets);
+>>>>>>> f83429e3ba7eecdc73c3f0d6cd69666b6544b35c
 
 /*!
 *   \brief Get a range of datasets (by index) from an aggregation list
