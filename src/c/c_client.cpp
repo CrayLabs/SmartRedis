@@ -1831,7 +1831,7 @@ SRError get_list_length(void* c_client, const char* list_name,
     Client* s = reinterpret_cast<Client*>(c_client);
     std::string lname(list_name, list_name_length);
 
-    s->get_list_length(lname);
+    *result_length = s->get_list_length(lname);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
@@ -1942,7 +1942,7 @@ SRError poll_list_length_lte(void* c_client, const char* name,
 extern "C"
 SRError get_datasets_from_list(void* c_client, const char* list_name,
                                const size_t list_name_length,
-                               void** datasets, size_t* num_datasets)
+                               void*** datasets, size_t* num_datasets)
 {
   SRError result = SRNoError;
   try
@@ -1955,14 +1955,16 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
     std::string lname(list_name, list_name_length);
 
     std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
-    *num_datasets = result_datasets.size();
+    size_t ndatasets = result_datasets.size();
     *datasets = NULL;
-    if (*num_datasets > 0) {
-      *datasets = new void*[*num_datasets];
-      for (size_t i = 0; i < *num_datasets; i++) {
-        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+    if (ndatasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
       }
+      *datasets = (void**)alloc;
     }
+    *num_datasets = ndatasets;
   }
   catch (const Exception& e) {
     SRSetLastError(e);

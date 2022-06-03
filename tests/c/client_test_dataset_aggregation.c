@@ -40,12 +40,13 @@ bool cluster = true;
 int append_dataset(void* client, char* list_name, int list_name_length, char* ds_name, int ds_name_length)
 {
   void *dataset = NULL;
-  char *t1 = "tensor_1";
+  char *t1 = "test_array";
   const size_t n_dims = 1;
   size_t dims[n_dims];
-  uint16_t ***tensor = NULL;
+  uint16_t* tensor = NULL;
   int i;
   bool exists = false;
+  int list_length = 0;
 
   // Initialize dataset
   if (SRNoError != CDataSet(ds_name, ds_name_length, &dataset) || NULL == dataset)
@@ -59,7 +60,7 @@ int append_dataset(void* client, char* list_name, int list_name_length, char* ds
   for (i = 0; i < dims[0]; i++) {
     tensor[i] = 1 << i;
   }
-  if (SRNoError != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, SRTensorTypeInt16, SRMemLayoutNested))
+  if (SRNoError != add_tensor(dataset, t1, strlen(t1), tensor, dims, n_dims, SRTensorTypeUint16, SRMemLayoutNested))
     return -1;
 
   // Put the DataSet into the database
@@ -81,7 +82,7 @@ int count_datasets(void* client, char* list_name, int list_name_length, int expe
     return -1;
   }
   if (list_length != expected_count) {
-    printf("Got wrong number of entries in list!\n");
+    printf("Got wrong number of entries in list! (Got %d; expected %d.)\n", list_length, expected_count);
     return -1;
   }
   return 0;
@@ -89,6 +90,34 @@ int count_datasets(void* client, char* list_name, int list_name_length, int expe
 
 int check_dataset(void* client, void* dataset)
 {
+  const char* tensor_name = "test_array";
+  uint16_t* tensor = NULL;
+  size_t* dims = NULL;
+  size_t n_dims = 0;
+  SRTensorType type;
+  uint16_t i;
+
+  if (SRNoError != get_dataset_tensor(
+    dataset, tensor_name, strlen(tensor_name), (void **)&tensor, &dims, &n_dims, &type, SRMemLayoutContiguous)) {
+      printf("Failed to get tensor!\n");
+      return -1;
+  }
+  if (1 != n_dims || dims[0] != 10) {
+    printf("Tensor has wrong dimensionality!\n");
+    return -1;
+  }
+  if (type != SRTensorTypeUint16) {
+    printf("Tensor has wrong type!\n");
+    return -1;
+  }
+  for (i = 0; i < 10; i++) {
+    if (tensor[i] != 1 << i) {
+      printf("Tensor has wrong data!\n");
+      return -1;
+    }
+  }
+
+  // Looks good
   return 0;
 }
 
@@ -96,12 +125,11 @@ int main(int argc, char* argv[])
 {
   int i;
   int result = 0;
-  int ndatasets = 4;
-  char* dbl_suffix = "_dbl_c";
-  char* dataset_name[] = {"agg_dataset_0", "agg_dataset_1", "agg_dataset_2",  "agg_dataset_2"};
-  char* list_name = "my_aggregation";
-  void* datasets = NULL;
+  int ndatasets = 5;
   size_t num_datasets = 0;
+  char* dataset_name[] = {"agg_dataset_0", "agg_dataset_1", "agg_dataset_2",  "agg_dataset_2", "agg_dataset_3"};
+  char* list_name = "my_aggregation";
+  void** datasets = NULL;
 
   // Initialize client
   void *client = NULL;
@@ -129,14 +157,14 @@ int main(int argc, char* argv[])
       printf("Retrieval of datasets failed!\n");
       return -1;
   }
-  if (num_datasets != (size_t)ndatasets) {
-    printf("Retrieval of datasets got the wrong number of datasets!\n");
+  if ((int)num_datasets != ndatasets) {
+    printf("Retrieval of datasets got the wrong number of datasets (got %d; expected %d)!\n", (int)num_datasets, (int)ndatasets);
     return -1;
   }
 
   // Check datasets
   for (i = 0; i < ndatasets; i++) {
-    result += check_dataset(client, &datasets[i]);
+    result += check_dataset(client, datasets[i]);
   }
 
   // Done
