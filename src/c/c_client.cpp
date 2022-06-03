@@ -1983,7 +1983,7 @@ extern "C"
 SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
-                               void** datasets, size_t* num_datasets)
+                               void*** datasets, size_t* num_datasets)
 {
   SRError result = SRNoError;
   try
@@ -1997,14 +1997,16 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
 
     std::vector<DataSet> result_datasets = s->get_dataset_list_range(
       lname, start_index, end_index);
-    *num_datasets = result_datasets.size();
+    size_t ndatasets = result_datasets.size();
     *datasets = NULL;
     if (*num_datasets > 0) {
-      *datasets = new void*[*num_datasets];
-      for (size_t i = 0; i < *num_datasets; i++) {
-        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
       }
+      *datasets = (void**)alloc;
     }
+    *num_datasets = ndatasets;
   }
   catch (const Exception& e) {
     SRSetLastError(e);

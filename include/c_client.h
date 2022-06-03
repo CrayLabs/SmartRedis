@@ -1520,7 +1520,7 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
-                               void** datasets, size_t* num_datasets);
+                               void*** datasets, size_t* num_datasets);
 
 #ifdef __cplusplus
 }
