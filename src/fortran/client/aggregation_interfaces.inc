@@ -104,7 +104,7 @@ interface
     type(c_ptr), value            :: client
     character(kind=c_char)        :: name(*)
     integer(kind=c_size_t), value :: name_length
-    integer(kind=c_int),    value :: list_length 
+    integer(kind=c_int),    value :: list_length
     integer(kind=c_int),    value :: poll_frequency_ms
     integer(kind=c_int),    value :: num_tries
     logical(kind=c_bool)          :: exists
@@ -120,7 +120,7 @@ interface
     type(c_ptr), value            :: client
     character(kind=c_char)        :: name(*)
     integer(kind=c_size_t), value :: name_length
-    integer(kind=c_int),    value :: list_length 
+    integer(kind=c_int),    value :: list_length
     integer(kind=c_int),    value :: poll_frequency_ms
     integer(kind=c_int),    value :: num_tries
     logical(kind=c_bool)          :: exists
@@ -136,7 +136,7 @@ interface
     type(c_ptr), value            :: client
     character(kind=c_char)        :: name(*)
     integer(kind=c_size_t), value :: name_length
-    integer(kind=c_int),    value :: list_length 
+    integer(kind=c_int),    value :: list_length
     integer(kind=c_int),    value :: poll_frequency_ms
     integer(kind=c_int),    value :: num_tries
     logical(kind=c_bool)          :: exists
@@ -151,7 +151,7 @@ interface
     integer(kind=enum_kind)       :: get_datasets_from_list_c
     type(c_ptr), value            :: client
     character(kind=c_char)        :: list_name(*)
-    integer(kind=c_size_t), value :: list_name_length 
+    integer(kind=c_size_t), value :: list_name_length
     type(c_ptr), dimension(:)     :: datasets
     integer(kind=c_size_t)        :: num_datasets
   end function get_datasets_from_list_c
@@ -165,7 +165,7 @@ interface
     integer(kind=enum_kind)       :: get_dataset_list_range_c
     type(c_ptr), value            :: client
     character(kind=c_char)        :: list_name(*)
-    integer(kind=c_size_t), value :: list_name_length 
+    integer(kind=c_size_t), value :: list_name_length
     integer(kind=c_int),    value :: start_index
     integer(kind=c_int),    value :: end_index
     type(c_ptr), dimension(:)     :: datasets

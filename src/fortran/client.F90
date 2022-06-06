@@ -147,9 +147,13 @@ type, public :: client_type
   !> Delete the dataset from the database
   procedure :: delete_dataset
 
+  !> If true, preprend the ensemble id for tensor-related keys
   procedure :: use_tensor_ensemble_prefix
+  !> If true, preprend the ensemble id for model-related keys
   procedure :: use_model_ensemble_prefix
+  !> If true, preprend the ensemble id for dataset list-related keys
   procedure :: use_list_ensemble_prefix
+  !> Specify a specific source of data (e.g. another ensemble member)
   procedure :: set_data_source
 
   !> Append a dataset to a list for aggregation
@@ -1204,7 +1208,7 @@ function set_script_multigpu(self, name, script, first_gpu, num_gpus) result(cod
 
   name_length = len_trim(name)
   script_length = len_trim(script)
-  
+
   c_first_gpu = first_gpu
   c_num_gpus = num_gpus
 
@@ -1337,7 +1341,7 @@ function delete_script_multigpu(self, name, first_gpu, num_gpus) result(code)
 
   c_name = trim(name)
   name_length = len_trim(name)
-  
+
   c_first_gpu = first_gpu
   c_num_gpus = num_gpus
 
@@ -1474,14 +1478,14 @@ function use_list_ensemble_prefix(self, use_prefix) result(code)
 end function use_list_ensemble_prefix
 
 !> Appends a dataset to the aggregation list When appending a dataset to an aggregation list, the list will
-!! automatically be created if it does not exist (i.e. this is the first entry in the list). Aggregation 
+!! automatically be created if it does not exist (i.e. this is the first entry in the list). Aggregation
 !! lists work by referencing the dataset by storing its key, so appending a dataset to an aggregation list
-!! does not create a copy of the dataset.  Also, for this reason, the dataset must have been previously 
+!! does not create a copy of the dataset.  Also, for this reason, the dataset must have been previously
 !! placed into the database with a separate call to put_dataset().
 function append_to_list(self, list_name, dataset) result(code)
   class(client_type), intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),   intent(in) :: list_name    !< Name of the dataset to get
-  type(dataset_type), intent(in) :: dataset !< receives the dataset
+  character(len=*),   intent(in) :: list_name  !< Name of the dataset to get
+  type(dataset_type), intent(in) :: dataset    !< Dataset to append to the list
   integer(kind=enum_kind)        :: code
 
   integer(kind=c_size_t) :: list_name_length
@@ -1495,9 +1499,9 @@ end function append_to_list
 !> Delete an aggregation list
 function delete_list(self, list_name) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
+  character(len=*),     intent(in) :: list_name  !< Name of the aggregated dataset list to delete
   integer(kind=enum_kind)          :: code
-  
+
   integer(kind=c_size_t) :: list_name_length
   character(kind=c_char,len=len_trim(list_name)) :: list_name_c
 
@@ -1509,11 +1513,11 @@ end function delete_list
 
 !> Copy an aggregation list
 function copy_list(self, src_name, dest_name) result(code)
-  class(client_type),   intent(in) :: self     !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: src_name !< Name of the dataset to copy
+  class(client_type),   intent(in) :: self      !< An initialized SmartRedis client
+  character(len=*),     intent(in) :: src_name  !< Name of the dataset to copy
   character(len=*),     intent(in) :: dest_name !< The new list name
   integer(kind=enum_kind)          :: code
-  
+
   integer(kind=c_size_t) :: src_name_length, dest_name_length
   character(kind=c_char,len=len_trim(src_name)) :: src_name_c
   character(kind=c_char,len=len_trim(dest_name)) :: dest_name_c
@@ -1528,11 +1532,11 @@ end function copy_list
 
 !> Rename an aggregation list
 function rename_list(self, src_name, dest_name) result(code)
-  class(client_type),   intent(in) :: self     !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: src_name !< Name of the dataset to rename
+  class(client_type),   intent(in) :: self      !< An initialized SmartRedis client
+  character(len=*),     intent(in) :: src_name  !< Name of the dataset to rename
   character(len=*),     intent(in) :: dest_name !< The new list name
   integer(kind=enum_kind)          :: code
-  
+
   integer(kind=c_size_t) :: src_name_length, dest_name_length
   character(kind=c_char,len=len_trim(src_name)) :: src_name_c
   character(kind=c_char,len=len_trim(dest_name)) :: dest_name_c
@@ -1547,12 +1551,12 @@ end function rename_list
 
 !> Get the length of the aggregation list
 function get_list_length(self, list_name, result_length) result(code)
-  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
-  integer,              intent(out) :: result_length !< The length of the list
-  integer(kind=enum_kind)          :: code
- 
-  integer(kind=c_size_t) :: list_name_length 
+  class(client_type),   intent(in   ) :: self           !< An initialized SmartRedis client
+  character(len=*),     intent(in   ) :: list_name      !< Name of the dataset to get
+  integer,              intent(  out) :: result_length  !< The length of the list
+  integer(kind=enum_kind)             :: code
+
+  integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: result_length_c
   character(kind=c_char,len=len_trim(list_name)) :: list_name_c
 
@@ -1566,14 +1570,14 @@ end function get_list_length
 
 !> Get the length of the aggregation list
 function poll_list_length(self, list_name, list_length, poll_frequency_ms, num_tries, poll_result) result(code)
-  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
-  integer,              intent(in)  :: list_length !< The desired length of the list
-  integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
-  integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: poll_result !< True if the list is the requested length, False if not after num_tries.
-  integer(kind=enum_kind)          :: code
-  
+  class(client_type),   intent(in   ) :: self               !< An initialized SmartRedis client
+  character(len=*),     intent(in   ) :: list_name          !< Name of the dataset to get
+  integer,              intent(in   ) :: list_length        !< The desired length of the list
+  integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
+  integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
+  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  integer(kind=enum_kind)             :: code
+
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
@@ -1591,14 +1595,14 @@ end function poll_list_length
 
 !> Get the length of the aggregation list
 function poll_list_length_gte(self, list_name, list_length, poll_frequency_ms, num_tries, poll_result) result(code)
-  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
-  integer,              intent(in)  :: list_length !< The desired length of the list
-  integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
-  integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: poll_result !< True if the list is the requested length, False if not after num_tries.
+  class(client_type),   intent(in   ) :: self               !< An initialized SmartRedis client
+  character(len=*),     intent(in   ) :: list_name          !< Name of the dataset to get
+  integer,              intent(in   ) :: list_length        !< The desired length of the list
+  integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
+  integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
+  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
-  
+
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
@@ -1616,14 +1620,14 @@ end function poll_list_length_gte
 
 !> Get the length of the aggregation list
 function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, num_tries, poll_result) result(code)
-  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
-  integer,              intent(in)  :: list_length !< The desired length of the list
+  class(client_type),   intent(in) :: self                !< An initialized SmartRedis client
+  character(len=*),     intent(in) :: list_name           !< Name of the dataset to get
+  integer,              intent(in)  :: list_length        !< The desired length of the list
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: poll_result !< True if the list is the requested length, False if not after num_tries.
+  logical(kind=c_bool), intent(out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
-  
+
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
@@ -1639,10 +1643,13 @@ function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, n
                             c_list_length, c_poll_frequency, c_num_tries, poll_result)
 end function poll_list_length_lte
 
-!> Get datasets from an aggregation list. Note that this will deallocate an existing list
+!> Get datasets from an aggregation list. Note that this will deallocate an existing list.
+!! NOTE: This potentially be less performant than get_datasets_from_list_range due to an
+!! extra query to the database to get the list length. This is for now necessary because
+!! difficulties in allocating memory for Fortran alloctables from within C.
 function get_datasets_from_list(self, list_name, datasets, num_datasets) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
+  character(len=*),     intent(in) :: list_name  !< Name of the dataset to get
   type(dataset_type), dimension(:), allocatable, intent(  out) :: datasets !< The array of datasets included
   integer(kind=enum_kind)          :: code
                                                                            !! in the list
@@ -1660,24 +1667,24 @@ function get_datasets_from_list(self, list_name, datasets, num_datasets) result(
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
-  
+
   c_num_datasets = num_datasets
   code = get_dataset_list_range_allocated_c(self%client_ptr, list_name_c, list_name_length, &
-                                           0, c_num_datasets-1, dataset_ptrs) 
-  
+                                           0, c_num_datasets-1, dataset_ptrs)
+
   if (allocated(datasets)) deallocate(datasets)
   allocate(datasets(num_datasets))
   do i=1,num_datasets
     datasets(i)%dataset_ptr = dataset_ptrs(i)
-  enddo 
+  enddo
   deallocate(dataset_ptrs)
 
 end function get_datasets_from_list
 
 !> Get datasets from an aggregation list over a given range by index. Note that this will deallocate an existing list
 function get_datasets_from_list_range(self, list_name, start_index, end_index, datasets) result(code)
-  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
-  character(len=*),     intent(in) :: list_name    !< Name of the dataset to get
+  class(client_type),   intent(in) :: self        !< An initialized SmartRedis client
+  character(len=*),     intent(in) :: list_name   !< Name of the dataset to get
   integer,              intent(in) :: start_index !< The starting index of the range (inclusive,
                                                   !! starting at zero).  Negative values are
                                                   !! supported.  A negative value indicates offsets
@@ -1688,7 +1695,7 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
                                                   !! supported.  A negative value indicates offsets
                                                   !! starting at the end of the list. For example, -1 is
                                                   !! the last element of the list.
-  
+
   type(dataset_type), dimension(:), allocatable, intent(  out) :: datasets !< The array of datasets included
   integer(kind=enum_kind)          :: code
                                                                            !! in the list
@@ -1705,16 +1712,16 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
-  
+
   c_num_datasets = num_datasets
   code = get_dataset_list_range_allocated_c(self%client_ptr, list_name_c, list_name_length, &
-                                            c_start_index, c_end_index, dataset_ptrs) 
-  
+                                            c_start_index, c_end_index, dataset_ptrs)
+
   if (allocated(datasets)) deallocate(datasets)
   allocate(datasets(num_datasets))
   do i=1,num_datasets
     datasets(i)%dataset_ptr = dataset_ptrs(i)
-  enddo 
+  enddo
   deallocate(dataset_ptrs)
 end function get_datasets_from_list_range
 
