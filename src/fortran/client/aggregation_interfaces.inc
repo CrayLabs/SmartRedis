@@ -168,6 +168,6 @@ interface
     integer(kind=c_size_t), value :: list_name_length
     integer(kind=c_int),    value :: start_index
     integer(kind=c_int),    value :: end_index
-    type(c_ptr), dimension(:)     :: datasets
+    type(c_ptr), value            :: datasets
   end function get_dataset_list_range_allocated_c
 end interface

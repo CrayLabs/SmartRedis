@@ -1659,18 +1659,20 @@ function get_datasets_from_list(self, list_name, datasets, num_datasets) result(
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length, c_num_datasets
 
-  type(c_ptr), dimension(:), allocatable :: dataset_ptrs
+  type(c_ptr), dimension(:), allocatable, target :: dataset_ptrs
+  type(c_ptr) :: ptr_to_dataset_ptrs
   integer :: i
 
   code = self%get_list_length(list_name, num_datasets)
   allocate(dataset_ptrs(num_datasets))
+  ptr_to_dataset_ptrs = c_loc(dataset_ptrs)
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
 
   c_num_datasets = num_datasets
   code = get_dataset_list_range_allocated_c(self%client_ptr, list_name_c, list_name_length, &
-                                           0, c_num_datasets-1, dataset_ptrs)
+                                           0, c_num_datasets-1, ptr_to_dataset_ptrs)
 
   if (allocated(datasets)) deallocate(datasets)
   allocate(datasets(num_datasets))
@@ -1704,18 +1706,21 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length, c_num_datasets
   integer(kind=c_int) :: c_start_index, c_end_index
   integer :: num_datasets, i
-  type(c_ptr), dimension(:), allocatable :: dataset_ptrs
+  type(c_ptr), dimension(:), allocatable, target :: dataset_ptrs
+  type(c_ptr) :: ptr_to_dataset_ptrs
 
   code = self%get_list_length(list_name, num_datasets)
   if (code /= SRNoError) return
   allocate(dataset_ptrs(num_datasets))
+  ptr_to_dataset_ptrs = c_loc(dataset_ptrs)
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
 
   c_num_datasets = num_datasets
+
   code = get_dataset_list_range_allocated_c(self%client_ptr, list_name_c, list_name_length, &
-                                            c_start_index, c_end_index, dataset_ptrs)
+                                            c_start_index, c_end_index, ptr_to_dataset_ptrs)
 
   if (allocated(datasets)) deallocate(datasets)
   allocate(datasets(num_datasets))
