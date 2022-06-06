@@ -2040,7 +2040,7 @@ SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
     std::vector<DataSet> result_datasets = s->get_dataset_list_range(
       lname, start_index, end_index);
     size_t num_datasets = result_datasets.size();
-    if ( num_datasets != (end_index-start_index+1)) {
+    if ( num_datasets != (size_t) (end_index-start_index+1)) {
       SRSetLastError(SRInternalException(
         "Returned dataset list is not equal to the requested range"
       ));
