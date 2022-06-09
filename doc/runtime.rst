@@ -107,6 +107,15 @@ The functions for changing this default behavior are:
     The function ``Client.use_model_ensemble_prefix()`` controls
     object prefixing for model and script data.
 
+Model Execution Environment Variable
+====================================
+
+SmartRedis enables a timeout on the length of time that is allowed
+to elapse while waiting for a model to elapse. This is controlled
+by the ``SR_MODEL_TIMEOUT`` environment variable. The value for
+this variable is measured in milliseconds, and the default value
+is one minute.
+
 Connection and Command Execution Environment Variables
 ======================================================
 
@@ -130,3 +139,11 @@ The user can set these environment variables to adjust command execution behavio
 ``SR_CMD_TIMEOUT`` should be specified in seconds.  Note that ``SR_CMD_INTERVAL``
 and ``SR_CMD_TIMEOUT`` are read during client initialization and not
 before each command execution.
+
+The environment variable ``SR_THREAD_COUNT`` is used by SmartRedis to determine
+the number of threads to initialize when building a worker pool for parallel task
+execution. If the variable is not defined, SmartRedis will use a default number
+of threads equal to one per hardware context in the processor on which the library
+is running. This default will generally give good performance; however, if the
+SmartRedis library is sharing the processor hardware with other software, it may
+be useful to specify a smaller number of threads for some workloads.
