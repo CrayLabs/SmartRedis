@@ -113,7 +113,7 @@ end function initialize_dataset
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
 function add_tensor_i8(self, name, data, dims) result(code)
   integer(kind=c_int8_t), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
@@ -129,7 +129,7 @@ end function add_tensor_i8
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int16' C-type
 function add_tensor_i16(self, name, data, dims) result(code)
   integer(kind=c_int16_t), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
@@ -145,7 +145,7 @@ end function add_tensor_i16
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int32' C-type
 function add_tensor_i32(self, name, data, dims) result(code)
   integer(kind=c_int32_t), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
@@ -161,7 +161,7 @@ end function add_tensor_i32
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int64' C-type
 function add_tensor_i64(self, name, data, dims) result(code)
   integer(kind=c_int64_t), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
@@ -177,7 +177,7 @@ end function add_tensor_i64
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'float' C-type
 function add_tensor_float(self, name, data, dims) result(code)
   real(kind=c_float), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
@@ -193,7 +193,7 @@ end function add_tensor_float
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'double' C-type
 function add_tensor_double(self, name, data, dims) result(code)
   real(kind=c_double), dimension(..), target, intent(in) :: data !< Data to be sent
-  class(dataset_type),   intent(in)  :: self !< Fortran SLIC dataset
+  class(dataset_type),   intent(in)  :: self !< Fortran SmartRedis dataset
   character(len=*),      intent(in)  :: name !< The unique name used to store in the database
   integer, dimension(:), intent(in)  :: dims !< The length of each dimension
   integer(kind=enum_kind)            :: code !< Result of the operation
