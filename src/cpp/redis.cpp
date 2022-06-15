@@ -561,7 +561,7 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                  "non-cluster client connection.");
     }
 
-    //Build the Command
+    // Build the Command
     cmd.set_exec_address_port(host, port);
     cmd << "AI.INFO" << Keyfield(key);
 
@@ -571,6 +571,20 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
     }
 
     return run(cmd);
+}
+
+// Reconfigure the model chunk size for the database
+void Redis::set_model_chunk_size(int chunk_size)
+{
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+
+    // Store the new model chunk size for later
+    _model_chunk_size = chunk_size;
 }
 
 inline CommandReply Redis::_run(const Command& cmd)

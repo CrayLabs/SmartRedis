@@ -1439,14 +1439,7 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
 // Reconfigure the model chunk size for the database
 void Client::set_model_chunk_size(int chunk_size)
 {
-    AddressAnyCommand cmd;
-    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
-    std::cout << cmd.to_string() << std::endl;
-
-    CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
-    _redis_server->store_model_chunk_size(chunk_size);
+    _redis_server->set_model_chunk_size(chunk_size);
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN

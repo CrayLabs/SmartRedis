@@ -34,10 +34,12 @@ set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
 find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(HIREDIS hiredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
 
 include_directories(SYSTEM
     /usr/local/include
     ../../install/include
+    ../../install/include/hiredis
 )
 
 add_executable(client_test_dataset_aggregation
@@ -85,5 +87,13 @@ add_executable(client_test_put_get_3D
 )
 
 target_link_libraries(client_test_put_get_3D
+        ${SR_LIB}
+)
+
+add_executable(test_raw
+        test_raw.c
+)
+
+target_link_libraries(test_raw
         ${SR_LIB}
 )

@@ -917,11 +917,40 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
     return run(cmd);
 }
 
+// Reconfigure the model chunk size for the database
+void RedisCluster::set_model_chunk_size(int chunk_size)
+{
+    // Repeat for each server node:
+    std::vector<DBNode>::const_iterator node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Pick a node for the command
+        AddressAtCommand cmd;
+        std::string host(node->ip);
+        uint64_t port = node->port;
+        cmd.set_exec_address_port(host, port);
+        // Build the command
+        cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+
+        // Run it
+        CommandReply reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("set_model_chunk_size failed for node " + node->name);
+        }
+    }
+
+    // Store the new model chunk size for later
+    _model_chunk_size = chunk_size;
+}
+
+
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
 {
+    if (db_prefix.length() == 0) {
+        throw SRInternalException("No db_prefix in call to RedisCluster::_run()");
+    }
     std::string_view sv_prefix(db_prefix.data(), db_prefix.size());
 
-    // Execute the commmand
+    // Execute the command
     for (int i = 1; i <= _command_attempts; i++) {
         try {
             sw::redis::Redis db = _redis_cluster->redis(sv_prefix, false);
