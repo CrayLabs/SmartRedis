@@ -42,6 +42,7 @@ def test_set_model_from_file(mock_model, use_cluster):
     try:
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
         c = Client(None, use_cluster)
+        c.set_model_chunk_size(1024 * 1024)
         c.set_model_from_file("file_cnn", "./torch_cnn.pt", "TORCH", "CPU")
         assert c.model_exists("file_cnn")
         returned_model = c.get_model("file_cnn")

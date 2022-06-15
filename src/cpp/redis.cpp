@@ -271,7 +271,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
 
 // Set a model from std::string_view buffer in the database for future execution
 CommandReply Redis::set_model(const std::string& model_name,
-                              std::string_view model,
+                              const std::vector<std::string_view>& model,
                               const std::string& backend,
                               const std::string& device,
                               int batch_size,
@@ -310,7 +310,7 @@ CommandReply Redis::set_model(const std::string& model_name,
 // Set a model from std::string_view buffer in the
 // database for future execution in a multi-GPU system
 void Redis::set_model_multigpu(const std::string& name,
-                               const std::string_view& model,
+                               const std::vector<std::string_view>& model,
                                const std::string& backend,
                                int first_gpu,
                                int num_gpus,
@@ -326,7 +326,7 @@ void Redis::set_model_multigpu(const std::string& name,
         std::string device = "GPU:" + std::to_string(i);
         std::string model_key = name + "." + device;
         result = set_model(
-            name, model_key, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
+            model_key, model, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
         if (result.has_error() > 0) {
             throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
         }

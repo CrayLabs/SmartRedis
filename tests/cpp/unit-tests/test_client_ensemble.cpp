@@ -137,6 +137,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 
             Client producer_client(use_cluster());
             producer_client.use_model_ensemble_prefix(true);
+            producer_client.set_model_chunk_size(1024 * 1024);
 
             // Tensors
             float* array = (float*)malloc(dims[0]*sizeof(float));

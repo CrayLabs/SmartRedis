@@ -548,8 +548,20 @@ void Client::set_model(const std::string& name,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
-    _redis_server->set_model(key, model, backend, device,
+    _redis_server->set_model(key, model_segments, backend, device,
                              batch_size, min_batch_size,
                              tag, inputs, outputs);
 }
@@ -599,9 +611,21 @@ void Client::set_model_multigpu(const std::string& name,
         throw SRParameterException(backend + " is not a valid backend.");
     }
 
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
-        key, model, backend, first_gpu, num_gpus,
+        key, model_segments, backend, first_gpu, num_gpus,
         batch_size, min_batch_size,
         tag, inputs, outputs);
 }
@@ -1151,6 +1175,7 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw SRRuntimeException("CONFIG SET command failed");
 }
 
+// Perform an immediate save of the database
 void Client::save(std::string address)
 {
     AddressAtCommand cmd;
@@ -1408,6 +1433,19 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
     }
 
     return _get_dataset_list_range(list_name, start_index, end_index);
+}
+
+// Reconfigure the model chunk size for the database
+void Client::set_model_chunk_size(int chunk_size)
+{
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+    std::cout << cmd.to_string() << std::endl;
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+    _redis_server->store_model_chunk_size(chunk_size);
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN

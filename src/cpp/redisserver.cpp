@@ -56,6 +56,7 @@ RedisServer::RedisServer()
                          _command_interval + 1;
 
     _tp = new ThreadPool(_thread_count);
+    _model_chunk_size = _DEFAULT_MODEL_CHUNK_SIZE;
 }
 
 // RedisServer destructor
