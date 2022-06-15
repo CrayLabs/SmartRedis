@@ -463,6 +463,16 @@ void Client::set_model_from_file(const std::string& name,
         throw SRRuntimeException("Model file " + model_file + " is too large to process.");
     }
 
+    // Check the size of the file
+    int fd = open(model_file.c_str(), O_RDONLY);
+    if (fd == -1) {
+        throw SRRuntimeException("Unable to access model file " + model_file);
+    }
+    size_t length = (size_t)lseek(fd, 0, SEEK_END);
+    if (length > model_file.max_size()) {
+        throw SRRuntimeException("Model file " + model_file + " is too large to process.");
+    }
+
     std::ifstream fin(model_file, std::ios::binary);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -1191,6 +1201,7 @@ void Client::save(std::string address)
         throw SRRuntimeException("SAVE command failed");
 }
 
+<<<<<<< HEAD
 // Append dataset to aggregation list
 void Client::append_to_list(const std::string& list_name,
                             const DataSet& dataset)
@@ -1440,6 +1451,19 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
 void Client::set_model_chunk_size(int chunk_size)
 {
     _redis_server->set_model_chunk_size(chunk_size);
+=======
+// Reconfigure the model chunk size for the database
+void Client::set_model_chunk_size(int chunk_size)
+{
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+    std::cout << cmd.to_string() << std::endl;
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+    _redis_server->store_model_chunk_size(chunk_size);
+>>>>>>> 859c2431e0b20310c44f78fc7d158117f40ca68a
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN

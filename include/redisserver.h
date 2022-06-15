@@ -520,6 +520,14 @@ class RedisServer {
         */
         virtual void set_model_chunk_size(int chunk_size) = 0;
 
+        /*!
+        *   \brief Store the current model chunk size
+        *   \param chunk_size The updated model chunk size
+        */
+        virtual void store_model_chunk_size(int chunk_size) {
+            _model_chunk_size = chunk_size;
+        }
+
     protected:
 
         /*!
@@ -585,6 +593,7 @@ class RedisServer {
         static constexpr int _DEFAULT_CMD_INTERVAL = 1000;
 
         /*!
+<<<<<<< HEAD
         *   \brief Default number of threads for thread pool
         */
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
@@ -610,6 +619,8 @@ class RedisServer {
         ThreadPool *_tp;
 
         /*!
+=======
+>>>>>>> 859c2431e0b20310c44f78fc7d158117f40ca68a
         *   \brief Default model chunking size (bytes)
         */
         static constexpr int _DEFAULT_MODEL_CHUNK_SIZE = 511 * 1024 * 1024;
