@@ -33,6 +33,8 @@ from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
+from .dataset_conversion import Xarray
+
 class Dataset:
     def __init__(self, name):
         """Initialize a Dataset object
@@ -42,6 +44,8 @@ class Dataset:
         """
         typecheck(name, "name", str)
         self._data = PyDataset(name)
+        
+        self.xarray = Xarray() 
 
     @staticmethod
     def from_pybind(dataset):
@@ -169,3 +173,11 @@ class Dataset:
         """
         typecheck(name, "name", str)
         return self._data.get_meta_strings(name)
+
+
+    def from_xarray_to_dataset(self):
+        """to do
+
+    
+        """
+        return self.xarray.to_dataset()
