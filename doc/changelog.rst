@@ -10,7 +10,7 @@ Description
 
  - Updated and improved the documentation of the SmartRedis library. In particular, a new SmartRedis Integration Guide provides an introduction to using the SmartRedis library and integrating it with existing software. (PR261_) (PR260_) (PR259_) (SSPR214_)
 
- - Implemented aggregation of lists of DataSets for all client languages, enabling the SmartRedis library to perform pipelining of operations. (PR258_) (PR257_) (PR256_) (PR248_) New commands are:
+ - Implemented DataSet aggregation lists in all client languages, for pipelined retrieval of data across clustered and non-clustered backend databases. (PR258_) (PR257_) (PR256_) (PR248_) New commands are:
   - append_to_list()
   - delete_list()
   - copy_list()
@@ -23,7 +23,7 @@ Description
   - get_dataset_list_range()
   - use_list_ensemble_prefix()
 
- - Implement multithreaded execution of parallel tasks, including all multi-shard operations. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
+ - Implement multithreaded execution of parallel tasks, including dataset list retrieval and clustered model and script set, delete, and execute operations. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
 
  - Augment support for GPUs by implementing multi-GPU convenience functions for all client languages. (PR254_) (PR250_) (PR244_) New commands are:
   - set_model_from_file_multigpu()
@@ -39,25 +39,25 @@ Description
   - delete_script()
   - delete_model()
 
- - Added clustered Redis testing to automated GitHub check-in testing. (PR239_)
-
  - Updated the use of backend RedisAI API calls to discontinue use of deprecated methods for model selection (AI.MODELSET) and execution (AI.MODELRUN) in favor of current methods AI.MODELSTORE and AI.MODELEXECUTE, respectively. (PR234_)
 
  - SmartRedis will no longer call the C runtime method srand() to ensure that it does not interfere with random number generation in client code. It now uses a separate instance of the C++ random number generator. (PR233_)
 
  - Updated the way that the Fortran enum_kind type defined in the fortran_c_interop module is defined in order to better comply with Fortran standard and not interfere with GCC 6.3.0. (PR231_)
 
- - Updated the SmartRedis internal API for building commands for the backend database. (PR223_) This change should not be visible to clients.
-
  - Corrected the spelling of the word "command" in a few error message strings. (PR221_)
+
+ - SmartRedis now requires a CMake version 3.13 or later in order to utilize the add_link_options CMake command. (PR217_)
+
+ - Added clustered Redis testing to automated GitHub check-in testing. (PR239_)
+
+ - Updated the SmartRedis internal API for building commands for the backend database. (PR223_) This change should not be visible to clients.
 
  - The SmartRedis example code is now validated through the automated GitHub checkin process. This will help ensure that the examples do not fall out of date. (PR220)
 
  - Added missing copyright statements to CMakeLists.txt and the SmartRedis examples. (PR219_)
 
  - Updated the C++ test coverage to ensure that all test files are properly executed when running "make test". (PR218_)
-
- - SmartRedis now requires a CMake version 3.13 or later in order to utilize the add_link_options CMake command. (PR217_)
 
  - Fixed an internal naming conflict between a local variable and a class member variable in the DataSet class. (PR215_)  This should not be visible to clients.
 
