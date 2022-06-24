@@ -4,7 +4,7 @@ Changelog
 0.3.1
 -----
 
-Released on June 23, 2022
+Released on June 24, 2022
 
 Description
 
