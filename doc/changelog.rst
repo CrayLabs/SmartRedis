@@ -13,6 +13,7 @@ Version 0.3.1 adds new functionality in the form of DataSet aggregation lists fo
 Detailed Notes
 
 - Implemented DataSet aggregation lists in all client languages, for pipelined retrieval of data across clustered and non-clustered backend databases. (PR258_) (PR257_) (PR256_) (PR248_) New commands are:
+
   - append_to_list()
   - delete_list()
   - copy_list()
@@ -28,6 +29,7 @@ Detailed Notes
 - Implemented multithreaded execution for parallel dataset list retrieval on clustered databases. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
 
 - Augmented support for GPUs by implementing multi-GPU convenience functions for all client languages. (PR254_) (PR250_) (PR244_) New commands are:
+
   - set_model_from_file_multigpu()
   - set_model_multigpu()
   - set_script_from_file_multigpu()
@@ -38,6 +40,7 @@ Detailed Notes
   - delete_script_multigpu()
 
 - Added API calls for all clients to delete models and scripts from the backend database. (PR240_) New commands are:
+
   - delete_script()
   - delete_model()
 
