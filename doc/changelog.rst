@@ -8,7 +8,9 @@ Released on June 23, 2022
 
 Description
 
- - Updated and improved the documentation of the SmartRedis library. In particular, a new SmartRedis Integration Guide provides an introduction to using the SmartRedis library and integrating it with existing software. (PR261_) (PR260_) (PR259_) (SSPR214_)
+Version 0.3.1 adds new functionality in the form of DataSet aggregation lists for pipelined retrieval of data, conveniuent support for multiple GPUs, and the ability to delete scripts and models from the backend database. It also introduces multithreaded execution for certain tasks that span multiple shards of a clustered database, and it incorporates a variety of internal improvements that will enhance the library going forward.
+
+Detailed Notes
 
  - Implemented DataSet aggregation lists in all client languages, for pipelined retrieval of data across clustered and non-clustered backend databases. (PR258_) (PR257_) (PR256_) (PR248_) New commands are:
   - append_to_list()
@@ -48,6 +50,8 @@ Description
  - Corrected the spelling of the word "command" in a few error message strings. (PR221_)
 
  - SmartRedis now requires a CMake version 3.13 or later in order to utilize the add_link_options CMake command. (PR217_)
+
+ - Updated and improved the documentation of the SmartRedis library. In particular, a new SmartRedis Integration Guide provides an introduction to using the SmartRedis library and integrating it with existing software. (PR261_) (PR260_) (PR259_) (SSPR214_)
 
  - Added clustered Redis testing to automated GitHub check-in testing. (PR239_)
 
