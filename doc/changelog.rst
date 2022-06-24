@@ -25,7 +25,7 @@ Detailed Notes
   - get_dataset_list_range()
   - use_list_ensemble_prefix()
 
- - Implement multithreaded execution of parallel tasks, including dataset list retrieval and clustered model and script set, delete, and execute operations. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
+ - Implemented multithreaded execution of parallel tasks, including dataset list retrieval and clustered model and script set and delete operations. The number of threads devoted for this purpose is controlled by the new environment variable SR_THERAD_COUNT. The value defaults to 4, but may be any positive integer or special value zero, which will cause the SmartRedis runtime to allocate one thread for each available hardware context. (PR251_) (PR246_)
 
  - Augment support for GPUs by implementing multi-GPU convenience functions for all client languages. (PR254_) (PR250_) (PR244_) New commands are:
   - set_model_from_file_multigpu()
