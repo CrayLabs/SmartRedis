@@ -179,161 +179,103 @@ class Dataset:
 
 
     def import_from_xarray(self,xr):
-        # do the conversion we discussed here
- 
-        # data variables
-        ## convert xr to a dict -- easier to separate vars -- already in a form that is right for reconstruction 
-        ##  could do differently --> direclty accessing from xarray 
+        """Get xarray DataArray and convert into a SmartRedis Dataset
+
+        :param xr: The xarray DataArray to Convert 
         
-        # XARRAY TO DICTIONARY 
+        :type xr: xarray DataArray
+        """
+        
+# Convert xr to a dict  
         dict = xr.to_dict()   
-    
-        #to_da = xr.data 
-        #att= xr.attrs  
-        # when adding metastring and tensor should keep track of how things are named for reconstruction  
-       # print(dict) 
-      #  print(dict.keys())   #(['dims', 'attrs', 'data', 'coords', 'name'])
-      #  print(dict["dims"])    #('x', 'y', 'time') 
-      #  print(dict["attrs"])  # {'description': 'Ambient temperature.', 'units': 'degC'}
-      
-      
-        # ------------- ATTRIBUTES TO STRING -------------
-        attr_list = []    
-     #   print("",dict["attrs"].items())
+              
+# Convert attribute list to string 
+        attr_list = []   
         for k, v in dict["attrs"].items():                                  
-            attr_list.extend([k,v])             #attr_list.append(k)      # attr_list.append(v)
+            attr_list.extend([k,v])            
         attr_string = ",".join(attr_list)
         
-        #print(attr_string)  #description,Ambient temperature.,units,degC
+        ## case to include :: no attributes ! 
         
-        #attributes to a string 
-    
-    #    print(dims_string)
-    #    print("extended",attr_list)
-  
-
-        data = dict["data"]   # why did I do this ?
-        #print(dict["dims"])  #('x', 'y', 'time')
-    
-   
-
-       #-------------DIMS TO STRING -------------
+# Extract data variable array
+# Convert data from type list to type numpy.ndarray
+        data = np.array(dict["data"])   
+      
+# Convert dimensions list to string
         dims_string = ",".join(dict["dims"])
-   
-   #     print(dims_string)  #x,y,time
                
-
-        # -------------COORDS TO STRING -------------
+# Convert coordinate names into string  
         coord_list = []  
         for q in dict["coords"]:
             coord_list.append(q)
-        
         coord_string = ",".join(coord_list)
-    
-#       print(coord_string)             # lon, lat, time, reference_time
-                                         # just the comma separated list of coordinates in this dataset 
-
                                                        
-    # ------ the rest of the coordinate object to STRING ------- # could just keep it all in a metastring for reconstruction 
+# Convert coordinate data into string 
         coord_data = []
         for item in coord_list:
-            coord_to_str = dict['coords'][f'{item}']
-            coord_to_str = str(coord_to_str)
-          #  print(type(coord_to_str))
-          #  print(coord_to_str)
+            coord_to_str = str(dict['coords'][f'{item}'])
             coord_data.append(coord_to_str)
-            
-       # print(coord_data)   ## just the coordinate data (minus the name of coords but with all other structure )
-        #print(dict['coords'])   ## or should I just turn this whole dict into a string? 
-       # print(type(coord_data))  # this is a list 
+
         coord_data = ",".join(coord_data)  # do this to turn it into a string 
-       # print(type(coord_data))  # now it's of type string and can be put into a metastring 
-       
-
-
-       # why did I do this? was in the wrong form? 
-       
-        data = np.array(data)        # all in string format or in a numpy array 
  
-        return coord_data, attr_string, data, coord_string, dims_string
+ # Add to dataset   
+        self.add_tensor("data",data)
+        self.add_meta_string("attributes",attr_string) 
+        self.add_meta_string("coordinates",coord_string)  
+        self.add_meta_string("coordinate_data",coord_data)    
+        self.add_meta_string("dimensions", dims_string) 
+
     
 
- 
-    def export_to_xarray(self,dataset,attr_list,coord_string,coord_list,dims_list): # -> xr: 
+    def export_to_xarray(self):  #-> xr: 
+        """Get SmartRedis DataSet and convert into an xarray DataArray
         
-   #     print(dataset)
-   #     print("rattr_list",attr_list)
-   #     print("rcoord_string",coord_string)
-   #     print("rcoord_list",coord_list)
-   #     print("dims_list",dims_list)
+        Assumptions: meta_string attributes, coordinates, coordinate_data
+        and dimensions exist in the correct form. 
         
-        
-        data = dataset
-        
-       #from  rattr_list ['description,Ambient temperature.,units,degC']
-       #to   ['description', 'Ambient temperature.', 'units', 'degC']
+        Returns: xarray DataArray
+        """
+
+# Retrieve the dataset
+        data_ = self.get_tensor("data")
+        attr_string = self.get_meta_strings("attributes")
+        coord_string = self.get_meta_strings("coordinates")
+        coord_data_string = self.get_meta_strings("coordinate_data")
+        dims_string = self.get_meta_strings("dimensions")    
        
-        #--- attr string to something that can be used to reconstruct xarray 
-        attr_list = attr_list[0].split(",")
-   
+# Convert attr string into list 
+        attr_string = attr_string[0].split(",")    
+      
+# Convert from attribute list to dictionary
+        attrs = {attr_string[i]: attr_string[i + 1] for i in range(0, len(attr_string), 2)}
+                    
+# Convert dims string to list 
+        dims_list = dims_string[0].split(",")
         
-        #-----from attribute list to dictionary -- for constructing xarray 
-        # can it just stay a list? 
-        attrs = {attr_list[i]: attr_list[i + 1] for i in range(0, len(attr_list), 2)}
+# Convert coords name string into list 
+        coord_list = coord_string[0].split(",")    
         
-        # --- splitting dims string to list 
-        dims_list = dims_list[0].split(",")
-        
-        # ----- splitting coords list 
-        coord_string = coord_string[0].split(",")
-        #{'description': 'Ambient temperature.', 'units': 'degC'}
-
-  
-        coords = eval(coord_list[0])
-
-    # is this needed
+ #convert coord string into dict then traverse the dict into a form that we can input into xarray  
+        coords_ = eval(coord_data_string[0]) 
+      
         listn = []
-        for n in coords: 
-    #        print(n)
+        for n in coords_: 
             listn.append(n)
-   #     for m in coord_string:
-   #         print(m)
-
-
-
-#need these in the form coord:{lon: {'dims': ('x', 'y'), 'attrs': {}, 'data': [[-99.83, -99.32], [-99.79, -99.23]]
-
-       #         }
-       #this form --> 
-        #{
-        # 'lon': {'dims': ('x', 'y'), 'attrs': {}, 'data': [[-99.83, -99.32], [-99.79, -99.23]]},
-        # 'lat': {'dims': ('x', 'y'), 'attrs': {}, 'data': [[42.25, 42.21], [42.63, 42.59]]}, 
-        # 'time': {'dims': ('time',), 'attrs': {}, 'data': [datetime.datetime(2014, 9, 6, 0, 0), datetime.datetime(2014, 9, 7, 0, 0), datetime.datetime(2014, 9, 8, 0, 0)]},
-        # 'reference_time': {'dims': (), 'attrs': {}, 'data': datetime.datetime(2014, 9, 5, 0, 0)}
-        # }
-        
-        test = {k: {} for k in coord_string}
-
-    
+        test = {k: {} for k in coord_list}
         k=0
         for i in test:
-            test[i] = listn[k]
+            test[i] = listn[k] 
             k += 1
-            
-
-       # print(test)
- 
-      #  test2 = {'lon': '', 'lat': '', 'time':[1,2,3], 'reference_time': ''}
-   
-   #from dict to something accessible by xarray 
-        coords1 = {
+             
+   #from dict to something accessible by xarray    {coords = {} }  coord = {} 
+        coords = {
             k: (v["dims"], v["data"], v.get("attrs"))
                 for k, v in test.items()
             }
 
-     # the reconstruction -- might be missing 
-        xr_ = xr.DataArray(data = dataset, 
+     # The reconstruction
+        xr_ = xr.DataArray(data = data_, 
                            dims = dims_list,
                            attrs = attrs,
-                           coords = coords1)
+                           coords = coords)
         return xr_
