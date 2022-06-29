@@ -573,7 +573,6 @@ class RedisServer {
         std::mt19937 _gen;
 
         /*!
-<<<<<<< HEAD
         *   \brief Number of threads for thread pool
         */
         int _thread_count;
@@ -582,8 +581,6 @@ class RedisServer {
         *   \brief The thread pool
         */
         ThreadPool *_tp;
-=======
->>>>>>> 80877bda4a17a357dd8b0b658fa80dd27250cbc3
         *   \brief Random number generator
         */
         bool _is_domain_socket;
