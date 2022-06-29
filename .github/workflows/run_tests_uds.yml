@@ -133,7 +133,7 @@ jobs:
 
       - name: Overwrite redis env vars
         run: |
-         echo "unix://tmp/redis.sock" >> $GITHUB_ENV &&
+         echo "SSDB=unix://tmp/redis.sock" >> $GITHUB_ENV &&
          echo "SMARTREDIS_TEST_CLUSTER=False" >> $GITHUB_ENV
 
 #      - name: Start redis (***WS*** Do I need to do anything special to launch?)
