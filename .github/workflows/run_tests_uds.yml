@@ -130,11 +130,11 @@ jobs:
           mkdir -p /tmp && \
           touch /tmp/redis.sock && \
           chmod 777 /tmp/redis.sock && \
-          redis-server --unixsocket /tmp/redis.sock --unixsocketperm 777 --daemonize yes --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+          redis-server --unixsocket /tmp/redis.sock --unixsocketperm 777 --port 0 --bind 127.0.0.1 --daemonize yes --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
 
       - name: Overwrite redis env vars
         run: |
-         echo "SSDB=unix://tmp/redis.sock" >> $GITHUB_ENV &&
+         echo "SSDB=unix:///tmp/redis.sock" >> $GITHUB_ENV &&
          echo "SMARTREDIS_TEST_CLUSTER=False" >> $GITHUB_ENV
 
 #      - name: Start redis (***WS*** Do I need to do anything special to launch?)
