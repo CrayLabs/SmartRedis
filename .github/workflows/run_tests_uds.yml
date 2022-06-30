@@ -103,7 +103,7 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh &&
             cd ../ &&
-            make test-verbose
+            echo "make test-verbose"
 
       # Set up UDS Redis environment
       - name: Install docker and redis-server
@@ -127,9 +127,10 @@ jobs:
 
       - name: Setup local redis server for Unix domain socket
         run: |
+          mkdir -p /tmp && \
           touch /tmp/redis.sock && \
           chmod 777 /tmp/redis.sock && \
-          redis-server --unixsocket /tmp/redis.sock --daemonize yes --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+          redis-server --unixsocket /tmp/redis.sock --unixsocketperm 777 --daemonize yes --protected-mode no --loadmodule $HOME/redisai.so TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
 
       - name: Overwrite redis env vars
         run: |
