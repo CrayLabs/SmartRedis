@@ -187,12 +187,11 @@ class RedisServer {
         virtual bool model_key_exists(const std::string& key) = 0;
 
         /*!
-         *  \brief Check if address and port maps to database node
-         *  \param address address of database
-         *  \param port port of database
+         *  \brief Check if address is valid
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port) = 0;
+        virtual bool is_addressable(const SRAddress& address) const = 0;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -634,7 +633,7 @@ class RedisServer {
         std::string _get_ssdb();
 
         /*!
-        *   \brief Unordered map of address:port to DBNode in the cluster
+        *   \brief Unordered map of SRAddress to DBNode in the cluster
         */
         std::unordered_map<std::string, DBNode*> _address_node_map;
 

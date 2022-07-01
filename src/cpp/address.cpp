@@ -35,6 +35,10 @@ using namespace SmartRedis;
 // SRAddress constructor
 SRAddress::SRAddress(const std::string& addr_spec)
 {
+    //     if (address_port.rfind("tcp://", 0) == 0)
+
+
+
     // Parse the incoming address specification
     _is_tcp = (addr_spec.compare(0, 7, "unix://") != 0);
     if (_is_tcp) { // TCP address
@@ -68,11 +72,23 @@ SRAddress::SRAddress(const std::string& addr_spec)
     }
 }
 
+// Comparison operator
+bool SRAddress::operator==(const SRAddress& other) const
+{
+    return (
+        (_is_tcp == other._is_tcp) &&
+        (_is_tcp ? _tcp_host == other._tcp_host : true) &&
+        (_is_tcp ? _tcp_port == other._tcp_port : true) &&
+        (_is_tcp ? true : _uds_file == other._uds_file)
+    );
+}
+
+
 // Convert to a string
 std::string SRAddress::to_string() const
 {
     if (_is_tcp) {
-        return _tcp_host + ":" + _tcp_port;
+        return _tcp_host + ":" + std::to_string(_tcp_port);
     }
     else {
         return "unix://" + _uds_file;

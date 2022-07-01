@@ -140,7 +140,7 @@ SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 
             THEN("The command's address will be an empty string")
             {
-                CHECK(cmd->get_address() == "");
+                CHECK(cmd->get_address()._tcp_host == "");
             }
         }
     }

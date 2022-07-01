@@ -192,11 +192,10 @@ class Redis : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param address Address of database
-         *  \param port Port of database
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port);
+        virtual bool is_addressable(const SRAddress& address) const;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -508,16 +507,15 @@ class Redis : public RedisServer
         *   \brief Inserts a string formatted as address:port
                    into _address_node_map. Strips the protocol
                    (tcp:// or unix://) before inserting.
-        *   \param address_port A string formatted as {protocol}://address:port
+        *   \param db_address The address string (TCP or UDS)
         */
-        inline void _add_to_address_map(std::string address_port);
+        inline void _add_to_address_map(SRAddress& db_address);
 
         /*!
         *   \brief Connect to the server at the address and port
-        *   \param address_port A string formatted as {protocol}://address:port
-        *                       for redis connection
+        *   \param db_address The server address
         */
-        inline void _connect(std::string address_port);
+        inline void _connect(SRAddress& db_address);
 };
 
 } //namespace SmartRedis

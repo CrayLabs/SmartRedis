@@ -48,6 +48,11 @@ class SRAddress
     public:
     /*!
     *   \brief SRAddress default constructor
+    */
+    SRAddress() : _is_tcp(true), _tcp_host(""), _tcp_port(0) {}
+
+    /*!
+    *   \brief SRAddress constructor
     *   \param addr_spec The address (string form) of a server
     */
     SRAddress(const std::string& addr_spec);
@@ -57,6 +62,12 @@ class SRAddress
     *   \param other The address to copy
     */
     SRAddress(const SRAddress& other) = default;
+
+    /*!
+    *   \brief Comparison operator
+    *   \param other The address to compare
+    */
+    bool operator==(const SRAddress& other) const;
 
     /*!
     *   \brief Convert an address to string form
@@ -77,7 +88,7 @@ class SRAddress
     /*!
     *   \brief  The TCP port (undefined for UDS)
     */
-    std::string _tcp_port;
+    uint64_t _tcp_port;
 
     /*!
     *   \brief  The UDS filespec (undefined for TCP)
