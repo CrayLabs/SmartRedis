@@ -80,7 +80,7 @@ SRAddress RedisServer::_get_ssdb()
     _check_ssdb_string(env_str);
 
     // Parse the data in it
-    std::vector<SRAddress> hosts_ports;
+    std::vector<SRAddress> address_choices;
     const char delim = ',';
 
     size_t i_pos = 0;
@@ -88,7 +88,7 @@ SRAddress RedisServer::_get_ssdb()
     while (j_pos != std::string::npos) {
         std::string substr = env_str.substr(i_pos, j_pos - i_pos);
         SRAddress addr_spec(substr);
-        hosts_ports.push_back(addr_spec);
+        address_choices.push_back(addr_spec);
         i_pos = j_pos + 1;
         j_pos = env_str.find(delim, i_pos);
     }
@@ -96,12 +96,12 @@ SRAddress RedisServer::_get_ssdb()
     if (i_pos < env_str.size()) {
         std::string substr = env_str.substr(i_pos, j_pos - i_pos);
         SRAddress addr_spec(substr);
-        hosts_ports.push_back(addr_spec);
+        address_choices.push_back(addr_spec);
     }
 
     // Pick an entry from the list at random
-    std::uniform_int_distribution<> distrib(0, hosts_ports.size() - 1);
-    return hosts_ports[distrib(_gen)];
+    std::uniform_int_distribution<> distrib(0, address_choices.size() - 1);
+    return address_choices[distrib(_gen)];
 }
 
 // Check that the SSDB environment variable value does not have any errors

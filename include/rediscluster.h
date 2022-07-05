@@ -62,10 +62,9 @@ class RedisCluster : public RedisServer
         *   \brief RedisCluster constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param address_port The address and port in the form of
-        *                       "{protocol}://address:port"
+        *   \param address_spec The TCP or UDS address of the server
         */
-        RedisCluster(std::string address_port);
+        RedisCluster(std::string address_spec);
 
         /*!
         *   \brief RedisCluster copy constructor is not allowed

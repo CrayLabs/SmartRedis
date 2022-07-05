@@ -638,12 +638,6 @@ inline CommandReply Redis::_run(const Command& cmd)
 
 inline void Redis::_add_to_address_map(SRAddress& db_address)
 {
-#if 0
-    if (address_port.rfind("tcp://", 0) == 0)
-        address_port = address_port.substr(6, std::string::npos);
-    else if (address_port.rfind("unix://", 0) == 0)
-        address_port = address_port.substr(7, std::string::npos);
-#endif
     _address_node_map.insert({db_address.to_string(), nullptr});
 }
 

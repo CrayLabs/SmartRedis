@@ -52,9 +52,9 @@ RedisCluster::RedisCluster() : RedisServer()
 
 // RedisCluster constructor. Uses address provided to constructor instead of
 // environment variables
-RedisCluster::RedisCluster(std::string address_port) : RedisServer()
+RedisCluster::RedisCluster(std::string address_spec) : RedisServer()
 {
-    SRAddress db_address(address_port);
+    SRAddress db_address(address_spec);
     _connect(db_address);
     _map_cluster();
     if (_address_node_map.count(db_address.to_string()) > 0)
@@ -1099,7 +1099,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
     0) (integer) min slot
     1) (integer) max slot
     2) 0) "ip address"
-       1) (integer) port
+       1) (integer) port   (note that for clustered Redis, this will always be a TCP address)
        2) "name"
     */
     size_t n_db_nodes = reply.n_elements();

@@ -487,7 +487,7 @@ class RedisServer {
 
         /*!
         *   \brief Retrieve model/script runtime statistics
-        *   \param address The address of the database node (host:port)
+        *   \param address The TCP or UDS address of the database node
         *   \param key The key associated with the model or script
         *   \param reset_stat Boolean indicating if the counters associated
         *                     with the model or script should be reset.
