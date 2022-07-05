@@ -990,7 +990,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
             // Attempt the connection
-            _redis_cluster = new sw::redis::RedisCluster(db_address.to_string());
+            _redis_cluster = new sw::redis::RedisCluster(db_address.to_string(true));
             return;
         }
         catch (std::bad_alloc& e) {

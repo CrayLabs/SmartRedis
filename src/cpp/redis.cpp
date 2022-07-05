@@ -653,7 +653,7 @@ inline void Redis::_connect(SRAddress& db_address)
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
             // Try to create the sw::redis::Redis object
-            _redis = new sw::redis::Redis(db_address.to_string());
+            _redis = new sw::redis::Redis(db_address.to_string(true));
 
             // Attempt to have the sw::redis::Redis object
             // make a connection using the PING command

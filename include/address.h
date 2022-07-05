@@ -71,9 +71,10 @@ class SRAddress
 
     /*!
     *   \brief Convert an address to string form
+    *   \param add_tcp_protocol Add "tcp://" protocol prefix to output if true
     *   \returns Stringified address specification
     */
-    virtual std::string to_string() const;
+    virtual std::string to_string(bool add_tcp_protocol = false) const;
 
     /*!
     *   \brief  Is this a TCP address? (If not, it's a Unix Domain Socket Address)

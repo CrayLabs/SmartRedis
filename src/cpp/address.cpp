@@ -39,20 +39,31 @@ SRAddress::SRAddress(const std::string& addr_spec)
 
 
 
+    // Check address type
+    // Unix Domain Socket (UDS) addresses are prefixed with "unix://""
+    std::string prefix("unix://");
+    _is_tcp = (addr_spec.compare(0, prefix.size(), prefix) != 0);
+
     // Parse the incoming address specification
-    _is_tcp = (addr_spec.compare(0, 7, "unix://") != 0);
     if (_is_tcp) { // TCP address
+        // Strip off tcp:// if present
+        std::string address(addr_spec);
+        prefix = "tcp://";
+        if (address.compare(0, prefix.size(), prefix) == 0) {
+            address = address.substr(prefix.size());
+        }
+
         // TCP addresses are of the form host:port, so split the two halves
-        size_t colon_position = addr_spec.find(":");
-        if (colon_position == 0 || (colon_position >= addr_spec.size() - 1) ||
+        size_t colon_position = address.find(":");
+        if (colon_position == 0 || (colon_position >= address.size() - 1) ||
             colon_position == std::string::npos) {
-            throw SRRuntimeException(addr_spec +
+            throw SRRuntimeException(address +
                                      " is not a valid database node address.");
         }
 
         try {
-            _tcp_host = addr_spec.substr(0, colon_position);
-            std::string port_string = addr_spec.substr(colon_position + 1);
+            _tcp_host = address.substr(0, colon_position);
+            std::string port_string = address.substr(colon_position + 1);
             _tcp_port = std::stoul(port_string, nullptr, 0);
         }
         catch (std::bad_alloc& ba) {
@@ -66,8 +77,6 @@ SRAddress::SRAddress(const std::string& addr_spec)
         }
     }
     else { // UDS address
-        // Unix Domain Socket (UDS) addresses are prefixed with "unix://""
-        std::string prefix("unix://");
         _uds_file = addr_spec.substr(prefix.size());
     }
 }
@@ -85,10 +94,11 @@ bool SRAddress::operator==(const SRAddress& other) const
 
 
 // Convert to a string
-std::string SRAddress::to_string() const
+std::string SRAddress::to_string(bool add_tcp_protocol /* = false*/) const
 {
     if (_is_tcp) {
-        return _tcp_host + ":" + std::to_string(_tcp_port);
+        std::string result(add_tcp_protocol ? "tcp://" : "");
+        return result + _tcp_host + ":" + std::to_string(_tcp_port);
     }
     else {
         return "unix://" + _uds_file;
