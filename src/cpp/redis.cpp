@@ -34,8 +34,7 @@ using namespace SmartRedis;
 // Redis constructor.
 Redis::Redis() : RedisServer()
 {
-    std::string ssdb = _get_ssdb();
-    SRAddress db_address(ssdb);
+    SRAddress db_address(_get_ssdb());
     // Remember whether it's a unix domain socket for later
     _is_domain_socket = !db_address._is_tcp;
     _add_to_address_map(db_address);

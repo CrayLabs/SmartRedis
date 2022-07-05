@@ -36,8 +36,7 @@ using namespace SmartRedis;
 // RedisCluster constructor
 RedisCluster::RedisCluster() : RedisServer()
 {
-    std::string ssdb = _get_ssdb();
-    SRAddress db_address(ssdb);
+    SRAddress db_address(_get_ssdb());
     if (!db_address._is_tcp) {
         throw SRRuntimeException("Unix Domain Socket is not supported with clustered Redis");
     }

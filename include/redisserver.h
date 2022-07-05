@@ -54,6 +54,7 @@
 #include "gettensorcommand.h"
 #include "pipelinereply.h"
 #include "threadpool.h"
+#include "address.h"
 
 ///@file
 
@@ -627,10 +628,9 @@ class RedisServer {
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
         *          variable.
-        *   \returns A address and port pair in the form of
-        *            address:port
+        *   \returns An SRAddress representing the selected server address
         */
-        std::string _get_ssdb();
+        SRAddress _get_ssdb();
 
         /*!
         *   \brief Unordered map of SRAddress to DBNode in the cluster

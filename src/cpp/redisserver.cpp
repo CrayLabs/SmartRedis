@@ -69,7 +69,7 @@ RedisServer::~RedisServer()
 
 // Retrieve a single address, randomly chosen from a list of addresses if
 // applicable, from the SSDB environment variable
-std::string RedisServer::_get_ssdb()
+SRAddress RedisServer::_get_ssdb()
 {
     // Retrieve the environment variable
     char* env_char = getenv("SSDB");
@@ -80,25 +80,23 @@ std::string RedisServer::_get_ssdb()
     _check_ssdb_string(env_str);
 
     // Parse the data in it
-    std::vector<std::string> hosts_ports;
+    std::vector<SRAddress> hosts_ports;
     const char delim = ',';
 
     size_t i_pos = 0;
     size_t j_pos = env_str.find(delim);
     while (j_pos != std::string::npos) {
         std::string substr = env_str.substr(i_pos, j_pos - i_pos);
-        if (substr.find('/') == std::string::npos)
-            substr = "tcp://" + substr;
-        hosts_ports.push_back(substr);
+        SRAddress addr_spec(substr);
+        hosts_ports.push_back(addr_spec);
         i_pos = j_pos + 1;
         j_pos = env_str.find(delim, i_pos);
     }
     // Catch the last value that does not have a trailing ';'
     if (i_pos < env_str.size()) {
         std::string substr = env_str.substr(i_pos, j_pos - i_pos);
-        if (substr.find('/') == std::string::npos)
-            substr = "tcp://" + substr;
-        hosts_ports.push_back(substr);
+        SRAddress addr_spec(substr);
+        hosts_ports.push_back(addr_spec);
     }
 
     // Pick an entry from the list at random

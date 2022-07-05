@@ -35,10 +35,6 @@ using namespace SmartRedis;
 // SRAddress constructor
 SRAddress::SRAddress(const std::string& addr_spec)
 {
-    //     if (address_port.rfind("tcp://", 0) == 0)
-
-
-
     // Check address type
     // Unix Domain Socket (UDS) addresses are prefixed with "unix://""
     std::string prefix("unix://");
