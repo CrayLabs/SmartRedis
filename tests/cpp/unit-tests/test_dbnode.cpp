@@ -42,8 +42,9 @@ SCENARIO("Testing DBNode object", "[DBNode]")
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == "");
-            CHECK(node_1.ip == "");
-            CHECK(node_1.port == -1);
+            CHECK(node_1.address._is_tcp);
+            CHECK(node_1.address._tcp_host == "");
+            CHECK(node_1.address._tcp_port == 0);
             CHECK(node_1.lower_hash_slot == -1);
             CHECK(node_1.upper_hash_slot == -1);
         }
@@ -61,20 +62,20 @@ SCENARIO("Testing DBNode object", "[DBNode]")
               "and hash slot information")
     {
         std::string name = "name";
-        std::string ip = "192.168.4.1";
-        uint64_t port = -1;
+        SRAddress address("192.168.4.1:0");
         uint64_t l_slot_1 = 2;
         uint64_t l_slot_2 = 1;
         uint64_t u_slot = -1;
         std::string prefix = "prefix";
-        DBNode node_1(ip, name, port, l_slot_1, u_slot, prefix);
-        DBNode node_2(ip, name, port, l_slot_2, u_slot, prefix);
+        DBNode node_1(name, address, l_slot_1, u_slot, prefix);
+        DBNode node_2(name, address, l_slot_2, u_slot, prefix);
 
         THEN("The DBNode's data members are set to their default values")
         {
             CHECK(node_1.name == name);
-            CHECK(node_1.ip == ip);
-            CHECK(node_1.port == port);
+            CHECK(node_1.address._is_tcp);
+            CHECK(node_1.address._tcp_host == address._tcp_host);
+            CHECK(node_1.address._tcp_port == address._tcp_port);
             CHECK(node_1.lower_hash_slot == l_slot_1);
             CHECK(node_1.upper_hash_slot == u_slot);
             CHECK(node_1.prefix == prefix);
