@@ -31,6 +31,8 @@
 #include "dataset.h"
 #include "../client_test_utils.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 // helper function for resetting environment
@@ -87,7 +89,7 @@ void load_mnist_image_to_array(float**** img)
 
 SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Client ensemble using a producer/consumer paradigm" << std::endl;
     GIVEN("Variables that will be used by the producer and consumer")
     {
         const char* old_keyin = std::getenv("SSKEYIN");

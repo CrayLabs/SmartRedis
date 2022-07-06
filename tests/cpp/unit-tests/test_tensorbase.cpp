@@ -26,15 +26,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensorbase.h"
 #include "tensorpack.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing TensorBase through TensorPack" << std::endl;
     SRTensorType tensor_type = GENERATE(SRTensorTypeDouble, SRTensorTypeFloat,
                                         SRTensorTypeInt64, SRTensorTypeInt32,
                                         SRTensorTypeInt16, SRTensorTypeInt8,

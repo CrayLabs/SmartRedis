@@ -29,12 +29,13 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "multikeycommand.h"
 
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Adding fields of different types" << std::endl;
     GIVEN("A MultiKeyCommand object")
     {
         MultiKeyCommand cmd;

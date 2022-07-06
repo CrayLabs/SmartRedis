@@ -30,6 +30,8 @@
 #include "metadata.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 // helper function for checking if the MetaData object was copied correctly
 void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
 {
@@ -128,7 +130,7 @@ void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
 
 SCENARIO("Test MetaData", "[MetaData]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test MetaData" << std::endl;
     GIVEN("A MetaData object")
     {
         MetaData metadata;

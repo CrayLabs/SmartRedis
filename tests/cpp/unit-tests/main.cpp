@@ -29,3 +29,20 @@
 #define CATCH_CONFIG_MAIN
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "srexception.h"
+#include <ctime>
+
+std::time_t start_time;
+bool initialized = false;
+
+time_t get_start_time() {
+    if (initialized)
+        return start_time;
+    start_time = std::time(NULL);
+    initialized = true;
+    return start_time;
+}
+
+unsigned long get_time_offset() {
+    std::time_t now = std::time(NULL);
+    return (unsigned long)((unsigned long)now - (unsigned long)get_start_time());
+}

@@ -33,6 +33,8 @@
 #include "srexception.h"
 #include <sstream>
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 // helper function that determines whether two
@@ -92,7 +94,7 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
 
 SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Dataset Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
         Client client(use_cluster());
@@ -188,7 +190,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 
 SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Tensor Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
         Client client(use_cluster());
@@ -468,7 +470,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 
 SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing INFO Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
         Client client(use_cluster());
@@ -517,6 +519,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 
 SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing AI.INFO Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
         Client client(use_cluster());
@@ -565,7 +568,7 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
 
 SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on empty Client Object" << std::endl;
     GIVEN("An empty non-cluster Client object")
     {
         Client client(use_cluster());
@@ -600,7 +603,7 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 
 SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on Client Object" << std::endl;
     GIVEN("A non-cluster Client object")
     {
         // From within the testing framework, there is no way of knowing
@@ -641,7 +644,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
 
 SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CONFIG GET and CONFIG SET on Client Object" << std::endl;
     GIVEN("A Client object")
     {
         Client client(use_cluster());
@@ -686,6 +689,7 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 
 SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test CONFIG GET on an unsupported command" << std::endl;
     GIVEN("A client object")
     {
         Client client(use_cluster());
@@ -706,6 +710,7 @@ SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
 
 SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test CONFIG SET on an unsupported command" << std::endl;
     GIVEN("A client object")
     {
         Client client(use_cluster());
@@ -726,7 +731,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
 
 SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
     GIVEN("A client object and some data")
     {
         Client client(use_cluster());
@@ -766,7 +771,7 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 
 SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test that prefixing covers all hash slots of a cluster" << std::endl;
     if(use_cluster()==false)
         return;
 
@@ -805,6 +810,7 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 
 SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Multi-GPU Function error cases" << std::endl;
     GIVEN("A Client object, a script, and a model")
     {
         Client client(use_cluster());
