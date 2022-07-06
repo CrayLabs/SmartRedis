@@ -23,14 +23,15 @@ library will set the value of ``SSDB`` for the user.
 
 The ``SSDB`` environment variable should have the format
 of ``address:port``, and may optionally be prefixed with
-a protocol, such as ``tcp://``.  If no protocol is specified,
-the default will be taken as TCP. Unix domain sockets are
-supported via the protocol prefex ``unix://``.
+a protocol, such as ``tcp://``.  For a cluster, the addresses
+and ports should be separated by a "," character. If no
+protocol is specified, the default will be taken as TCP.
+Unix domain sockets are supported via the protocol prefex
+``unix://``; however, Unix domain sockets are not supported
+in clusters.
 
-For a cluster, the addresses and ports should be separated
-by a "," character. Unix domain sockets are not supported
-in clusters. Below is an example of setting ``SSDB``
-for a Redis cluster at three different addresses using port ``6379``:
+Below is an example of setting ``SSDB`` for a Redis cluster
+at three different addresses, each using port ``6379``:
 
 .. code-block:: bash
 

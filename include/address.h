@@ -89,7 +89,7 @@ class SRAddress
     /*!
     *   \brief  The TCP port (undefined for UDS)
     */
-    uint64_t _tcp_port;
+    uint16_t _tcp_port;
 
     /*!
     *   \brief  The UDS filespec (undefined for TCP)

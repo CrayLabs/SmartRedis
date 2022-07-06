@@ -51,8 +51,7 @@ class Redis : public RedisServer
         *   \brief Redis constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param address_port The address and port in the form of
-        *                       "{protocol}://address:port"
+        *   \param address_port The TCP or UDP server address
         */
         Redis(std::string address_port);
 

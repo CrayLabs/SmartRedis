@@ -583,7 +583,9 @@ class RedisServer {
         ThreadPool *_tp;
 
         /*
-        *   \brief Random number generator
+        *   \brief Indicates whether the server was connected to
+        *          via a Unix domain socket (true) or TCP connection
+        *          (false)
         */
         bool _is_domain_socket;
 
