@@ -29,9 +29,11 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "stringfield.h"
 
+unsigned long get_time_offset();
+
 SCENARIO("Test StringField", "[StringField]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test StringField" << std::endl;
     GIVEN("A StringField object constructed with the string field name")
     {
         std::string name_1 = "stringfield_name_1";

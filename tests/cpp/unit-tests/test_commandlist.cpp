@@ -35,11 +35,13 @@
 #include "addressanycommand.h"
 #include "client.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing CommandList object", "[CommandList]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CommandList objectinfo" << std::endl;
     GIVEN("A CommandList object")
     {
         CommandList cmd_lst;
@@ -287,7 +289,7 @@ SCENARIO("Testing CommandList object", "[CommandList]")
 
 SCENARIO("Testing CommandList object on heap", "[CommandList]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CommandList object on heap" << std::endl;
     GIVEN("A CommandList object on the heap with three Commands")
     {
         CommandList* cmd_lst = new CommandList;

@@ -26,14 +26,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dbnode.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing DBNode object", "[DBNode]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing DBNode object" << std::endl;
     GIVEN("Two DBNode objects created with the default contructor")
     {
         DBNode node_1;

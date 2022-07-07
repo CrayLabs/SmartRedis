@@ -29,6 +29,8 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "redis.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 // Helper class used for accessing protected members of RedisServer
@@ -54,7 +56,7 @@ void setenv_ssdb(const char* ssdb)
 
 SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
     GIVEN("A TestSSDB object")
     {
         const char* old_ssdb = std::getenv("SSDB");
