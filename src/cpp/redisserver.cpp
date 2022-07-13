@@ -92,7 +92,7 @@ SRAddress RedisServer::_get_ssdb()
         i_pos = j_pos + 1;
         j_pos = env_str.find(delim, i_pos);
     }
-    // Catch the last value that does not have a trailing ';'
+    // Catch the last value that does not have a trailing ','
     if (i_pos < env_str.size()) {
         std::string substr = env_str.substr(i_pos, j_pos - i_pos);
         SRAddress addr_spec(substr);

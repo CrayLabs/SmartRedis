@@ -635,7 +635,7 @@ class RedisServer {
         SRAddress _get_ssdb();
 
         /*!
-        *   \brief Unordered map of SRAddress to DBNode in the cluster
+        *   \brief Unordered map of server address string to DBNode in the cluster
         */
         std::unordered_map<std::string, DBNode*> _address_node_map;
 

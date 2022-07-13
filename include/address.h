@@ -39,7 +39,7 @@
 namespace SmartRedis {
 
 /*!
-*   \brief  Address: generalized representation of a server address,
+*   \brief  SRAddress: generalized representation of a server address,
 *           encompassing both TCP (address:port) and Unix Domain Socket
 *           (filename) style addresses
 */

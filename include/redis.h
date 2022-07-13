@@ -51,9 +51,9 @@ class Redis : public RedisServer
         *   \brief Redis constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param address_port The TCP or UDP server address
+        *   \param addr_spec The TCP or UDS server address
         */
-        Redis(std::string address_port);
+        Redis(std::string addr_spec);
 
         /*!
         *   \brief Redis copy constructor is not allowed
@@ -503,10 +503,8 @@ class Redis : public RedisServer
         inline CommandReply _run(const Command& cmd);
 
         /*!
-        *   \brief Inserts a string formatted as address:port
-                   into _address_node_map. Strips the protocol
-                   (tcp:// or unix://) before inserting.
-        *   \param db_address The address string (TCP or UDS)
+        *   \brief Inserts an address into _address_node_map
+        *   \param db_address The server address
         */
         inline void _add_to_address_map(SRAddress& db_address);
 

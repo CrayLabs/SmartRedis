@@ -114,7 +114,7 @@ class DBNode{
         bool operator<(const DBNode& db_node) const;
 
         /*!
-        *   \brief The TCP or UDP address of the DBNode
+        *   \brief The TCP or UDS address of the DBNode
         */
         SRAddress address;
 

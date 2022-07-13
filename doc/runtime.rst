@@ -39,7 +39,8 @@ at three different addresses, each using port ``6379``:
 
 The Python client relies on ``SSDB`` to determine database
 location.  However, the Python ``Client`` constructor also allows
-for the database location to be set as an input parameter.
+for the database location to be set as an input parameter. In
+this case, it sets SSDB from the input parameter.
 
 Ensemble Environment Variables
 ==============================

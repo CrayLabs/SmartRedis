@@ -117,7 +117,9 @@ class NonKeyedCommand : public Command
 
     private:
         /*!
-        *   \brief Address of database node
+        *   \brief Address of database node. If none has even
+        *          been set, it will be an address consisting of
+        *          TCP, an empty string for the IP address, and port 0
         */
         SRAddress _address;
 };
