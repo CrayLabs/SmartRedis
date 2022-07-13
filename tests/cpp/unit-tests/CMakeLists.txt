@@ -32,8 +32,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS --coverage)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_package(Threads REQUIRED)
 
 include_directories(SYSTEM
     /usr/local/include
@@ -45,6 +47,7 @@ include_directories(SYSTEM
 set(SOURCES
 	../../../src/cpp/addressanycommand.cpp
 	../../../src/cpp/addressatcommand.cpp
+	../../../src/cpp/addressallcommand.cpp
 	../../../src/cpp/client.cpp
 	../../../src/cpp/clusterinfocommand.cpp
 	../../../src/cpp/command.cpp
@@ -60,6 +63,7 @@ set(SOURCES
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/multikeycommand.cpp
 	../../../src/cpp/nonkeyedcommand.cpp
+    ../../../src/cpp/pipelinereply.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
@@ -67,11 +71,13 @@ set(SOURCES
 	../../../src/cpp/stringfield.cpp
 	../../../src/cpp/tensorbase.cpp
 	../../../src/cpp/tensorpack.cpp
+	../../../src/cpp/threadpool.cpp
 )
 
 # The unit tests to be executed
 set(UNIT_TESTS
 	main.cpp
+    test_aggregation_list.cpp
 	test_client.cpp
 	test_client_ensemble.cpp
 	test_dataset.cpp
@@ -125,4 +131,4 @@ endif()
 
 add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
 
-target_link_libraries(cpp_unit_tests ${SR_LIB})
+target_link_libraries(cpp_unit_tests PUBLIC ${SR_LIB} PRIVATE Threads::Threads)

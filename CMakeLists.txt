@@ -33,9 +33,9 @@ option(BUILD_PYTHON "Build the python module" ON)
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
-add_link_options(-lpthread)
 enable_language(Fortran)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 if (WERROR)
     add_compile_options(-Wall -Werror)
@@ -43,6 +43,7 @@ endif()
 
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
+find_package(Threads REQUIRED)
 
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
@@ -60,6 +61,7 @@ set(CLIENT_SRC
     src/cpp/compoundcommand.cpp
     src/cpp/addressatcommand.cpp
     src/cpp/addressanycommand.cpp
+    src/cpp/addressallcommand.cpp
     src/cpp/clusterinfocommand.cpp
     src/cpp/dbinfocommand.cpp
     src/cpp/gettensorcommand.cpp
@@ -74,6 +76,8 @@ set(CLIENT_SRC
     src/cpp/redis.cpp
     src/cpp/metadatafield.cpp
     src/cpp/stringfield.cpp
+    src/cpp/pipelinereply.cpp
+    src/cpp/threadpool.cpp
 )
 
 set(FORTRAN_SRC
@@ -93,7 +97,7 @@ set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
 set_target_properties(smartredis PROPERTIES SUFFIX ".so")
-target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES})
+target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
 # Fortran library
 add_library(smartredis-fortran SHARED ${FORTRAN_SRC})

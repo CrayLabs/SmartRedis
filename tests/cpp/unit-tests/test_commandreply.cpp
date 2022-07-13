@@ -30,6 +30,8 @@
 #include "commandreply.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 /*
@@ -101,7 +103,7 @@ void fill_reply_array(redisReply*& reply, int num_of_children)
 
 SCENARIO("Testing CommandReply object", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CommandReply object" << std::endl;
     GIVEN("A CommandReply object with type REDIS_REPLY_INTEGER")
     {
         redisReply* reply = new redisReply;
@@ -162,7 +164,7 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
 SCENARIO("Test CommandReply copy assignment operator and copy "
          "constructor on simple REDIS_REPLY_TYPES", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test CommandReply copy assignment operator and copy" << std::endl;
     GIVEN("A CommandReply")
     {
         redisReply* reply = new redisReply;
@@ -207,7 +209,7 @@ SCENARIO("Test CommandReply copy assignment operator and copy "
 
 SCENARIO("Test CommandReply::has_error", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test CommandReply::has_error" << std::endl;
     GIVEN("A parent and child redisReply")
     {
         char const* str = "ERR";
@@ -234,7 +236,7 @@ SCENARIO("Test CommandReply::has_error", "[CommandReply]")
 SCENARIO("CommandReply copy assignment operator preserves the state of the "
          "rvalue and the lvalue when one of the objects are deleted", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": CommandReply copy assignment operator preserves the state of the" << std::endl;
     GIVEN("Two dynamically allocated CommandReply. One with a complex "
           "redisReply, and the other with a simple redisReply")
     {
@@ -322,7 +324,7 @@ SCENARIO("CommandReply copy assignment operator preserves the state of the "
 
 SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Simple tests on CommandReply constructors that use redisReply*" << std::endl;
     GIVEN("A redisReply")
     {
         char const* str = "100.0";
@@ -368,7 +370,7 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[Com
 
 SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test CommandReply copy constructor with an inconsistent redisReply" << std::endl;
     GIVEN("An inconsistent redisReply where its 'elements' doesn't "\
           "correspond to its 'element'")
     {
@@ -394,7 +396,7 @@ SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "
 
 SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[CommandReply]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Test CommandReply's redisReply deep copy on a shallow copy" << std::endl;
     GIVEN("A CommandReply with redisReply type REDIS_REPLY_ARRAY")
     {
         char const* strs[] = {"zero", "one"};
@@ -433,6 +435,7 @@ SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[Command
 
 SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[CommandReply]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test CommandReply string retrieval for non REDIS_REPLY_STRING" << std::endl;
     char const* strs[] = {"OK", "42.5", "99999999999999999999", "Verbatim string"};
     int lens[] = {3, 5, 21, 16};
     int types[] = {REDIS_REPLY_STATUS, REDIS_REPLY_DOUBLE, REDIS_REPLY_BIGNUM, REDIS_REPLY_VERB};
@@ -471,6 +474,7 @@ SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[Comm
 
 SCENARIO("Test REDIS_REPLY_ERROR retrieval from a CommandReply", "[CommandReply]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test REDIS_REPLY_ERROR retrieval from a CommandReply" << std::endl;
     /*
             CommanReply (ARRAY)     LEVEL 0
             /    |    \

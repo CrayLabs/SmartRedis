@@ -84,6 +84,11 @@ CommandReply Redis::run(AddressAnyCommand& cmd){
     return _run(cmd);
 }
 
+// Run an address-all Command on the server
+CommandReply Redis::run(AddressAllCommand& cmd){
+    return _run(cmd);
+}
+
 // Run a Command list on the server
 std::vector<CommandReply> Redis::run(CommandList& cmds)
 {
@@ -93,6 +98,23 @@ std::vector<CommandReply> Redis::run(CommandList& cmds)
         replies.push_back(dynamic_cast<Command*>(*cmd)->run_me(this));
     }
     return replies;
+}
+
+PipelineReply
+Redis::run_via_unordered_pipelines(CommandList& cmd_list)
+{
+    // Get pipeline object (no new connection)
+    sw::redis::Pipeline pipeline = _redis->pipeline(false);
+
+    // Iterator over all commands and add to pipeline
+    CommandList::iterator cmd = cmd_list.begin();
+
+    for ( ; cmd != cmd_list.end(); cmd++) {
+        pipeline.command((*cmd)->cbegin(), (*cmd)->cend());
+    }
+
+    // Execute the pipeline and return value
+    return PipelineReply(pipeline.exec());
 }
 
 // Check if a model or script key exists in the database
@@ -285,6 +307,39 @@ CommandReply Redis::set_model(const std::string& model_name,
     return run(cmd);
 }
 
+// Set a model from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void Redis::set_model_multigpu(const std::string& name,
+                               const std::string_view& model,
+                               const std::string& backend,
+                               int first_gpu,
+                               int num_gpus,
+                               int batch_size,
+                               int min_batch_size,
+                               const std::string& tag,
+                               const std::vector<std::string>& inputs,
+                               const std::vector<std::string>& outputs)
+{
+    // Store a copy of the model for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+        result = set_model(
+            name, model_key, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
+        }
+    }
+
+    // Add a version for get_model to find
+    result = set_model(
+        name, model, backend, "GPU", batch_size, min_batch_size, tag, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general model");
+    }
+}
+
 // Set a script from a string_view buffer in the database for future execution
 CommandReply Redis::set_script(const std::string& key,
                                const std::string& device,
@@ -298,7 +353,32 @@ CommandReply Redis::set_script(const std::string& key,
     return run(cmd);
 }
 
-// Run a model in the database using the specificed input and output tensors
+// Set a script from std::string_view buffer in the
+// database for future execution in a multi-GPU system
+void Redis::set_script_multigpu(const std::string& name,
+                                const std::string_view& script,
+                                int first_gpu,
+                                int num_gpus)
+{
+    // Store a copy of the script for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+        result = set_script(script_key, device, script);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to set script for GPU " + std::to_string(i));
+        }
+    }
+
+    // Add a copy for get_script to find
+    result = set_script(name, "GPU", script);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to set general script");
+    }
+}
+
+// Run a model in the database using the specified input and output tensors
 CommandReply Redis::run_model(const std::string& key,
                               std::vector<std::string> inputs,
                               std::vector<std::string> outputs)
@@ -319,7 +399,25 @@ CommandReply Redis::run_model(const std::string& key,
     return run(cmd);
 }
 
-// Run a script function in the database using the specificed input and
+// Run a model in the database using the
+// specified input and output tensors in a multi-GPU system
+void Redis::run_model_multigpu(const std::string& name,
+                               std::vector<std::string> inputs,
+                               std::vector<std::string> outputs,
+                               int offset,
+                               int first_gpu,
+                               int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    CommandReply result = run_model(name + "." + device, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occured while executing the model on " + device);
+    }
+}
+
+// Run a script function in the database using the specified input and
 // output tensors
 CommandReply Redis::run_script(const std::string& key,
                               const std::string& function,
@@ -335,6 +433,26 @@ CommandReply Redis::run_script(const std::string& key,
     return run(cmd);
 }
 
+// Use multiple GPUs to run a script function in the database using the
+// specified input and output tensors
+void Redis::run_script_multigpu(const std::string& name,
+                                const std::string& function,
+                                std::vector<std::string>& inputs,
+                                std::vector<std::string>& outputs,
+                                int offset,
+                                int first_gpu,
+                                int num_gpus)
+{
+    int gpu = first_gpu + _modulo(offset, num_gpus);
+    std::string device = "GPU:" + std::to_string(gpu);
+    CommandReply result = run_script(
+        name + "." + device, function, inputs, outputs);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException(
+            "An error occured while executing the script on " + device);
+    }
+}
+
 // Delete a model from the database
 CommandReply Redis::delete_model(const std::string& key)
 {
@@ -346,6 +464,29 @@ CommandReply Redis::delete_model(const std::string& key)
     return run(cmd);
 }
 
+// Remove a model from the database that was stored
+// for use with multiple GPUs
+void Redis::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the model for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string model_key = name + "." + device;
+        result = delete_model(model_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove model for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_model to find
+    result = delete_model(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general model");
+    }
+}
+
 // Delete a script from the database
 CommandReply Redis::delete_script(const std::string& key)
 {
@@ -355,6 +496,29 @@ CommandReply Redis::delete_script(const std::string& key)
 
     // Run it
     return run(cmd);
+}
+
+// Remove a script from the database that was stored
+// for use with multiple GPUs
+void Redis::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    // Remove a copy of the script for each GPU
+    CommandReply result;
+    for (int i = first_gpu; i < num_gpus; i++) {
+        std::string device = "GPU:" + std::to_string(i);
+        std::string script_key = name + "." + device;
+        result = delete_script(script_key);
+        if (result.has_error() > 0) {
+            throw SRRuntimeException("Failed to remove script for GPU " + std::to_string(i));
+        }
+    }
+
+    // Remove the copy that was added for get_script to find
+    result = delete_script(name);
+    if (result.has_error() > 0) {
+        throw SRRuntimeException("Failed to remove general script");
+    }
 }
 
 // Retrieve the model from the database

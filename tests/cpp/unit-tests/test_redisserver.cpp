@@ -36,6 +36,8 @@
 #include "redis.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 /*  Derived objects for Redis and RedisCluster are defined to access
@@ -127,6 +129,7 @@ void check_all_defaults(T& server)
 
 SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test runtime settings are initialized correctly" << std::endl;
     GIVEN("A Redis derived object created with all environment variables unset")
     {
         unset_all_env_vars();

@@ -358,6 +358,30 @@ void PyClient::set_script_from_file(const std::string& name,
     }
 }
 
+void PyClient::set_script_from_file_multigpu(const std::string& name,
+                                             const std::string& script_file,
+                                             int first_gpu,
+                                             int num_gpus)
+{
+    try {
+        _client->set_script_from_file_multigpu(name, script_file, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script_from_file_multigpu.");
+    }
+}
+
+
 void PyClient::set_script(const std::string& name,
                           const std::string& device,
                           const std::string_view& script)
@@ -377,6 +401,29 @@ void PyClient::set_script(const std::string& name,
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing set_script.");
+    }
+}
+
+void PyClient::set_script_multigpu(const std::string& name,
+                                   const std::string_view& script,
+                                   int first_gpu,
+                                   int num_gpus)
+{
+    try {
+        _client->set_script_multigpu(name, script, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_script_multigpu.");
     }
 }
 
@@ -425,6 +472,34 @@ void PyClient::run_script(const std::string& name,
     }
 }
 
+void PyClient::run_script_multigpu(const std::string& name,
+                                   const std::string& function,
+                                   std::vector<std::string>& inputs,
+                                   std::vector<std::string>& outputs,
+                                   int offset,
+                                   int first_gpu,
+                                   int num_gpus)
+{
+    try {
+      _client->run_script_multigpu(
+          name, function, inputs, outputs, offset, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_script_multigpu.");
+    }
+}
+
+
 void PyClient::delete_script(const std::string& name)
 {
     try {
@@ -442,6 +517,27 @@ void PyClient::delete_script(const std::string& name)
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing delete_script.");
+    }
+}
+
+void PyClient::delete_script_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    try {
+        _client->delete_script_multigpu(name, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_script_multigpu.");
     }
 }
 
@@ -496,6 +592,37 @@ void PyClient::set_model(const std::string& name,
     }
 }
 
+void PyClient::set_model_multigpu(const std::string& name,
+                                  const std::string_view& model,
+                                  const std::string& backend,
+                                  int first_gpu,
+                                  int num_gpus,
+                                  int batch_size,
+                                  int min_batch_size,
+                                  const std::string& tag,
+                                  const std::vector<std::string>& inputs,
+                                  const std::vector<std::string>& outputs)
+{
+    try {
+        _client->set_model_multigpu(name, model, backend, first_gpu, num_gpus,
+                                    batch_size, min_batch_size, tag,
+                                    inputs, outputs);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_multigpu.");
+    }
+}
+
 void PyClient::set_model_from_file(const std::string& name,
                                    const std::string& model_file,
                                    const std::string& backend,
@@ -526,6 +653,37 @@ void PyClient::set_model_from_file(const std::string& name,
     }
 }
 
+void PyClient::set_model_from_file_multigpu(const std::string& name,
+                                            const std::string& model_file,
+                                            const std::string& backend,
+                                            int first_gpu,
+                                            int num_gpus,
+                                            int batch_size,
+                                            int min_batch_size,
+                                            const std::string& tag,
+                                            const std::vector<std::string>& inputs,
+                                            const std::vector<std::string>& outputs)
+{
+    try {
+        _client->set_model_from_file_multigpu(
+            name, model_file, backend, first_gpu, num_gpus, batch_size,
+            min_batch_size, tag, inputs, outputs);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing set_model_from_file_multigpu.");
+    }
+}
+
 void PyClient::run_model(const std::string& name,
                          std::vector<std::string> inputs,
                          std::vector<std::string> outputs)
@@ -548,6 +706,31 @@ void PyClient::run_model(const std::string& name,
     }
 }
 
+void PyClient::run_model_multigpu(const std::string& name,
+                                  std::vector<std::string> inputs,
+                                  std::vector<std::string> outputs,
+                                  int offset,
+                                  int first_gpu,
+                                  int num_gpus)
+{
+    try {
+        _client->run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing run_model_multigpu.");
+    }
+}
+
 void PyClient::delete_model(const std::string& name)
 {
     try {
@@ -565,6 +748,27 @@ void PyClient::delete_model(const std::string& name)
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing delete_model.");
+    }
+}
+
+void PyClient::delete_model_multigpu(
+    const std::string& name, int first_gpu, int num_gpus)
+{
+    try {
+        _client->delete_model_multigpu(name, first_gpu, num_gpus);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_model_multigpu.");
     }
 }
 
@@ -736,6 +940,12 @@ void PyClient::use_model_ensemble_prefix(bool use_prefix)
   _client->use_model_ensemble_prefix(use_prefix);
 }
 
+void PyClient::use_list_ensemble_prefix(bool use_prefix)
+{
+  _client->use_list_ensemble_prefix(use_prefix);
+}
+
+
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {
     try {
@@ -887,6 +1097,7 @@ void PyClient::config_set(std::string config_param, std::string value, std::stri
     }
 }
 
+// Save a copy of the database
 void PyClient::save(std::vector<std::string> addresses)
 {
     for (size_t address_index = 0; address_index < addresses.size(); address_index++) {
@@ -906,6 +1117,239 @@ void PyClient::save(std::vector<std::string> addresses)
             throw SRInternalException("A non-standard exception was encountered "\
                                       "while executing save.");
         }
+    }
+}
+
+
+// Appends a dataset to the aggregation list
+void PyClient::append_to_list(const std::string& list_name, PyDataset& dataset)
+{
+    try {
+        _client->append_to_list(list_name, *dataset.get());
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing append_to_list.");
+    }
+}
+
+// Delete an aggregation list
+void PyClient::delete_list(const std::string& list_name)
+{
+    try {
+        _client->delete_list(list_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing delete_list.");
+    }
+}
+
+// Copy an aggregation list
+void PyClient::copy_list(const std::string& src_name, const std::string& dest_name)
+{
+    try {
+        _client->copy_list(src_name, dest_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing copy_list.");
+    }
+}
+
+// Rename an aggregation list
+void PyClient::rename_list(const std::string& src_name, const std::string& dest_name)
+{
+    try {
+        _client->rename_list(src_name, dest_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing rename_list.");
+    }
+}
+
+// Get the number of entries in the list
+int PyClient::get_list_length(const std::string& list_name)
+{
+    try {
+        return _client->get_list_length(list_name);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_list_length.");
+    }
+}
+
+// Poll list length until length is equal
+bool PyClient::poll_list_length(const std::string& name, int list_length,
+                                int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length.");
+    }
+}
+
+// Poll list length until length is greater than or equal
+bool PyClient::poll_list_length_gte(const std::string& name, int list_length,
+                                    int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length_gte(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length_gte.");
+    }
+}
+
+// Poll list length until length is less than or equal
+bool PyClient::poll_list_length_lte(const std::string& name, int list_length,
+                                   int poll_frequency_ms, int num_tries)
+{
+    try {
+        return _client->poll_list_length_lte(
+            name, list_length, poll_frequency_ms, num_tries);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing poll_list_length_lte.");
+    }
+}
+
+// Get datasets from an aggregation list
+py::list PyClient::get_datasets_from_list(const std::string& list_name)
+{
+    try {
+        std::vector<DataSet> datasets = _client->get_datasets_from_list(list_name);
+        std::vector<PyDataset*> result;
+        for (auto it = datasets.begin(); it != datasets.end(); it++) {
+            DataSet* ds = new DataSet(std::move(*it));
+            result.push_back(new PyDataset(ds));
+        }
+        py::list result_list = py::cast(result);
+        return result_list;
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_datasets_from_list.");
+    }
+}
+
+// Get a range of datasets (by index) from an aggregation list
+py::list PyClient::get_dataset_list_range(
+    const std::string& list_name, const int start_index, const int end_index)
+{
+    try {
+        std::vector<DataSet> datasets = _client->get_dataset_list_range(
+            list_name, start_index, end_index);
+        std::vector<PyDataset*> result;
+        for (auto it = datasets.begin(); it != datasets.end(); it++) {
+            DataSet* ds = new DataSet(std::move(*it));
+            result.push_back(new PyDataset(ds));
+        }
+        py::list result_list = py::cast(result);
+        return result_list;
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_dataset_list_range.");
     }
 }
 

@@ -35,11 +35,13 @@
 #include "addressanycommand.h"
 #include "client.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing CommandList object", "[CommandList]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CommandList objectinfo" << std::endl;
     GIVEN("A CommandList object")
     {
         CommandList cmd_lst;
@@ -87,6 +89,18 @@ SCENARIO("Testing CommandList object", "[CommandList]")
                     c_it++;
                     field_index++;
                 }
+            }
+
+            AND_THEN("The [] operator can be used to retrieve a Command "\
+                     "reference")
+            {
+                Command& first_cmd = cmd_lst[0];
+                CHECK(first_cmd.cbegin() != first_cmd.cend());
+            }
+
+            AND_THEN("An error is thrown if the [] operator is out of range")
+            {
+                CHECK_THROWS_AS(cmd_lst[1000], InternalException);
             }
 
             AND_THEN("A new CommandList object can be constructed "
@@ -275,7 +289,7 @@ SCENARIO("Testing CommandList object", "[CommandList]")
 
 SCENARIO("Testing CommandList object on heap", "[CommandList]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing CommandList object on heap" << std::endl;
     GIVEN("A CommandList object on the heap with three Commands")
     {
         CommandList* cmd_lst = new CommandList;
