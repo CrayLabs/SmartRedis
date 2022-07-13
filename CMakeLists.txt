@@ -34,8 +34,8 @@ set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 add_link_options(-lpthread)
-
-add_compile_options(-fvisibility=default)
+enable_language(Fortran)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
 if (WERROR)
     add_compile_options(-Wall -Werror)
@@ -74,9 +74,13 @@ set(CLIENT_SRC
     src/cpp/redis.cpp
     src/cpp/metadatafield.cpp
     src/cpp/stringfield.cpp
+)
+
+set(FORTRAN_SRC
     src/fortran/fortran_c_interop.F90
     src/fortran/dataset.F90
-    src/fortran/client.F90)
+    src/fortran/client.F90
+)
 
 include_directories(SYSTEM
     include
@@ -84,20 +88,26 @@ include_directories(SYSTEM
     src/fortran
 )
 
+set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
+
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
 set_target_properties(smartredis PROPERTIES SUFFIX ".so")
 target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES})
 
-# Install dynamic library and headers
-install(TARGETS smartredis
-	LIBRARY DESTINATION lib)
+# Fortran library
+add_library(smartredis-fortran SHARED ${FORTRAN_SRC})
+target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
 )
+
+# Install dynamic library and headers
+install(TARGETS smartredis smartredis-fortran
+	LIBRARY DESTINATION lib)
 
 if(BUILD_PYTHON)
 	message("-- Python client build enabled")
