@@ -12,15 +12,16 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
-This version adds new functionality in the form of support for Unix Domain Sockets.
+- This version adds new functionality in the form of support for Unix Domain Sockets.
+- Fortran client can now be optionally built with the rest of the library
 
 Detailed Notes
 
-Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
+- Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
+- A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against
 
 .. _PR252: https://github.com/CrayLabs/SmartRedis/pull/252
-
-
+.. _PR245: https://github.com/CrayLabs/SmartRedis/pull/245
 
 0.3.1
 -----

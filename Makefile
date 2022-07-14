@@ -22,11 +22,17 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
-# help: lib                            - Build SmartRedis clients into a dynamic library
+# help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
 	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
+
+# help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
+.PHONY: lib-with-fortran
+lib-with-fortran: SHELL:=/bin/bash
+lib-with-fortran: deps
+	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS) -DBUILD_FORTRAN=ON
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
