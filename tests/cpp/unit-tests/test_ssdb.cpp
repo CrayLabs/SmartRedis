@@ -28,6 +28,8 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "redis.h"
+#include "client.h"
+#include "address.h"
 
 unsigned long get_time_offset();
 
@@ -39,9 +41,9 @@ class TestSSDB : public Redis
     public:
         TestSSDB() : Redis() {}
 
-        std::string get_ssdb()
+        SRAddress get_ssdb()
         {
-            return this->_get_ssdb();
+            return _get_ssdb();
         }
 };
 
@@ -66,6 +68,7 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb;
+        Client* c = NULL;
 
         THEN("SSDB environment variable must exist "
              "and contain valid characters")
@@ -80,8 +83,11 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 
             // Valid SSDB. Ensure one of 127 or 128 is chosen
             setenv_ssdb("127,128");
-            std::string hp = test_ssdb.get_ssdb();
-            CHECK((hp == "tcp://127" || hp == "tcp://128"));
+            CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
+
+            // SSDB points to a unix domain socket and we're using clustered Redis
+            setenv_ssdb ("unix://127.0.0.1:6349");
+            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
 
             setenv_ssdb(old_ssdb);
         }

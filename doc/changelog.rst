@@ -1,6 +1,27 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future date
+
+Note
+
+This section details changes made in the development branch that have not yet been applied to a released version of the SmartRedis library.
+
+Description
+
+This version adds new functionality in the form of support for Unix Domain Sockets.
+
+Detailed Notes
+
+Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
+
+.. _PR252: https://github.com/CrayLabs/SmartRedis/pull/252
+
+
+
 0.3.1
 -----
 

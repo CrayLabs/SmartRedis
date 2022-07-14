@@ -37,6 +37,7 @@
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
 #include "pipelinereply.h"
+#include "address.h"
 
 namespace SmartRedis {
 
@@ -61,10 +62,9 @@ class RedisCluster : public RedisServer
         *   \brief RedisCluster constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param address_port The address and port in the form of
-        *                       "tcp://address:port"
+        *   \param address_spec The TCP or UDS address of the server
         */
-        RedisCluster(std::string address_port);
+        RedisCluster(std::string address_spec);
 
         /*!
         *   \brief RedisCluster copy constructor is not allowed
@@ -206,11 +206,10 @@ class RedisCluster : public RedisServer
 
         /*!
          *  \brief Check if address is valid
-         *  \param address address of database
-         *  \param port port of database
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port);
+        virtual bool is_addressable(const SRAddress& address) const;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -552,7 +551,7 @@ class RedisCluster : public RedisServer
         *                       tcp:://address:port
         *                       for redis connection
         */
-        inline void _connect(std::string address_port);
+        inline void _connect(SRAddress& db_address);
 
         /*!
         *   \brief Map the RedisCluster via the CLUSTER SLOTS
