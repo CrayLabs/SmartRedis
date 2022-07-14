@@ -45,7 +45,7 @@ if (WERROR)
     if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         add_compile_options(-Wall -Werror)
     else()
-        message( WARNING "WERROR was specified, but the CMAKE compiler is not GCC")
+        message(WARNING "WERROR was specified, but the CMAKE compiler is not GCC")
     endif()
 endif()
 
