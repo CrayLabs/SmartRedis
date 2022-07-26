@@ -24,76 +24,100 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
+
+from smartredis import Dataset
+
+import xarray as xr
 import numpy as np
 import pandas as pd
-import xarray as xr
-from smartredis import Dataset
-import datetime
+
+from smartredis.util import DatasetConverter 
+
+
 
 def test_dataset_conversion():
-    """
-    Testing creating xarray dataset, converting 
-    to SmartRedis dataset and then back into a xarray dataset
     
-    get an xarray
-    call import to make a dataset out of it
-    call export to make an xarray out of the dataset
-    compare the two xarrays
-    """
+    # Testing:
+    # adding data and metadata to a SmartRedis dataset, 
+    # calling add_metadata_for_xarray method on the dataset and the list of field names,
+    # calling transform_to_xarray on the dataset,
+    # returning an Xarray DataArray 
+    
+    # Out of Scope for now: 
+    # time coordinate
+    # coordinates with other fields: date, dimensions, attributes
+    # named DataArrays 
 
-# Create a mock xarray dataarrays
-## EX 1 
+
+  
+# EX1 DATA 
+
     np.random.seed(0)
     temperature = 15 + 8 * np.random.randn(2, 2, 3)
-    lon = [[-99.83, -99.32], [-99.79, -99.23]]
-    lat = [[42.25, 42.21], [42.63, 42.59]]
-    time = pd.date_range("2014-09-06", periods=3)
-    reference_time = pd.Timestamp("2014-09-05")
-
-
-    da_1 = xr.DataArray(
-        data=temperature,
-        dims=["x", "y", "time"],
-        coords=dict(
-            lon=(["x", "y"], lon),
-            lat=(["x", "y"], lat),
-            time=time,
-            reference_time=reference_time,
-        ),
-        attrs=dict(
-            description="Ambient temperature.",
-            units="degC",
-        )
-    )
-    
-## EX 2 
-    da_2 = xr.DataArray(np.random.randn(2, 3), coords={'x': ['a', 'b']}, dims=('x', 'y'))
-      
-## EX 3
-    
-    da_3 = {"dims": "t", "data": [1, 2, 3]}
-    da_3 = xr.DataArray.from_dict(da_3)
-        
-## EX 4 
-    da_4 = {
-           "coords": {
-                "t": {"dims": "t", "data": [0, 1, 2], "attrs": {"units": "s"}}
-            },
-          "attrs": {"title": "air temperature"},
-          "dims": "t",
-          "data": [10, 20, 30],
-           "name": "a",
-    }
-    da_4 = xr.DataArray.from_dict(da_4)
-    
-## Test with global attributes? 
+    lon = np.array([[-99.83, -99.32], [-99.79, -99.23]])
+    lat = np.array([[42.25, 42.21], [42.63, 42.59]])
   
-# Create Dataset 
-    d = Dataset("a_dataset")
-    d.import_from_xarray(da_1)
-   
-# Pass to reconstruction 
-    ret_xarray = d.export_to_xarray()
+    data = np.array(temperature)
+    dims=["x", "y", "time"]
+    #coords=dict(
+    #     lon=(["x", "y"], lon),
+    #     lat=(["x", "y"], lat))
+         #time=time,
+         #reference_time=reference_time)
+   # attrs=dict(
+   #     description="Ambient temperature.",
+   #      units="degC")
+         
+
+    # User construction of the SmartRedis dataset
+    ds = Dataset("example-1") 
   
-    print(ret_xarray.equals(da_1))
-    assert ret_xarray.equals(da_1)
+    ds.add_tensor("data",temperature)
+    ds.add_meta_string("lon_dim_name","x")
+    ds.add_meta_string("lat_dim_name","y")
+    ds.add_meta_string("description","Ambient temperature")
+    ds.add_meta_string("units","degC")
+    ds.add_meta_string("time_dim_name","time")
+    
+   # ds.add_tensor("lon",lon)
+   # ds.add_tensor("lat",lat)
+    # ds.add_meta_string("time_units","days since 2014-09-06")
+    # ds.add_tensor("time",time)
+    # ds.add_tensor("reference_time",reference_time)
+            # coords=["lon","lat"], 
+                                          # record_dimension='time_dim_name') 
+                                          #"time","reference_time"]
+    
+
+    DatasetConverter.add_metadata_for_xarray(ds, data="data",
+                                             dims=["lon_dim_name","lat_dim_name","time_dim_name"],attrs=["description","units"])
+                                             
+    an_xarray = DatasetConverter.transform_to_xarray(ds)
+    
+    #print(an_xarray)
+    
+    
+    
+    
+# Ex 2  DATA
+
+    #coords = {"t": {"dims": "t","data": [0, 1, 2], "attrs": {"units": "s"}} }
+    attrs = {"title": "air temperature"}
+    dims = "t"
+    gdata = np.array([10, 20, 30])
+    # name = "a"
+
+# User construction of dataset 
+    da = Dataset("example-2") 
+    da.add_tensor("global-data",gdata)
+    da.add_meta_string("title","air temperature")
+    da.add_meta_string("dim_name","t")
+    
+
+    DatasetConverter.add_metadata_for_xarray(da, data="global-data",dims=["dim_name"],attrs=["title"])
+                           
+    xarray_example2 = DatasetConverter.transform_to_xarray(da)
+    
+   # print(xarray_example2)
+    

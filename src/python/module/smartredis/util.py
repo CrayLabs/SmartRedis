@@ -27,6 +27,9 @@
 from .error import *
 from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
+
+import xarray as xr
+import numpy as np
 class Dtypes:
     @staticmethod
     def tensor_from_numpy(array):
@@ -111,3 +114,93 @@ def typecheck(arg, name, _type):
     """
     if not isinstance(arg, _type):
         raise TypeError(f"Argument {name} is of type {type(arg)}, not {_type}")
+
+
+
+class DatasetConverter:   
+    
+    def add_metadata_for_xarray(ds,data=None,dims=None,coords=None,attrs=None): #time=None,time_variable=None):
+        """_summary_
+        return attribute labels, dimensions labels, coordinate labels etc for retrieval 
+        adding the field names to retrieve to xarray specific field names 
+        can use those general field names to construct xarray in transform method 
+
+        Args:
+            ds (_type_): _description_
+            data (_type_, optional): _description_. Defaults to None.
+            dims (_type_, optional): _description_. Defaults to None.
+            coords (_type_, optional): _description_. Defaults to None.
+            attrs (_type_, optional): _description_. Defaults to None.
+        """
+        
+        args = list(locals().keys())[1:]
+        for arg in args: 
+            if isinstance(eval(arg),list):
+                items = []
+                for item in eval(arg): 
+                    items.append(item)
+        
+                arg_field=",".join(items)
+             
+                ds.add_meta_string(f"_xarray_{arg}",arg_field)  # pass in comma separated string 
+            else:
+                if eval(arg) != None: 
+                    ds.add_meta_string(f"_xarray_{arg}",eval(arg))
+                    
+
+     
+    def transform_to_xarray(ds): 
+        """_summary_
+
+        Args:
+            ds (_type_): _description_
+
+        Returns:
+            xarray.DataArray: _description_
+        """
+    
+        # data 
+        try: 
+            for item in ds.get_meta_strings("_xarray_data")[0].split(","):    # for the data field if list - prepare to retrieve more than one tensor 
+                _xarray_data = ds.get_tensor(f"{item}")
+            
+            data_final = _xarray_data
+    
+        except: 
+            pass
+            
+        # dimensions  
+        dims_final=[]
+        try:
+            for item in ds.get_meta_strings(f"_xarray_dims")[0].split(","):
+                _xarray_dims = ds.get_meta_strings(f"{item}")
+                dims_final.append(_xarray_dims[0])
+        except: 
+            pass
+        
+        # coordinates 
+        coords_final={}
+
+        try: 
+            for item in ds.get_meta_strings("_xarray_coords")[0].split(","):
+                _xarray_coords = ds.get_tensor(f"{item}")
+                coords_final[item] = _xarray_coords
+        except: 
+            pass
+      
+        # attributes 
+        attrs_final = {}
+        try: 
+            if (ds.get_meta_strings("_xarray_attrs")) != ['attrs']:   # better way to check?
+                for item in ds.get_meta_strings(f"_xarray_attrs")[0].split(","):
+                    _xarray_attrs = ds.get_meta_strings(f"{item}")
+            
+                    attrs_final[item] = _xarray_attrs[0]     
+        except: 
+            pass  
+
+        # construct the xarray 
+        ret_xarray = xr.DataArray(data=data_final,coords=coords_final,dims=dims_final,attrs=attrs_final)
+   
+
+        return ret_xarray 
