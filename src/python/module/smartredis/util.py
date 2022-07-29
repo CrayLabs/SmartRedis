@@ -119,88 +119,131 @@ def typecheck(arg, name, _type):
 
 class DatasetConverter:   
     
-    def add_metadata_for_xarray(ds,data=None,dims=None,coords=None,attrs=None): #time=None,time_variable=None):
-        """_summary_
-        return attribute labels, dimensions labels, coordinate labels etc for retrieval 
-        adding the field names to retrieve to xarray specific field names 
-        can use those general field names to construct xarray in transform method 
+    def add_metadata_for_xarray(ds,data_names,dim_names,coord_names=None,attr_names=None):
+        """Extracts metadata from a SmartRedis dataset and adds it to
+        dataformat specific fieldnames 
 
-        Args:
-            ds (_type_): _description_
-            data (_type_, optional): _description_. Defaults to None.
-            dims (_type_, optional): _description_. Defaults to None.
-            coords (_type_, optional): _description_. Defaults to None.
-            attrs (_type_, optional): _description_. Defaults to None.
-        """
+        :param ds: a SmartRedis Dataset with metadata added to Xarray 
+        specific field names 
+        :type ds: SmartRedis Dataset
+        :param data_names: variable data field name
+        :type data_names: list or string 
+        :param dim_names: dimension field names. Defaults to None.
+        :type dim_names: list
+        :param coord_names: coordinate field names. Defaults to None.
+        :type coord_names: list, optional
+        :param attr_names: attribute field names. Defaults to None.
+        :type attr_names: list, optional
+        """        
         
-        args = list(locals().keys())[1:]
-        for arg in args: 
-            if isinstance(eval(arg),list):
-                items = []
-                for item in eval(arg): 
-                    items.append(item)
-        
-                arg_field=",".join(items)
-             
-                ds.add_meta_string(f"_xarray_{arg}",arg_field)  # pass in comma separated string 
-            else:
-                if eval(arg) != None: 
-                    ds.add_meta_string(f"_xarray_{arg}",eval(arg))
-                    
+        args = ['dim_names','coord_names','attr_names'] 
 
+        for d in data_names:  
+
+            ds.add_meta_string("_xarray_data_names",d)
+   
+            
+            for arg in args:
+
+                if isinstance(eval(arg),list):
+                    items = []
+                    for item in eval(arg): 
+                        items.append(item)
+
+                    arg_field=",".join(items)
+                    ds.add_meta_string(f"_xarray_{d}_{arg}",arg_field)
+            
+                else:
+                    if eval(arg) != None: 
+                        ds.add_meta_string(f"_xarray_{d}_{arg}",eval(arg))
+                        print(f"_xarray_{d}_{arg}")
+    
+                    else: 
+                        ds.add_meta_string(f"_xarray_{d}_{arg}","null")
+    
+        
      
     def transform_to_xarray(ds): 
-        """_summary_
+        """ Uses dataformat specifc field names added to the 
+        SmartRedis dataset in the add_metadata method to construct 
+        xarray in transform method 
 
-        Args:
-            ds (_type_): _description_
-
-        Returns:
-            xarray.DataArray: _description_
-        """
-    
-        # data 
-        try: 
-            for item in ds.get_meta_strings("_xarray_data")[0].split(","):    # for the data field if list - prepare to retrieve more than one tensor 
-                _xarray_data = ds.get_tensor(f"{item}")
-            
-            data_final = _xarray_data
-    
-        except: 
-            pass
-            
-        # dimensions  
-        dims_final=[]
-        try:
-            for item in ds.get_meta_strings(f"_xarray_dims")[0].split(","):
-                _xarray_dims = ds.get_meta_strings(f"{item}")
-                dims_final.append(_xarray_dims[0])
-        except: 
-            pass
+        :param ds: a SmartRedis dataset that has had  metadata added 
+        to dataformat specificfield names 
+        :type ds: SmartRedis Dataset
         
-        # coordinates 
-        coords_final={}
-
-        try: 
-            for item in ds.get_meta_strings("_xarray_coords")[0].split(","):
-                _xarray_coords = ds.get_tensor(f"{item}")
-                coords_final[item] = _xarray_coords
-        except: 
-            pass
-      
-        # attributes 
-        attrs_final = {}
-        try: 
-            if (ds.get_meta_strings("_xarray_attrs")) != ['attrs']:   # better way to check?
-                for item in ds.get_meta_strings(f"_xarray_attrs")[0].split(","):
-                    _xarray_attrs = ds.get_meta_strings(f"{item}")
-            
-                    attrs_final[item] = _xarray_attrs[0]     
-        except: 
-            pass  
-
-        # construct the xarray 
-        ret_xarray = xr.DataArray(data=data_final,coords=coords_final,dims=dims_final,attrs=attrs_final)
+        :return: a dictionary of keys as the data field anme and the
+        value as the built Xarray DataArray constructed using 
+        fieldnames and appropriately formatted metadata. 
+        """
+        
+        coord_dict= {}
+        coord_final = {}
+        attr_dict = {}
+        
+        
+        iter_ = ds.get_meta_strings("_xarray_data_names")
+  
+        for item in ds.get_meta_strings("_xarray_data_names"):
+       
+            # make the coordinate dict 
+            for d in ds.get_meta_strings("_xarray_data_names"):
+                for k in ds.get_meta_strings(f"_xarray_{item}_coord_names")[0].split(","):
+                    if d == k:
+                        
+                        if d in iter_:
+                            iter_.remove(d)
+              
+                        # coordinate dimensions
+                        test_dims_final = []
+                        for qitem in ds.get_meta_strings(f"_xarray_{d}_dim_names")[0].split(","):
+                            test_xarray_dims = ds.get_meta_strings(qitem)
    
+                            test_dims_final.append(test_xarray_dims[0])
+                        
+                        # coordinate attributes 
+                        for atitem in ds.get_meta_strings(f"_xarray_{d}_attr_names")[0].split(","):
+                            
+                            attrt = ds.get_meta_strings(atitem)
+                            attr_dict[atitem] = attrt[0] 
+                                            
+                        coord_dict[d]= (test_dims_final,ds.get_tensor(d),attr_dict)
+        
+                        # clear the coordinate attributes dict 
+                        attr_dict = {}
+                
+                    # dict: keys= data names, value = their coordinate dictionaries 
+                        coord_final[item] = coord_dict
+                        
+        # rest of the data items (not coordinates)                
+        ret_xarray = {}
 
+        for item in iter_:
+
+            _xarray_data = ds.get_tensor(item)
+            data_final = _xarray_data
+
+            
+            dims_final=[]
+            for ditem in ds.get_meta_strings(f"_xarray_{item}_dim_names")[0].split(","):
+                _xarray_dims = ds.get_meta_strings(ditem)
+                dims_final.append(_xarray_dims[0])
+            
+
+            attrs_final = {}
+            for aitem in ds.get_meta_strings(f"_xarray_{item}_attr_names")[0].split(","):
+                _xarray_attrs = ds.get_meta_strings(aitem)
+        
+                attrs_final[aitem] = _xarray_attrs[0]     
+            
+
+            # add coords to the correct data array 
+            for name in coord_final.keys():
+                if name == item: 
+                    coords_final = coord_final.get(name)
+
+            _xarray = xr.DataArray(data=data_final,coords=coords_final,dims=dims_final,attrs=attrs_final)
+            
+            ret_xarray[item] = _xarray 
+            
         return ret_xarray 

@@ -27,97 +27,229 @@
 
 
 from smartredis import Dataset
-
-import xarray as xr
 import numpy as np
-import pandas as pd
-
 from smartredis.util import DatasetConverter 
 
+import xarray as xr
 
 
-def test_dataset_conversion():
-    
-    # Testing:
-    # adding data and metadata to a SmartRedis dataset, 
-    # calling add_metadata_for_xarray method on the dataset and the list of field names,
-    # calling transform_to_xarray on the dataset,
-    # returning an Xarray DataArray 
-    
-    # Out of Scope for now: 
-    # time coordinate
-    # coordinates with other fields: date, dimensions, attributes
-    # named DataArrays 
+# Create data 
+
+lon = np.linspace(0,360,10)
+lat = np.linspace(-90,90,5)
+lon_coord = (
+'x',
+lon,
+{ 'x_coord_units':'degrees E', 'x_coord_longname':'Longitude'},
+None
+) 
+lat_coord = (
+'y',
+lat,
+{ 'y_coord_units':'degrees N', 'y_coord_longname':'Latitude'},
+None
+)
+data_attributes = {
+'units':'m/s',
+'longname':'velocity',
+'convention':'CF1.5'
+}
+
+data1d = np.random.random([10])
+
+data2d = np.random.random([10,5])
+
+ds_1d = xr.DataArray(
+data=data1d,
+dims='x',
+coords = (lon_coord,), 
+attrs=data_attributes
+)
+
+
+ds_2d = xr.DataArray(
+data=data2d,
+dims=['x','y'],
+coords = (lon_coord,lat_coord),
+attrs=data_attributes
+)
+
+
+# Create Datasets 
+
+ds1 = Dataset("ds-1d")
+
+ds2 = Dataset("ds-2d")
 
 
   
-# EX1 DATA 
-
-    np.random.seed(0)
-    temperature = 15 + 8 * np.random.randn(2, 2, 3)
-    lon = np.array([[-99.83, -99.32], [-99.79, -99.23]])
-    lat = np.array([[42.25, 42.21], [42.63, 42.59]])
+def test_add_metadata_for_xarray():
+    
   
-    data = np.array(temperature)
-    dims=["x", "y", "time"]
-    #coords=dict(
-    #     lon=(["x", "y"], lon),
-    #     lat=(["x", "y"], lat))
-         #time=time,
-         #reference_time=reference_time)
-   # attrs=dict(
-   #     description="Ambient temperature.",
-   #      units="degC")
-         
+# Calling add_metadata_for_xarray method on the two dataset exmaples and the list of field names
 
-    # User construction of the SmartRedis dataset
-    ds = Dataset("example-1") 
+
+# User adding 1D xarray data to SmartRedis dataset
+
+    ###
+     # 1d data
+    ds1.add_tensor("1ddata",data1d) 
+    
+    # coord 
+    ds1.add_tensor("x",lon)
+    ds1.add_meta_string("x_coord_units","degrees E")    # this might not work actually 
+    ds1.add_meta_string("x_coord_longname","Longitude")
+
+    #data attr 
+    ds1.add_meta_string("units","m/s")
+    ds1.add_meta_string("longname","velocity")
+    ds1.add_meta_string("convention","CF1.5")
+
+    # dims   
+    ds1.add_meta_string("dim_data_x","x")
+
+
+
+
+# Calling the first method for the 1d array 
+    
+    DatasetConverter.add_metadata_for_xarray(
+        ds1, 
+        data_names=["1ddata"],
+        dim_names=["dim_data_x"],
+        coord_names=["x"], # this has to be the same as 
+        attr_names=["units","longname","convention"]
+    )
+    
+    # coordinate 1
+    DatasetConverter.add_metadata_for_xarray(
+    ds1,
+    data_names=["x"], 
+    dim_names=["dim_data_x"],
+    attr_names=["x_coord_units","x_coord_longname"]    # cant have the same name for retrieval 
+    )
+
+    
+    
+
+# Assert that created data and data put into the dataset is the same 
+
+    assert(ds1.get_tensor("1ddata") == data1d).all()
+
+    # # #attr stuff 
+    assert(ds1.get_meta_strings("units")[0] == "m/s")
+    assert(ds1.get_meta_strings("longname")[0] == "velocity")
+    assert(ds1.get_meta_strings("convention")[0] == "CF1.5")
+
+    # # # # dims stuff 
+    assert(ds1.get_meta_strings("dim_data_x")[0] == "x")
+    
+    # # # coord stuff - just lon
+    assert(ds1.get_tensor("x") == lon).all()
   
-    ds.add_tensor("data",temperature)
-    ds.add_meta_string("lon_dim_name","x")
-    ds.add_meta_string("lat_dim_name","y")
-    ds.add_meta_string("description","Ambient temperature")
-    ds.add_meta_string("units","degC")
-    ds.add_meta_string("time_dim_name","time")
+
+    assert(ds1.get_meta_strings("x_coord_units")[0] == "degrees E")
+    assert(ds1.get_meta_strings("x_coord_longname")[0] == "Longitude")
+
+
+#-------------------------------------------------------------------------------
+
+
+# User adding 2D xarray data to SmartRedis dataset
+
+
+    # 2d data
+    ds2.add_tensor("2ddata",data2d) 
     
-   # ds.add_tensor("lon",lon)
-   # ds.add_tensor("lat",lat)
-    # ds.add_meta_string("time_units","days since 2014-09-06")
-    # ds.add_tensor("time",time)
-    # ds.add_tensor("reference_time",reference_time)
-            # coords=["lon","lat"], 
-                                          # record_dimension='time_dim_name') 
-                                          #"time","reference_time"]
+    # coord 
+    ds2.add_tensor("x",lon)
+    ds2.add_meta_string("x_coord_units","degrees E")    # this might not work actually 
+    ds2.add_meta_string("x_coord_longname","Longitude")
+
+    ds2.add_tensor("y",lat)
+    ds2.add_meta_string("y_coord_units","degrees N")    # because these are both named the same 
+    ds2.add_meta_string("y_coord_longname","Latitude")
+
+    #data attr 
+    ds2.add_meta_string("units","m/s")
+    ds2.add_meta_string("longname","velocity")
+    ds2.add_meta_string("convention","CF1.5")
+
+    # dims   
+    ds2.add_meta_string("dim_data_x","x")
+    ds2.add_meta_string("dim_data_y","y")
+
+
+  
+
+    # Calling add_metadata_for_xarray for 
+    DatasetConverter.add_metadata_for_xarray(
+        ds2, 
+        data_names=["2ddata"],
+        dim_names=["dim_data_x","dim_data_y"],
+        coord_names=["x","y"], # this has to be the same as 
+        attr_names=["units","longname","convention"]
+    )
+    
+    # coordinate 1
+    DatasetConverter.add_metadata_for_xarray(
+    ds2,
+    data_names=["x"], 
+    dim_names=["dim_data_x"],
+    attr_names=["x_coord_units","x_coord_longname"]    # cant have the same name for retrieval 
+    )
+    
+    # coordinate 1
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=["y"], 
+        dim_names=["dim_data_y"],
+        attr_names=["y_coord_units","y_coord_longname"]
+    )
+    
+# Assert that created data and data put into the dataset is the same 
+      # 2d data
+    assert(ds2.get_tensor("2ddata") == data2d).all()
+    
+    # coord 
+    assert(ds2.get_tensor("x")==lon).all()
+    assert(ds2.get_meta_strings("x_coord_units")[0]=="degrees E")    # this might not work actually 
+    assert(ds2.get_meta_strings("x_coord_longname")[0]=="Longitude")
+
+    assert(ds2.get_tensor("y") == lat).all()
+    assert(ds2.get_meta_strings("y_coord_units")[0] == "degrees N")    # because these are both named the same 
+    assert(ds2.get_meta_strings("y_coord_longname")[0] == "Latitude")
+
+    #data attr 
+    assert(ds2.get_meta_strings("units")[0] == "m/s")
+    assert(ds2.get_meta_strings("longname")[0] =="velocity")
+    assert(ds2.get_meta_strings("convention")[0] == "CF1.5")
+
+    # # dims   
+    assert(ds2.get_meta_strings("dim_data_x")[0] == "x")
+    assert(ds2.get_meta_strings("dim_data_y")[0] == "y")
+
+
+  
+def test_transform_to_xarray():
+    
+    
+# 1D array test
+    d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
+
+    d1_transformed = d1_xarray_ret["1ddata"]
+
+    assert(ds_1d.equals(d1_transformed))
+    
+    assert(ds_1d.identical(d1_transformed))
     
 
-    DatasetConverter.add_metadata_for_xarray(ds, data="data",
-                                             dims=["lon_dim_name","lat_dim_name","time_dim_name"],attrs=["description","units"])
-                                             
-    an_xarray = DatasetConverter.transform_to_xarray(ds)
+# 2D array test
+    d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
+   
+    d2_transformed = d2_xarray_ret["2ddata"]
     
-    #print(an_xarray)
+    assert(ds_2d.equals(d2_transformed))
     
-    
-    
-    
-# Ex 2  DATA
-
-    #coords = {"t": {"dims": "t","data": [0, 1, 2], "attrs": {"units": "s"}} }
-    attrs = {"title": "air temperature"}
-    dims = "t"
-    gdata = np.array([10, 20, 30])
-    # name = "a"
-
-# User construction of dataset 
-    da = Dataset("example-2") 
-    da.add_tensor("global-data",gdata)
-    da.add_meta_string("title","air temperature")
-    da.add_meta_string("dim_name","t")
-    
-
-    DatasetConverter.add_metadata_for_xarray(da, data="global-data",dims=["dim_name"],attrs=["title"])
-                           
-    xarray_example2 = DatasetConverter.transform_to_xarray(da)
-    
-   # print(xarray_example2)
-    
+    assert(ds_2d.identical(d2_transformed))
+   
