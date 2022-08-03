@@ -33,7 +33,6 @@ from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
-
 class Dataset:
     def __init__(self, name):
         """Initialize a Dataset object

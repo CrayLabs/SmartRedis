@@ -26,4 +26,4 @@
 
 from .client import Client
 from .dataset import Dataset
-from .util import DatasetConverter
+from .dataset_utils import DatasetConverter
