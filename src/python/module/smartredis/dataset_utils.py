@@ -39,7 +39,9 @@ def typechecking(names,strings_name,string_name):
     typecheck(names, strings_name, list)
     for name in names:
         typecheck(name, string_name, str)  
-        
+        # Check if empty 
+        if string_name == "":
+            raise RedisRuntimeError
         
 class DatasetConverter:  
 
@@ -64,6 +66,8 @@ class DatasetConverter:
 
         # would have to do some other changes to make adding just a string acceptable 
         # so just convert any list into a list of one string elementxs
+        
+
 
         if type(data_names) == str:
             data_names = [data_names]
