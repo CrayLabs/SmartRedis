@@ -62,8 +62,6 @@ class DatasetConverter:
         
         typecheck(dataset, "dataset", Dataset)
 
-        # does this fail if the user passes in just a str? 
-        # is there an elegant way to handle this? 
         # would have to do some other changes to make adding just a string acceptable 
         # so just convert any list into a list of one string elementxs
 
