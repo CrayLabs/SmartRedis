@@ -389,72 +389,76 @@ def test_bad_data_transform_to_xarray_1d():
    
     # Calling method add_metadata_for_xarray on 1D dataset 
     # good data and prerequisite for transform_to_xarray 
-    with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
+    # Test incorrect data in data_names parameter 
+    DatasetConverter.add_metadata_for_xarray(
             ds1, 
             data_names=["baddata"],
             dim_names=dimname,
             coord_names=coordname,
             attr_names=attrname
         )
-        # Calling method add_metadata_for_xarray for x coordinate
-        DatasetConverter.add_metadata_for_xarray(
-            ds1,
-            data_names=cdataname, 
-            dim_names=cdimname,
-            attr_names=cattrname 
-        )
-        d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
-
+    # Calling method add_metadata_for_xarray for x coordinate
+    DatasetConverter.add_metadata_for_xarray(
+        ds1,
+        data_names=cdataname, 
+        dim_names=cdimname,
+        attr_names=cattrname 
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds1, 
-            data_names=dataname,
-            dim_names=["baddata1","baddata2"],
-            coord_names=coordname,
-            attr_names=attrname
-        )
-        # Calling method add_metadata_for_xarray for x coordinate
-        DatasetConverter.add_metadata_for_xarray(
-            ds1,
-            data_names=cdataname, 
-            dim_names=cdimname,
-            attr_names=cattrname 
-        )
-        d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
-    
-    with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds1, 
-            data_names=dataname,
-            dim_names=dimname,
-            coord_names=["baddata"],
-            attr_names=attrname
-        )
-        # Calling method add_metadata_for_xarray for x coordinate
-        DatasetConverter.add_metadata_for_xarray(
-            ds1,
-            data_names=cdataname, 
-            dim_names=cdimname,
-            attr_names=cattrname 
-        )
         d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
         
+    # Test incorrect data in dim_names parameter 
+    DatasetConverter.add_metadata_for_xarray(
+        ds1, 
+        data_names=dataname,
+        dim_names=["baddata1","baddata2"],
+        coord_names=coordname,
+        attr_names=attrname
+    )
+    # Calling method add_metadata_for_xarray for x coordinate
+    DatasetConverter.add_metadata_for_xarray(
+        ds1,
+        data_names=cdataname, 
+        dim_names=cdimname,
+        attr_names=cattrname 
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds1, 
-            data_names=dataname,
-            dim_names=dimname,
-            coord_names=coordname,
-            attr_names=["baddata1","baddata2","baddata3"]
-        )
-        # Calling method add_metadata_for_xarray for x coordinate
-        DatasetConverter.add_metadata_for_xarray(
-            ds1,
-            data_names=cdataname, 
-            dim_names=cdimname,
-            attr_names=cattrname 
-        )
+        d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
+        
+    # Test incorrect data in coord_names parameter 
+    DatasetConverter.add_metadata_for_xarray(
+        ds1, 
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=["baddata"],
+        attr_names=attrname
+    )
+    # Calling method add_metadata_for_xarray for x coordinate
+    DatasetConverter.add_metadata_for_xarray(
+        ds1,
+        data_names=cdataname, 
+        dim_names=cdimname,
+        attr_names=cattrname 
+    )
+    with pytest.raises(RedisKeyError): 
+        d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
+     
+    # Test incorrect data in attr_names parameter
+    DatasetConverter.add_metadata_for_xarray(
+        ds1, 
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=coordname,
+        attr_names=["baddata1","baddata2","baddata3"]
+    )
+    # Calling method add_metadata_for_xarray for x coordinate
+    DatasetConverter.add_metadata_for_xarray(
+        ds1,
+        data_names=cdataname, 
+        dim_names=cdimname,
+        attr_names=cattrname 
+    )   
+    with pytest.raises(RedisKeyError): 
         d1_xarray_ret = DatasetConverter.transform_to_xarray(ds1)
         
 #------- beginning of 2d transform_to_xarray tests-------
@@ -518,93 +522,93 @@ def test_bad_data_transform_to_xarray_2d():
     # Calling add_metadata_for_xarray for 2D data
     # Prerequisite for transform to xarray 
     # Test incorrect data in data_names parameter
+    DatasetConverter.add_metadata_for_xarray(
+        ds2, 
+        data_names=["baddata"],
+        dim_names=dimname,
+        coord_names=coordname, 
+        attr_names=attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c1_dataname, 
+        dim_names=c1_dimname,
+        attr_names=c1_attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c2_dataname, 
+        dim_names=c2_dimname,
+        attr_names=c2_attrname
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds2, 
-            data_names=["baddata"],
-            dim_names=dimname,
-            coord_names=coordname, 
-            attr_names=attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c1_dataname, 
-            dim_names=c1_dimname,
-            attr_names=c1_attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c2_dataname, 
-            dim_names=c2_dimname,
-            attr_names=c2_attrname
-        )
         d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
         
     # Test incorrect data in dim_names parameter
+    DatasetConverter.add_metadata_for_xarray(
+        ds2, 
+        data_names=dataname,
+        dim_names=["baddata1","baddata2"],
+        coord_names=coordname, 
+        attr_names=attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c1_dataname, 
+        dim_names=c1_dimname,
+        attr_names=c1_attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c2_dataname, 
+        dim_names=c2_dimname,
+        attr_names=c2_attrname
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds2, 
-            data_names=dataname,
-            dim_names=["baddata1","baddata2"],
-            coord_names=coordname, 
-            attr_names=attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c1_dataname, 
-            dim_names=c1_dimname,
-            attr_names=c1_attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c2_dataname, 
-            dim_names=c2_dimname,
-            attr_names=c2_attrname
-        )
         d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
         
     # Test incorrect data in coord_names parameter
+    DatasetConverter.add_metadata_for_xarray(
+        ds2, 
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=["baddata1","baddata2"], 
+        attr_names=attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c1_dataname, 
+        dim_names=c1_dimname,
+        attr_names=c1_attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c2_dataname, 
+        dim_names=c2_dimname,
+        attr_names=c2_attrname
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds2, 
-            data_names=dataname,
-            dim_names=dimname,
-            coord_names=["baddata1","baddata2"], 
-            attr_names=attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c1_dataname, 
-            dim_names=c1_dimname,
-            attr_names=c1_attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c2_dataname, 
-            dim_names=c2_dimname,
-            attr_names=c2_attrname
-        )
         d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
         
     # Test incorrect data in attr_names parameter 
+    DatasetConverter.add_metadata_for_xarray(
+        ds2, 
+        data_names=dataname,
+        dim_names=dimname,
+        coord_names=coordname, 
+        attr_names=["baddata1","baddata2","baddata3"]
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c1_dataname, 
+        dim_names=c1_dimname,
+        attr_names=c1_attrname
+    )
+    DatasetConverter.add_metadata_for_xarray(
+        ds2,
+        data_names=c2_dataname, 
+        dim_names=c2_dimname,
+        attr_names=c2_attrname
+    )
     with pytest.raises(RedisKeyError): 
-        DatasetConverter.add_metadata_for_xarray(
-            ds2, 
-            data_names=dataname,
-            dim_names=dimname,
-            coord_names=coordname, 
-            attr_names=["baddata1","baddata2","baddata3"]
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c1_dataname, 
-            dim_names=c1_dimname,
-            attr_names=c1_attrname
-        )
-        DatasetConverter.add_metadata_for_xarray(
-            ds2,
-            data_names=c2_dataname, 
-            dim_names=c2_dimname,
-            attr_names=c2_attrname
-        )
         d2_xarray_ret = DatasetConverter.transform_to_xarray(ds2)
