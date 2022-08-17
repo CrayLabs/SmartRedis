@@ -26,9 +26,8 @@
 
 try:
     import xarray as xr
-except:
+except ImportError:
     xr = None
-
 _xarray_not_found = 'optional package xarray not available in environment'
 
 import numpy as np
@@ -51,14 +50,16 @@ longitude_coord_1d = (
 data_attributes_1d = {"units": "m/s", "longname": "velocity", "convention": "CF1.5"}
 # Generate 1D reference tensor data
 data1d = np.random.random([10])
-# Create 1D reference Xarray for testing
-ds_1d = xr.DataArray(
-    name = "1ddata",
-    data = data1d,
-    dims = "x",
-    coords = (longitude_coord_1d,),
-    attrs = data_attributes_1d,
-)
+
+if xr:
+    # Create 1D reference Xarray for testing
+    ds_1d = xr.DataArray(
+        name = "1ddata",
+        data = data1d,
+        dims = "x",
+        coords = (longitude_coord_1d,),
+        attrs = data_attributes_1d,
+    )
 
 # ----------Create reference 2D data for 2D tests ---------
 longitude_2d = np.linspace(0, 360, 10)
@@ -79,14 +80,15 @@ data_attributes_2d = {"units": "m/s", "longname": "velocity", "convention": "CF1
 
 # Generate 2D reference tensor data
 data2d = np.random.random([10, 5])
-# Create 2D reference Xarray for testing
-ds_2d = xr.DataArray(
-    name = "2ddata",
-    data = data2d,
-    dims = ["x", "y"],
-    coords = (longitude_coord_2d, latitude_coord_2d),
-    attrs = data_attributes_2d,
-)
+if xr:
+    # Create 2D reference Xarray for testing
+    ds_2d = xr.DataArray(
+        name = "2ddata",
+        data = data2d,
+        dims = ["x", "y"],
+        coords = (longitude_coord_2d, latitude_coord_2d),
+        attrs = data_attributes_2d,
+    )
 
 # ----helper methods -------
 
@@ -391,6 +393,7 @@ def test_transform_to_xarray_1d():
     assert ds_1d.identical(d1_transformed)
 
 
+@pytest.mark.skipif(not xr, reason = _xarray_not_found)
 def test_bad_data_transform_to_xarray_1d():
     """Test transform_to_xarray method with incorrect 1d data"""
 
@@ -509,6 +512,7 @@ def test_transform_to_xarray_2d():
     assert ds_2d.identical(d2_transformed)
 
 
+@pytest.mark.skipif(not xr, reason = _xarray_not_found)
 def test_bad_data_transform_to_xarray_2d():
     """Test transform_to_xarray method with incorrect 2d data"""
 

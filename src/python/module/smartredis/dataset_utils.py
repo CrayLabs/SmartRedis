@@ -26,8 +26,9 @@
 
 try:
     import xarray as xr
-except:
+except ImportError:
     xr = None
+
 from .dataset import Dataset
 from .util import Dtypes, exception_handler, typecheck
 from itertools import permutations
@@ -117,7 +118,7 @@ class DatasetConverter:
         """
 
         if (not xr):
-            raise RedisRuntimeError("Optional package must be installed")
+            raise RedisRuntimeError("Optional package xarray must be installed")
 
         typecheck(dataset, "dataset", Dataset)
 
