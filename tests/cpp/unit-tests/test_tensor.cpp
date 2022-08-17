@@ -26,14 +26,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensor.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing Tensor", "[Tensor]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing Tensor" << std::endl;
     GIVEN("Two Tensors")
     {
         // Create first tensor

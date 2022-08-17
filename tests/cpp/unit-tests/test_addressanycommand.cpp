@@ -30,11 +30,13 @@
 #include "addressanycommand.h"
 #include "redisserver.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAnyCommand" << std::endl;
     GIVEN("An AddressAnyCommand object")
     {
         AddressAnyCommand cmd;
@@ -102,21 +104,20 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
 
 SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
     GIVEN("An AddressAnyCommand object and a db node address and port")
     {
         AddressAnyCommand cmd;
-        std::string db_address = "127.0.0.1";
-        uint16_t db_port = 6379;
+        std::string db_address = "127.0.0.1:6379";
+        SRAddress address(db_address);
 
         WHEN("An address and port are set")
         {
-            cmd.set_exec_address_port(db_address, db_port);
+            cmd.set_exec_address(db_address);
 
             THEN("The command's address and port will be the same as those set")
             {
-                CHECK(cmd.get_address() == db_address);
-                CHECK(cmd.get_port() == db_port);
+                CHECK(cmd.get_address() == address);
             }
         }
     }

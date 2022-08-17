@@ -29,11 +29,13 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "compoundcommand.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing copy constructor and deep copy operator for CompoundCommand", "[CompoundCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor and deep copy operator for CompoundCommand" << std::endl;
     GIVEN("A CompoundCommand object")
     {
         CompoundCommand cmd;

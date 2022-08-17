@@ -22,18 +22,25 @@ library will set the value of ``SSDB`` for the user.
 
 
 The ``SSDB`` environment variable should have the format
-of ``address:port``.  For a cluster, the addresses
-and ports should be separated by a "," character.
+of ``address:port``, and may optionally be prefixed with
+a protocol, such as ``tcp://``.  For a cluster, the addresses
+and ports should be separated by a "," character. If no
+protocol is specified, the default will be taken as TCP.
+Unix domain sockets are supported via the protocol prefex
+``unix://``; however, Unix domain sockets are not supported
+in clusters.
+
 Below is an example of setting ``SSDB`` for a Redis cluster
-at three different addresses using port ``6379``:
+at three different addresses, each using port ``6379``:
 
 .. code-block:: bash
 
     export SSDB="10.128.0.153:6379,10.128.0.154:6379,10.128.0.155:6379"
 
-The Python client also relies on ``SSDB`` to determine database
+The Python client relies on ``SSDB`` to determine database
 location.  However, the Python ``Client`` constructor also allows
-for the database location to be set as an input parameter.
+for the database location to be set as an input parameter. In
+this case, it sets SSDB from the input parameter.
 
 Ensemble Environment Variables
 ==============================
@@ -107,6 +114,14 @@ The functions for changing this default behavior are:
     The function ``Client.use_model_ensemble_prefix()`` controls
     object prefixing for model and script data.
 
+Model Execution Environment Variable
+====================================
+
+The ``SR_MODEL_TIMEOUT`` environment variable defines a timeout
+on the length of time SmartRedis will wait for a model to
+execute. The value for this variable is measured in milliseconds,
+and the default value is one minute.
+
 Connection and Command Execution Environment Variables
 ======================================================
 
@@ -130,3 +145,14 @@ The user can set these environment variables to adjust command execution behavio
 ``SR_CMD_TIMEOUT`` should be specified in seconds.  Note that ``SR_CMD_INTERVAL``
 and ``SR_CMD_TIMEOUT`` are read during client initialization and not
 before each command execution.
+
+The environment variable ``SR_THREAD_COUNT`` is used by SmartRedis to determine
+the number of threads to initialize when building a worker pool for parallel task
+execution. The default value is four. If the variable is set to zero, SmartRedis
+will use a default number of threads equal to one per hardware context in the
+processor on which the library is running (more specifically, SmartRedis will
+use the result of a call to std::thread::hardware_concurrency() as the number
+of threads to create). This default will generally give good
+performance; however, if the SmartRedis library is sharing the processor hardware
+with other software, it may be useful to specify a smaller number of threads for
+some workloads.
