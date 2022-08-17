@@ -24,12 +24,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import xarray as xr
 from .dataset import Dataset
 from .util import Dtypes, exception_handler, typecheck
-import xarray as xr
 from itertools import permutations
 from .error import *
-
 
 #----helper function -----
 def get_data(dataset,name,type):
@@ -61,14 +60,7 @@ class DatasetConverter:
             :param attr_names: attribute field names. Defaults to None.
             :type attr_names: list[str], optional
         """        
-        
-        typecheck(dataset, "dataset", Dataset)
-
-        # would have to do some other changes to make adding just a string acceptable 
-        # so just convert any list into a list of one string elementxs
-        
-
-
+    
         if type(data_names) == str:
             data_names = [data_names]
         if type(dim_names) == str:
@@ -77,35 +69,30 @@ class DatasetConverter:
             coord_names = [coord_names]
         if type(attr_names) == str:
             attr_names = [attr_names]
-            
-        args = [dim_names, coord_names, attr_names]
-        sargs = ['dim_names','coord_names','attr_names'] 
- 
-        # Rather than repeating these loops, please add a typecheck_list() 
-        # utility that takes a list arg and a list element type and performs this check.
         
+        typecheck(dataset, "dataset", Dataset)   
         typechecking(data_names, "data_names","data_name")
         typechecking(dim_names, "dim_names","dim_name")
         if coord_names:
             typechecking(coord_names, "coord_names","coord_name")
         if attr_names:
             typechecking(attr_names, "attr_names","attr_name")
+            
+        args = [dim_names, coord_names, attr_names]
+        sargs = ['dim_names','coord_names','attr_names'] 
         
         for name in data_names: 
             dataset.add_meta_string("_xarray_data_names",name) 
             for (arg,sarg) in zip(args,sargs):
                 if isinstance(arg,list):
                     values = []
-                    # thinking of edge cases - have we tested if they pass in an empty list? 
-                    # add_meta_string is okay with empty lists , but not sure about xarray logic 
                     for val in arg: 
                         values.append(val)
                     arg_field=",".join(values)
                     dataset.add_meta_string(f"_xarray_{name}_{sarg}",arg_field)
                 else:
-                    if arg != None: 
+                    if arg: 
                         dataset.add_meta_string(f"_xarray_{name}_{sarg}",arg)
-    
                     else: 
                         dataset.add_meta_string(f"_xarray_{name}_{sarg}","null")
 
@@ -131,22 +118,26 @@ class DatasetConverter:
         # Check for data names that are equal to coordinate names. If any matches
         # are found, then those data variables are treated as coordinates variables
         for tensor_name,d in list(permutations(variable_names,2)):
-            for coordname in get_data(dataset,tensor_name,'coord'):                                     #dataset.get_meta_strings(f"_xarray_{tensor_name}_coord_names")[0].split(","):
+            for coordname in get_data(dataset,tensor_name,'coord'):     
                 if d == coordname:
-                    # Remove coordinate data names from data names - may refactor this to make more clear
+                    # Remove coordinate data names from data names
                     if d in variable_names:
                         variable_names.remove(d)
                     # Get coordinate dimensions in the appropriate format for Xarray 
                     coord_dims = []
-                    for coord_dim_field_name in get_data(dataset,d,'dim'):                              #dataset.get_meta_strings(f"_xarray_{d}_dim_names")[0].split(","):
-                        coord_dims.append(dataset.get_meta_strings(coord_dim_field_name)[0])
+                    for coord_dim_field_name in get_data(dataset,d,'dim'):                           
+                        coord_dims.append(
+                            dataset.get_meta_strings(coord_dim_field_name)[0]
+                        )
                     # Get coordinate attributes in the appropriate format for Xarray 
                     coord_attrs = {}
-                    for coord_attr_field_name in get_data(dataset,d,'attr'):                            ##dataset.get_meta_strings(f"_xarray_{d}_attr_names")[0].split(","):
-                        coord_attrs[coord_attr_field_name] = dataset.get_meta_strings(coord_attr_field_name)[0] 
+                    for coord_attr_field_name in get_data(dataset,d,'attr'):                           
+                        fieldname = dataset.get_meta_strings(coord_attr_field_name)[0] 
+                        coord_attrs[coord_attr_field_name] = fieldname
                     # Add dimensions, data, and attributes to the coordinate variable       
                     coord_dict[d] = (coord_dims,dataset.get_tensor(d),coord_attrs)
-                    # Add coordinate names and relative values in the appropriate form to add to Xarray coords variable
+                    # Add coordinate names and relative values in the appropriate
+                    # form to add to Xarray coords variable
                     coord_final[tensor_name] = coord_dict        
         
         ret_xarray = {}
@@ -154,12 +145,13 @@ class DatasetConverter:
             data_final = dataset.get_tensor(variable_name) 
             dims_final=[]
             # Extract dimensions in correct form
-            for dim_field_name in get_data(dataset,variable_name,'dim'):                                ##dataset.get_meta_strings(f"_xarray_{variable_name}_dim_names")[0].split(","):
+            for dim_field_name in get_data(dataset,variable_name,'dim'):                            
                 dims_final.append(dataset.get_meta_strings(dim_field_name)[0])
             attrs_final = {}
             #Extract attributes in correct form 
-            for attr_field_name in get_data(dataset,variable_name,'attr'):                              #dataset.get_meta_strings(f"_xarray_{variable_name}_attr_names")[0].split(","):
-                attrs_final[attr_field_name] = dataset.get_meta_strings(attr_field_name)[0]     
+            for attr_field_name in get_data(dataset,variable_name,'attr'): 
+                fieldname = dataset.get_meta_strings(attr_field_name)[0]                             
+                attrs_final[attr_field_name] = fieldname 
             # Add coordinates to the correct data name
             for name in coord_final.keys():
                 if name == variable_name: 
@@ -167,6 +159,12 @@ class DatasetConverter:
 
             # Construct a xr.DataArray using extracted dataset data, 
             # append the dataarray to corresponding variable names
-            ret_xarray[variable_name] = xr.DataArray(name=variable_name,data=data_final,coords=coords_final,dims=dims_final,attrs=attrs_final)
+            ret_xarray[variable_name] = xr.DataArray(
+                name=variable_name,
+                data=data_final,
+                coords=coords_final,
+                dims=dims_final,
+                attrs=attrs_final
+            )
             
         return ret_xarray 
