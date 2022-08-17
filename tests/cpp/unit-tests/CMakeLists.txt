@@ -45,6 +45,7 @@ include_directories(SYSTEM
 
 # The source files to assess coverage on
 set(SOURCES
+	../../../src/cpp/address.cpp
 	../../../src/cpp/addressanycommand.cpp
 	../../../src/cpp/addressatcommand.cpp
 	../../../src/cpp/addressallcommand.cpp

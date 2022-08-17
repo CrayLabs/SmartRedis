@@ -29,10 +29,13 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "addressatcommand.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[AddressAtCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Ensuring the iterators for an AddressAtCommand are correct" << std::endl;
     GIVEN("An AddressAtCommand with a single field")
     {
         AddressAtCommand cmd;
@@ -60,6 +63,7 @@ SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[Address
 
 SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAtCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAtCommand on heap" << std::endl;
     GIVEN("An AddressAtCommand object on the heap")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -130,7 +134,7 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
 
 SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
     GIVEN("An AddressAtCommand object")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -140,7 +144,7 @@ SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 
             THEN("The command's address will be an empty string")
             {
-                CHECK(cmd->get_address() == "");
+                CHECK(cmd->get_address()._tcp_host == "");
             }
         }
     }

@@ -980,10 +980,8 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 {
     // Run an INFO EVERYTHING command to get node info
     DBInfoCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "INFO" << "EVERYTHING";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
@@ -1002,10 +1000,8 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
 
     // Run the CLUSTER INFO command
     ClusterInfoCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CLUSTER" << "INFO";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
@@ -1063,13 +1059,8 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
 void Client::flush_db(std::string address)
 {
     AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw SRRuntimeException(std::string(address) +
-                                 "is not a valid database node address.");
-    }
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "FLUSHDB";
 
     CommandReply reply = _run(cmd);
@@ -1082,10 +1073,8 @@ std::unordered_map<std::string,std::string>
 Client::config_get(std::string expression, std::string address)
 {
     AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CONFIG" << "GET" << expression;
 
     CommandReply reply = _run(cmd);
@@ -1106,10 +1095,8 @@ Client::config_get(std::string expression, std::string address)
 void Client::config_set(std::string config_param, std::string value, std::string address)
 {
     AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CONFIG" << "SET" << config_param << value;
 
     CommandReply reply = _run(cmd);
@@ -1120,10 +1107,8 @@ void Client::config_set(std::string config_param, std::string value, std::string
 void Client::save(std::string address)
 {
     AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "SAVE";
 
     CommandReply reply = _run(cmd);

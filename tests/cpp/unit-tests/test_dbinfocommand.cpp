@@ -29,10 +29,13 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dbinfocommand.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Parsing an empty string for db info")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for db info" << std::endl;
     GIVEN("A DBInfoCommand and an empty string")
     {
         DBInfoCommand cmd;

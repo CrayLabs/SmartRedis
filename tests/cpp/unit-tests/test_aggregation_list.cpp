@@ -34,6 +34,8 @@
 #include "srexception.h"
 #include <sstream>
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 // helper function that determines whether two
@@ -143,6 +145,7 @@ bool is_same_dataset(DataSet& dataset_1, DataSet& dataset_2)
 
 SCENARIO("Testing Dataset aggregation via our client", "[List]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Dataset aggregation via our client" << std::endl;
     GIVEN("A Client object and vector of DataSet objects")
     {
         Client client(use_cluster());

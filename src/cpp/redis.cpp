@@ -34,16 +34,19 @@ using namespace SmartRedis;
 // Redis constructor.
 Redis::Redis() : RedisServer()
 {
-    std::string address_port = _get_ssdb();
-    _add_to_address_map(address_port);
-    _connect(address_port);
+    SRAddress db_address(_get_ssdb());
+    // Remember whether it's a unix domain socket for later
+    _is_domain_socket = !db_address._is_tcp;
+    _add_to_address_map(db_address);
+    _connect(db_address);
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
-Redis::Redis(std::string address_port) : RedisServer()
+Redis::Redis(std::string addr_spec) : RedisServer()
 {
-    _add_to_address_map(address_port);
-    _connect(address_port);
+    SRAddress db_address(addr_spec);
+    _add_to_address_map(db_address);
+    _connect(db_address);
 }
 
 // Redis destructor
@@ -72,9 +75,9 @@ CommandReply Redis::run(CompoundCommand& cmd){
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    if (not is_addressable(cmd.get_address(), cmd.get_port()))
-        throw SRRuntimeException("The provided host and port do not match "\
-                                 "the host and port used to initialize the "\
+    if (!is_addressable(cmd.get_address()))
+        throw SRRuntimeException("The provided address does not match "\
+                                 "the address used to initialize the "\
                                  "non-cluster client connection.");
     return this->_run(cmd);
 }
@@ -156,10 +159,9 @@ bool Redis::hash_field_exists(const std::string& key,
 }
 
 // Check if address is valid
-bool Redis::is_addressable(const std::string& address,
-                           const uint64_t& port)
+bool Redis::is_addressable(const SRAddress& address) const
 {
-    return _address_node_map.find(address + ":" + std::to_string(port)) !=
+    return _address_node_map.find(address.to_string()) !=
         _address_node_map.end();
 }
 
@@ -549,20 +551,17 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                              const bool reset_stat)
 {
     AddressAtCommand cmd;
-
-    // Parse the host and port
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    SRAddress db_address(address);
 
     // Determine the prefix we need for the model or script
-    if (!is_addressable(host, port)) {
-        throw SRRuntimeException("The provided host and port do not match "\
-                                 "the host and port used to initialize the "\
+    if (!is_addressable(db_address)) {
+        throw SRRuntimeException("The provided address does not match "\
+                                 "the address used to initialize the "\
                                  "non-cluster client connection.");
     }
 
     //Build the Command
-    cmd.set_exec_address_port(host, port);
+    cmd.set_exec_address(db_address);
     cmd << "AI.INFO" << Keyfield(key);
 
     // Optionally add RESETSTAT to the command
@@ -637,22 +636,17 @@ inline CommandReply Redis::_run(const Command& cmd)
     throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
-inline void Redis::_add_to_address_map(std::string address_port)
+inline void Redis::_add_to_address_map(SRAddress& db_address)
 {
-    if (address_port.rfind("tcp://", 0) == 0)
-        address_port = address_port.substr(6, std::string::npos);
-    else if (address_port.rfind("unix://", 0) == 0)
-        address_port = address_port.substr(7, std::string::npos);
-
-    _address_node_map.insert({address_port, nullptr});
+    _address_node_map.insert({db_address.to_string(), nullptr});
 }
 
-inline void Redis::_connect(std::string address_port)
+inline void Redis::_connect(SRAddress& db_address)
 {
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
             // Try to create the sw::redis::Redis object
-            _redis = new sw::redis::Redis(address_port);
+            _redis = new sw::redis::Redis(db_address.to_string(true));
 
             // Attempt to have the sw::redis::Redis object
             // make a connection using the PING command

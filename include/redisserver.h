@@ -54,6 +54,7 @@
 #include "gettensorcommand.h"
 #include "pipelinereply.h"
 #include "threadpool.h"
+#include "address.h"
 
 ///@file
 
@@ -187,12 +188,11 @@ class RedisServer {
         virtual bool model_key_exists(const std::string& key) = 0;
 
         /*!
-         *  \brief Check if address and port maps to database node
-         *  \param address address of database
-         *  \param port port of database
+         *  \brief Check if address is valid
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port) = 0;
+        virtual bool is_addressable(const SRAddress& address) const = 0;
 
         /*!
         *   \brief Put a Tensor on the server
@@ -487,7 +487,7 @@ class RedisServer {
 
         /*!
         *   \brief Retrieve model/script runtime statistics
-        *   \param address The address of the database node (host:port)
+        *   \param address The TCP or UDS address of the database node
         *   \param key The key associated with the model or script
         *   \param reset_stat Boolean indicating if the counters associated
         *                     with the model or script should be reset.
@@ -559,10 +559,8 @@ class RedisServer {
 
         /*!
         *   \brief Default number of threads for thread pool
-        *          (zero, special value that translates to one
-        *          per hardware context)
         */
-        static constexpr int _DEFAULT_THREAD_COUNT = 0;
+        static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
         *   \brief Seeding for the random number engine
@@ -583,6 +581,13 @@ class RedisServer {
         *   \brief The thread pool
         */
         ThreadPool *_tp;
+
+        /*
+        *   \brief Indicates whether the server was connected to
+        *          via a Unix domain socket (true) or TCP connection
+        *          (false)
+        */
+        bool _is_domain_socket;
 
         /*!
         *   \brief Environment variable for connection timeout
@@ -625,13 +630,12 @@ class RedisServer {
         *          chosen from a list of addresses if
         *          applicable, from the SSDB environment
         *          variable.
-        *   \returns A address and port pair in the form of
-        *            address:port
+        *   \returns An SRAddress representing the selected server address
         */
-        std::string _get_ssdb();
+        SRAddress _get_ssdb();
 
         /*!
-        *   \brief Unordered map of address:port to DBNode in the cluster
+        *   \brief Unordered map of server address string to DBNode in the cluster
         */
         std::unordered_map<std::string, DBNode*> _address_node_map;
 

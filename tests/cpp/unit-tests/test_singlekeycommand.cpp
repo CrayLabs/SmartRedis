@@ -30,12 +30,13 @@
 #include "singlekeycommand.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Retrieve field to empty SingleKeyCommand" << std::endl;
     GIVEN("An empty SingleKeyCommand object")
     {
         SingleKeyCommand cmd;
@@ -54,6 +55,7 @@ SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 
 SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCommand]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor for SingleKeyCommand on heap" << std::endl;
     GIVEN("A SingleKeyCommand object on the heap")
     {
         SingleKeyCommand* cmd = new SingleKeyCommand;

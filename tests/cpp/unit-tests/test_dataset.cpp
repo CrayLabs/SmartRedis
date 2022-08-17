@@ -31,6 +31,8 @@
 #include "srexception.h"
 #include <cxxabi.h>
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 const char *currentExceptionTypeName() {
@@ -41,7 +43,7 @@ const char *currentExceptionTypeName() {
 
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
-
+    std::cout << std::to_string(get_time_offset()) << ": Testing DataSet object" << std::endl;
     GIVEN("A DataSet object")
     {
         std::string dataset_name;
