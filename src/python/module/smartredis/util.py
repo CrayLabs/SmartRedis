@@ -27,6 +27,7 @@
 from .error import *
 from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
+
 class Dtypes:
     @staticmethod
     def tensor_from_numpy(array):

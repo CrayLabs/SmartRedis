@@ -126,7 +126,7 @@ def test_augment_dataset(mock_data, use_cluster):
         "Dataset returned did not return the correct additional tensor",
     )
 
-    # Check the accuracy of the metadat fields
+    # Check the accuracy of the metadata fields
     assert aug_dataset.get_meta_scalars(scalar_name).size == 1
     assert len(aug_dataset.get_meta_strings(string_name)) == 1
     assert aug_dataset.get_meta_scalars(scalar_name)[0] == scalar_field
