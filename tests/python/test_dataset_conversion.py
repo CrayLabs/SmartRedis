@@ -163,7 +163,6 @@ def assert_equality_2d(dataset):
     # Compare tensor data and metadata extracted from dataset after
     # add_metadata_for_xarray call to generated 1D data
     assert (dataset.get_tensor("2ddata") == data2d).all()
-   # assert dataset.get_meta_strings("units")[0] == "m/s"
     assert dataset.get_meta_strings("units")[0] == data_attributes_1d["units"]
     assert dataset.get_meta_strings("longname")[0] == data_attributes_1d["longname"]
     assert dataset.get_meta_strings("convention")[0] == data_attributes_1d["convention"]
