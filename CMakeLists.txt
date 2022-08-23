@@ -105,6 +105,7 @@ if (BUILD_FORTRAN)
     set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
     # Fortran library
     add_library(smartredis-fortran SHARED ${FORTRAN_SRC})
+    set_target_properties(smartredis-fortran PROPERTIES SUFFIX ".so")
     target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
     # Install dynamic library and headers
     install(TARGETS smartredis-fortran

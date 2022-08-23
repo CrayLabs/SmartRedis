@@ -35,13 +35,9 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
-set(ftn_client_src
-    ../../../src/fortran/fortran_c_interop.F90
-    ../../../src/fortran/dataset.F90
-    ../../../src/fortran/client.F90
-)
-
-find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SMARTREDIS_LIBRARY smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+set(SMARTREDIS_LIBRARIES ${SMARTREDIS_LIBRARY} ${SMARTREDIS_FORTRAN_LIBRARY})
 
 include_directories(SYSTEM
     /usr/local/include
@@ -50,20 +46,18 @@ include_directories(SYSTEM
 
 add_executable(client_test_put_get_1D
 	client_test_put_get_1D.F90
-	${ftn_client_src}
 	test_utils.F90
 )
 target_link_libraries(client_test_put_get_1D
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_put_get_2D
 	client_test_put_get_2D.F90
-	${ftn_client_src}
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_2D
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_put_get_3D
@@ -72,7 +66,7 @@ add_executable(client_test_put_get_3D
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_3D
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_mnist
@@ -81,7 +75,7 @@ add_executable(client_test_mnist
         test_utils.F90
 )
 target_link_libraries(client_test_mnist
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_mnist_multigpu
@@ -90,7 +84,7 @@ add_executable(client_test_mnist_multigpu
         test_utils.F90
 )
 target_link_libraries(client_test_mnist_multigpu
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_dataset
@@ -99,7 +93,7 @@ add_executable(client_test_dataset
         test_utils.F90
 )
 target_link_libraries(client_test_dataset
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_put_get_unpack_dataset
@@ -108,7 +102,7 @@ add_executable(client_test_put_get_unpack_dataset
         test_utils.F90
 )
 target_link_libraries(client_test_put_get_unpack_dataset
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_dataset_aggregation
@@ -117,7 +111,7 @@ add_executable(client_test_dataset_aggregation
         test_utils.F90
 )
 target_link_libraries(client_test_dataset_aggregation
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_misc_tensor
@@ -126,7 +120,7 @@ add_executable(client_test_misc_tensor
         test_utils.F90
 )
 target_link_libraries(client_test_misc_tensor
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_ensemble
@@ -135,7 +129,7 @@ add_executable(client_test_ensemble
         test_utils.F90
 )
 target_link_libraries(client_test_ensemble
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
 
 add_executable(client_test_initialized
@@ -144,5 +138,5 @@ add_executable(client_test_initialized
         test_utils.F90
 )
 target_link_libraries(client_test_initialized
-	${SR_LIB}
+	${SMARTREDIS_LIBRARIES}
 )
