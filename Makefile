@@ -61,7 +61,7 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-lib
+build-tests: test-lib-with-fortran
 	./build-scripts/build_cpp_tests.sh
 	./build-scripts/build_cpp_unit_tests.sh
 	./build-scripts/build_c_tests.sh
