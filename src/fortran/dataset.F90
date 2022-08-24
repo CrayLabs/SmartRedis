@@ -311,8 +311,6 @@ function get_meta_scalars_i32(self, name, meta) result(code)
   integer(kind=c_int32_t), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                        :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_int32
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_i32
 
@@ -323,8 +321,6 @@ function get_meta_scalars_i64(self, name, meta) result(code)
   integer(kind=c_int64_t), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                        :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_int64
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_i64
 
@@ -335,8 +331,6 @@ function get_meta_scalars_float(self, name, meta) result(code)
   real(kind=c_float), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                   :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_flt
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_float
 
@@ -347,8 +341,6 @@ function get_meta_scalars_double(self, name, meta) result(code)
   real(kind=c_double), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                    :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_dbl
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_double
 

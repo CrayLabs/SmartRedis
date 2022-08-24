@@ -162,7 +162,7 @@ interface
     datasets) bind(c, name="_get_dataset_list_range_allocated")
     use iso_c_binding, only : c_ptr, c_char, c_bool, c_size_t, c_int
     import :: enum_kind
-    integer(kind=enum_kind)       :: get_dataset_list_range_c
+    integer(kind=enum_kind)       :: get_dataset_list_range_allocated_c
     type(c_ptr), value            :: client
     character(kind=c_char)        :: list_name(*)
     integer(kind=c_size_t), value :: list_name_length

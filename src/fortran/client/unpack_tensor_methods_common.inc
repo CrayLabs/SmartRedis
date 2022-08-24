@@ -27,7 +27,6 @@
   !** Beginning of code common to all unpack_tensor subroutines
 
   ! Local variables
-  integer(kind=c_size_t) :: ndim ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
   character(kind=c_char, len=len_trim(name)) :: c_name !< Transformed fortran 'name' to a c-string
   integer(kind=c_size_t) :: name_length, c_n_dims
