@@ -68,6 +68,7 @@ function convert_char_array_to_c(character_array_f, character_array_c, string_pt
   n_strings= size(character_array_f)
   allocate(string_lengths(n_strings))
   allocate(string_ptrs(n_strings))
+  allocate(character_array_c(n_strings))
 
   ! Need to find the length of the string, so we can allocate the c_array
   max_length = 0
@@ -85,7 +86,7 @@ function convert_char_array_to_c(character_array_f, character_array_c, string_pt
   ! Copy the character into a c_char and create pointers to each of the strings
   do i=1,n_strings
      if (string_lengths(i) .gt. 0) then
-        character_array_c(i) = transfer(character_array_f(i),character_array_c(i))
+        character_array_c(i) = character_array_f(i)
         string_ptrs(i) = c_loc(character_array_c(i))
      else
         string_ptrs(i) = c_null_ptr;
