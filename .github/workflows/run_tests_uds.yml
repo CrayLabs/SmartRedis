@@ -142,5 +142,7 @@ jobs:
 
       # CI tests that should be run with UDS Redis go here
       - name: Run testing with UDS redis
-        run: make test-verbose
+        run: |
+          export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+          make test-verbose
 

@@ -105,6 +105,7 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh &&
             cd ../ &&
+            export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
             make test-verbose
 
       - name: Run Python coverage tests
