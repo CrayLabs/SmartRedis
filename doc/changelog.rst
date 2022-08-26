@@ -18,18 +18,17 @@ Description
 
 Detailed Notes
 
+- Update library linking instructions and update Fortran tester build process (PR277_)
+- Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
+- Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
-- Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
-- Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
-- Update library linking instructions and update Fortran tester build process (PR277_)
 
-
+.. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
+.. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
+.. _PR276: https://github.com/CrayLabs/SmartRedis/pull/276
 .. _PR252: https://github.com/CrayLabs/SmartRedis/pull/252
 .. _PR245: https://github.com/CrayLabs/SmartRedis/pull/245
-.. _PR276: https://github.com/CrayLabs/SmartRedis/pull/276
-.. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
-.. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
 
 0.3.1
 -----
