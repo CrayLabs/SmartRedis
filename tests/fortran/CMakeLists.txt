@@ -31,112 +31,53 @@ cmake_minimum_required(VERSION 3.13)
 enable_language(Fortran)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
-find_library(SMARTREDIS_LIBRARY smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
-set(SMARTREDIS_LIBRARIES ${SMARTREDIS_LIBRARY} ${SMARTREDIS_FORTRAN_LIBRARY})
+# Assume by default that users should link against the install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../install/")
+endif()
 
+# Specify all pre-processor and library dependencies
+find_library(SMARTREDIS_LIBRARY smartredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(HIREDIS hiredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(REDISPP redis++ PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+set(SMARTREDIS_LIBRARIES
+	${SMARTREDIS_LIBRARY}
+	${SMARTREDIS_FORTRAN_LIBRARY}
+	${HIREDIS}
+	${REDISPP}
+)
 include_directories(SYSTEM
     /usr/local/include
-    ../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-add_executable(client_test_put_get_1D
-	client_test_put_get_1D.F90
-	test_utils.F90
-)
-target_link_libraries(client_test_put_get_1D
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_put_get_2D
-	client_test_put_get_2D.F90
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_2D
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_put_get_3D
-	client_test_put_get_3D.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_3D
-	${SMARTREDIS_LIBRARIES}
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+	 client_test_dataset_aggregation
+	 client_test_dataset
+	 client_test_ensemble
+	 client_test_initialized
+	 client_test_misc_tensor
+	 client_test_mnist_multigpu
+	 client_test_mnist
+	 client_test_put_get_1D
+	 client_test_put_get_2D
+	 client_test_put_get_3D
+	 client_test_put_get_unpack_dataset
 )
 
-add_executable(client_test_mnist
-	client_test_mnist.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_mnist
-	${SMARTREDIS_LIBRARIES}
-)
+foreach(EXECUTABLE ${EXECUTABLES})
 
-add_executable(client_test_mnist_multigpu
-	client_test_mnist_multigpu.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_mnist_multigpu
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_dataset
-	client_test_dataset.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_dataset
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_put_get_unpack_dataset
-	client_test_put_get_unpack_dataset.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_unpack_dataset
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_dataset_aggregation
-	client_test_dataset_aggregation.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_dataset_aggregation
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_misc_tensor
-	client_test_misc_tensor.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_misc_tensor
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_ensemble
-	client_test_ensemble.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_ensemble
-	${SMARTREDIS_LIBRARIES}
-)
-
-add_executable(client_test_initialized
-        client_test_initialized.F90
-        ${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_initialized
-	${SMARTREDIS_LIBRARIES}
-)
+	add_executable(${EXECUTABLE}
+		${EXECUTABLE}.F90
+		test_utils.F90
+	)
+	target_link_libraries(${EXECUTABLE}
+		${SMARTREDIS_LIBRARIES}
+	)
+endforeach()
