@@ -1,12 +1,12 @@
 
-Clone the SmartRedis repository and checkout the most recent release:
+Clone the SmartRedis repository and optionally checkout a specific branch or tag:
 
 .. code-block:: bash
 
-    git clone https://github.com/CrayLabs/SmartRedis.git
+    git clone https://github.com/CrayLabs/SmartRedis.git [--branch tag_name] smartredis
 
-Note that the release tarball can also be used instead of cloning the git
-repository, but the preferred method is a repository clone.
+The release tarball can also be used instead of cloning the git repository, but
+the preferred method is a repository clone.
 
 The ```Makefile`` included in the top level of the SmartRedis repository has two
 main targets: ``lib`` which will create a dynamic library for C, C++, and Python
@@ -28,7 +28,7 @@ applications.
 Linking instructions using compiler flags
 -----------------------------------------
 
-For applications which used pre-defined compiler flags for compilation, the
+For applications which use pre-defined compiler flags for compilation, the
 following flags should be included for the preprocessor
 
 .. code-block:: text
