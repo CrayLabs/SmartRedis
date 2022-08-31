@@ -33,7 +33,7 @@ FROM ubuntu:20.04 as builder
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
     ca-certificates git \
-    make cmake gcc g++ libc6-dev python3 libpython3-dev pip && \
+    make cmake gcc g++ libc6-dev python3 libpython3-dev pip gfortran && \
     rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
