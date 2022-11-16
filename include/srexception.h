@@ -89,7 +89,8 @@ class Exception: public std::exception
     Exception(const char* what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
-        // NOP
+        Logger::get_instance().log_data(
+            LLInfo, exception_class() + " at " + _loc + ":" + _msg);
     }
 
     /*!
@@ -101,7 +102,8 @@ class Exception: public std::exception
     Exception(const std::string& what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
-        // NOP
+        Logger::get_instance().log_data(
+            LLInfo, exception_class() + " at " + _loc + ":" + _msg);
     }
 
     /*!
@@ -156,6 +158,14 @@ class Exception: public std::exception
     }
 
     /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("Exception")
+    }
+
+    /*!
     *   \brief Retrieve the message for an exception
     *   \returns String of message data
     */
@@ -191,6 +201,19 @@ class Exception: public std::exception
 class BadAllocException: public Exception
 {
     public:
+    /*!
+    *   \brief BadAllocException constructor with location information
+    *   \param what_arg The message for the exception
+    *   \param file The source file from which the exception was thrown
+    *   \param line The line number from which the exception was thrown
+    */
+    BadAllocException(const std::string& what_arg, const char* file, int line)
+      : Exception(what_arg, file, line)
+    {
+        Logger::get_instance().log_data(
+            LLInfo, "BadAllocException at " + _loc + ":" + _msg);
+    }
+
     using Exception::Exception;
 
     /*!
@@ -199,6 +222,14 @@ class BadAllocException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRBadAllocError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("BadAllocException")
     }
 };
 
@@ -223,6 +254,14 @@ class DatabaseException: public Exception
     SRError to_error_code() const noexcept override {
         return SRDatabaseError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("DatabaseException")
+    }
 };
 
 /*!
@@ -245,6 +284,14 @@ class RuntimeException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRRuntimeError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("RuntimeException")
     }
 };
 
@@ -269,6 +316,14 @@ class ParameterException: public Exception
     SRError to_error_code() const noexcept override {
         return SRParameterError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("ParameterException")
+    }
 };
 
 /*!
@@ -291,6 +346,14 @@ class TimeoutException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRTimeoutError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("TimeoutException")
     }
 };
 
@@ -315,6 +378,14 @@ class InternalException: public Exception
     SRError to_error_code() const noexcept override {
         return SRInternalError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("InternalException")
+    }
 };
 
 /*!
@@ -338,6 +409,14 @@ class KeyException: public Exception
     SRError to_error_code() const noexcept override {
         return SRKeyError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("KeyException")
+    }
 };
 
 /*!
@@ -359,6 +438,14 @@ class TypeException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRTypeError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("TypeException")
     }
 };
 

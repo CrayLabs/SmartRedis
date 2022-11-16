@@ -26,25 +26,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "c_client.h"
-#include "srexception.h"
-#include "srassert.h"
+#ifndef SMARTREDIS_UTILITY_H
+#define SMARTREDIS_UTILITY_H
 
-using namespace SmartRedis;
+#include <cstdlib>
+#include <string>
+#include "address.h"
 
-// The last error encountered
-static Exception __lastError = Exception("no error");
+///@file
 
-// Store the last error encountered
-extern "C"
-void SRSetLastError(const Exception& last_error)
-{
-  // Store the last error
-  __lastError = last_error;
-}
+namespace SmartRedis {
 
-// Return the last error encountered
-extern "C"
-const char* SRGetLastError()  {
-  return __lastError.what();
-}
+/*!
+*   \brief Initialize an integer from an environment variable
+*   \param value Receives the value of the environment variable
+*   \param env_var The name of the environment variable to query
+*   \param default_value Default if the environment variable is not set
+*/
+void get_integer_from_env(int& value,
+                         const std::string& env_var,
+                         int default_value);
+
+/*!
+*   \brief Initialize a string from an environment variable
+*   \param value Receives the value of the environment variable
+*   \param env_var The name of the environment variable to query
+*   \param default_value Default if the environment variable is not set
+*/
+void get_string_from_env(std::string& value,
+                         const std::string& env_var,
+                         const std::string& default_value);
+
+} //namespace SmartRedis
+
+#endif //SMARTREDIS_UTILITY_H

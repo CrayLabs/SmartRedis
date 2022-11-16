@@ -648,24 +648,6 @@ class RedisServer {
         void _check_ssdb_string(const std::string& env_str);
 
         /*!
-        *   \brief Initialize a variable of type integer from an environment
-        *          variable.  If the environment variable is not set,
-        *          the default value is assigned.
-        *   \param value Reference to a integer value which will be assigned
-        *                a default value or environment variable value
-        *   \param env_var std::string of the environment variable name
-        *   \param default_value The default value to assign if the environment
-        *                        variable is not set.
-        *   \throw SmartRedis::RuntimeException if environment variable
-        *          retrieval fails, conversion to integer fails, or
-        *          if the value of the environment value contains
-        *          characters other than [0,9] or a negative sign ('-').
-        */
-        void _init_integer_from_env(int& value,
-                                    const std::string& env_var,
-                                    const int& default_value);
-
-        /*!
         *   \brief This function checks that _connection_timeout,
         *          _connection_interval, _command_timeout, and
         *          _command_interval, which have been set from environment

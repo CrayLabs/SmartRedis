@@ -29,6 +29,7 @@
 #include <string_view>
 #include "dataset.h"
 #include "srexception.h"
+#include "logging.h"
 
 using namespace SmartRedis;
 
@@ -46,6 +47,9 @@ void DataSet::add_tensor(const std::string& name,
                          const SRTensorType type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _add_to_tensorpack(name, data, dims, type, mem_layout);
     _metadata.add_string(".tensor_names", name);
 }
@@ -57,6 +61,9 @@ void DataSet::add_meta_scalar(const std::string& name,
                               const void* data,
                               const SRMetaDataType type)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.add_scalar(name, data, type);
 }
 
@@ -66,6 +73,9 @@ void DataSet::add_meta_scalar(const std::string& name,
 void DataSet::add_meta_string(const std::string& name,
                               const std::string& data)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.add_string(name, data);
 }
 
@@ -78,6 +88,9 @@ void DataSet::get_tensor(const std::string& name,
                          SRTensorType& type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Clone the tensor in the DataSet
     TensorBase* tensor = _get_tensorbase_obj(name);
     if (tensor == NULL) {
@@ -99,6 +112,9 @@ void DataSet::get_tensor(const std::string&  name,
                          SRTensorType& type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::vector<size_t> dims_vec;
     get_tensor(name, data, dims_vec, type, mem_layout);
 
@@ -124,6 +140,9 @@ void DataSet::unpack_tensor(const std::string& name,
                             const SRTensorType type,
                             SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _enforce_tensor_exists(name);
     _tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
 }
@@ -138,6 +157,9 @@ void DataSet::get_meta_scalars(const std::string& name,
                                size_t& length,
                                SRMetaDataType& type)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.get_scalar_values(name, data, length, type);
 }
 
@@ -151,24 +173,36 @@ void DataSet::get_meta_strings(const std::string& name,
                                size_t& n_strings,
                                size_t*& lengths)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.get_string_values(name, data, n_strings, lengths);
 }
 
 // Check if the DataSet has a field
 bool DataSet::has_field(const std::string& field_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _metadata.has_field(field_name);
 }
 
 // Clear all entries in a DataSet field.
 void DataSet::clear_field(const std::string& field_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.clear_field(field_name);
 }
 
 // Retrieve the names of the tensors in the DataSet
 std::vector<std::string> DataSet::get_tensor_names()
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (_metadata.has_field(".tensor_names"))
         return _metadata.get_string_values(".tensor_names");
     else
@@ -181,12 +215,18 @@ std::vector<std::string> DataSet::get_tensor_names()
 // std::vectorstd::string.
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _metadata.get_string_values(name);
 }
 
 // Get the Tensor type of the Tensor
 SRTensorType DataSet::get_tensor_type(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _tensorpack.get_tensor(name)->type();
 }
 

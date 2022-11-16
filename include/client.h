@@ -29,8 +29,8 @@
 #ifndef SMARTREDIS_CPP_CLIENT_H
 #define SMARTREDIS_CPP_CLIENT_H
 #ifdef __cplusplus
-#include "string.h"
-#include "stdlib.h"
+#include <string.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -48,6 +48,7 @@
 #include "tensorbase.h"
 #include "tensor.h"
 #include "sr_enums.h"
+#include "logger.h"
 
 ///@file
 
@@ -73,10 +74,11 @@ class Client
         /*!
         *   \brief Client constructor
         *   \param cluster Flag for if a database cluster is being used
+        *   \param client_id Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
         *          object initialization fails
         */
-        Client(bool cluster);
+        Client(bool cluster, const std::string& client_id = "anonymous");
 
         /*!
         *   \brief Client copy constructor is not available
