@@ -37,15 +37,15 @@ using namespace SmartRedis;
 RedisServer::RedisServer()
     : _gen(_rd())
 {
-    get_integer_from_env(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
+    get_config_integer(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
                          _DEFAULT_CONN_TIMEOUT);
-    get_integer_from_env(_connection_interval, _CONN_INTERVAL_ENV_VAR,
+    get_config_integer(_connection_interval, _CONN_INTERVAL_ENV_VAR,
                          _DEFAULT_CONN_INTERVAL);
-    get_integer_from_env(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
+    get_config_integer(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
                          _DEFAULT_CMD_TIMEOUT);
-    get_integer_from_env(_command_interval, _CMD_INTERVAL_ENV_VAR,
+    get_config_integer(_command_interval, _CMD_INTERVAL_ENV_VAR,
                          _DEFAULT_CMD_INTERVAL);
-    get_integer_from_env(_thread_count, _TP_THREAD_COUNT,
+    get_config_integer(_thread_count, _TP_THREAD_COUNT,
                          _DEFAULT_THREAD_COUNT);
 
     _check_runtime_variables();
@@ -74,7 +74,7 @@ SRAddress RedisServer::_get_ssdb()
 {
     // Retrieve the environment variable
     std::string db_spec;
-    get_string_from_env(db_spec, "SSDB", "");
+    get_config_string(db_spec, "SSDB", "");
     if (db_spec.length() == 0)
         throw SRRuntimeException("The environment variable SSDB "\
                                  "must be set to use the client.");

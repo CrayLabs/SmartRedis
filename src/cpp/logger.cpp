@@ -54,7 +54,7 @@ void Logger::configure_logging(const std::string& _client_id)
     }
 
     // Get the logfile
-    get_string_from_env(logfile, "SS_LOG_FILE", "");
+    get_config_string(logfile, "SS_LOG_FILE", "");
     if (logfile.length() == 0) {
         throw SRRuntimeException(
             "No file specified for logging");
@@ -73,7 +73,7 @@ void Logger::configure_logging(const std::string& _client_id)
 
     // Get the logging level
     std::string level;
-    get_string_from_env(level, "SS_LOG_LEVEL", "");
+    get_config_string(level, "SS_LOG_LEVEL", "");
     if (level.length() == 0) {
         throw SRRuntimeException(
             "No level specified for logging");

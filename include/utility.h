@@ -38,24 +38,26 @@
 namespace SmartRedis {
 
 /*!
-*   \brief Initialize an integer from an environment variable
-*   \param value Receives the value of the environment variable
-*   \param env_var The name of the environment variable to query
-*   \param default_value Default if the environment variable is not set
+*   \brief Initialize an integer from configuration, such as an
+*          environment variable
+*   \param value Receives the configuration value
+*   \param cfg_key The key to query for the configuration variable
+*   \param default_value Default if configuration key is not set
 */
-void get_integer_from_env(int& value,
-                         const std::string& env_var,
-                         int default_value);
+void get_config_integer(int& value,
+                        const std::string& cfg_key,
+                        int default_value);
 
 /*!
-*   \brief Initialize a string from an environment variable
-*   \param value Receives the value of the environment variable
-*   \param env_var The name of the environment variable to query
-*   \param default_value Default if the environment variable is not set
+*   \brief Initialize an string from configuration, such as an
+*          environment variable
+*   \param value Receives the configuration value
+*   \param cfg_key The key to query for the configuration variable
+*   \param default_value Default if configuration key is not set
 */
-void get_string_from_env(std::string& value,
-                         const std::string& env_var,
-                         const std::string& default_value);
+void get_config_string(std::string& value,
+                       const std::string& cfg_key,
+                       const std::string& default_value);
 
 } //namespace SmartRedis
 

@@ -1553,7 +1553,7 @@ void Client::_set_prefixes_from_env()
 {
     // Establish set prefix
     std::string put_key_prefix;
-    get_string_from_env(put_key_prefix, "SSKEYOUT", "");
+    get_config_string(put_key_prefix, "SSKEYOUT", "");
     if (put_key_prefix.length() > 0)
         _put_key_prefix = put_key_prefix;
     else
@@ -1561,7 +1561,7 @@ void Client::_set_prefixes_from_env()
 
     // Establish get prefix(es)
     std::string get_key_prefixes;
-    get_string_from_env(get_key_prefixes, "SSKEYIN", "");
+    get_config_string(get_key_prefixes, "SSKEYIN", "");
     if (get_key_prefixes.length() > 0) {
         char* a = get_key_prefixes.c_str();
         char* b = a;

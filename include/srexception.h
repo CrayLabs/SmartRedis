@@ -201,18 +201,6 @@ class Exception: public std::exception
 class BadAllocException: public Exception
 {
     public:
-    /*!
-    *   \brief BadAllocException constructor with location information
-    *   \param what_arg The message for the exception
-    *   \param file The source file from which the exception was thrown
-    *   \param line The line number from which the exception was thrown
-    */
-    BadAllocException(const std::string& what_arg, const char* file, int line)
-      : Exception(what_arg, file, line)
-    {
-        Logger::get_instance().log_data(
-            LLInfo, "BadAllocException at " + _loc + ":" + _msg);
-    }
 
     using Exception::Exception;
 

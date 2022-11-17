@@ -28,70 +28,89 @@
 
 #include <cstdlib>
 #include <string>
+#include <cstring>
+#include <stdio.h>
+#include <stdexcept>
+#include "srexception.h"
 #include "utility.h"
+#include "logger.h"
 
 using namespace SmartRedis;
 
 /*!
-*   \brief Initialize an integer from an environment variable
-*   \param value Receives the value of the environment variable
-*   \param env_var The name of the environment variable to query
-*   \param default_value Default if the environment variable is not set
+*   \brief Initialize an integer from configuration, such as an
+*          environment variable
+*   \param value Receives the configuration value
+*   \param cfg_key The key to query for the configuration variable
+*   \param default_value Default if configuration key is not set
 */
-void get_integer_from_env(int& value,
-                         const std::string& env_var,
-                         int default_value)
+void get_config_integer(int& value,
+                        const std::string& cfg_key,
+                        int default_value)
 {
     value = default_value;
 
-    char* env_val = std::getenv(env_var.c_str());
+    char* cfg_val = std::getenv(cfg_key.c_str());
 
-    if (env_val != NULL && strlen(env_val) > 0) {
+    if (cfg_val != NULL && std::strlen(cfg_val) > 0) {
         // Enforce that all characters are digits because std::stoi
         // will truncate a string like "10xy" to 10.
         // We want to guard users from input errors they might have.
-        for (char* c = env_val; *c != '\0'; c++) {
-            if (!isdigit(*c) && !(*c == '-' && c == env_val)) {
-                throw SRParameterException("The value of " + env_var +
+        for (char* c = cfg_val; *c != '\0'; c++) {
+            if (!isdigit(*c) && !(*c == '-' && c == cfg_val)) {
+                throw SRParameterException("The value of " + cfg_key +
                                            " must be a valid number.");
             }
         }
 
         try {
-            value = std::stoi(env_val);
+            value = std::stoi(cfg_val);
         }
         catch (std::invalid_argument& e) {
-            throw SRParameterException("The value of " + env_var + " could "\
+            throw SRParameterException("The value of " + cfg_key + " could "\
                                        "not be converted to type integer.");
         }
         catch (std::out_of_range& e) {
-            throw SRParameterException("The value of " + env_var + " is too "\
+            throw SRParameterException("The value of " + cfg_key + " is too "\
                                        "large to be stored as an integer "\
                                        "value.");
         }
         catch (std::exception& e) {
             throw SRInternalException("An unexpected error occurred  "\
                                       "while attempting to convert the "\
-                                      "environment variable " + env_var +
+                                      "environment variable " + cfg_key +
                                       " to an integer.");
         }
+    }
+    else {
+        Logger::get_instance().log_data(
+            LLDebug,
+            "Warning: Configuration variable " + cfg_key + " not set"
+        );
     }
 }
 
 /*!
-*   \brief Initialize a string from an environment variable
-*   \param value Receives the value of the environment variable
-*   \param env_var The name of the environment variable to query
-*   \param default_value Default if the environment variable is not set
+*   \brief Initialize an string from configuration, such as an
+*          environment variable
+*   \param value Receives the configuration value
+*   \param cfg_key The key to query for the configuration variable
+*   \param default_value Default if configuration key is not set
 */
-void get_string_from_env(std::string& value,
-                         const std::string& env_var,
-                         const std::string& default_value)
+void get_config_string(std::string& value,
+                       const std::string& cfg_key,
+                       const std::string& default_value)
 {
     value = default_value;
 
-    char* env_val = std::getenv(env_var.c_str());
+    char* cfg_val = std::getenv(cfg_key.c_str());
 
-    if (env_val != NULL && strlen(env_val) > 0)
-        value = env_val;
+    if (cfg_val != NULL && std::strlen(cfg_val) > 0)
+        value = cfg_val;
+    else {
+        Logger::get_instance().log_data(
+            LLDebug,
+            "Warning: Configuration variable " + cfg_key + " not set"
+        );
+    }
 }
