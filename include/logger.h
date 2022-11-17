@@ -132,6 +132,17 @@ class Logger {
 };
 
 /*!
+*   \brief Conditionally log data if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_data(SRLoggingLevel level, const std::string& data)
+{
+    Logger::get_instance().log_data(level, data);
+}
+
+
+/*!
 *   \brief The FunctionLogger class logs entry and exit of an API function.
 *          The intended use is to create an instance of this class on the stack
 *          inside each API point via the LOG_API_FUNCTION macro, below.
@@ -145,8 +156,7 @@ class FunctionLogger {
         FunctionLogger(const char* function_name)
             : name(function_name)
         {
-            Logger::get_instance().log_data(
-                LLDebug, "API Function " + name + " called");
+            log_data(LLDebug, "API Function " + name + " called");
         }
 
         /*!
@@ -154,8 +164,7 @@ class FunctionLogger {
         */
         ~FunctionLogger()
         {
-            Logger::get_instance().log_data(
-                LLDebug, "API Function " + name + " exited");
+            log_data(LLDebug, "API Function " + name + " exited");
         }
     private:
         /*!

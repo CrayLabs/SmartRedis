@@ -25,8 +25,7 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
-        Logger::get_instance().log_data(
-            LLDebug, "Kicking off thread " + std::to_string(i));
+        log_data(LLDebug, "Kicking off thread " + std::to_string(i));
         threads.push_back(std::thread(&ThreadPool::perform_jobs, this, i));
     }
 
@@ -52,8 +51,7 @@ void ThreadPool::shutdown()
     while (!initialization_complete)
         ; // Spin
 
-    Logger::get_instance().log_data(
-        LLDebug, "Shutting down thread pool");
+    log_data(LLDebug, "Shutting down thread pool");
 
     // We're closed for business
     shutting_down = true;
@@ -67,12 +65,12 @@ void ThreadPool::shutdown()
             "Waiting for thread to terminate (" +
             std::to_string(i++) + " of " +
             std::to_string(num_threads) + ")";
-        Logger::get_instance().log_data(LLDebug, message);
+        log_data(LLDebug, message);
         thr.join(); // Blocks until the thread finishes execution
     }
 
     // Done
-    Logger::get_instance().log_data(LLDebug, "Shutdown complete");
+    log_data(LLDebug, "Shutdown complete");
     shutdown_complete = true;
 }
 
@@ -80,7 +78,7 @@ void ThreadPool::shutdown()
 void ThreadPool::perform_jobs(unsigned int tid)
 {
     int jobid = 0;
-    Logger::get_instance().log_data(
+    log_data(
         LLDebug, "Thread " + std::to_string(tid) + " reporting for duty");
 
     // Loop forever processing jobs until we get killed
@@ -123,12 +121,11 @@ void ThreadPool::perform_jobs(unsigned int tid)
                 ": " + std::to_string(get_job.count()) + " s; " +
                 "time to execute job: " +
                 std::to_string(execute_job.count()) + " s";
-            Logger::get_instance().log_data(LLDebug, message);
+            log_data(LLDebug, message);
         }
     }
 
-    Logger::get_instance().log_data(
-        LLDebug, "Thread " + std::to_string(tid) + " shutting down");
+    log_data(LLDebug, "Thread " + std::to_string(tid) + " shutting down");
 }
 
 // Submit a job to threadpool for execution

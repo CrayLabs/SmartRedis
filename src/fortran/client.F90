@@ -232,14 +232,30 @@ function SR_error_parser(self, response_code) result(is_error)
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster)
-  integer(kind=enum_kind)           :: initialize_client
-  class(client_type), intent(inout) :: self    !< Receives the initialized client
-  logical, optional,  intent(in   ) :: cluster !< If true, client uses a database cluster (Default: .false.)
+function initialize_client(self, cluster, client_id)
+  integer(kind=enum_kind)                     :: initialize_client
+  class(client_type),         intent(inout)   :: self      !< Receives the initialized client
+  logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
+  character(len=*), optional, intent(in   )   :: client_id !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_client_id
+  integer(kind=c_size_t) :: client_id_length
+
+  if (present(client_id)) then
+    allocate(character(kind=c_char, len=len_trim(client_id)) :: c_client_id)
+    c_client_id = client_id
+    client_id_length = len_trim(client_id)
+  else
+    allocate(character(kind=c_char, len=10) :: c_client_id)
+    c_client_id = 'anonymous'
+    client_id_length = 10
+  endif
 
   if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, self%client_ptr)
+  initialize_client = c_constructor(self%cluster, c_client_id, client_id_length, self%client_ptr)
   self%is_initialized = initialize_client .eq. SRNoError
+  if (allocated(c_client_id)) deallocate(c_client_id)
 end function initialize_client
 
 !> Check whether the client has been initialized

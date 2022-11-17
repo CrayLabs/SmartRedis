@@ -42,6 +42,31 @@ location.  However, the Python ``Client`` constructor also allows
 for the database location to be set as an input parameter. In
 this case, it sets SSDB from the input parameter.
 
+Logging Environment Variables
+=============================
+
+SmartRedis will log events to a file on behalf of a client. There
+are two main environment variables that affect logging, ``SR_LOG_FILE``
+and ``SR_LOG_LEVEL``.
+
+``SR_LOG_FILE`` is the specifier for the location of the file that
+receives logging information. Each entry in the file will be prefixed
+with a timestamp and the identifier of the client that invoked the logging
+message.
+
+``SR_LOG_LEVEL`` relates to the verbosity of information that wil be logged.
+It may be one of three levels: ``NONE`` disables logging altogether.
+``INFO`` provides informational logging, such as exception events that
+transpire within the SmartRedis library and creation or destruction of a
+client object.  ``DEBUG`` provides more verbose logging, including information
+on the activities of the SmartRedis thread pool and API function entry and exit.
+Debug level logging will also log the absence of an expected environment variable,
+though this can happen only if the variables to set up logging are in place.
+
+The runtime impact of log levels NONE or INFO should be minimal on
+client performance; however, seting the log level to DEBUG may cause some
+degradation.
+
 Ensemble Environment Variables
 ==============================
 

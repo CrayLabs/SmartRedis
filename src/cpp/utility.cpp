@@ -83,7 +83,7 @@ void get_config_integer(int& value,
         }
     }
     else {
-        Logger::get_instance().log_data(
+        log_data(
             LLDebug,
             "Warning: Configuration variable " + cfg_key + " not set"
         );
@@ -108,7 +108,7 @@ void get_config_string(std::string& value,
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
         value = cfg_val;
     else {
-        Logger::get_instance().log_data(
+        log_data(
             LLDebug,
             "Warning: Configuration variable " + cfg_key + " not set"
         );

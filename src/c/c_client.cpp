@@ -38,14 +38,17 @@ using namespace SmartRedis;
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
-SRError SmartRedisCClient(bool cluster, void** new_client)
+SRError SmartRedisCClient(
+  bool cluster, void** new_client,
+  const char* client_id, const size_t client_id_length)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(new_client != NULL);
+    SR_CHECK_PARAMS(new_client != NULL && client_id != NULL);
 
-    Client* s = new Client(cluster);
+    std::string _client_id(client_id, client_id_length);
+    Client* s = new Client(cluster, _client_id);
     *new_client = reinterpret_cast<void*>(s);
   }
   catch (const std::bad_alloc& e) {

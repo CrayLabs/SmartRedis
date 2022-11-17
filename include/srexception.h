@@ -89,8 +89,7 @@ class Exception: public std::exception
     Exception(const char* what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
-        Logger::get_instance().log_data(
-            LLInfo, exception_class() + " at " + _loc + ":" + _msg);
+        log_data(LLInfo, exception_class() + " at " + _loc + ":" + _msg);
     }
 
     /*!
@@ -102,8 +101,7 @@ class Exception: public std::exception
     Exception(const std::string& what_arg, const char* file, int line)
       : _msg(what_arg), _loc(file + std::string(":") + std::to_string(line))
     {
-        Logger::get_instance().log_data(
-            LLInfo, exception_class() + " at " + _loc + ":" + _msg);
+        log_data(LLInfo, exception_class() + " at " + _loc + ":" + _msg);
     }
 
     /*!

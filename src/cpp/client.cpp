@@ -74,8 +74,7 @@ Client::~Client()
     }
     _redis_server = NULL;
 
-    Logger& logger = Logger::get_instance();
-    logger.log_data(LLInfo, "Client destroyed");
+    log_data(LLInfo, "Client destroyed");
 }
 
 // Put a DataSet object into the database
