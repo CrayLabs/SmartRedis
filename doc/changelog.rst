@@ -12,18 +12,21 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- A bug related to thread pool initialization was fixed.
 - This version adds new functionality in the form of support for Unix Domain Sockets.
 - Fortran client can now be optionally built with the rest of the library
 - Initial support for dataset conversions, specifically Xarray.
 
 Detailed Notes
 
+- Fix thread pool error (PR280_)
 - Update library linking instructions and update Fortran tester build process (PR277_)
 - Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
 - Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
 .. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
 .. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
 .. _PR276: https://github.com/CrayLabs/SmartRedis/pull/276

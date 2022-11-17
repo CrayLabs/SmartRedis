@@ -20,8 +20,9 @@ using namespace std::chrono_literals;
 // Constructor
 ThreadPool::ThreadPool(unsigned int num_threads)
 {
-    // Flag that we're initializing
+    // Flags that we're initializing and not shutting down
     initialization_complete = false;
+    shutting_down = false;
 
     // By default, we'll make one thread for each hardware context
     if (num_threads == 0)
@@ -37,7 +38,6 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     }
 
     // Announce that we're open for business
-    shutting_down = false;
     shutdown_complete = false;
     initialization_complete = true;
 }
