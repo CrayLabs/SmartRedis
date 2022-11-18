@@ -43,10 +43,13 @@ using namespace SmartRedis;
 *   \param value Receives the configuration value
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
+*   \param suppress_warning Do not issue a warning if the variable
+*                           is not set
 */
 void get_config_integer(int& value,
                         const std::string& cfg_key,
-                        int default_value)
+                        int default_value,
+                        bool suppress_warning /* = false */)
 {
     value = default_value;
 
@@ -82,10 +85,10 @@ void get_config_integer(int& value,
                                       " to an integer.");
         }
     }
-    else {
-        log_data(
+    else if (!suppress_warning) {
+        log_warning(
             LLDebug,
-            "Warning: Configuration variable " + cfg_key + " not set"
+            "Configuration variable " + cfg_key + " not set"
         );
     }
 }
@@ -96,10 +99,13 @@ void get_config_integer(int& value,
 *   \param value Receives the configuration value
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
+*   \param suppress_warning Do not issue a warning if the variable
+*                           is not set
 */
 void get_config_string(std::string& value,
                        const std::string& cfg_key,
-                       const std::string& default_value)
+                       const std::string& default_value,
+                       bool suppress_warning /* = false */)
 {
     value = default_value;
 
@@ -107,10 +113,10 @@ void get_config_string(std::string& value,
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
         value = cfg_val;
-    else {
-        log_data(
+    else if (!suppress_warning) {
+        log_warning(
             LLDebug,
-            "Warning: Configuration variable " + cfg_key + " not set"
+            "Configuration variable " + cfg_key + " not set"
         );
     }
 }

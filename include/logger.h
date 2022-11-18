@@ -51,15 +51,15 @@ class Logger {
         */
        static Logger& get_instance()
        {
-           static Logger instance; // instantiated on first acccess
-           return instance;
+           static Logger __instance; // instantiated on first acccess
+           return __instance;
        }
 
         /*!
         *   \brief Set up logging for the current client
         *   \param _client_id ID to use for the current client
         */
-       void configure_logging(const std::string& _client_id);
+       void configure_logging(const std::string& client_id);
 
     private:
 
@@ -108,27 +108,49 @@ class Logger {
         */
         void log_data(SRLoggingLevel level, const std::string_view& data);
 
+        /*!
+        *   \brief Conditionally log warning data if the logging level is
+        *          high enough
+        *   \param level Minimum logging level for data to be logged
+        *   \param data Text of data to be logged
+        */
+        void log_warning(SRLoggingLevel level, const std::string& data)
+        {
+            log_data(level, "WARNING: " + data);
+        }
+
+        /*!
+        *   \brief Conditionally log error data if the logging level is
+        *          high enough
+        *   \param level Minimum logging level for data to be logged
+        *   \param data Text of data to be logged
+        */
+        void log_error(SRLoggingLevel level, const std::string& data)
+        {
+            log_data(level, "ERROR: " + data);
+        }
+
     private:
 
         /*!
         *   \brief Track whether logging is initialized
         */
-        bool initialized;
+        bool _initialized;
 
         /*!
         *   \brief The client ID for this client
         */
-        std::string client_id;
+        std::string _client_id;
 
         /*!
         *   \brief The file to which to write log data
         */
-        std::string logfile;
+        std::string _logfile;
 
         /*!
         *   \brief The current logging level
         */
-        SRLoggingLevel log_level;
+        SRLoggingLevel _log_level;
 };
 
 /*!
@@ -141,6 +163,25 @@ inline void log_data(SRLoggingLevel level, const std::string& data)
     Logger::get_instance().log_data(level, data);
 }
 
+/*!
+*   \brief Conditionally log a warning if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_warning(SRLoggingLevel level, const std::string& data)
+{
+    Logger::get_instance().log_warning(level, data);
+}
+
+/*!
+*   \brief Conditionally log an error if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_error(SRLoggingLevel level, const std::string& data)
+{
+    Logger::get_instance().log_error(level, data);
+}
 
 /*!
 *   \brief The FunctionLogger class logs entry and exit of an API function.

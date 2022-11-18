@@ -76,10 +76,11 @@ typedef enum {
 *   \brief  Enumeration for logging levels
 */
 typedef enum {
-    LLInvalid = 0, // Invalid or uninitialized logging level
-    LLNone    = 1, // No logging at all
-    LLInfo    = 2, // Informational logging only
-    LLDebug   = 3 // Verbose logging for debugging purposes
+    LLInvalid   = 0, // Invalid or uninitialized logging level
+    LLQuiet     = 1, // No logging at all
+    LLInfo      = 2, // Informational logging only
+    LLDebug     = 3, // Verbose logging for debugging purposes
+    LLDeveloper = 4  // Extra verbose logging for internal use
 } SRLoggingLevel;
 
 #endif // SMARTREDIS_ENUMS_H
