@@ -35,7 +35,7 @@
 #include "utility.h"
 #include "logger.h"
 
-using namespace SmartRedis;
+namespace SmartRedis {
 
 /*!
 *   \brief Initialize an integer from configuration, such as an
@@ -49,7 +49,7 @@ using namespace SmartRedis;
 void get_config_integer(int& value,
                         const std::string& cfg_key,
                         const int default_value,
-                        bool suppress_warning /* = false */)
+                        bool suppress_warning /*= false*/)
 {
     value = default_value;
 
@@ -105,7 +105,7 @@ void get_config_integer(int& value,
 void get_config_string(std::string& value,
                        const std::string& cfg_key,
                        const std::string& default_value,
-                       bool suppress_warning /* = false */)
+                       bool suppress_warning /*= false*/)
 {
     value = default_value;
 
@@ -120,3 +120,5 @@ void get_config_string(std::string& value,
         );
     }
 }
+
+} // namespace SmartRedis {
