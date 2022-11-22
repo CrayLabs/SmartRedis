@@ -30,6 +30,7 @@
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
 #include "srexception.h"
+#include "utility.h"
 
 using namespace SmartRedis;
 
@@ -615,8 +616,8 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
 {
     // Check for a non-default timeout setting
     int run_timeout;
-    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           _DEFAULT_MODEL_TIMEOUT);
+    get_config_integer(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                       _DEFAULT_MODEL_TIMEOUT);
 
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select

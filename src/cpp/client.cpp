@@ -1562,8 +1562,8 @@ void Client::_set_prefixes_from_env()
     std::string get_key_prefixes;
     get_config_string(get_key_prefixes, "SSKEYIN", "");
     if (get_key_prefixes.length() > 0) {
-        char* a = get_key_prefixes.c_str();
-        char* b = a;
+        const char* a = get_key_prefixes.c_str();
+        const char* b = a;
         char parse_char = ',';
         while (*b != '\0') {
             if (*b == parse_char) {

@@ -31,6 +31,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "sr_enums.h"
+#include "logger.h"
 
 ///@file
 
@@ -160,7 +162,7 @@ class Exception: public std::exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("Exception")
+        return std::string("Exception");
     }
 
     /*!
@@ -215,7 +217,7 @@ class BadAllocException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("BadAllocException")
+        return std::string("BadAllocException");
     }
 };
 
@@ -246,7 +248,7 @@ class DatabaseException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("DatabaseException")
+        return std::string("DatabaseException");
     }
 };
 
@@ -277,7 +279,7 @@ class RuntimeException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("RuntimeException")
+        return std::string("RuntimeException");
     }
 };
 
@@ -308,7 +310,7 @@ class ParameterException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("ParameterException")
+        return std::string("ParameterException");
     }
 };
 
@@ -339,7 +341,7 @@ class TimeoutException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("TimeoutException")
+        return std::string("TimeoutException");
     }
 };
 
@@ -370,7 +372,7 @@ class InternalException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("InternalException")
+        return std::string("InternalException");
     }
 };
 
@@ -401,7 +403,7 @@ class KeyException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("KeyException")
+        return std::string("KeyException");
     }
 };
 
@@ -431,7 +433,7 @@ class TypeException: public Exception
     *   \returns Stringified version of the class name
     */
     virtual std::string exception_class() {
-        return std::string("TypeException")
+        return std::string("TypeException");
     }
 };
 

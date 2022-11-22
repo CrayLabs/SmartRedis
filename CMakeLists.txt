@@ -87,6 +87,8 @@ set(CLIENT_SRC
     src/cpp/stringfield.cpp
     src/cpp/pipelinereply.cpp
     src/cpp/threadpool.cpp
+    src/cpp/utility.cpp
+    src/cpp/logger.cpp
 )
 
 include_directories(SYSTEM

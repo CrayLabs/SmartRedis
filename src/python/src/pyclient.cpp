@@ -35,7 +35,7 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-PyClient::PyClient(bool cluster, std::string& client_id)
+PyClient::PyClient(bool cluster, const std::string& client_id)
 {
 //    throw SRRuntimeException("Test");
     _client = NULL;

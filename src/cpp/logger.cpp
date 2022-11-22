@@ -178,3 +178,63 @@ void Logger::log_data(SRLoggingLevel level, const std::string_view& data)
     const std::string _data(data);
     log_data(level, _data);
 }
+
+/*!
+*   \brief Conditionally log data if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*   \param data_len Length in characters of data to be logged
+*/
+extern "C" void log_data_noexcept(
+    SRLoggingLevel level, const char* data, size_t data_len)
+{
+    auto &logger = Logger::get_instance();
+    try {
+        std::string strData(data, data_len);
+        logger.log_data(level, strData);
+    }
+    catch (Exception e) {
+        std::cout << "Logging failure: " << e.where()
+                  << ": " << e.what() << std::endl;
+    }
+}
+
+/*!
+*   \brief Conditionally log a warning if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*   \param data_len Length in characters of data to be logged
+*/
+extern "C" void log_warning_noexcept(
+    SRLoggingLevel level, const char* data, size_t data_len)
+{
+    auto &logger = Logger::get_instance();
+    try {
+        std::string strData(data, data_len);
+        logger.log_warning(level, strData);
+    }
+    catch (Exception e) {
+        std::cout << "Logging failure: " << e.where()
+                  << ": " << e.what() << std::endl;
+    }
+}
+
+/*!
+*   \brief Conditionally log an error if the logging level is high enough
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*   \param data_len Length in characters of data to be logged
+*/
+extern "C" void log_error_noexcept(
+    SRLoggingLevel level, const char* data, size_t data_len)
+{
+    auto &logger = Logger::get_instance();
+    try {
+        std::string strData(data, data_len);
+        logger.log_error(level, strData);
+    }
+    catch (Exception e) {
+        std::cout << "Logging failure: " << e.where()
+                  << ": " << e.what() << std::endl;
+    }
+}

@@ -48,7 +48,7 @@ namespace SmartRedis {
 */
 void get_config_integer(int& value,
                         const std::string& cfg_key,
-                        int default_value,
+                        const int default_value,
                         bool suppress_warning = false);
 
 /*!

@@ -29,7 +29,7 @@
 #include <string_view>
 #include "dataset.h"
 #include "srexception.h"
-#include "logging.h"
+#include "logger.h"
 
 using namespace SmartRedis;
 

@@ -28,6 +28,7 @@
 
 #include "redis.h"
 #include "srexception.h"
+#include "utility.h"
 
 using namespace SmartRedis;
 
@@ -387,8 +388,8 @@ CommandReply Redis::run_model(const std::string& key,
 {
     // Check for a non-default timeout setting
     int run_timeout;
-    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           _DEFAULT_MODEL_TIMEOUT);
+    get_config_integer(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                       _DEFAULT_MODEL_TIMEOUT);
 
     // Build the command
     CompoundCommand cmd;
