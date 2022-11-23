@@ -26,7 +26,7 @@
 
 interface
   function c_constructor(cluster, client_id, client_id_length, new_client) bind(c, name="SmartRedisCClient")
-    use iso_c_binding, only : c_ptr, c_bool
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: c_constructor
     logical(kind=c_bool), value   :: cluster !< True if a database cluster is being used
