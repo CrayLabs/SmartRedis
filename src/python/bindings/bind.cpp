@@ -28,6 +28,7 @@
 
 #include "pyclient.h"
 #include "srexception.h"
+#include "logger.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -107,6 +108,11 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
         .def("get_meta_strings", &PyDataset::get_meta_strings)
         .def("get_name", &PyDataset::get_name);
+
+    // Logging functions
+    m.def("cpp_log_data", &log_data)
+     .def("cpp_log_warning", &log_warning)
+     .def("cpp_log_error", &log_error);
 
     // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
