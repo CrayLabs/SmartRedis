@@ -39,8 +39,10 @@ using namespace SmartRedis;
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
 SRError SmartRedisCClient(
-  bool cluster, void** new_client,
-  const char* client_id, const size_t client_id_length)
+  bool cluster,
+  const char* client_id,
+  const size_t client_id_length,
+  void** new_client)
 {
   SRError result = SRNoError;
   try {

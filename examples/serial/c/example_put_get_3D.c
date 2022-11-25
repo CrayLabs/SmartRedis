@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) {
   values.
   */
 
+  const char* client_id = "put_get_3d";
+  size_t cid_len = strlen(client_id);
   size_t n_dims = 3;
   size_t* dims = malloc(n_dims*sizeof(size_t));
   dims[0] = 10;
@@ -46,7 +48,7 @@ int main(int argc, char* argv[]) {
 
   void* client = NULL;
   bool cluster_mode = true; // Set to false if not using a clustered database
-  if (SRNoError != SmartRedisCClient(cluster_mode, &client)) {
+  if (SRNoError != SmartRedisCClient(cluster_mode, client_id, cid_len, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
   }

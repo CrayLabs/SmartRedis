@@ -62,7 +62,9 @@ class PyClient
         *                  is being used
         *   \param client_id Identifier for the current client
         */
-        PyClient(bool cluster, const std::string& client_id = "anonymous");
+        PyClient(
+            bool cluster,
+            const std::string& client_id = std::string("anonymous"));
 
         /*!
         *   \brief PyClient destructor

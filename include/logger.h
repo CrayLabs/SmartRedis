@@ -29,9 +29,11 @@
 #ifndef SMARTREDIS_LOGGER_H
 #define SMARTREDIS_LOGGER_H
 
-#include <stdlib.h>
+#ifdef __cplusplus // Skip C++ headers for C users
 #include <string>
 #include "utility.h"
+#endif // __cplusplus
+#include <stdlib.h>
 #include "sr_enums.h"
 
 ///@file

@@ -39,7 +39,7 @@ PYBIND11_MODULE(smartredisPy, m) {
 
     // Python client bindings
     py::class_<PyClient>(m, "PyClient")
-        .def(py::init<bool>())
+        .def(py::init<bool, const std::string&>())
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
         .def("delete_tensor", &PyClient::delete_tensor)

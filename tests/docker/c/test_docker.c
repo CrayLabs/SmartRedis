@@ -36,9 +36,11 @@
 int main(int argc, char* argv[]) {
 
     void* client = NULL;
+    const char* client_id = "test_docker";
+    size_t cid_len = strlen(client_id);
 
     SRError return_code = SRNoError;
-    return_code = SmartRedisCClient(false, &client);
+    return_code = SmartRedisCClient(false, client_id, cid_len, &client);
 
     if (return_code != SRNoError) {
         return -1;

@@ -41,7 +41,9 @@ bool cluster = true;
 int missing_dataset(char *dataset_name, size_t dataset_name_len)
 {
   void *client = NULL;
-  if (SRNoError != SmartRedisCClient(use_cluster(), &client))
+  const char* client_id = "missing_dataset";
+  size_t cid_len = strlen(client_id);
+  if (SRNoError != SmartRedisCClient(use_cluster(), client_id, cid_len, &client))
     return -1;
 
   bool exists = false;
@@ -67,9 +69,11 @@ int present_dataset(char *dataset_name, size_t dataset_name_len)
   uint16_t ***tensor = NULL;
   int i, j, k;
   bool exists = false;
+  const char* client_id = "present_dataset";
+  size_t cid_len = strlen(client_id);
 
   // Initialize client and dataset
-  if (SRNoError != SmartRedisCClient(use_cluster(), &client) || NULL == client)
+  if (SRNoError != SmartRedisCClient(use_cluster(), client_id, cid_len, &client) || NULL == client)
     return -1;
   if (SRNoError != CDataSet(dataset_name, dataset_name_len, &dataset) || NULL == dataset)
     return -1;

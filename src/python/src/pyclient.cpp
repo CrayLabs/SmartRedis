@@ -37,7 +37,6 @@ namespace py = pybind11;
 
 PyClient::PyClient(bool cluster, const std::string& client_id)
 {
-//    throw SRRuntimeException("Test");
     _client = NULL;
     try {
         _client = new Client(cluster, client_id);

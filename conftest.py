@@ -32,6 +32,7 @@ import io
 import os
 import random
 import string
+import inspect
 
 dtypes = [
     np.float64,
@@ -64,6 +65,10 @@ def mock_data():
 @pytest.fixture
 def mock_model():
     return MockTestModel
+
+@pytest.fixture
+def context():
+    return inspect.stack()[1][3]
 
 class MockTestData:
 
