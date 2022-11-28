@@ -40,7 +40,7 @@ Client::Client(bool cluster, const std::string& client_id)
     // Set up logging
     Logger& logger = Logger::get_instance();
     logger.configure_logging(client_id);
-    logger.log_data(LLInfo, "New client created");
+    logger.log_data(LLDebug, "New client created");
 
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
@@ -74,7 +74,7 @@ Client::~Client()
     }
     _redis_server = NULL;
 
-    log_data(LLInfo, "Client destroyed");
+    log_data(LLDebug, "Client destroyed");
 }
 
 // Put a DataSet object into the database
