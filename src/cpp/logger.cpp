@@ -151,9 +151,11 @@ void Logger::log_data(SRLoggingLevel level, const std::string& data)
     if (_logfile.length() > 0) {
         std::ofstream logstream;
         logstream.open(_logfile, std::ios_base::app);
-        logstream << _client_id << "@" << timestamp << ":" << data;
+        logstream << _client_id << "@" << timestamp << ":" << data
+                  << std::endl;
     } else {
-        std::cout << _client_id << "@" << timestamp << ":" << data;
+        std::cout << _client_id << "@" << timestamp << ":" << data
+                  << std::endl;
     }
 }
 
