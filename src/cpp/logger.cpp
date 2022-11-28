@@ -193,7 +193,7 @@ extern "C" void log_data_noexcept(
         std::string strData(data, data_len);
         logger.log_data(level, strData);
     }
-    catch (Exception e) {
+    catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
                   << ": " << e.what() << std::endl;
     }
@@ -213,7 +213,7 @@ extern "C" void log_warning_noexcept(
         std::string strData(data, data_len);
         logger.log_warning(level, strData);
     }
-    catch (Exception e) {
+    catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
                   << ": " << e.what() << std::endl;
     }
@@ -233,7 +233,7 @@ extern "C" void log_error_noexcept(
         std::string strData(data, data_len);
         logger.log_error(level, strData);
     }
-    catch (Exception e) {
+    catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
                   << ": " << e.what() << std::endl;
     }

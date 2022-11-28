@@ -93,7 +93,7 @@ build-test-fortran: test-lib-with-fortran
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
-build-examples: lib
+build-examples: lib-with-fortran
 	./build-scripts/build_serial_examples.sh
 	./build-scripts/build_parallel_examples.sh
 
