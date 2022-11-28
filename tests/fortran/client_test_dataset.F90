@@ -164,7 +164,7 @@ program main
   if (.not. all(meta_int64_recv == meta_int64_vec)) error stop 'meta_int64: FAILED'
 
   ! test dataset_existence
-  result = client%initialize(use_cluster(), __FILE__)
+  result = client%initialize(use_cluster(), "client_test_dataset")
   if (result .ne. SRNoError) error stop
   result = client%dataset_exists("nonexistent", exists)
   if (result .ne. SRNoError) error stop

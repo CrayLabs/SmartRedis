@@ -51,7 +51,8 @@ program main
   character(len=12) :: dataset_name
   integer :: result
 
-  result = client%initialize(use_cluster(), __FILE__)
+  result = client%initialize(use_cluster(), &
+    "client_test_dataset_aggregation")
   if (result .ne. SRNoError) error stop
 
   call random_number(true_vectors)

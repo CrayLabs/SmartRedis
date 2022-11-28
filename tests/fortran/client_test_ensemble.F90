@@ -103,7 +103,7 @@ ensemble_keyout = "producer_1"
 call setenv("SSKEYIN", "producer_1,producer_0")
 call setenv("SSKEYOUT", ensemble_keyout)
 
-result = client%initialize(use_cluster(), __FILE__)
+result = client%initialize(use_cluster(), "client_test_ensemble")
 if (result .ne. SRNoError) error stop
 result = client%use_model_ensemble_prefix(.true.)
 if (result .ne. SRNoError) error stop
