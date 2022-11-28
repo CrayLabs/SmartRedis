@@ -42,6 +42,8 @@ public :: enum_kind !< The kind of integer equivalent to a C enum. According to 
                     !! users do not have to import the iso_c_binding module into their
                     !! programs
 
+public :: log_data, log_warning, log_error
+
 contains
 
 !> Log data to the SmartRedis log
