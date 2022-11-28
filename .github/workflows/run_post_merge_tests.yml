@@ -140,5 +140,7 @@ jobs:
         if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
         run: |
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+          export SR_LOG_FILE=smartredis_examples_log.txt &&
+          export SR_LOG_LEVEL=DEBUG &&
           make test-examples
 

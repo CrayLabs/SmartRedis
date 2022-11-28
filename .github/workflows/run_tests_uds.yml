@@ -145,5 +145,7 @@ jobs:
       - name: Run testing with UDS redis
         run: |
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
+          export SR_LOG_FILE=smartredis_uds_tests_log.txt &&
+          export SR_LOG_LEVEL=DEBUG &&
           make test-verbose
 

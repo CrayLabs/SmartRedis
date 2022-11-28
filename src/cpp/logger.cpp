@@ -55,7 +55,7 @@ void Logger::configure_logging(const std::string& client_id)
     _initialized = true;
 
     // Get the logfile
-    get_config_string(_logfile, "SS_LOG_FILE", "", true);
+    get_config_string(_logfile, "SR_LOG_FILE", "", true);
     std::string requestedLogfile(_logfile);
     bool missingLogFile = _logfile.length() == 0;
 
@@ -73,7 +73,7 @@ void Logger::configure_logging(const std::string& client_id)
 
     // Get the logging level
     std::string level;
-    get_config_string(level, "SS_LOG_LEVEL", "", true);
+    get_config_string(level, "SR_LOG_LEVEL", "", true);
     bool missingLogLevel = level.length() == 0;
     bool badLogLevel = false;
     if (level.length() > 0) {
