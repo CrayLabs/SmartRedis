@@ -40,7 +40,7 @@ program main
 
   if (client%isinitialized()) error stop 'client not initialized'
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), __FILE__)
   if (result .ne. SRNoError) error stop
 
   if (.not. client%isinitialized()) error stop 'client is initialized'

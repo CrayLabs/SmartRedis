@@ -31,9 +31,9 @@ from smartredis import Client, Dataset
 from smartredis.error import *
 
 
-def test_aggregation(use_cluster):
+def test_aggregation(use_cluster, context):
     num_datasets = 4
-    client = Client(None, use_cluster)
+    client = Client(None, use_cluster, client_id=context)
 
     # Build datasets
     original_datasets = [create_dataset(f"dataset_{i}") for i in range(num_datasets)]

@@ -58,7 +58,7 @@ void produce(
         std::string keyout="",
         std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), __FILE__ "::producer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors
@@ -128,7 +128,7 @@ void consume(std::vector<size_t> dims,
              std::string keyout="",
              std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), __FILE__ "::consumer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors

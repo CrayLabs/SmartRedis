@@ -73,7 +73,7 @@ program main
     recv_array_integer_64(i) = irand()
   enddo
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), __FILE__)
   if (result .ne. SRNoError) error stop
 
   result = client%put_tensor("true_array_real_32", true_array_real_32, shape(true_array_real_32))

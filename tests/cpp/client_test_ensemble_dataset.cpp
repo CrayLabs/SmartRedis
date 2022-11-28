@@ -35,7 +35,7 @@ void rename_dataset(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), __FILE__);
     client.use_tensor_ensemble_prefix(true);
 
     double*** t_send_1 =
@@ -137,7 +137,7 @@ void add_to_aggregation_list(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster());
+    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), __FILE__);
     client.use_tensor_ensemble_prefix(true);
     client.use_list_ensemble_prefix(true);
 

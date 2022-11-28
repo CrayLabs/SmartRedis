@@ -52,7 +52,7 @@ void load_mnist_image_to_array(float**** img)
 void run_mnist(const std::string& model_name,
                const std::string& script_name)
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), __FILE__);
 
   float**** array = allocate_4D_array<float>(1,1,28,28);
   float** result = allocate_2D_array<float>(1, 10);

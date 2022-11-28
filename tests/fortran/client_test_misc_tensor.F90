@@ -46,7 +46,7 @@ program main
   integer :: result
   logical(kind=c_bool) :: exists
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), __FILE__)
   if (result .ne. SRNoError) error stop
 
   print *, "Putting tensor"

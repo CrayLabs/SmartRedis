@@ -47,7 +47,8 @@ program mnist_test
   character(len=2) :: key_suffix
   integer :: sr_return_code
 
-  sr_return_code = client%initialize(use_cluster())
+  sr_return_code = client%initialize(use_cluster(), &
+    __FILE__)
   if (sr_return_code .ne. SRNoError) error stop
 
   sr_return_code = client%set_model_from_file_multigpu(model_key, model_file, "TORCH", first_gpu, num_gpus)

@@ -35,7 +35,7 @@
 void put_get_empty_dataset(std::string dataset_name)
 {
     //Create Client and DataSet
-    SmartRedis::Client client(use_cluster());
+    SmartRedis::Client client(use_cluster(), __FILE__);
     SmartRedis::DataSet sent_dataset(dataset_name);
 
     //Put the DataSet into the database

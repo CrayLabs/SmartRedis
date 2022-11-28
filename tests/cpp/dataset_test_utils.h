@@ -43,7 +43,8 @@ namespace DATASET_TEST_UTILS {
 class DatasetTestClient : public SmartRedis::Client
 {
     public:
-        DatasetTestClient(bool cluster) : Client(cluster) {};
+        DatasetTestClient(bool cluster, const std::string& name)
+            : Client(cluster, name) {};
 
         bool hash_field_exists(const std::string& key,
                                const std::string& field) {
