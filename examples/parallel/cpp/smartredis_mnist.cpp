@@ -100,10 +100,12 @@ int main(int argc, char* argv[]) {
     // Retrieve the MPI rank
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    std::string client_id("Client ");
+    client_id += std::to_string(rank);
 
     // Initialize a Client object
     bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode);
+    SmartRedis::Client client(cluster_mode, client_id);
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.

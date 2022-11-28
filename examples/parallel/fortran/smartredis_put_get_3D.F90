@@ -57,7 +57,7 @@ program main
   call random_number(recv_array_real_64)
 
   ! Initialize a client
-  result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
+  result = client%initialize(.true., __FILE__) ! Change .false. to .true. if not using a clustered database
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Add a tensor to the database and verify that we can retrieve it
