@@ -27,31 +27,37 @@
  */
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
-#include "clusterinfocommand.h"
+#include "../client_test_utils.h"
+#include "redis.h"
+#include "client.h"
+#include "address.h"
 #include "logger.h"
 
 unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
-SCENARIO("Parsing an empty string for cluster info")
+SCENARIO("Additional Testing for logging", "[LOG]")
 {
-    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for cluster info" << std::endl;
-    Logger::get_instance().rename_client("test_clusterinfocommand");
-    log_data(LLDebug, "***Beginning ClusterInfoCommand testing***");
+    std::cout << std::to_string(get_time_offset()) << ": Additional Testing for logging" << std::endl;
+    Logger::get_instance().rename_client("test_logger");
+    log_data(LLDebug, "***Beginning Logger testing***");
 
-    GIVEN("A ClusterInfoCommand and an empty string")
+    GIVEN("A Client object")
     {
-        ClusterInfoCommand cmd;
-        std::string info = "";
+        Client client(use_cluster(), "test_logger");
 
-        WHEN("calling parse_db_cluster_info on the empty string")
+        THEN("Logging should be able to be done")
         {
-            THEN("An empty parsed_reply_map is returned")
-            {
-                CHECK(cmd.parse_db_cluster_info(info).size() == 0);
-            }
+            // log_data()
+            log_data(LLInfo, "This is data logged at the Info level");
+
+            // log_warning()
+            log_warning(LLInfo, "This is a warning logged at the Info level");
+
+            // log_error()
+            log_error(LLInfo, "This is an error logged at the Info level");
         }
     }
-    log_data(LLDebug, "***End ClusterInfoCommand testing***");
+    log_data(LLDebug, "***End Logger testing***");
 }

@@ -29,6 +29,7 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "client.h"
 #include "dataset.h"
+#include "logger.h"
 #include "../client_test_utils.h"
 
 unsigned long get_time_offset();
@@ -39,26 +40,15 @@ using namespace SmartRedis;
 // variables to their original state
 void reset_env_vars(const char* old_keyin, const char* old_keyout)
 {
+    log_data(LLDebug, "Resetting SSKEYIN and SSKEYOUT");
     if (old_keyin != nullptr) {
-        std::string reset_keyin =
-            std::string("SSKEYIN=") + std::string(old_keyin);
-        char* reset_keyin_c = new char[reset_keyin.size() + 1];
-        std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
-        reset_keyin_c[reset_keyin.size()] = '\0';
-        putenv( reset_keyin_c);
-        delete [] reset_keyin_c;
+        setenv("SSKEYIN", old_keyin, 1);
     }
     else {
         unsetenv("SSKEYIN");
     }
     if (old_keyout != nullptr) {
-        std::string reset_keyout =
-            std::string("SSKEYOUT=") + std::string(old_keyout);
-        char* reset_keyout_c = new char[reset_keyout.size() + 1];
-        std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
-        reset_keyout_c[reset_keyout.size()] = '\0';
-        putenv( reset_keyout_c);
-        delete [] reset_keyout_c;
+        setenv("SSKEYOUT", old_keyout, 1);
     }
     else {
         unsetenv("SSKEYOUT");
@@ -90,14 +80,17 @@ void load_mnist_image_to_array(float**** img)
 SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Client ensemble using a producer/consumer paradigm" << std::endl;
+    Logger::get_instance().rename_client("test_client_ensemble");
+    log_data(LLDebug, "***Beginning Client Ensemble testing***");
+
     GIVEN("Variables that will be used by the producer and consumer")
     {
         const char* old_keyin = std::getenv("SSKEYIN");
         const char* old_keyout = std::getenv("SSKEYOUT");
-        char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
-        char keyout_env_put[] = "SSKEYOUT=producer_0";
-        char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";
-        char keyout_env_get[] = "SSKEYOUT=producer_1";
+        char keyin_env_put[] = "producer_0,producer_1";
+        char keyout_env_put[] = "producer_0";
+        char keyin_env_get[] = "producer_1,producer_0";
+        char keyout_env_get[] = "producer_1";
         size_t dim1 = 10;
         std::vector<size_t> dims = {dim1};
         std::string producer_keyout = "producer_0";
@@ -133,11 +126,13 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         THEN("The Client ensemble can be tested with "
              "a producer/consumer relationship")
         {
+            ////////////////////////////////////////////////////////////
             // do producer stuff
-            putenv(keyin_env_put);
-            putenv(keyout_env_put);
+            log_data(LLDebug, "***Beginning producer operations***");
+            setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
+            setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
 
-            Client producer_client(use_cluster(), "test_client_ensemble");
+            Client producer_client(use_cluster(), "test_client_ensemble::producer");
             producer_client.use_model_ensemble_prefix(true);
 
             // Tensors
@@ -182,13 +177,15 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             producer_client.run_model(model_name, {script_out_key_ds},
                                      {out_key_ds});
             free_4D_array(mnist_array, 1, 1, 28);
+            log_data(LLDebug, "***End producer operations***");
 
-
+            ////////////////////////////////////////////////////////////
             // do consumer stuff
-            putenv(keyin_env_get);
-            putenv(keyout_env_get);
+            log_data(LLDebug, "***Beginning consumer operations***");
+            setenv("SSKEYIN", keyin_env_get, 1);
+            setenv("SSKEYOUT", keyout_env_get, 1);
 
-            Client consumer_client(use_cluster(), "test_client_ensemble");
+            Client consumer_client(use_cluster(), "test_client_ensemble::consumer");
             consumer_client.use_model_ensemble_prefix(true);
 
             // Tensors
@@ -253,4 +250,5 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             reset_env_vars(old_keyin, old_keyout);
         }
     }
+    log_data(LLDebug, "***End Client Ensemble testing***");
 }

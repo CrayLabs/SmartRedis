@@ -130,7 +130,8 @@ inline void RedisServer::_check_runtime_variables()
     }
 
     if (_command_timeout <= 0) {
-        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR + " " +
+                                   std::to_string(_command_timeout) +
                                    " must be greater than 0.");
     }
 
@@ -146,7 +147,8 @@ inline void RedisServer::_check_runtime_variables()
     }
 
     if (_command_timeout > (INT_MAX / 1000)) {
-        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR +
+        throw SRParameterException(_CMD_TIMEOUT_ENV_VAR + " " +
+                                   std::to_string(_command_timeout) +
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
     }

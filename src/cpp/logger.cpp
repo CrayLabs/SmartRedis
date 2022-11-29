@@ -40,6 +40,16 @@
 using namespace SmartRedis;
 
 /*!
+*   \brief Rename the current client
+*   \param _client_id new ID to use for the current client
+*/
+void Logger::rename_client(const std::string& client_id)
+{
+    _client_id = client_id;
+}
+
+
+/*!
 *   \brief Set up logging for the current client
 *   \param _client_id ID to use for the current client
 */

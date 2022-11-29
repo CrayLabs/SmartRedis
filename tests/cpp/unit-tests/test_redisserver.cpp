@@ -35,6 +35,7 @@
 #include "rediscluster.h"
 #include "redis.h"
 #include "srexception.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -110,6 +111,44 @@ void unset_all_env_vars()
         unsetenv(CMD_INTERVAL_ENV_VAR);
 }
 
+// Helper function to retrieve original versions of environment vars
+void save_env_vars(
+    char** conn_timeout,
+    char** conn_interval,
+    char** cmd_timeout,
+    char** cmd_interval)
+{
+    *conn_timeout = getenv(CONN_TIMEOUT_ENV_VAR);
+    *conn_interval = getenv(CONN_INTERVAL_ENV_VAR);
+    *cmd_timeout = getenv(CMD_TIMEOUT_ENV_VAR);
+    *cmd_interval = getenv(CMD_INTERVAL_ENV_VAR);
+}
+
+// Helper function to restore environment vars
+void restore_env_vars(
+    char* conn_timeout,
+    char* conn_interval,
+    char* cmd_timeout,
+    char* cmd_interval)
+{
+    if (conn_timeout != NULL)
+        setenv(CONN_TIMEOUT_ENV_VAR, conn_timeout, 1);
+    else
+        unsetenv(CONN_TIMEOUT_ENV_VAR);
+    if (conn_interval != NULL)
+        setenv(CONN_INTERVAL_ENV_VAR, conn_interval, 1);
+    else
+        unsetenv(CONN_INTERVAL_ENV_VAR);
+    if (cmd_timeout != NULL)
+        setenv(CMD_TIMEOUT_ENV_VAR, cmd_timeout, 1);
+    else
+        unsetenv(CMD_TIMEOUT_ENV_VAR);
+    if (cmd_interval != NULL)
+        setenv(CMD_INTERVAL_ENV_VAR, cmd_interval, 1);
+    else
+        unsetenv(CMD_INTERVAL_ENV_VAR);
+}
+
 // Helper function to check that all default values being used
 template <class T>
 void check_all_defaults(T& server)
@@ -130,6 +169,15 @@ void check_all_defaults(T& server)
 SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test runtime settings are initialized correctly" << std::endl;
+    Logger::get_instance().rename_client("test_redisserver");
+    log_data(LLDebug, "***Beginning RedisServer testing***");
+
+    char* __conn_timeout;
+    char* __conn_interval;
+    char* __cmd_timeout;
+    char* __cmd_interval;
+    save_env_vars(&__conn_timeout, &__conn_interval, &__cmd_timeout, &__cmd_interval);
+
     GIVEN("A Redis derived object created with all environment variables unset")
     {
         unset_all_env_vars();
@@ -305,4 +353,6 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
+    restore_env_vars(__conn_timeout, __conn_interval, __cmd_timeout, __cmd_interval);
+    log_data(LLDebug, "***End RedisServer testing***");
 }

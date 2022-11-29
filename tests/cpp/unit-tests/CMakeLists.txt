@@ -64,7 +64,7 @@ set(SOURCES
 	../../../src/cpp/metadatafield.cpp
 	../../../src/cpp/multikeycommand.cpp
 	../../../src/cpp/nonkeyedcommand.cpp
-    ../../../src/cpp/pipelinereply.cpp
+	../../../src/cpp/pipelinereply.cpp
 	../../../src/cpp/redis.cpp
 	../../../src/cpp/rediscluster.cpp
 	../../../src/cpp/redisserver.cpp
@@ -90,7 +90,6 @@ set(UNIT_TESTS
 	test_tensor.cpp
 	test_metadata.cpp
 	test_stringfield.cpp
-	test_ssdb.cpp
 	test_commandreply.cpp
 	test_singlekeycommand.cpp
 	test_addressatcommand.cpp
@@ -100,6 +99,8 @@ set(UNIT_TESTS
 	test_dbinfocommand.cpp
 	test_clusterinfocommand.cpp
     test_redisserver.cpp
+	test_logger.cpp
+	test_ssdb.cpp
 )
 
 # Compare the number of source files given above to the number of source CPP

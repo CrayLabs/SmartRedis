@@ -32,6 +32,7 @@
 #include "../client_test_utils.h"
 #include "srexception.h"
 #include <sstream>
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -95,6 +96,8 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
 SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Dataset Functions on Client Object" << std::endl;
+    Logger::get_instance().rename_client("test_client");
+    log_data(LLDebug, "***Beginning Client testing***");
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -953,4 +956,5 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
             }
         }
     }
+    log_data(LLDebug, "***End Client testing***");
 }

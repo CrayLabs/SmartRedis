@@ -30,20 +30,22 @@
 #include "dataset.h"
 #include "srexception.h"
 #include <cxxabi.h>
+#include "logger.h"
 
 unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 const char *currentExceptionTypeName() {
-    int status;
-//    return abi::__cxa_demangle(abi::__cxa_current_exception_type()->name(), 0, 0, &status);
     return abi::__cxa_current_exception_type()->name();
 }
 
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing DataSet object" << std::endl;
+    Logger::get_instance().rename_client("test_dataset");
+    log_data(LLDebug, "***Beginning DataSet testing***");
+
     GIVEN("A DataSet object")
     {
         std::string dataset_name;
@@ -208,4 +210,5 @@ SCENARIO("Testing DataSet object", "[DataSet]")
             }
         }
     }
+    log_data(LLDebug, "***End DataSet testing***");
 }

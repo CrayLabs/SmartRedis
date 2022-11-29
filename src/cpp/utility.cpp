@@ -52,8 +52,16 @@ void get_config_integer(int& value,
                         bool suppress_warning /*= false*/)
 {
     value = default_value;
+    std::string message = "Getting value for " + cfg_key;
+    log_data(LLDebug, message);
 
     char* cfg_val = std::getenv(cfg_key.c_str());
+    message = "Retrieved value \"";
+    message += cfg_val == NULL ? "<NULL>" : cfg_val;
+    message += "\"";
+    if (NULL == cfg_val)
+        message += ". Using default value of " + std::to_string(default_value);
+    log_data(LLDebug, message);
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0) {
         // Enforce that all characters are digits because std::stoi
@@ -91,6 +99,9 @@ void get_config_integer(int& value,
             "Configuration variable " + cfg_key + " not set"
         );
     }
+
+    message = "Exiting with value \"" + std::to_string(value) + "\"";
+    log_data(LLDebug, message);
 }
 
 /*!
@@ -108,8 +119,16 @@ void get_config_string(std::string& value,
                        bool suppress_warning /*= false*/)
 {
     value = default_value;
+    std::string message = "Getting value for " + cfg_key;
+    log_data(LLDebug, message);
 
     char* cfg_val = std::getenv(cfg_key.c_str());
+    message = "Retrieved value \"";
+    message += cfg_val == NULL ? "<NULL>" : cfg_val;
+    message += "\"";
+    if (NULL == cfg_val)
+        message += ". Using default value of \"" + default_value + "\"";
+    log_data(LLDebug, message);
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
         value = cfg_val;
@@ -119,6 +138,9 @@ void get_config_string(std::string& value,
             "Configuration variable " + cfg_key + " not set"
         );
     }
+
+    message = "Exiting with value \"" + value + "\"";
+    log_data(LLDebug, message);
 }
 
 } // namespace SmartRedis {

@@ -30,6 +30,7 @@
 #include "redis.h"
 #include "client.h"
 #include "address.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -59,13 +60,16 @@ void setenv_ssdb(const char* ssdb)
 SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
+    Logger::get_instance().rename_client("test_ssdb");
+    log_data(LLDebug, "***Beginning SSDB testing***");
+
     GIVEN("A TestSSDB object")
     {
         const char* old_ssdb = std::getenv("SSDB");
 
-    INFO("SSDB must be set to a valid host and "\
-         "port before running this test.");
-    REQUIRE(old_ssdb != NULL);
+        INFO("SSDB must be set to a valid host and "\
+            "port before running this test.");
+        REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb;
         Client* c = NULL;
@@ -92,4 +96,5 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
             setenv_ssdb(old_ssdb);
         }
     }
+    log_data(LLDebug, "***End SSDB testing***");
 }

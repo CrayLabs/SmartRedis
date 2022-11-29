@@ -73,6 +73,12 @@ class Logger {
         */
        void configure_logging(const std::string& client_id);
 
+        /*!
+        *   \brief Rename the current client
+        *   \param _client_id new ID to use for the current client
+        */
+        void rename_client(const std::string& client_id);
+
     private:
 
         /*!

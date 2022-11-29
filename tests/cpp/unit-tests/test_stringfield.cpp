@@ -28,12 +28,16 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "stringfield.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
 SCENARIO("Test StringField", "[StringField]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test StringField" << std::endl;
+    Logger::get_instance().rename_client("test_stringfield");
+    log_data(LLDebug, "***Beginning StringField testing***");
+
     GIVEN("A StringField object constructed with the string field name")
     {
         std::string name_1 = "stringfield_name_1";
@@ -95,4 +99,5 @@ SCENARIO("Test StringField", "[StringField]")
         }
         // TODO: Test serializing the StringField
     }
+    log_data(LLDebug, "***End StringField testing***");
 }
