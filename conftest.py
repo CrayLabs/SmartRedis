@@ -67,8 +67,8 @@ def mock_model():
     return MockTestModel
 
 @pytest.fixture
-def context():
-    return inspect.stack()[1][3]
+def context(request):
+    return request.node.name
 
 class MockTestData:
 

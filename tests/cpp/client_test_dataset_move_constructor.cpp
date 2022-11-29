@@ -125,11 +125,11 @@ void move_constructor(
                              &DATASET_TEST_UTILS::ui32_meta_1,
                              SRMetadataTypeUint32);
 
-  //Move the DataSet half way through metadata additions to
-  //test that we can continue adding new fields to the old fields
-  SmartRedis::DataSet moved_dataset = SmartRedis::DataSet(std::move(*dataset));
+    //Move the DataSet half way through metadata additions to
+    //test that we can continue adding new fields to the old fields
+    SmartRedis::DataSet moved_dataset = SmartRedis::DataSet(std::move(*dataset));
 
-  moved_dataset.add_meta_scalar("ui32_field_1",
+    moved_dataset.add_meta_scalar("ui32_field_1",
                             &DATASET_TEST_UTILS::ui32_meta_2,
                             SRMetadataTypeUint32);
     moved_dataset.add_meta_scalar("ui32_field_2",

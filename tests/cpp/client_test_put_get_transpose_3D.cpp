@@ -60,7 +60,7 @@ void put_get_3D_array(
         SRMemoryLayout send_direction = SRMemLayoutContiguous,
         SRMemoryLayout recv_direction = SRMemLayoutContiguous)
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), __FILE__);
 
   //Allocate and fill arrays
   T_send* array = (T_send*)malloc(dims[0]*dims[1]*dims[2]*sizeof(T_send));

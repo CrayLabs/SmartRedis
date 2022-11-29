@@ -78,7 +78,7 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client(use_cluster(), __FILE__);
   std::string model_key = "mnist_model";
   std::string model_file = "./../mnist_data/mnist_cnn.pt";
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
