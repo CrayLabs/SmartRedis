@@ -28,7 +28,7 @@ import os
 
 import numpy as np
 import pytest
-from smartredis import Client, Dataset
+from smartredis import Client, Dataset, log_data, log_warning, log_error
 from smartredis.error import *
 
 
@@ -739,6 +739,21 @@ def test_bad_type_get_dataset_list_range(use_cluster, context):
         c.get_dataset_list_range(listname, "not an integer", end_index)
     with pytest.raises(TypeError):
         c.get_dataset_list_range(listname, start_index, "not an integer")
+
+def test_bad_type_log_data(use_cluster, context):
+    c = Client(None, use_cluster, client_id=context)
+    with pytest.raises(TypeError):
+        log_data(42)
+
+def test_bad_type_log_warning(use_cluster, context):
+    c = Client(None, use_cluster, client_id=context)
+    with pytest.raises(TypeError):
+        log_warning(42)
+
+def test_bad_type_log_error(use_cluster, context):
+    c = Client(None, use_cluster, client_id=context)
+    with pytest.raises(TypeError):
+        log_error(42)
 
 #####
 # Test type errors from bad parameter types to Dataset API calls
