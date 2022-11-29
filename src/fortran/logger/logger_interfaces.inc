@@ -28,9 +28,9 @@ interface
   subroutine c_log_data(level, data, data_length) bind(c, name="log_data_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)       :: level
-    character(kind=c_char)        :: data(*)
-    integer(kind=c_size_t), value :: data_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
   end subroutine c_log_data
 end interface
 
@@ -38,9 +38,9 @@ interface
   subroutine c_log_warning(level, data, data_length) bind(c, name="log_warning_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)       :: level
-    character(kind=c_char)        :: data(*)
-    integer(kind=c_size_t), value :: data_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
   end subroutine c_log_warning
 end interface
 
@@ -48,8 +48,8 @@ interface
   subroutine c_log_error(level, data, data_length) bind(c, name="log_error_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)       :: level
-    character(kind=c_char)        :: data(*)
-    integer(kind=c_size_t), value :: data_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
   end subroutine c_log_error
 end interface
