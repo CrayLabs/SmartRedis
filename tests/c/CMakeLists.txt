@@ -56,6 +56,14 @@ target_link_libraries(client_test_dataset_exists
 	${SR_LIB}
 )
 
+add_executable(client_test_logging
+	client_test_logging.c
+)
+
+target_link_libraries(client_test_logging
+	${SR_LIB}
+)
+
 add_executable(client_test_put_unpack_1D
 	client_test_put_unpack_1D.c
 )
