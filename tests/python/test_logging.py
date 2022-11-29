@@ -24,25 +24,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-__all__ = [
-    "Client",
-    "Dataset",
-    "DatasetConverter",
-    "log_data",
-    "log_warning",
-    "log_error",
-    "LLQuiet",
-    "LLInfo",
-    "LLDebug",
-    "LLDeveloper",
-]
+import os
 
-from .client import Client
-from .dataset import Dataset
-from .dataset_utils import DatasetConverter
-from .logger import (
-    log_data, log_warning, log_error
-)
-from .smartredisPy import (
-    LLQuiet, LLInfo, LLDebug, LLDeveloper
-)
+import numpy as np
+import pytest
+from smartredis import *
+from smartredis.error import *
+
+
+def test_logging(use_cluster, context):
+    c = Client(None, use_cluster, client_id=context)
+    log_data(LLQuiet, "This is data logging (LLQuiet)")
+    log_warning(LLQuiet, "This is a warning (LLQuiet)")
+    log_error(LLQuiet, "This is an error (LLQuiet)")
+    log_data(LLInfo, "This is data logging (LLInfo)")
+    log_warning(LLInfo, "This is a warning (LLInfo)")
+    log_error(LLInfo, "This is an error (LLInfo)")
+    log_data(LLDebug, "This is data logging (LLDebug)")
+    log_warning(LLDebug, "This is a warning (LLDebug)")
+    log_error(LLDebug, "This is an error (LLDebug)")
+    log_data(LLDeveloper, "This is data logging (LLDeveloper)")
+    log_warning(LLDeveloper, "This is a warning (LLDeveloper)")
+    log_error(LLDeveloper, "This is an error (LLDeveloper)")
+

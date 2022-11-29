@@ -24,8 +24,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .smartredisPy import cpp_log_data, cpp_log_warning, cpp_log_error
+from .smartredisPy import cpp_log_data, cpp_log_warning, cpp_log_error, SRLoggingLevel
 from .util import exception_handler, typecheck
+
+# Logging levels
+#LLQuiet     = 1  # No logging at all
+#LLInfo      = 2  # Informational logging only
+#LLDebug     = 3  # Verbose logging for debugging purposes
+#LLDeveloper = 4  # Extra verbose logging for internal use
 
 @exception_handler
 def log_data(level, data):
@@ -37,7 +43,7 @@ def log_data(level, data):
     :type data: str
     :raises RedisReplyError: if logging fails
     """
-    typecheck(level, "level", int)
+    typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
     cpp_log_data(level, data)
 
@@ -51,7 +57,7 @@ def log_warning(level, data):
     :type data: str
     :raises RedisReplyError: if logging fails
     """
-    typecheck(level, "level", int)
+    typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
     cpp_log_warning(level, data)
 
@@ -65,7 +71,7 @@ def log_error(level, data):
     :type data: str
     :raises RedisReplyError: if logging fails
     """
-    typecheck(level, "level", int)
+    typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
     cpp_log_error(level, data)
 

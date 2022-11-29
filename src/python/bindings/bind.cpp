@@ -114,6 +114,14 @@ PYBIND11_MODULE(smartredisPy, m) {
      .def("cpp_log_warning", &log_warning)
      .def("cpp_log_error", &log_error);
 
+    // Logging levels
+    py::enum_<SRLoggingLevel>(m, "SRLoggingLevel")
+        .value("LLQuiet", LLQuiet)
+        .value("LLInfo", LLInfo)
+        .value("LLDebug", LLDebug)
+        .value("LLDeveloper", LLDeveloper)
+        .export_values();
+
     // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
     static py::exception<SmartRedis::RuntimeException>  runtime_exception_handler(m,  "RedisRuntimeError",  exception_handler.ptr());
