@@ -148,7 +148,7 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
     std::cout << std::to_string(get_time_offset()) << ": Testing Dataset aggregation via our client" << std::endl;
     GIVEN("A Client object and vector of DataSet objects")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_aggregation_list");
 
         std::vector<DataSet> datasets;
 

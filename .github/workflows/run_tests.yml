@@ -108,7 +108,7 @@ jobs:
             cd ../ &&
             export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
             export SR_LOG_FILE=smartredis_cicd_tests_log.txt &&
-            export SR_LOG_LEVEL=DEBUG &&
+            export SR_LOG_LEVEL=INFO &&
             make test-verbose
 
       - name: Run Python coverage tests
@@ -166,6 +166,6 @@ jobs:
         run: |
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
           export SR_LOG_FILE=smartredis_cicd_tests_log.txt &&
-          export SR_LOG_LEVEL=DEBUG &&
+          export SR_LOG_LEVEL=INFO &&
           make test-verbose
 

@@ -137,7 +137,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             putenv(keyin_env_put);
             putenv(keyout_env_put);
 
-            Client producer_client(use_cluster(), __FILE__);
+            Client producer_client(use_cluster(), "test_client_ensemble");
             producer_client.use_model_ensemble_prefix(true);
 
             // Tensors
@@ -188,7 +188,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             putenv(keyin_env_get);
             putenv(keyout_env_get);
 
-            Client consumer_client(use_cluster(), __FILE__);
+            Client consumer_client(use_cluster(), "test_client_ensemble");
             consumer_client.use_model_ensemble_prefix(true);
 
             // Tensors

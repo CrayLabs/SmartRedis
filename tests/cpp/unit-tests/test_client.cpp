@@ -97,7 +97,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing Dataset Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         THEN("get, rename, and copy DataSet called on "
              "a nonexistent DataSet throws errors")
@@ -193,7 +193,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing Tensor Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
@@ -473,7 +473,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing INFO Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         WHEN("INFO or CLUSTER INFO is called on database with "
              "an invalid address")
@@ -522,7 +522,7 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing AI.INFO Functions on Client Object" << std::endl;
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         WHEN("AI.INFO called on database with an invalid address")
         {
@@ -571,7 +571,7 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
     std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on empty Client Object" << std::endl;
     GIVEN("An empty non-cluster Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         WHEN("FLUSHDB is called on database with "
              "an invalid address")
@@ -611,7 +611,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
         if (use_cluster())
             return;
 
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
         std::string dataset_name = "test_dataset_name";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_name", "meta_string_val");
@@ -647,7 +647,7 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing CONFIG GET and CONFIG SET on Client Object" << std::endl;
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
 
         WHEN("CONFIG GET or CONFIG SET are called on databases with "
              "invalid addresses ")
@@ -692,7 +692,7 @@ SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Test CONFIG GET on an unsupported command" << std::endl;
     GIVEN("A client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG GET is called with an unsupported command")
@@ -713,7 +713,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Test CONFIG SET on an unsupported command" << std::endl;
     GIVEN("A client object")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG SET is called with an unsupported command")
@@ -734,7 +734,7 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
     std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
     GIVEN("A client object and some data")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
         std::string dataset_name = "test_save_dataset";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_save_name", "meta_string_val");
@@ -813,7 +813,7 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
     std::cout << std::to_string(get_time_offset()) << ": Testing Multi-GPU Function error cases" << std::endl;
     GIVEN("A Client object, a script, and a model")
     {
-        Client client(use_cluster(), __FILE__);
+        Client client(use_cluster(), "test_client");
         std::string model_key = "a_model";
         std::string model_file = "./../../mnist_data/mnist_cnn.pt";
         std::string script_key = "a_script";
