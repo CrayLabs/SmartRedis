@@ -121,6 +121,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .value("LLDebug", LLDebug)
         .value("LLDeveloper", LLDeveloper)
         .export_values();
+    // Error management routines
+    m.def("c_get_last_error_location", &SRGetLastErrorLocation);
 
     // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");

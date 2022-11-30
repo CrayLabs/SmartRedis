@@ -12,6 +12,8 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Python error messages from SmartRedis contain more information
+- Added logging functionality to the SmartRedis library
 - A bug related to thread pool initialization was fixed.
 - This version adds new functionality in the form of support for Unix Domain Sockets.
 - Fortran client can now be optionally built with the rest of the library
@@ -20,14 +22,16 @@ Description
 
 Detailed Notes
 
+- Add exception location information from CPP code to Python exceptions (PR283_)
 - Added client activity and manual logging for developer use (PR281_)
-- Fix thread pool initialization error (PR280_)
+- Fix thread pool error (PR280_)
 - Update library linking instructions and update Fortran tester build process (PR277_)
 - Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
 - Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR283: https://github.com/CrayLabs/SmartRedis/pull/283
 .. _PR281: https://github.com/CrayLabs/SmartRedis/pull/281
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
 .. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277

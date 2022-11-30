@@ -48,3 +48,9 @@ extern "C"
 const char* SRGetLastError()  {
   return __lastError.what();
 }
+
+// Return the location for the last error encountered
+extern "C"
+const char* SRGetLastErrorLocation()  {
+  return __lastError.where();
+}
