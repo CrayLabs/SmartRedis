@@ -108,6 +108,9 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_meta_strings", &PyDataset::get_meta_strings)
         .def("get_name", &PyDataset::get_name);
 
+    // Error management routines
+    m.def("c_get_last_error_location", &SRGetLastErrorLocation);
+
     // Python exception classes
     static py::exception<SmartRedis::Exception>         exception_handler(m,          "RedisReplyError");
     static py::exception<SmartRedis::RuntimeException>  runtime_exception_handler(m,  "RedisRuntimeError",  exception_handler.ptr());
