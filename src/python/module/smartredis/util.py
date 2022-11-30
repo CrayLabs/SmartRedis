@@ -27,6 +27,7 @@
 from .error import *
 from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
+from .smartredisPy import c_get_last_error_location
 
 class Dtypes:
     @staticmethod
@@ -96,7 +97,12 @@ def exception_handler(func):
             # The smartredis.error hierarchy exactly
             # parallels the one built via pybind to enable this
             exception_name = cpp_error.__class__.__name__
-            raise globals()[exception_name](str(cpp_error), method_name) from None
+            error_loc = c_get_last_error_location()
+            if error_loc == "unavailable":
+                cpp_error_str = str(cpp_error)
+            else:
+                cpp_error_str = f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+            raise globals()[exception_name](cpp_error_str, method_name) from None
     return smartredis_api_wrapper
 
 def typecheck(arg, name, _type):

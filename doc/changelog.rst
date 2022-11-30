@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Python error messages from SmartRedis contain more information
 - A bug related to thread pool initialization was fixed.
 - This version adds new functionality in the form of support for Unix Domain Sockets.
 - Fortran client can now be optionally built with the rest of the library
@@ -19,6 +20,7 @@ Description
 
 Detailed Notes
 
+- Add exception location information from CPP code to Python exceptions (PR283_)
 - Fix thread pool error (PR280_)
 - Update library linking instructions and update Fortran tester build process (PR277_)
 - Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
