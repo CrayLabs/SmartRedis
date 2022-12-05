@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Improved error reporting capabilities for Fortran clients
 - Python error messages from SmartRedis contain more information
 - A bug related to thread pool initialization was fixed.
 - This version adds new functionality in the form of support for Unix Domain Sockets.
@@ -20,6 +21,7 @@ Description
 
 Detailed Notes
 
+- Fortran clients can now access error text and source location (PR284_)
 - Add exception location information from CPP code to Python exceptions (PR283_)
 - Fix thread pool error (PR280_)
 - Update library linking instructions and update Fortran tester build process (PR277_)
@@ -28,6 +30,8 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/284
+.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/283
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
 .. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
 .. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
