@@ -70,6 +70,7 @@ list(APPEND EXECUTABLES
 	 client_test_put_get_3D
 	 client_test_put_get_unpack_dataset
 	 client_test_logging
+	 client_test_errors
 )
 
 foreach(EXECUTABLE ${EXECUTABLES})

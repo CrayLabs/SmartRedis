@@ -102,6 +102,7 @@ if (BUILD_FORTRAN)
         src/fortran/dataset.F90
         src/fortran/client.F90
         src/fortran/logger.F90
+        src/fortran/errors.F90
     )
     include_directories(src/fortran)
     # Note the following has to be before ANY add_library command)
