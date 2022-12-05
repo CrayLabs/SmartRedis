@@ -71,12 +71,6 @@ function get_last_error_location()
   clocstr = c_get_last_error_location()
   clocstr_len = c_strlen(clocstr)
   get_last_error_location = make_str(clocstr, clocstr_len)
-!
-!  block
-!    character(len=n, kind=c_char), pointer :: ptrview
-!    call c_f_pointer(clocstr, ptrview)
-!    get_last_error_location = ptrview
-!  end block
 end function get_last_error_location
 
 end module smartredis_errors

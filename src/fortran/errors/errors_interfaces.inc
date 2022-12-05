@@ -32,15 +32,6 @@ interface
   end function c_strlen
 end interface
 
-!interface
-!  function make_str(strptr, str_len)
-!    use iso_c_binding, only : c_ptr, c_char, c_size_t
-!    character(kind=c_char, len=:), allocatable :: make_str
-!    type(c_ptr), intent(in), value             :: strptr
-!    integer(kind=c_size_t)                     :: str_len
-!  end function make_str
-!end interface
-
 interface
   function c_get_last_error() bind(c, name="SRGetLastError")
     use iso_c_binding, only : c_ptr, c_char
