@@ -26,9 +26,9 @@
 
 program main
   use smartredis_client, only : client_type
-  use smartredis_errors, only : get_last_error, get_last_error_location
+  use smartredis_errors, only : get_last_error, print_last_error
   use test_utils, only : use_cluster
-  use iso_fortran_env, only : STDERR => error_unit
+  use iso_fortran_env, only : STDERR => error_unit, STDOUT => output_unit
   use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
   use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 
@@ -45,8 +45,14 @@ program main
   result =  client%rename_tensor("vanilla", "chocolate")
   if (result .eq. SRNoError) error stop
 
+  write(*,*) "Printing last error retrieved as string"
   write(*,*) get_last_error()
-  write(*,*) get_last_error_location()
+  write(*,*) ""
+  write(*,*) "Printing last error via print_last_error()"
+  call print_last_error(STDOUT)
+  write(*,*) ""
+  write(*,*) "Printing last error via print_last_error() to STDERR default"
+  call print_last_error()
 
   write(*,*) "error assessment: passed"
 

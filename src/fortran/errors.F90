@@ -34,7 +34,7 @@ implicit none; private
 #include "enum_fortran.inc"
 #include "errors/errors_interfaces.inc"
 
-public :: get_last_error, get_last_error_location
+public :: get_last_error, print_last_error
 
 contains
 
@@ -49,29 +49,39 @@ function make_str(strptr, str_len)
   make_str = ptrview
 end function make_str
 
-!> Get the text of the last error that occurred in the SmartRedis library
+!> Get the last error that occurred in the SmartRedis library
 function get_last_error()
   character(kind=c_char, len=:), allocatable :: get_last_error  !< Text associated with the last error
 
-  type(c_ptr)               :: cstr
-  integer(kind=c_size_t)    :: cstr_len
+  character(kind=c_char, len=:), allocatable :: last_error, last_error_loc
+  type(c_ptr)                                :: cerrstr, clocstr
+  integer(kind=c_size_t)                     :: cerrstr_len, clocstr_len
 
-  cstr = c_get_last_error()
-  cstr_len = c_strlen(cstr)
-  get_last_error = make_str(cstr, cstr_len)
-end function get_last_error
+  ! Get the last error string from C
+  cerrstr = c_get_last_error()
+  cerrstr_len = c_strlen(cerrstr)
+  last_error = make_str(cerrstr, cerrstr_len)
 
-!> Get the location of the last error that occurred in the SmartRedis library
-function get_last_error_location()
-  character(kind=c_char, len=:), allocatable :: get_last_error_location  !< Location information for the last error
-
-  type(c_ptr)               :: clocstr
-  integer(kind=c_size_t)    :: clocstr_len
-
+  ! Get the last error location string from C
   clocstr = c_get_last_error_location()
   clocstr_len = c_strlen(clocstr)
-  get_last_error_location = make_str(clocstr, clocstr_len)
-end function get_last_error_location
+  last_error_loc = make_str(clocstr, clocstr_len)
+
+  get_last_error = last_error//new_line('a')//last_error_loc
+end function get_last_error
+
+!> Print the last error that occurred in the SmartRedis libary
+subroutine print_last_error(unit)
+  integer, optional, intent(in)              :: unit
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) get_last_error()
+end subroutine print_last_error
 
 end module smartredis_errors
 
