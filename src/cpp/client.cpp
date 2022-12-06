@@ -36,6 +36,7 @@ using namespace SmartRedis;
 
 // Constructor
 Client::Client(bool cluster, const std::string& logger_name)
+    : SRObject(logger_name)
 {
     // Set up logging
     Logger& logger = Logger::get_instance();

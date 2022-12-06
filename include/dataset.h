@@ -29,9 +29,10 @@
 #ifndef SMARTREDIS_DATASET_H
 #define SMARTREDIS_DATASET_H
 #ifdef __cplusplus
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
+#include "srobject.h"
 #include "tensor.h"
 #include "tensorpack.h"
 #include "metadata.h"
@@ -40,9 +41,7 @@
 
 ///@file
 
-namespace SmartRedis{
-
-class DataSet;
+namespace SmartRedis {
 
 ///@file
 /*!
@@ -56,7 +55,7 @@ class DataSet;
 *            the DataSet name
 *            (e.g. {dataset_name}.tensor_name).
 */
-class DataSet
+class DataSet : public SRObject
 {
     public:
 

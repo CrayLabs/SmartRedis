@@ -89,6 +89,7 @@ set(CLIENT_SRC
     src/cpp/threadpool.cpp
     src/cpp/utility.cpp
     src/cpp/logger.cpp
+    src/cpp/srobject.cpp
 )
 
 include_directories(SYSTEM

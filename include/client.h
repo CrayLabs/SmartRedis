@@ -37,6 +37,7 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include "srobject.h"
 #include "redisserver.h"
 #include "rediscluster.h"
 #include "redis.h"
@@ -54,8 +55,6 @@
 
 namespace SmartRedis {
 
-class Client;
-
 /*!
 *  \brief The database response to a command
 */
@@ -66,7 +65,7 @@ typedef redisReply ReplyElem;
 *   \brief The Client class is the primary user-facing
 *          class for executing server commands.
 */
-class Client
+class Client : public SRObject
 {
 
     public:

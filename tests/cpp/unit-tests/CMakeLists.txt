@@ -75,6 +75,7 @@ set(SOURCES
 	../../../src/cpp/threadpool.cpp
     ../../../src/cpp/utility.cpp
     ../../../src/cpp/logger.cpp
+    ../../../src/cpp/srobject.cpp
 )
 
 # The unit tests to be executed
