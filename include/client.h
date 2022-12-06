@@ -74,11 +74,11 @@ class Client
         /*!
         *   \brief Client constructor
         *   \param cluster Flag for if a database cluster is being used
-        *   \param client_id Name to use for this client when logging
+        *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
         *          object initialization fails
         */
-        Client(bool cluster, const std::string& client_id = "anonymous");
+        Client(bool cluster, const std::string& logger_name = "default");
 
         /*!
         *   \brief Client copy constructor is not available

@@ -19,7 +19,6 @@ Description
 - This version adds new functionality in the form of support for Unix Domain Sockets.
 - Fortran client can now be optionally built with the rest of the library
 - Initial support for dataset conversions, specifically Xarray.
-- Added support for logging of client activity.
 
 Detailed Notes
 

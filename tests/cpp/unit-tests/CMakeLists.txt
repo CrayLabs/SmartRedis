@@ -80,7 +80,7 @@ set(SOURCES
 # The unit tests to be executed
 set(UNIT_TESTS
 	main.cpp
-    test_aggregation_list.cpp
+	test_aggregation_list.cpp
 	test_client.cpp
 	test_client_ensemble.cpp
 	test_dataset.cpp
@@ -98,7 +98,7 @@ set(UNIT_TESTS
 	test_addressanycommand.cpp
 	test_dbinfocommand.cpp
 	test_clusterinfocommand.cpp
-    test_redisserver.cpp
+	test_redisserver.cpp
 	test_logger.cpp
 	test_ssdb.cpp
 )

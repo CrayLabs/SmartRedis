@@ -232,30 +232,30 @@ function SR_error_parser(self, response_code) result(is_error)
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster, client_id)
+function initialize_client(self, cluster, logger_name)
   integer(kind=enum_kind)                     :: initialize_client
   class(client_type),         intent(inout)   :: self      !< Receives the initialized client
   logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
-  character(len=*), optional, intent(in   )   :: client_id !< Identifier for the current client
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
 
   ! Local variables
-  character(kind=c_char, len=:), allocatable :: c_client_id
-  integer(kind=c_size_t) :: client_id_length
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
 
-  if (present(client_id)) then
-    allocate(character(kind=c_char, len=len_trim(client_id)) :: c_client_id)
-    c_client_id = client_id
-    client_id_length = len_trim(client_id)
+  if (present(logger_name)) then
+    allocate(character(kind=c_char, len=len_trim(logger_name)) :: c_logger_name)
+    c_logger_name = logger_name
+    logger_name_length = len_trim(logger_name)
   else
-    allocate(character(kind=c_char, len=10) :: c_client_id)
-    c_client_id = 'anonymous'
-    client_id_length = 10
+    allocate(character(kind=c_char, len=10) :: c_logger_name)
+    c_logger_name = 'default'
+    logger_name_length = 8
   endif
 
   if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, c_client_id, client_id_length, self%client_ptr)
+  initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
   self%is_initialized = initialize_client .eq. SRNoError
-  if (allocated(c_client_id)) deallocate(c_client_id)
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
 end function initialize_client
 
 !> Check whether the client has been initialized

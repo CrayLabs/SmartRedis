@@ -40,17 +40,17 @@ using namespace SmartRedis;
 extern "C"
 SRError SmartRedisCClient(
   bool cluster,
-  const char* client_id,
-  const size_t client_id_length,
+  const char* logger_name,
+  const size_t logger_name_length,
   void** new_client)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(new_client != NULL && client_id != NULL);
+    SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
-    std::string _client_id(client_id, client_id_length);
-    Client* s = new Client(cluster, _client_id);
+    std::string _logger_name(logger_name, logger_name_length);
+    Client* s = new Client(cluster, _logger_name);
     *new_client = reinterpret_cast<void*>(s);
   }
   catch (const std::bad_alloc& e) {

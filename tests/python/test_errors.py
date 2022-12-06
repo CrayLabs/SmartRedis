@@ -36,7 +36,7 @@ def test_SSDB_not_set(use_cluster, context):
     ssdb = os.environ["SSDB"]
     del os.environ["SSDB"]
     with pytest.raises(RedisConnectionError):
-        c = Client(None, use_cluster, client_id=context)
+        c = Client(None, use_cluster, logger_name=context)
     os.environ["SSDB"] = ssdb
 
 
@@ -45,30 +45,30 @@ def test_bad_SSDB(use_cluster, context):
     del os.environ["SSDB"]
     os.environ["SSDB"] = "not-an-address:6379;"
     with pytest.raises(RedisConnectionError):
-        c = Client(None, use_cluster, client_id=context)
+        c = Client(None, use_cluster, logger_name=context)
     os.environ["SSDB"] = ssdb
 
 
 def test_bad_get_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         c.get_tensor("not-a-key")
 
 
 def test_bad_get_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisKeyError):
         c.get_dataset("not-a-key")
 
 
 def test_bad_script_file(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(FileNotFoundError):
         c.set_script_from_file("key", "not-a-file")
 
 
 def test_get_non_existant_script(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         script = c.get_script("not-a-script")
 
@@ -76,7 +76,7 @@ def test_get_non_existant_script(use_cluster, context):
 def test_bad_function_execution(use_cluster, context):
     """Error raised inside function"""
 
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_function("bad-function", bad_function)
     data = np.array([1, 2, 3, 4])
     c.put_tensor("bad-func-tensor", data)
@@ -87,7 +87,7 @@ def test_bad_function_execution(use_cluster, context):
 def test_missing_script_function(use_cluster, context):
     """User requests to run a function not in the script"""
 
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_function("bad-function", bad_function)
     with pytest.raises(RedisReplyError):
         c.run_script(
@@ -101,7 +101,7 @@ def test_wrong_model_name(mock_data, mock_model, use_cluster, context):
     data = mock_data.create_data(1)
 
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_model("simple_cnn", model, "TORCH", "CPU")
     c.put_tensor("input", data[0])
     with pytest.raises(RedisReplyError):
@@ -115,7 +115,7 @@ def test_wrong_model_name_from_file(mock_data, mock_model, use_cluster, context)
     try:
         data = mock_data.create_data(1)
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
-        c = Client(None, use_cluster, client_id=context)
+        c = Client(None, use_cluster, logger_name=context)
         c.set_model_from_file("simple_cnn_from_file", "./torch_cnn.pt", "TORCH", "CPU")
         c.put_tensor("input", data[0])
         with pytest.raises(RedisReplyError):
@@ -125,7 +125,7 @@ def test_wrong_model_name_from_file(mock_data, mock_model, use_cluster, context)
 
 
 def test_bad_device(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_script("key", "some_script", device="not-a-gpu")
 
@@ -133,7 +133,7 @@ def test_bad_device(use_cluster, context):
 # Test type errors from bad parameter types to Client API calls
 
 def test_bad_type_put_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     array = np.array([1, 2, 3, 4])
     with pytest.raises(TypeError):
         c.put_tensor(42, array)
@@ -143,26 +143,26 @@ def test_bad_type_put_tensor(use_cluster, context):
 
 def test_unsupported_type_put_tensor(use_cluster, context):
     """test an unsupported numpy type"""
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     data = np.array([1, 2, 3, 4]).astype(np.uint64)
     with pytest.raises(TypeError):
         c.put_tensor("key", data)
 
 
 def test_bad_type_get_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_tensor(42)
 
 
 def test_bad_type_delete_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.delete_tensor(42)
 
 
 def test_bad_type_copy_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.copy_tensor(42, "newname")
     with pytest.raises(TypeError):
@@ -170,7 +170,7 @@ def test_bad_type_copy_tensor(use_cluster, context):
 
 
 def test_bad_type_rename_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.rename_tensor(42, "newname")
     with pytest.raises(TypeError):
@@ -178,26 +178,26 @@ def test_bad_type_rename_tensor(use_cluster, context):
 
 
 def test_bad_type_put_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     array = np.array([1, 2, 3, 4])
     with pytest.raises(TypeError):
         c.put_dataset(array)
 
 
 def test_bad_type_get_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_dataset(42)
 
 
 def test_bad_type_delete_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.delete_dataset(42)
 
 
 def test_bad_type_copy_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.copy_dataset(42, "dest")
     with pytest.raises(TypeError):
@@ -205,7 +205,7 @@ def test_bad_type_copy_dataset(use_cluster, context):
 
 
 def test_bad_type_rename_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.rename_dataset(42, "oldkey")
     with pytest.raises(TypeError):
@@ -213,7 +213,7 @@ def test_bad_type_rename_dataset(use_cluster, context):
 
 
 def test_bad_type_set_function(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_function(42, bad_function)
     with pytest.raises(TypeError):
@@ -222,7 +222,7 @@ def test_bad_type_set_function(use_cluster, context):
         c.set_function("key", bad_function, 42)
 
 def test_bad_type_set_function_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_function_multigpu(42, bad_function, 0, 1)
     with pytest.raises(TypeError):
@@ -237,7 +237,7 @@ def test_bad_type_set_function_multigpu(use_cluster, context):
         c.set_function_multigpu("key", bad_function, 0, 0) # invalid num GPUs
 
 def test_bad_type_set_script(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "key_for_script"
     script = "bad script but correct parameter type"
     device = "CPU"
@@ -249,7 +249,7 @@ def test_bad_type_set_script(use_cluster, context):
         c.set_script(key, script, 42)
 
 def test_bad_type_set_script_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "key_for_script"
     script = "bad script but correct parameter type"
     first_gpu = 0
@@ -268,7 +268,7 @@ def test_bad_type_set_script_multigpu(use_cluster, context):
         c.set_script_multigpu(key, script, first_gpu, 0)
 
 def test_bad_type_set_script_from_file(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "key_for_script"
     scriptfile = "bad filename but correct parameter type"
     device = "CPU"
@@ -280,7 +280,7 @@ def test_bad_type_set_script_from_file(use_cluster, context):
         c.set_script_from_file(key, scriptfile, 42)
 
 def test_bad_type_set_script_from_file_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "key_for_script"
     scriptfile = "bad filename but correct parameter type"
     first_gpu = 0
@@ -295,13 +295,13 @@ def test_bad_type_set_script_from_file_multigpu(use_cluster, context):
         c.set_script_from_file_multigpu(key, scriptfile, first_gpu, "not an integer")
 
 def test_bad_type_get_script(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_script(42)
 
 
 def test_bad_type_run_script(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
     fn_name = "phred"
     inputs = ["list", "of", "strings"]
@@ -317,7 +317,7 @@ def test_bad_type_run_script(use_cluster, context):
 
 
 def test_bad_type_run_script_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
     fn_name = "phred"
     inputs = ["list", "of", "strings"]
@@ -346,14 +346,14 @@ def test_bad_type_run_script_multigpu(use_cluster, context):
 
 
 def test_bad_type_get_model(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_model(42)
 
 
 def test_bad_type_set_model(mock_model, use_cluster, context):
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_model(42, model, "TORCH", "CPU")
     with pytest.raises(TypeError):
@@ -372,9 +372,9 @@ def test_bad_type_set_model(mock_model, use_cluster, context):
         c.set_model("simple_cnn", model, "TORCH", "CPU", tag=42)
 
 def test_bad_type_set_model_multigpu(mock_model, use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_model_multigpu(42, model, "TORCH", 0, 1)
     with pytest.raises(TypeError):
@@ -399,7 +399,7 @@ def test_bad_type_set_model_multigpu(mock_model, use_cluster, context):
 
 def test_bad_type_set_model_from_file(use_cluster, context):
     modelfile = "bad filename but right parameter type"
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_model_from_file(42, modelfile, "TORCH", "CPU")
     with pytest.raises(TypeError):
@@ -421,7 +421,7 @@ def test_bad_type_set_model_from_file(use_cluster, context):
 
 def test_bad_type_set_model_from_file_multigpu(use_cluster, context):
     modelfile = "bad filename but right parameter type"
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_model_from_file_multigpu(42, modelfile, "TORCH", 0, 1)
     with pytest.raises(TypeError):
@@ -442,13 +442,13 @@ def test_bad_type_set_model_from_file_multigpu(use_cluster, context):
         c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, tag=42)
 
 def test_bad_type_run_model(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.run_model(42)
 
 
 def test_bad_type_run_model_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.run_model_multigpu(42, 0, 0, 1)
     with pytest.raises(TypeError):
@@ -463,7 +463,7 @@ def test_bad_type_run_model_multigpu(use_cluster, context):
         c.run_model_multigpu("simple_cnn", 0, 0, 0)
 
 def test_bad_type_delete_model_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.delete_model_multigpu(42, 0, 1)
     with pytest.raises(TypeError):
@@ -476,7 +476,7 @@ def test_bad_type_delete_model_multigpu(use_cluster, context):
         c.delete_model_multigpu("simple_cnn", 0, 0)
 
 def test_bad_type_delete_script_multigpu(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     script_name = "my_script"
     with pytest.raises(TypeError):
         c.delete_script_multigpu(42, 0, 1)
@@ -490,31 +490,31 @@ def test_bad_type_delete_script_multigpu(use_cluster, context):
         c.delete_script_multigpu(script_name, 0, 0)
 
 def test_bad_type_tensor_exists(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.tensor_exists(42)
 
 
 def test_bad_type_dataset_exists(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.dataset_exists(42)
 
 
 def test_bad_type_model_exists(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.model_exists(42)
 
 
 def test_bad_type_key_exists(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.key_exists(42)
 
 
 def test_bad_type_poll_key(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "some_key"
     freq = 42
     num_tries = 42
@@ -528,7 +528,7 @@ def test_bad_type_poll_key(use_cluster, context):
 
 
 def test_bad_type_poll_tensor(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "some_key"
     freq = 42
     num_tries = 42
@@ -542,7 +542,7 @@ def test_bad_type_poll_tensor(use_cluster, context):
 
 
 def test_bad_type_poll_dataset(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "some_key"
     freq = 42
     num_tries = 42
@@ -556,7 +556,7 @@ def test_bad_type_poll_dataset(use_cluster, context):
 
 
 def test_bad_type_poll_model(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "some_key"
     freq = 42
     num_tries = 42
@@ -570,43 +570,43 @@ def test_bad_type_poll_model(use_cluster, context):
 
 
 def test_bad_type_set_data_source(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.set_data_source(42)
 
 
 def test_bad_type_use_model_ensemble_prefix(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.use_model_ensemble_prefix("not a boolean")
 
 
 def test_bad_type_use_list_ensemble_prefix(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.use_list_ensemble_prefix("not a boolean")
 
 
 def test_bad_type_use_tensor_ensemble_prefix(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.use_tensor_ensemble_prefix("not a boolean")
 
 
 def test_bad_type_get_db_node_info(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_db_node_info("not a list")
 
 
 def test_bad_type_get_db_cluster_info(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_db_cluster_info("not a list")
 
 
 def test_bad_type_get_ai_info(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     address = ["list", "of", "str"]
     key = "ai.info.key"
     with pytest.raises(TypeError):
@@ -618,13 +618,13 @@ def test_bad_type_get_ai_info(use_cluster, context):
 
 
 def test_bad_type_flush_db(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.flush_db("not a list")
 
 
 def test_bad_type_config_get(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.config_get("timeout", 42)
     with pytest.raises(TypeError):
@@ -632,7 +632,7 @@ def test_bad_type_config_get(use_cluster, context):
 
 
 def test_bad_type_config_set(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     param = "timeout"
     value = "never"
     address = "127.0.0.1:6379"
@@ -645,41 +645,41 @@ def test_bad_type_config_set(use_cluster, context):
 
 
 def test_bad_type_save(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.save("not a list")
 
 def test_bad_type_append_to_list(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.append_to_list(42, 42)
 
 def test_bad_type_delete_list(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.delete_list(42)
 
 def test_bad_type_copy_list(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.copy_list(42, "dest")
     with pytest.raises(TypeError):
         c.copy_list("src", 42)
 
 def test_bad_type_rename_list(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.rename_list(42, "dest")
     with pytest.raises(TypeError):
         c.rename_list("src", 42)
 
 def test_bad_type_get_list_length(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_list_length(42)
 
 def test_bad_type_poll_list_length(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "mylist"
     len = 42
     pollfreq = 42
@@ -694,7 +694,7 @@ def test_bad_type_poll_list_length(use_cluster, context):
         c.poll_list_length(name, len, pollfreq, "not an integer")
 
 def test_bad_type_poll_list_length_gte(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "mylist"
     len = 42
     pollfreq = 42
@@ -709,7 +709,7 @@ def test_bad_type_poll_list_length_gte(use_cluster, context):
         c.poll_list_length_gte(name, len, pollfreq, "not an integer")
 
 def test_bad_type_poll_list_length_lte(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     name = "mylist"
     len = 42
     pollfreq = 42
@@ -724,12 +724,12 @@ def test_bad_type_poll_list_length_lte(use_cluster, context):
         c.poll_list_length_lte(name, len, pollfreq, "not an integer")
 
 def test_bad_type_get_datasets_from_list(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         c.get_datasets_from_list(42)
 
 def test_bad_type_get_dataset_list_range(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     listname = "my_list"
     start_index = 0
     end_index = 42
@@ -741,21 +741,21 @@ def test_bad_type_get_dataset_list_range(use_cluster, context):
         c.get_dataset_list_range(listname, start_index, "not an integer")
 
 def test_bad_type_log_data(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         log_data("Not a logging level", "Data to be logged")
     with pytest.raises(TypeError):
         log_data(LLInfo, 42)
 
 def test_bad_type_log_warning(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         log_warning("Not a logging level", "Data to be logged")
     with pytest.raises(TypeError):
         log_warning(LLInfo, 42)
 
 def test_bad_type_log_error(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
         log_error("Not a logging level", "Data to be logged")
     with pytest.raises(TypeError):

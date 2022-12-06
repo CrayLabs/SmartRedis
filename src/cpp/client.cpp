@@ -35,11 +35,11 @@
 using namespace SmartRedis;
 
 // Constructor
-Client::Client(bool cluster, const std::string& client_id)
+Client::Client(bool cluster, const std::string& logger_name)
 {
     // Set up logging
     Logger& logger = Logger::get_instance();
-    logger.configure_logging(client_id);
+    logger.configure_logging(logger_name);
     logger.log_data(LLDebug, "New client created");
 
     // Set up Redis server connection

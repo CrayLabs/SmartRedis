@@ -33,7 +33,7 @@ from smartredis.error import *
 
 
 def test_logging(use_cluster, context):
-    c = Client(None, use_cluster, client_id=context)
+    c = Client(None, use_cluster, logger_name=context)
     log_data(LLQuiet, "This is data logging (LLQuiet)")
     log_warning(LLQuiet, "This is a warning (LLQuiet)")
     log_error(LLQuiet, "This is an error (LLQuiet)")

@@ -35,7 +35,7 @@ def test_address(use_cluster, context):
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # check if SSDB was set anyway
     assert os.environ["SSDB"] == ssdb

@@ -32,6 +32,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <algorithm>
+#include <cctype>
 
 #include "utility.h"
 #include "logger.h"
@@ -39,26 +41,29 @@
 
 using namespace SmartRedis;
 
-/*!
-*   \brief Rename the current client
-*   \param _client_id new ID to use for the current client
-*/
-void Logger::rename_client(const std::string& client_id)
+// Convert a std::string to lower case
+void str_to_lower(std::string& str)
 {
-    _client_id = client_id;
+    std::transform(
+        str.begin(), str.end(), str.begin(),
+        [](unsigned char c) { return std::tolower(c); }
+    );
+}
+
+// Rename the current client
+void Logger::rename_client(const std::string& new_name)
+{
+    _logger_name = new_name;
 }
 
 
-/*!
-*   \brief Set up logging for the current client
-*   \param _client_id ID to use for the current client
-*/
-void Logger::configure_logging(const std::string& client_id)
+// Set up logging for the current client
+void Logger::configure_logging(const std::string& logger_name)
 {
     // If we're already initialized, they can set up a client ID
     // Useful if they call a Dataset API point before setting up
     // a Client object
-    _client_id = client_id;
+    _logger_name = logger_name;
     if (_initialized) {
         return;
     }
@@ -87,13 +92,14 @@ void Logger::configure_logging(const std::string& client_id)
     bool missingLogLevel = level.length() == 0;
     bool badLogLevel = false;
     if (level.length() > 0) {
-        if (level.compare("QUIET") == 0)
+        str_to_lower(level);
+        if (level.compare("quiet") == 0)
             _log_level = LLQuiet;
-        else if (level.compare("INFO") == 0)
+        else if (level.compare("info") == 0)
             _log_level = LLInfo;
-        else if (level.compare("DEBUG") == 0)
+        else if (level.compare("debug") == 0)
             _log_level = LLDebug;
-        else if (level.compare("DEVELOPER") == 0)
+        else if (level.compare("developer") == 0)
             _log_level = LLDeveloper;
         else {
             // Don't recognize the requested level; use default
@@ -134,18 +140,14 @@ void Logger::configure_logging(const std::string& client_id)
     _initialized = true;
 }
 
-/*!
-*   \brief Conditionally log data if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*/
+// Conditionally log data if the logging level is high enough
 void Logger::log_data(SRLoggingLevel level, const std::string& data)
 {
-    // If we're not initialized, configure logging as an anonymous
+    // If we're not initialized, configure logging as a default
     // client. This can happen if a caller invokes a Dataset API point
     // without initializing a Client object
     if (!_initialized)
-        configure_logging("anonymous");
+        configure_logging("default");
 
     // Silently ignore logging more verbose than requested
     if (level > _log_level)
@@ -157,46 +159,43 @@ void Logger::log_data(SRLoggingLevel level, const std::string& data)
     auto timestamp = std::put_time(&tm, "%H-%M-%S");
 
     // write the log data
-    // (There must be a cleaner way to write this!)
+    bool writingFile = (_logfile.length() > 0);
+    std::ofstream logstream;
+    std::ostream& log_target(writingFile ? logstream : std::cout);
     if (_logfile.length() > 0) {
-        std::ofstream logstream;
         logstream.open(_logfile, std::ios_base::app);
-        logstream << _client_id << "@" << timestamp << ":" << data
-                  << std::endl;
-    } else {
-        std::cout << _client_id << "@" << timestamp << ":" << data
-                  << std::endl;
+        if (!logstream.good()) {
+            // The logfile is no longer writable!
+            // Switch to console and emit an error
+            _logfile = "";
+            log_error(
+                LLInfo, "Logfile no longer writeable. Switching to console logging");
+            // Re-log this message since the current attempt has failed
+            log_data(level, data);
+            // Bail -- we're done here
+            return;
+        }
     }
+    log_target << _logger_name << "@" << timestamp << ":" << data
+               << std::endl;
 }
 
-/*!
-*   \brief Conditionally log data if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*/
+// Conditionally log data if the logging level is high enough
 void Logger::log_data(SRLoggingLevel level, const char* data)
 {
     const std::string _data(data);
     log_data(level, _data);
 }
 
-/*!
-*   \brief Conditionally log data if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*/
+// Conditionally log data if the logging level is high enough
 void Logger::log_data(SRLoggingLevel level, const std::string_view& data)
 {
     const std::string _data(data);
     log_data(level, _data);
 }
 
-/*!
-*   \brief Conditionally log data if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
+// Conditionally log data if the logging level is high enough
+// (exception-free variant)
 extern "C" void log_data_noexcept(
     SRLoggingLevel level, const char* data, size_t data_len)
 {
@@ -211,12 +210,8 @@ extern "C" void log_data_noexcept(
     }
 }
 
-/*!
-*   \brief Conditionally log a warning if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
+// Conditionally log a warning if the logging level is high enough
+// (exception-free variant)
 extern "C" void log_warning_noexcept(
     SRLoggingLevel level, const char* data, size_t data_len)
 {
@@ -231,12 +226,8 @@ extern "C" void log_warning_noexcept(
     }
 }
 
-/*!
-*   \brief Conditionally log an error if the logging level is high enough
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
+// Conditionally log an error if the logging level is high enough
+// (exception-free variant)
 extern "C" void log_error_noexcept(
     SRLoggingLevel level, const char* data, size_t data_len)
 {

@@ -36,7 +36,7 @@ def test_copy_dataset(use_cluster, context):
 
     dataset = create_dataset("test_dataset_copy")
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.copy_dataset("test_dataset_copy", "test_dataset_copied")
@@ -72,7 +72,7 @@ def test_rename_dataset(use_cluster, context):
 
     dataset = create_dataset("dataset_rename")
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.rename_dataset("dataset_rename", "dataset_renamed")
@@ -110,7 +110,7 @@ def test_delete_dataset(use_cluster, context):
 
     dataset = create_dataset("dataset_delete")
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     client.put_dataset(dataset)
 
     client.delete_dataset(
@@ -125,14 +125,14 @@ def test_delete_dataset(use_cluster, context):
 
 def test_rename_nonexisting_dataset(use_cluster, context):
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.rename_dataset("not-a-tensor", "still-not-a-tensor")
 
 
 def test_copy_nonexistant_dataset(use_cluster, context):
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     with pytest.raises(RedisReplyError):
         client.copy_dataset("not-a-tensor", "still-not-a-tensor")
 
@@ -141,7 +141,7 @@ def test_copy_not_dataset(use_cluster, context):
     def test_func(param):
         print(param)
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
     client.set_function("test_func_dataset", test_func)
     with pytest.raises(RedisReplyError):
         client.copy_dataset("test_func_dataset", "test_fork_dataset")

@@ -38,7 +38,7 @@ def test_dbnode_info_command(use_cluster, context):
     db_info_addr = [ssdb]
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     info = client.get_db_node_info(db_info_addr)
 
@@ -51,7 +51,7 @@ def test_dbcluster_info_command(mock_model, use_cluster, context):
     address = [ssdb]
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     if use_cluster:
         info = client.get_db_cluster_info(address)
@@ -67,7 +67,7 @@ def test_dbcluster_info_command(mock_model, use_cluster, context):
     del os.environ["SSDB"]
 
     # Init client
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # Get a mock model
     model = mock_model.create_torch_cnn()
@@ -98,7 +98,7 @@ def test_flushdb_command(use_cluster, context):
     address = [ssdb]
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # add key to client via put_tensor
     tensor = np.array([1, 2])
@@ -115,7 +115,7 @@ def test_config_set_get_command(use_cluster, context):
 
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     value = "6000"
     client.config_set("lua-time-limit", value, ssdb)
@@ -131,7 +131,7 @@ def test_config_set_command_DNE(use_cluster, context):
 
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # The CONFIG parameter "config_param_DNE" is unsupported
     with pytest.raises(RedisReplyError):
@@ -144,7 +144,7 @@ def test_config_get_command_DNE(use_cluster, context):
 
     del os.environ["SSDB"]
 
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # CONFIG GET returns an empty dictionary if the config_param is unsupported
     get_reply = client.config_get("config_param_DNE", ssdb)
@@ -161,7 +161,7 @@ def test_save_command(use_cluster, mock_data, context):
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    client = Client(address=ssdb, cluster=use_cluster, client_id=context)
+    client = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # for each address, check that the timestamp of the last SAVE increases after calling Client::save
     for address in addresses:

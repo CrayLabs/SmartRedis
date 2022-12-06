@@ -43,7 +43,7 @@ def test_put_get_dataset(mock_data, use_cluster, context):
         key = f"tensor_{str(index)}"
         dataset.add_tensor(key, tensor)
 
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
 
     assert not client.dataset_exists(
         "nonexistent-dataset"
@@ -75,7 +75,7 @@ def test_augment_dataset(mock_data, use_cluster, context):
     dataset_name = "augment-dataset"
 
     # Initialize a client
-    client = Client(None, use_cluster, client_id=context)
+    client = Client(None, use_cluster, logger_name=context)
 
     # Create a dataset to put into the database
     dataset = Dataset(dataset_name)

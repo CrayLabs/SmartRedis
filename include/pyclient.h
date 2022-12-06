@@ -60,11 +60,11 @@ class PyClient
         *   \brief PyClient constructor
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
-        *   \param client_id Identifier for the current client
+        *   \param logger_name Identifier for the current client
         */
         PyClient(
             bool cluster,
-            const std::string& client_id = std::string("anonymous"));
+            const std::string& logger_name = std::string("default"));
 
         /*!
         *   \brief PyClient destructor

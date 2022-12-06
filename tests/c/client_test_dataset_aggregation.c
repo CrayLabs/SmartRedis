@@ -130,12 +130,12 @@ int main(int argc, char* argv[])
   char* dataset_name[] = {"agg_dataset_0", "agg_dataset_1", "agg_dataset_2",  "agg_dataset_2", "agg_dataset_3"};
   char* list_name = "my_aggregation";
   void** datasets = NULL;
-  const char* client_id = "test_dataset_aggregation";
-  size_t cid_len = strlen(client_id);
+  const char* logger_name = "test_dataset_aggregation";
+  size_t cid_len = strlen(logger_name);
 
   // Initialize client
   void *client = NULL;
-  if (SRNoError != SmartRedisCClient(use_cluster(), client_id, cid_len, &client) || 
+  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client) || 
       NULL == client) {
     printf("Failed to initialize client!\n");
     printf("Test passed: NO\n");

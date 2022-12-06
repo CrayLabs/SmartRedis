@@ -69,15 +69,15 @@ class Logger {
 
         /*!
         *   \brief Set up logging for the current client
-        *   \param _client_id ID to use for the current client
+        *   \param logger_name ID to use for the current client
         */
-       void configure_logging(const std::string& client_id);
+       void configure_logging(const std::string& logger_name);
 
         /*!
         *   \brief Rename the current client
-        *   \param _client_id new ID to use for the current client
+        *   \param new_name new ID to use for the current client
         */
-        void rename_client(const std::string& client_id);
+        void rename_client(const std::string& new_name);
 
     private:
 
@@ -94,9 +94,15 @@ class Logger {
 
         /*!
         *   \brief Logger assignment operator unavailable
-        *   \param logger The Logger to copy for construction
+        *   \param logger The Logger to assign
         */
         void operator=(const Logger& logger) = delete;
+
+        /*!
+        *   \brief Logger move assignment operator unavailable
+        *   \param logger The Logger to move
+        */
+        void operator=(Logger&& logger) = delete;
 
         /*!
         *   \brief Default Logger destructor
@@ -158,7 +164,7 @@ class Logger {
         /*!
         *   \brief The client ID for this client
         */
-        std::string _client_id;
+        std::string _logger_name;
 
         /*!
         *   \brief The file to which to write log data
@@ -217,9 +223,9 @@ class FunctionLogger {
         *   \param function_name The name of the function to track
         */
         FunctionLogger(const char* function_name)
-            : name(function_name)
+            : _name(function_name)
         {
-            log_data(LLDebug, "API Function " + name + " called");
+            log_data(LLDebug, "API Function " + _name + " called");
         }
 
         /*!
@@ -227,13 +233,13 @@ class FunctionLogger {
         */
         ~FunctionLogger()
         {
-            log_data(LLDebug, "API Function " + name + " exited");
+            log_data(LLDebug, "API Function " + _name + " exited");
         }
     private:
         /*!
         *   \brief The name of the current function
         */
-        std::string name;
+        std::string _name;
 };
 
 /*!

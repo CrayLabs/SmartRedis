@@ -45,11 +45,11 @@ int main(int argc, char* argv[])
 {
   int result = 0;
   void *client = NULL;
-  const char* client_id = "client_test_logging";
-  size_t cid_len = strlen(client_id);
+  const char* logger_name = "client_test_logging";
+  size_t cid_len = strlen(logger_name);
 
   // Initialize client
-  if (SRNoError != SmartRedisCClient(use_cluster(), client_id, cid_len, &client) || NULL == client)
+  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client) || NULL == client)
     return -1;
 
   // Log stuff

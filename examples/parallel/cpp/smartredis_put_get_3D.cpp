@@ -53,12 +53,12 @@ int main(int argc, char* argv[]) {
     // Get our rank
     int rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::string client_id("Client ");
-    client_id += std::to_string(rank);
+    std::string logger_name("Client ");
+    logger_name += std::to_string(rank);
 
     // Initialize a SmartRedis client
     bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, client_id);
+    SmartRedis::Client client(cluster_mode, logger_name);
 
     // Put the tensor in the database
     std::string key = "3d_tensor_" + std::to_string(rank);

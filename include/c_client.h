@@ -43,15 +43,15 @@ extern "C" {
 /*!
 *   \brief C-client constructor
 *   \param cluster Flag to indicate if a database cluster is being used
-*   \param client_id Identifier for the current client
-*   \param client_id_length Length in characters of the client_id string
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
 *   \param new_client Receives the new client
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError SmartRedisCClient(
     bool cluster,
-    const char* client_id,
-    const size_t client_id_length,
+    const char* logger_name,
+    const size_t logger_name_length,
     void **new_client);
 
 /*!

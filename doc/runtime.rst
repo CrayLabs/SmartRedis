@@ -52,16 +52,21 @@ and ``SR_LOG_LEVEL``.
 ``SR_LOG_FILE`` is the specifier for the location of the file that
 receives logging information. Each entry in the file will be prefixed
 with a timestamp and the identifier of the client that invoked the logging
-message.
+message. The path may be relative or absolute, though a relative path risks
+creation of multiple log files if the executables that instantiate SmartRedis
+clients are run from different directories. If this variable is not set,
+logging information will be sent to standard console output (STDOUT in C and
+C++; output_unit in Fortran).
 
 ``SR_LOG_LEVEL`` relates to the verbosity of information that wil be logged.
-It may be one of three levels: ``NONE`` disables logging altogether.
+It may be one of three levels: ``QUIET`` disables logging altogether.
 ``INFO`` provides informational logging, such as exception events that
 transpire within the SmartRedis library and creation or destruction of a
 client object.  ``DEBUG`` provides more verbose logging, including information
 on the activities of the SmartRedis thread pool and API function entry and exit.
 Debug level logging will also log the absence of an expected environment variable,
-though this can happen only if the variables to set up logging are in place.
+though this can happen only if the variables to set up logging are in place. If
+this parameter is not set, a default logging level of ``INFO`` will be adopted.
 
 The runtime impact of log levels NONE or INFO should be minimal on
 client performance; however, seting the log level to DEBUG may cause some
