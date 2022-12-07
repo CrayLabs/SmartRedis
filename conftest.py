@@ -32,7 +32,6 @@ import io
 import os
 import random
 import string
-import inspect
 
 dtypes = [
     np.float64,

@@ -135,9 +135,6 @@ void Logger::configure_logging(const std::string& logger_name)
         throw SRRuntimeException(
             "Unrecognized logging level: " + level);
     }
-
-    // Done
-    _initialized = true;
 }
 
 // Conditionally log data if the logging level is high enough

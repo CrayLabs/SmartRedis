@@ -740,26 +740,15 @@ def test_bad_type_get_dataset_list_range(use_cluster, context):
     with pytest.raises(TypeError):
         c.get_dataset_list_range(listname, start_index, "not an integer")
 
-def test_bad_type_log_data(use_cluster, context):
+@pytest.mark.parametrize("log_fn", [
+    (log_data,), (log_warning,), (log_error,)
+])
+def test_bad_type_log_function(use_cluster, context, log_fn):
     c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
-        log_data("Not a logging level", "Data to be logged")
+        log_fn("Not a logging level", "Data to be logged")
     with pytest.raises(TypeError):
-        log_data(LLInfo, 42)
-
-def test_bad_type_log_warning(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
-    with pytest.raises(TypeError):
-        log_warning("Not a logging level", "Data to be logged")
-    with pytest.raises(TypeError):
-        log_warning(LLInfo, 42)
-
-def test_bad_type_log_error(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
-    with pytest.raises(TypeError):
-        log_error("Not a logging level", "Data to be logged")
-    with pytest.raises(TypeError):
-        log_error(LLInfo, 42)
+        log_fn(LLInfo, 42)
 
 #####
 # Test type errors from bad parameter types to Dataset API calls

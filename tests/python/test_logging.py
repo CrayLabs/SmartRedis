@@ -26,20 +26,14 @@
 
 from smartredis import *
 from smartredis.error import *
+import pytest
 
-
-def test_logging(use_cluster, context):
+@pytest.mark.parametrize("log_level", [
+    LLQuiet, LLInfo, LLDebug, LLDeveloper
+])
+def test_logging(use_cluster, context, log_level):
     c = Client(None, use_cluster, logger_name=context)
-    log_data(LLQuiet, "This is data logging (LLQuiet)")
-    log_warning(LLQuiet, "This is a warning (LLQuiet)")
-    log_error(LLQuiet, "This is an error (LLQuiet)")
-    log_data(LLInfo, "This is data logging (LLInfo)")
-    log_warning(LLInfo, "This is a warning (LLInfo)")
-    log_error(LLInfo, "This is an error (LLInfo)")
-    log_data(LLDebug, "This is data logging (LLDebug)")
-    log_warning(LLDebug, "This is a warning (LLDebug)")
-    log_error(LLDebug, "This is an error (LLDebug)")
-    log_data(LLDeveloper, "This is data logging (LLDeveloper)")
-    log_warning(LLDeveloper, "This is a warning (LLDeveloper)")
-    log_error(LLDeveloper, "This is an error (LLDeveloper)")
+    log_data(log_level, f"This is data logging ({log_level.name})")
+    log_warning(log_level, f"This is a warning ({log_level.name})")
+    log_error(log_level, f"This is an error ({log_level.name})")
 
