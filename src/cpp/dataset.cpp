@@ -35,7 +35,7 @@ using namespace SmartRedis;
 
 // DataSet constructor
 DataSet::DataSet(const std::string& name)
- : _dsname(name), SRObject(name)
+ : SRObject(name), _dsname(name)
 {
     // NOP
 }
