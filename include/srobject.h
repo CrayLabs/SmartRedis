@@ -29,14 +29,10 @@
 #ifndef SMARTREDIS_OBJECT_H
 #define SMARTREDIS_OBJECT_H
 #ifdef __cplusplus
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
-#include "tensor.h"
-#include "tensorpack.h"
-#include "metadata.h"
-#include "sharedmemorylist.h"
-#include "sr_enums.h"
+#include "logger.h"
 
 ///@file
 
@@ -57,6 +53,11 @@ class SRObject
         *          when logging with this as a context
         */
         SRObject(const std::string& logging_name);
+
+        /*!
+        *   \brief SRObject default destructor
+        */
+        virtual ~SRObject() = default;
 
         /*!
         *   \brief Conditionally log data if the logging level is high enough

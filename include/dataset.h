@@ -90,6 +90,11 @@ class DataSet : public SRObject
         DataSet& operator=(DataSet&& dataset) = default;
 
         /*!
+        *   \brief DataSet default destructor
+        */
+        virtual ~DataSet() = default;
+
+        /*!
         *   \brief Add a tensor to the DataSet.
         *   \param name The name used to reference the tensor
         *               within the DataSet

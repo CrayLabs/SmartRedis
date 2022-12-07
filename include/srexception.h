@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_SRException_H
-#define SMARTREDIS_SRException_H
+#ifndef SMARTREDIS_SREXCEPTION_H
+#define SMARTREDIS_SREXCEPTION_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -472,4 +472,4 @@ class TypeException: public Exception
 } // namespace SmartRedis
 
 #endif // __cplusplus
-#endif // SMARTREDIS_SRException_H
+#endif // SMARTREDIS_SREXCEPTION_H

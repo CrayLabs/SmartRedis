@@ -35,6 +35,7 @@
 #endif // __cplusplus
 #include <stdlib.h>
 #include "sr_enums.h"
+#include "srobject.h"
 
 ///@file
 

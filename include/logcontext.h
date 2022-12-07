@@ -51,6 +51,12 @@ class LogContext : public SRObject
         */
         LogContext(const std::string& logging_name)
             : SRObject(logging_name) {}
+
+        /*!
+        *   \brief LogContext default destructor
+        */
+        virtual ~LogContext() = default;
+
 };
 
 } // namespace SmartRedis

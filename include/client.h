@@ -103,7 +103,7 @@ class Client : public SRObject
         /*!
         *   \brief Client destructor
         */
-        ~Client();
+        virtual ~Client();
 
         /*!
         *   \brief Send a DataSet object to the database
