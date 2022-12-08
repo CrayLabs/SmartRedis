@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "logger.h"
+#include "sr_enums.h"
 
 ///@file
 
@@ -65,7 +65,7 @@ class SRObject
         *   \param data Text of data to be logged
         */
         virtual void log_data(
-            SRLoggingLevel level, const std::string& data);
+            SRLoggingLevel level, const std::string& data) const;
 
         /*!
         *   \brief Conditionally log warning data if the logging level is
@@ -74,7 +74,7 @@ class SRObject
         *   \param data Text of data to be logged
         */
         virtual void log_warning(
-            SRLoggingLevel level, const std::string& data)
+            SRLoggingLevel level, const std::string& data) const
         {
             log_data(level, "WARNING: " + data);
         }
@@ -86,7 +86,7 @@ class SRObject
         *   \param data Text of data to be logged
         */
         virtual void log_error(
-            SRLoggingLevel level, const std::string& data)
+            SRLoggingLevel level, const std::string& data) const
         {
             log_data(level, "ERROR: " + data);
         }

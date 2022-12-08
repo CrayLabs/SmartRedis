@@ -40,7 +40,7 @@ using namespace SmartRedis;
 class TestSSDB : public Redis
 {
     public:
-        TestSSDB() : Redis() {}
+        TestSSDB() : Redis(NULL) {}
 
         SRAddress get_ssdb()
         {
@@ -60,8 +60,8 @@ void setenv_ssdb(const char* ssdb)
 SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
-    Logger::get_instance().rename_client("test_ssdb");
-    log_data(LLDebug, "***Beginning SSDB testing***");
+    std::string context("test_ssdb");
+    log_data(context, LLDebug, "***Beginning SSDB testing***");
 
     GIVEN("A TestSSDB object")
     {
@@ -96,5 +96,5 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
             setenv_ssdb(old_ssdb);
         }
     }
-    log_data(LLDebug, "***End SSDB testing***");
+    log_data(context, LLDebug, "***End SSDB testing***");
 }

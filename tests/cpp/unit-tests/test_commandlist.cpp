@@ -43,8 +43,8 @@ using namespace SmartRedis;
 SCENARIO("Testing CommandList object", "[CommandList]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing CommandList objectinfo" << std::endl;
-    Logger::get_instance().rename_client("test_commandlist");
-    log_data(LLDebug, "***Beginning CommandList testing***");
+    std::string context("test_commandlist");
+    log_data(context, LLDebug, "***Beginning CommandList testing***");
     GIVEN("A CommandList object")
     {
         CommandList cmd_lst;
@@ -288,11 +288,15 @@ SCENARIO("Testing CommandList object", "[CommandList]")
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandList testing***");
 }
 
 SCENARIO("Testing CommandList object on heap", "[CommandList]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing CommandList object on heap" << std::endl;
+    std::string context("test_commandlist");
+    log_data(context, LLDebug, "***Beginning CommandList heap testing***");
+
     GIVEN("A CommandList object on the heap with three Commands")
     {
         CommandList* cmd_lst = new CommandList;
@@ -337,5 +341,5 @@ SCENARIO("Testing CommandList object on heap", "[CommandList]")
             }
         }
     }
-    log_data(LLDebug, "***End CommandList testing***");
+    log_data(context, LLDebug, "***End CommandList heap testing***");
 }

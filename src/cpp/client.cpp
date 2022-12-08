@@ -38,16 +38,14 @@ using namespace SmartRedis;
 Client::Client(bool cluster, const std::string& logger_name)
     : SRObject(logger_name)
 {
-    // Set up logging
-    Logger& logger = Logger::get_instance();
-    logger.configure_logging(logger_name);
-    logger.log_data(LLDebug, "New client created");
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
 
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
-    _redis_cluster = (cluster ? new RedisCluster() : NULL);
-    _redis = (cluster ? NULL : new Redis());
+    _redis_cluster = (cluster ? new RedisCluster(this) : NULL);
+    _redis = (cluster ? NULL : new Redis(this));
     if (cluster)
         _redis_server =  _redis_cluster;
     else
@@ -75,6 +73,7 @@ Client::~Client()
     }
     _redis_server = NULL;
 
+    // Log Client destruction
     log_data(LLDebug, "Client destroyed");
 }
 

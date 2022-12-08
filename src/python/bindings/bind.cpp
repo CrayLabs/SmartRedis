@@ -26,9 +26,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "pysrobject.h"
 #include "pyclient.h"
+#include "pydataset.h"
+#include "pylogcontext.h"
 #include "srexception.h"
 #include "logger.h"
+#include "srobject.h"
+#include "logcontext.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -37,8 +42,16 @@ namespace py = pybind11;
 PYBIND11_MODULE(smartredisPy, m) {
     m.doc() = "smartredis client"; // optional module docstring
 
-    // Python client bindings
-    py::class_<PyClient>(m, "PyClient")
+    // Python SRObject class
+    py::class_<PySRObject>(m, "PySRObject")
+        .def(py::init<std::string&>());
+
+    // Python LogContext class
+    py::class_<PyLogContext, PySRObject>(m, "PyLogContext")
+        .def(py::init<std::string&>());
+
+    // Python client class
+    py::class_<PyClient, PySRObject>(m, "PyClient")
         .def(py::init<bool, const std::string&>())
         .def("put_tensor", &PyClient::put_tensor)
         .def("get_tensor", &PyClient::get_tensor)
@@ -99,7 +112,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_dataset_list_range", &PyClient::get_dataset_list_range);
 
     // Python Dataset class
-    py::class_<PyDataset>(m, "PyDataset")
+    py::class_<PyDataset, PySRObject>(m, "PyDataset")
         .def(py::init<std::string&>())
         .def("add_tensor", &PyDataset::add_tensor)
         .def("get_tensor", &PyDataset::get_tensor)
@@ -110,9 +123,12 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_name", &PyDataset::get_name);
 
     // Logging functions
-    m.def("cpp_log_data", &log_data)
-     .def("cpp_log_warning", &log_warning)
-     .def("cpp_log_error", &log_error);
+    m.def("cpp_log_data", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_data))
+     .def("cpp_log_data", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_data))
+     .def("cpp_log_warning", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_warning))
+     .def("cpp_log_warning", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_warning))
+     .def("cpp_log_error", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_error))
+     .def("cpp_log_error", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_error));
 
     // Logging levels
     py::enum_<SRLoggingLevel>(m, "SRLoggingLevel")

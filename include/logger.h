@@ -51,39 +51,18 @@
 #ifdef __cplusplus
 namespace SmartRedis {
 
+class SRObject;
+
 /*!
 *   \brief The Logger class implements a logging facility for SmartRedis
 */
 class Logger {
 
-    public:
-
-        /*!
-        *   \brief Retrieve the unique Logger instance
-        *   \returns The actual logger instance
-        */
-       static Logger& get_instance()
-       {
-           static Logger __instance; // instantiated on first acccess
-           return __instance;
-       }
-
-        /*!
-        *   \brief Set up logging for the current client
-        *   \param logger_name ID to use for the current client
-        */
-       void configure_logging(const std::string& logger_name);
-
-        /*!
-        *   \brief Rename the current client
-        *   \param new_name new ID to use for the current client
-        */
-        void rename_client(const std::string& new_name);
-
     private:
 
         /*!
-        *   \brief Logger constructor
+        *   \brief Logger constructor. Do not use! To obtain the reference
+        *          to the singleton Logger, use the get_instance() method
         */
         Logger() { _initialized = false; }
 
@@ -113,46 +92,59 @@ class Logger {
     public:
 
         /*!
-        *   \brief Conditionally log data if the logging level is high enough
-        *   \param level Minimum logging level for data to be logged
-        *   \param data Text of data to be logged
+        *   \brief Retrieve the unique Logger instance
+        *   \returns The actual logger instance
         */
-        void log_data(SRLoggingLevel level, const char* data);
+       static Logger& get_instance()
+       {
+           static Logger __instance; // instantiated on first acccess
+           return __instance;
+       }
+
+        /*!
+        *   \brief Set up logging for the current client
+        */
+        void configure_logging();
 
         /*!
         *   \brief Conditionally log data if the logging level is high enough
+        *   \param context Logging context (string to prefix the log entry with)
         *   \param level Minimum logging level for data to be logged
         *   \param data Text of data to be logged
         */
-        void log_data(SRLoggingLevel level, const std::string& data);
-
-        /*!
-        *   \brief Conditionally log data if the logging level is high enough
-        *   \param level Minimum logging level for data to be logged
-        *   \param data Text of data to be logged
-        */
-        void log_data(SRLoggingLevel level, const std::string_view& data);
+        void log_data(
+            const std::string& context,
+            SRLoggingLevel level,
+            const std::string& data);
 
         /*!
         *   \brief Conditionally log warning data if the logging level is
         *          high enough
+        *   \param context Logging context (string to prefix the log entry with)
         *   \param level Minimum logging level for data to be logged
         *   \param data Text of data to be logged
         */
-        void log_warning(SRLoggingLevel level, const std::string& data)
+        void log_warning(
+            const std::string& context,
+            SRLoggingLevel level,
+            const std::string& data)
         {
-            log_data(level, "WARNING: " + data);
+            log_data(context, level, "WARNING: " + data);
         }
 
         /*!
         *   \brief Conditionally log error data if the logging level is
         *          high enough
+        *   \param context Logging context (string to prefix the log entry with)
         *   \param level Minimum logging level for data to be logged
         *   \param data Text of data to be logged
         */
-        void log_error(SRLoggingLevel level, const std::string& data)
+        void log_error(
+            const std::string& context,
+            SRLoggingLevel level,
+            const std::string& data)
         {
-            log_data(level, "ERROR: " + data);
+            log_data(context, level, "ERROR: " + data);
         }
 
     private:
@@ -161,11 +153,6 @@ class Logger {
         *   \brief Track whether logging is initialized
         */
         bool _initialized;
-
-        /*!
-        *   \brief The client ID for this client
-        */
-        std::string _logger_name;
 
         /*!
         *   \brief The file to which to write log data
@@ -180,32 +167,86 @@ class Logger {
 
 /*!
 *   \brief Conditionally log data if the logging level is high enough
+*   \param context Logging context (string to prefix the log entry with)
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 */
-inline void log_data(SRLoggingLevel level, const std::string& data)
+inline void log_data(
+    const std::string& context,
+    SRLoggingLevel level,
+    const std::string& data)
 {
-    Logger::get_instance().log_data(level, data);
+    Logger::get_instance().log_data(context, level, data);
+}
+
+/*!
+*   \brief Conditionally log data if the logging level is high enough
+*   \param context Object containing the log context
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_data(
+    const SRObject* context,
+    SRLoggingLevel level,
+    const std::string& data)
+{
+    context->log_data(level, data);
 }
 
 /*!
 *   \brief Conditionally log a warning if the logging level is high enough
+*   \param context Logging context (string to prefix the log entry with)
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 */
-inline void log_warning(SRLoggingLevel level, const std::string& data)
+inline void log_warning(
+    const std::string& context,
+    SRLoggingLevel level,
+    const std::string& data)
 {
-    Logger::get_instance().log_warning(level, data);
+    Logger::get_instance().log_warning(context, level, data);
+}
+
+/*!
+*   \brief Conditionally log a warning if the logging level is high enough
+*   \param context Object containing the log context
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_warning(
+    const SRObject* context,
+    SRLoggingLevel level,
+    const std::string& data)
+{
+    context->log_warning(level, data);
 }
 
 /*!
 *   \brief Conditionally log an error if the logging level is high enough
+*   \param context Logging context (string to prefix the log entry with)
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 */
-inline void log_error(SRLoggingLevel level, const std::string& data)
+inline void log_error(
+    const std::string& context,
+    SRLoggingLevel level,
+    const std::string& data)
 {
-    Logger::get_instance().log_error(level, data);
+    Logger::get_instance().log_error(context, level, data);
+}
+
+/*!
+*   \brief Conditionally log an error if the logging level is high enough
+*   \param context Object containing the log context
+*   \param level Minimum logging level for data to be logged
+*   \param data Text of data to be logged
+*/
+inline void log_error(
+    const SRObject* context,
+    SRLoggingLevel level,
+    const std::string& data)
+{
+    context->log_error(level, data);
 }
 
 
@@ -223,10 +264,11 @@ class FunctionLogger {
         *   \brief Logger constructor
         *   \param function_name The name of the function to track
         */
-        FunctionLogger(const char* function_name)
-            : _name(function_name)
+        FunctionLogger(const SRObject* context, const char* function_name)
+            : _name(function_name), _context(context)
         {
-            log_data(LLDebug, "API Function " + _name + " called");
+            _context->log_data(
+                LLDebug, "API Function " + _name + " called");
         }
 
         /*!
@@ -234,19 +276,26 @@ class FunctionLogger {
         */
         ~FunctionLogger()
         {
-            log_data(LLDebug, "API Function " + _name + " exited");
+            _context->log_data(
+                LLDebug, "API Function " + _name + " exited");
         }
     private:
         /*!
         *   \brief The name of the current function
         */
         std::string _name;
+
+        /*!
+        *   \brief The logging context (enclosing object for the API function)
+        */
+        const SRObject* _context;
 };
 
 /*!
 *   \brief Instantiate a FunctionLogger for the enclosing API function
 */
-#define LOG_API_FUNCTION() FunctionLogger ___function_logger___(__func__)
+#define LOG_API_FUNCTION() \
+    FunctionLogger ___function_logger___(this, __func__)
 
 
 } //namespace SmartRedis
@@ -267,29 +316,41 @@ class FunctionLogger {
 
 /*!
 *   \brief Conditionally log data if the logging level is high enough
+*   \param context Object containing the log context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged
 */
 C_API void log_data_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len);
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len);
 
 /*!
 *   \brief Conditionally log a warning if the logging level is high enough
+*   \param context Object containing the log context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged
 */
 C_API void log_warning_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len);
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len);
 
 /*!
 *   \brief Conditionally log an error if the logging level is high enough
+*   \param context Object containing the log context
 *   \param level Minimum logging level for data to be logged
 *   \param data Text of data to be logged
 *   \param data_len Length in characters of data to be logged
 */
 C_API void log_error_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len);
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len);
 
 #endif //SMARTREDIS_LOGGER_H

@@ -34,44 +34,53 @@ from .util import exception_handler, typecheck
 #LLDeveloper = 4  # Extra verbose logging for internal use
 
 @exception_handler
-def log_data(level, data):
+def log_data(context, level, data):
     """Log data to the SmartRedis logfile
 
+    :param context: Logging context (string to prefix the log entry with)
+    :type context: str
     :param level: minimum logging level for data to be logged with
     :type name: enum
     :param data: message data to log
     :type data: str
     :raises RedisReplyError: if logging fails
     """
+    typecheck(context, "context", str)
     typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
-    cpp_log_data(level, data)
+    cpp_log_data(context, level, data)
 
 @exception_handler
-def log_warning(level, data):
+def log_warning(context, level, data):
     """Log a warning to the SmartRedis logfile
 
+    :param context: Logging context (string to prefix the log entry with)
+    :type context: str
     :param level: minimum logging level for data to be logged with
     :type name: enum
     :param data: message data to log
     :type data: str
     :raises RedisReplyError: if logging fails
     """
+    typecheck(context, "context", str)
     typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
-    cpp_log_warning(level, data)
+    cpp_log_warning(context, level, data)
 
 @exception_handler
-def log_error(level, data):
+def log_error(context, level, data):
     """Log an error to the SmartRedis logfile
 
+    :param context: Logging context (string to prefix the log entry with)
+    :type context: str
     :param level: minimum logging level for data to be logged with
     :type name: enum
     :param data: message data to log
     :type data: str
     :raises RedisReplyError: if logging fails
     """
+    typecheck(context, "context", str)
     typecheck(level, "level", SRLoggingLevel)
     typecheck(data, "data", str)
-    cpp_log_error(level, data)
+    cpp_log_error(context, level, data)
 

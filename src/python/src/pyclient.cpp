@@ -36,6 +36,7 @@ using namespace SmartRedis;
 namespace py = pybind11;
 
 PyClient::PyClient(bool cluster, const std::string& logger_name)
+    : PySRObject(logger_name)
 {
     _client = NULL;
     try {

@@ -132,8 +132,8 @@ void check_metadata_copied_correctly(MetaData metadata, MetaData metadata_cpy)
 SCENARIO("Test MetaData", "[MetaData]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test MetaData" << std::endl;
-    Logger::get_instance().rename_client("test_metadata");
-    log_data(LLDebug, "***Beginning Metadata testing***");
+    std::string context("test_metadata");
+    log_data(context, LLDebug, "***Beginning Metadata testing***");
     GIVEN("A MetaData object")
     {
         MetaData metadata;
@@ -360,5 +360,5 @@ SCENARIO("Test MetaData", "[MetaData]")
             }
         }
     }
-    log_data(LLDebug, "***End DBNode testing***");
+    log_data(context, LLDebug, "***End DBNode testing***");
 }

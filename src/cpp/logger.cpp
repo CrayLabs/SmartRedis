@@ -38,6 +38,8 @@
 #include "utility.h"
 #include "logger.h"
 #include "srexception.h"
+#include "srassert.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
@@ -50,23 +52,10 @@ void str_to_lower(std::string& str)
     );
 }
 
-// Rename the current client
-void Logger::rename_client(const std::string& new_name)
-{
-    _logger_name = new_name;
-}
-
-
 // Set up logging for the current client
-void Logger::configure_logging(const std::string& logger_name)
+void Logger::configure_logging()
 {
-    // If we're already initialized, they can set up a client ID
-    // Useful if they call a Dataset API point before setting up
-    // a Client object
-    _logger_name = logger_name;
-    if (_initialized) {
-        return;
-    }
+    // Mark ourselves as initialized now
     _initialized = true;
 
     // Get the logfile
@@ -112,18 +101,22 @@ void Logger::configure_logging(const std::string& logger_name)
     }
 
     // Now that everything is configured, issue warning and
-    // error messages
+    // error messages. By deferring them, we may be able to
+    // issue them to the customer-requested logfile instead
+    // of to console, depending on what went wrong
     if (missingLogFile) {
         log_warning(
+            "SmartRedis Library",
             LLInfo,
-            "Environment variable SS_LOG_FILE is not set. "
+            "Environment variable SR_LOG_FILE is not set. "
             "Defaulting to stdout"
         );
     }
     if (missingLogLevel) {
         log_warning(
+            "SmartRedis Library",
             LLInfo,
-            "Environment variable SS_LOG_LEVEL is not set. "
+            "Environment variable SR_LOG_LEVEL is not set. "
             "Defaulting to INFO"
         );
     }
@@ -138,13 +131,16 @@ void Logger::configure_logging(const std::string& logger_name)
 }
 
 // Conditionally log data if the logging level is high enough
-void Logger::log_data(SRLoggingLevel level, const std::string& data)
+void Logger::log_data(
+    const std::string& context,
+    SRLoggingLevel level,
+    const std::string& data)
 {
     // If we're not initialized, configure logging as a default
     // client. This can happen if a caller invokes a Dataset API point
     // without initializing a Client object
     if (!_initialized)
-        configure_logging("default");
+        configure_logging();
 
     // Silently ignore logging more verbose than requested
     if (level > _log_level)
@@ -166,40 +162,32 @@ void Logger::log_data(SRLoggingLevel level, const std::string& data)
             // Switch to console and emit an error
             _logfile = "";
             log_error(
-                LLInfo, "Logfile no longer writeable. Switching to console logging");
+                "SmartRedis Library",
+                LLInfo,
+                "Logfile no longer writeable. Switching to console logging");
             // Re-log this message since the current attempt has failed
-            log_data(level, data);
+            log_data(context, level, data);
             // Bail -- we're done here
             return;
         }
     }
-    log_target << _logger_name << "@" << timestamp << ":" << data
+    log_target << context << "@" << timestamp << ":" << data
                << std::endl;
-}
-
-// Conditionally log data if the logging level is high enough
-void Logger::log_data(SRLoggingLevel level, const char* data)
-{
-    const std::string _data(data);
-    log_data(level, _data);
-}
-
-// Conditionally log data if the logging level is high enough
-void Logger::log_data(SRLoggingLevel level, const std::string_view& data)
-{
-    const std::string _data(data);
-    log_data(level, _data);
 }
 
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_data_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len)
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len)
 {
-    auto &logger = Logger::get_instance();
     try {
+        SR_CHECK_PARAMS(context != NULL);
+        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        logger.log_data(level, strData);
+        ctxt->log_data(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -210,12 +198,16 @@ extern "C" void log_data_noexcept(
 // Conditionally log a warning if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_warning_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len)
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len)
 {
-    auto &logger = Logger::get_instance();
     try {
+        SR_CHECK_PARAMS(context != NULL);
+        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        logger.log_warning(level, strData);
+        ctxt->log_warning(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -226,12 +218,16 @@ extern "C" void log_warning_noexcept(
 // Conditionally log an error if the logging level is high enough
 // (exception-free variant)
 extern "C" void log_error_noexcept(
-    SRLoggingLevel level, const char* data, size_t data_len)
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len)
 {
-    auto &logger = Logger::get_instance();
     try {
+        SR_CHECK_PARAMS(context != NULL);
+        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        logger.log_error(level, strData);
+        ctxt->log_error(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()

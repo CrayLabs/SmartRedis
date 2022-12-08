@@ -38,8 +38,8 @@ using namespace SmartRedis;
 SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAnyCommand" << std::endl;
-    Logger::get_instance().rename_client("test_addressanycommand");
-    log_data(LLDebug, "***Beginning AddressAnyCommand testing***");
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand testing***");
     GIVEN("An AddressAnyCommand object")
     {
         AddressAnyCommand cmd;
@@ -103,11 +103,14 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAnyCommand testing***");
 }
 
 SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand member testing***");
     GIVEN("An AddressAnyCommand object and a db node address and port")
     {
         AddressAnyCommand cmd;
@@ -124,5 +127,5 @@ SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
             }
         }
     }
-    log_data(LLDebug, "***End AddressAnyCommand testing***");
+    log_data(context, LLDebug, "***End AddressAnyCommand member testing***");
 }

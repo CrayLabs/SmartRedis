@@ -37,8 +37,8 @@ using namespace SmartRedis;
 SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[AddressAtCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Ensuring the iterators for an AddressAtCommand are correct" << std::endl;
-    Logger::get_instance().rename_client("test_addressatcommand");
-    log_data(LLDebug, "***Beginning AddressAtCommand testing***");
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand testing***");
 
     GIVEN("An AddressAtCommand with a single field")
     {
@@ -63,11 +63,15 @@ SCENARIO("Ensuring the iterators for an AddressAtCommand are correct", "[Address
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAtCommand testing***");
 }
 
 SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAtCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAtCommand on heap" << std::endl;
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand heap testing***");
+
     GIVEN("An AddressAtCommand object on the heap")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -134,13 +138,14 @@ SCENARIO("Testing assignment operator for AddressAtCommand on heap", "[AddressAt
             }
         }
     }
-    log_data(LLDebug, "***End AddressAtCommand testing***");
+    log_data(context, LLDebug, "***End AddressAtCommand heap testing***");
 }
 
 SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
-    log_data(LLDebug, "***Beginning AddressAtCommand variable testing***");
+    std::string context("test_addressatcommand");
+    log_data(context, LLDebug, "***Beginning AddressAtCommand variable testing***");
     GIVEN("An AddressAtCommand object")
     {
         AddressAtCommand* cmd = new AddressAtCommand;
@@ -154,5 +159,5 @@ SCENARIO("Testing AddressAtCommand member variables", "[AddressAtCommand]")
             }
         }
     }
-    log_data(LLDebug, "***End AddressAtCommand variable testing***");
+    log_data(context, LLDebug, "***End AddressAtCommand variable testing***");
 }

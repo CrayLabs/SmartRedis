@@ -116,7 +116,9 @@ class Exception: public std::exception
         _loc(std::string("\"") + file + std::string("\", line ") + std::to_string(line))
     {
         SRSetLastError(*this);
-        log_error(LLInfo, exception_class() + " at " + _loc + ": " + _msg);
+        log_error(
+            "SmartRedis Library", LLInfo,
+            exception_class() + " at " + _loc + ": " + _msg);
     }
 
     /*!
@@ -130,7 +132,9 @@ class Exception: public std::exception
         _loc(std::string("\"") + file + std::string("\", line ") + std::to_string(line))
     {
         SRSetLastError(*this);
-        log_error(LLInfo, exception_class() + " at " + _loc + ": " + _msg);
+        log_error(
+            "SmartRedis Library", LLInfo,
+            exception_class() + " at " + _loc + ": " + _msg);
     }
 
     /*!

@@ -39,8 +39,8 @@ using namespace SmartRedis;
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing TensorBase through TensorPack" << std::endl;
-    Logger::get_instance().rename_client("test_tensorbase");
-    log_data(LLDebug, "***Beginning TensorBase testing***");
+    std::string context("test_tensorbase");
+    log_data(context, LLDebug, "***Beginning TensorBase testing***");
 
     SRTensorType tensor_type = GENERATE(SRTensorTypeDouble, SRTensorTypeFloat,
                                         SRTensorTypeInt64, SRTensorTypeInt32,
@@ -237,5 +237,5 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             }
         }
     }
-    log_data(LLDebug, "***End TensorBase testing***");
+    log_data(context, LLDebug, "***End TensorBase testing***");
 }

@@ -37,7 +37,15 @@ using namespace SmartRedis;
 DataSet::DataSet(const std::string& name)
  : SRObject(name), _dsname(name)
 {
-    // NOP
+    // Log that a new DataSet has been instantiated
+    log_data(LLDebug, "New DataSet created");
+}
+
+// DataSet Destructor
+DataSet::~DataSet()
+{
+    // Log DataSet destruction
+    log_data(LLDebug, "DataSet destroyed");
 }
 
 // Add a tensor to the DataSet.

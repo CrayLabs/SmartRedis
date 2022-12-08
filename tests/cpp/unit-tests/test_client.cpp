@@ -96,8 +96,8 @@ void check_all_data(size_t length, std::vector<void*>& original_datas,
 SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Dataset Functions on Client Object" << std::endl;
-    Logger::get_instance().rename_client("test_client");
-    log_data(LLDebug, "***Beginning Client testing***");
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client testing***");
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -189,11 +189,14 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client testing***");
 }
 
 SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Tensor Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client tensor testing***");
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -469,11 +472,14 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client tensor testing***");
 }
 
 SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing INFO Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client INFO testing***");
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -518,11 +524,14 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client tensor testing***");
 }
 
 SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing AI.INFO Functions on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client AI.INFO testing***");
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -567,11 +576,15 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client AI.INFO testing***");
 }
 
 SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on empty Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client empty FLIUSHDB testing***");
+
     GIVEN("An empty non-cluster Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -602,11 +615,15 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client empty FLUSHDB testing***");
 }
 
 SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing FLUSHDB on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client FLUSHDB testing***");
+
     GIVEN("A non-cluster Client object")
     {
         // From within the testing framework, there is no way of knowing
@@ -643,11 +660,15 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client FLUSHDB testing***");
 }
 
 SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing CONFIG GET and CONFIG SET on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config get/set testing***");
+
     GIVEN("A Client object")
     {
         Client client(use_cluster(), "test_client");
@@ -688,11 +709,15 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get/set testing***");
 }
 
 SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CONFIG GET on an unsupported command" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config get unsupported testing***");
+
     GIVEN("A client object")
     {
         Client client(use_cluster(), "test_client");
@@ -709,11 +734,15 @@ SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
 SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CONFIG SET on an unsupported command" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client config set unsupported testing***");
+
     GIVEN("A client object")
     {
         Client client(use_cluster(), "test_client");
@@ -730,11 +759,15 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
 SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client SAVE unsupported testing***");
+
     GIVEN("A client object and some data")
     {
         Client client(use_cluster(), "test_client");
@@ -770,11 +803,15 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Client SAVE unsupported testing***");
 }
 
 SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test that prefixing covers all hash slots of a cluster" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client prefix coverage testing***");
+
     if(use_cluster()==false)
         return;
 
@@ -807,13 +844,16 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
                                 RuntimeException);
             }
         }
-
     }
+    log_data(context, LLDebug, "***End Client prefix coverage testing***");
 }
 
 SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Multi-GPU Function error cases" << std::endl;
+    std::string context("test_client");
+    log_data(context, LLDebug, "***Beginning Client multigpu error testing***");
+
     GIVEN("A Client object, a script, and a model")
     {
         Client client(use_cluster(), "test_client");
@@ -956,5 +996,5 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
             }
         }
     }
-    log_data(LLDebug, "***End Client testing***");
+    log_data(context, LLDebug, "***End Client multigpu error testing***");
 }

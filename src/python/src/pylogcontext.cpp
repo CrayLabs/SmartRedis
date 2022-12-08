@@ -26,32 +26,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../../third-party/catch/single_include/catch2/catch.hpp"
-#include "dbinfocommand.h"
-#include "logger.h"
 
-unsigned long get_time_offset();
+#include "pylogcontext.h"
+#include "logcontext.h"
+#include "srexception.h"
 
 using namespace SmartRedis;
 
-SCENARIO("Parsing an empty string for db info")
+namespace py = pybind11;
+
+PyLogContext::PyLogContext(const std::string& context)
+    : PySRObject(context)
 {
-    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for db info" << std::endl;
-    std::string context("test_dbinfocommand");
-    log_data(context, LLDebug, "***Beginning DBInfoCommand testing***");
-
-    GIVEN("A DBInfoCommand and an empty string")
-    {
-        DBInfoCommand cmd;
-        std::string info = "";
-
-        WHEN("calling parse_db_node_info on the empty string")
-        {
-            THEN("An empty info_map is returned")
-            {
-                CHECK(cmd.parse_db_node_info(info).size() == 0);
-            }
-        }
+    _logcontext = NULL;
+    try {
+        _logcontext = new LogContext(context);
     }
-    log_data(context, LLDebug, "***End DBInfoCommand testing***");
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "during dataset construction.");
+    }
+}
+
+PyLogContext::PyLogContext(LogContext* logcontext)
+    : PySRObject(logcontext)
+{
+    _logcontext = logcontext;
+}
+
+PyLogContext::~PyLogContext()
+{
+    if (_logcontext != NULL) {
+        delete _logcontext;
+        _logcontext = NULL;
+    }
+}
+
+LogContext* PyLogContext::get() {
+    return _logcontext;
 }

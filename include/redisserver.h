@@ -60,8 +60,7 @@
 
 namespace SmartRedis {
 
-class RedisServer;
-
+class Client;
 
 /*!
 *   \brief Abstract class that defines interface for
@@ -73,8 +72,9 @@ class RedisServer {
 
         /*!
         *   \brief Default constructor
+        *   \param client The owning Client
         */
-        RedisServer();
+        RedisServer(const Client* client);
 
         /*!
         *   \brief Destructor
@@ -561,6 +561,11 @@ class RedisServer {
         *   \brief Default number of threads for thread pool
         */
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
+
+        /*!
+        *   \brief The owning Client
+        */
+        const Client* _client;
 
         /*!
         *   \brief Seeding for the random number engine

@@ -147,8 +147,8 @@ bool is_same_dataset(DataSet& dataset_1, DataSet& dataset_2)
 SCENARIO("Testing Dataset aggregation via our client", "[List]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Dataset aggregation via our client" << std::endl;
-    Logger::get_instance().rename_client("test_aggregation_list");
-    log_data(LLDebug, "***Beginning DataSet Aggregation testing***");
+    std::string context("test_aggregation_list");
+    log_data(context, LLDebug, "***Beginning DataSet Aggregation testing***");
 
     GIVEN("A Client object and vector of DataSet objects")
     {
@@ -504,5 +504,5 @@ SCENARIO("Testing Dataset aggregation via our client", "[List]")
             }
         }
     }
-    log_data(LLDebug, "***End DataSet Aggregation testing***");
+    log_data(context, LLDebug, "***End DataSet Aggregation testing***");
 }

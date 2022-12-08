@@ -37,8 +37,8 @@ using namespace SmartRedis;
 SCENARIO("Testing copy constructor and deep copy operator for CompoundCommand", "[CompoundCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor and deep copy operator for CompoundCommand" << std::endl;
-    Logger::get_instance().rename_client("test_compoundcommand");
-    log_data(LLDebug, "***Beginning CompoundCommand testing***");
+    std::string context("test_compoundcommand");
+    log_data(context, LLDebug, "***Beginning CompoundCommand testing***");
 
     GIVEN("A CompoundCommand object")
     {
@@ -137,5 +137,5 @@ SCENARIO("Testing copy constructor and deep copy operator for CompoundCommand", 
             }
         }
     }
-    log_data(LLDebug, "***End CompoundCommand testing***");
+    log_data(context, LLDebug, "***End CompoundCommand testing***");
 }

@@ -38,8 +38,8 @@ using namespace SmartRedis;
 SCENARIO("Testing Tensor", "[Tensor]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Tensor" << std::endl;
-    Logger::get_instance().rename_client("test_tensor");
-    log_data(LLDebug, "***Beginning Tensor testing***");
+    std::string context("test_tensor");
+    log_data(context, LLDebug, "***Beginning Tensor testing***");
 
     GIVEN("Two Tensors")
     {
@@ -139,5 +139,5 @@ SCENARIO("Testing Tensor", "[Tensor]")
             }
         }
     }
-    log_data(LLDebug, "***End Tensor testing***");
+    log_data(context, LLDebug, "***End Tensor testing***");
 }

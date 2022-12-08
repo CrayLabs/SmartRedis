@@ -29,13 +29,16 @@
 
 #include "pydataset.h"
 #include "srexception.h"
+#include "logger.h"
 
 using namespace SmartRedis;
 
 namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name)
+    : PySRObject(name)
 {
+    log_data("PyDataset::PyDataset(const std::string& name)", LLInfo, "pydataset constructor (" + name + ")");
     _dataset = NULL;
     try {
         _dataset = new DataSet(name);
@@ -56,13 +59,20 @@ PyDataset::PyDataset(const std::string& name)
 }
 
 PyDataset::PyDataset(DataSet* dataset)
+    : PySRObject(dataset)
 {
+    log_data("PyDataset::PyDataset(DataSet* dataset)", LLInfo, "pydataset constructor");
+    if (_dataset != NULL)
+        _dataset->log_data(LLInfo, "pydataset getting overwritten");
     _dataset = dataset;
+    if (_dataset != NULL)
+        _dataset->log_data(LLInfo, "pydataset overwritten");
 }
 
 PyDataset::~PyDataset()
 {
     if (_dataset != NULL) {
+        _dataset->log_data(LLInfo, "pydataset destructor");
         delete _dataset;
         _dataset = NULL;
     }

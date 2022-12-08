@@ -29,11 +29,13 @@
 #include "redis.h"
 #include "srexception.h"
 #include "utility.h"
+#include "client.h"
 
 using namespace SmartRedis;
 
 // Redis constructor.
-Redis::Redis() : RedisServer()
+Redis::Redis(const Client* client)
+    : RedisServer(client)
 {
     SRAddress db_address(_get_ssdb());
     // Remember whether it's a unix domain socket for later
@@ -43,7 +45,8 @@ Redis::Redis() : RedisServer()
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
-Redis::Redis(std::string addr_spec) : RedisServer()
+Redis::Redis(const Client* client, std::string addr_spec)
+    : RedisServer(client)
 {
     SRAddress db_address(addr_spec);
     _add_to_address_map(db_address);

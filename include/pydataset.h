@@ -26,25 +26,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dataset.h"
+#ifndef PYDATASET_H
+#define PYDATASET_H
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <string>
-
+#include "dataset.h"
+#include "pysrobject.h"
 ///@file
 
 namespace py = pybind11;
 
 namespace SmartRedis {
 
-class PyDataset;
-
 /*!
 *   \brief The PyDataset class is a wrapper around the
            C++ dataset abstraction class.
 */
-class PyDataset
+class PyDataset : public PySRObject
 {
     public:
 
@@ -68,7 +69,7 @@ class PyDataset
         /*!
         *   \brief PyDataset destructor
         */
-        ~PyDataset();
+        virtual ~PyDataset();
 
         /*!
         *   \brief Add a tensor to the PyDataset
@@ -148,3 +149,5 @@ class PyDataset
 };
 
 } //namespace SmartRedis
+
+#endif // PYDATASET_H

@@ -33,7 +33,7 @@ import pytest
 ])
 def test_logging(use_cluster, context, log_level):
     c = Client(None, use_cluster, logger_name=context)
-    log_data(log_level, f"This is data logging ({log_level.name})")
-    log_warning(log_level, f"This is a warning ({log_level.name})")
-    log_error(log_level, f"This is an error ({log_level.name})")
+    log_data(context, log_level, f"This is data logging ({log_level.name})")
+    log_warning(context, log_level, f"This is a warning ({log_level.name})")
+    log_error(context, log_level, f"This is an error ({log_level.name})")
 

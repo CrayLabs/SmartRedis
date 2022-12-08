@@ -40,7 +40,6 @@ using namespace SmartRedis;
 // variables to their original state
 void reset_env_vars(const char* old_keyin, const char* old_keyout)
 {
-    log_data(LLDebug, "Resetting SSKEYIN and SSKEYOUT");
     if (old_keyin != nullptr) {
         setenv("SSKEYIN", old_keyin, 1);
     }
@@ -80,8 +79,8 @@ void load_mnist_image_to_array(float**** img)
 SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing Client ensemble using a producer/consumer paradigm" << std::endl;
-    Logger::get_instance().rename_client("test_client_ensemble");
-    log_data(LLDebug, "***Beginning Client Ensemble testing***");
+    std::string context("test_client_ensemble");
+    log_data(context, LLDebug, "***Beginning Client Ensemble testing***");
 
     GIVEN("Variables that will be used by the producer and consumer")
     {
@@ -128,7 +127,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         {
             ////////////////////////////////////////////////////////////
             // do producer stuff
-            log_data(LLDebug, "***Beginning producer operations***");
+            log_data(context, LLDebug, "***Beginning producer operations***");
             setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
             setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
 
@@ -177,11 +176,11 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             producer_client.run_model(model_name, {script_out_key_ds},
                                      {out_key_ds});
             free_4D_array(mnist_array, 1, 1, 28);
-            log_data(LLDebug, "***End producer operations***");
+            log_data(context, LLDebug, "***End producer operations***");
 
             ////////////////////////////////////////////////////////////
             // do consumer stuff
-            log_data(LLDebug, "***Beginning consumer operations***");
+            log_data(context, LLDebug, "***Beginning consumer operations***");
             setenv("SSKEYIN", keyin_env_get, 1);
             setenv("SSKEYOUT", keyout_env_get, 1);
 
@@ -248,7 +247,8 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 
             // reset environment variables to their original state
             reset_env_vars(old_keyin, old_keyout);
+            log_data(context, LLDebug, "***End consumer operations***");
         }
     }
-    log_data(LLDebug, "***End Client Ensemble testing***");
+    log_data(context, LLDebug, "***End Client Ensemble testing***");
 }

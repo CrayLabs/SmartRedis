@@ -53,7 +53,7 @@ void get_config_integer(int& value,
 {
     value = default_value;
     std::string message = "Getting value for " + cfg_key;
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 
     char* cfg_val = std::getenv(cfg_key.c_str());
     message = "Retrieved value \"";
@@ -61,7 +61,7 @@ void get_config_integer(int& value,
     message += "\"";
     if (NULL == cfg_val)
         message += ". Using default value of " + std::to_string(default_value);
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0) {
         // Enforce that all characters are digits because std::stoi
@@ -95,13 +95,14 @@ void get_config_integer(int& value,
     }
     else if (!suppress_warning) {
         log_warning(
+            "SmartRedis Library",
             LLDebug,
             "Configuration variable " + cfg_key + " not set"
         );
     }
 
     message = "Exiting with value \"" + std::to_string(value) + "\"";
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 }
 
 /*!
@@ -120,7 +121,7 @@ void get_config_string(std::string& value,
 {
     value = default_value;
     std::string message = "Getting value for " + cfg_key;
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 
     char* cfg_val = std::getenv(cfg_key.c_str());
     message = "Retrieved value \"";
@@ -128,19 +129,20 @@ void get_config_string(std::string& value,
     message += "\"";
     if (NULL == cfg_val)
         message += ". Using default value of \"" + default_value + "\"";
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
         value = cfg_val;
     else if (!suppress_warning) {
         log_warning(
+            "SmartRedis Library",
             LLDebug,
             "Configuration variable " + cfg_key + " not set"
         );
     }
 
     message = "Exiting with value \"" + value + "\"";
-    log_data(LLDebug, message);
+    log_data("SmartRedis Library", LLDebug, message);
 }
 
 } // namespace SmartRedis {

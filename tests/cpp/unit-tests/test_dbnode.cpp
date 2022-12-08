@@ -38,8 +38,8 @@ using namespace SmartRedis;
 SCENARIO("Testing DBNode object", "[DBNode]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing DBNode object" << std::endl;
-    Logger::get_instance().rename_client("test_dbnode");
-    log_data(LLDebug, "***Beginning DBNode testing***");
+    std::string context("test_dbnode");
+    log_data(context, LLDebug, "***Beginning DBNode testing***");
 
     GIVEN("Two DBNode objects created with the default contructor")
     {
@@ -96,5 +96,5 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1 < node_2);
         }
     }
-    log_data(LLDebug, "***End DBNode testing***");
+    log_data(context, LLDebug, "***End DBNode testing***");
 }

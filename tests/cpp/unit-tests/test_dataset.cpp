@@ -43,8 +43,8 @@ const char *currentExceptionTypeName() {
 SCENARIO("Testing DataSet object", "[DataSet]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing DataSet object" << std::endl;
-    Logger::get_instance().rename_client("test_dataset");
-    log_data(LLDebug, "***Beginning DataSet testing***");
+    std::string context("test_dataset");
+    log_data(context, LLDebug, "***Beginning DataSet testing***");
 
     GIVEN("A DataSet object")
     {
@@ -210,5 +210,5 @@ SCENARIO("Testing DataSet object", "[DataSet]")
             }
         }
     }
-    log_data(LLDebug, "***End DataSet testing***");
+    log_data(context, LLDebug, "***End DataSet testing***");
 }

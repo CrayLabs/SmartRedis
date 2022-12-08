@@ -8,12 +8,27 @@
 #include "threadpool.h"
 #include "srexception.h"
 #include "logger.h"
+#include "client.h"
 
 using namespace SmartRedis;
 using namespace std::chrono_literals;
 
+// Log safely, even if our _client pointer is NULL
+// This is a workaround for the direct instantiation of Redis and RedisCluster
+// objects in our unit tests that do not currently include a Client*. Once those
+// usages are updated, this function can go away and all calls replaced with
+// direct invocations of _client->log_data()
+void safelog(const Client* client, SRLoggingLevel level, const std::string& msg)
+{
+    if (client != NULL)
+        client->log_data(level, msg);
+    else
+        log_data("Threadpool", level, msg);
+}
+
 // Constructor
-ThreadPool::ThreadPool(unsigned int num_threads)
+ThreadPool::ThreadPool(const Client* client, unsigned int num_threads)
+    : _client(client)
 {
     // Flags that we're initializing and not shutting down
     initialization_complete = false;
@@ -26,7 +41,8 @@ ThreadPool::ThreadPool(unsigned int num_threads)
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread
     for (unsigned int i = 0; i < num_threads; i++) {
-        log_data(LLDeveloper, "Kicking off thread " + std::to_string(i));
+        safelog(_client,
+            LLDeveloper, "Kicking off thread " + std::to_string(i));
         threads.push_back(std::thread(&ThreadPool::perform_jobs, this, i));
     }
 
@@ -51,7 +67,7 @@ void ThreadPool::shutdown()
     while (!initialization_complete)
         ; // Spin
 
-    log_data(LLDeveloper, "Shutting down thread pool");
+    safelog(_client, LLDeveloper, "Shutting down thread pool");
 
     // We're closed for business
     shutting_down = true;
@@ -65,12 +81,12 @@ void ThreadPool::shutdown()
             "Waiting for thread to terminate (" +
             std::to_string(i++) + " of " +
             std::to_string(num_threads) + ")";
-        log_data(LLDeveloper, message);
+        safelog(_client, LLDeveloper, message);
         thr.join(); // Blocks until the thread finishes execution
     }
 
     // Done
-    log_data(LLDeveloper, "Shutdown complete");
+    safelog(_client, LLDeveloper, "Shutdown complete");
     shutdown_complete = true;
 }
 
@@ -78,7 +94,7 @@ void ThreadPool::shutdown()
 void ThreadPool::perform_jobs(unsigned int tid)
 {
     int jobid = 0;
-    log_data(
+    safelog(_client,
         LLDebug, "Thread " + std::to_string(tid) + " reporting for duty");
 
     // Loop forever processing jobs until we get killed
@@ -121,11 +137,12 @@ void ThreadPool::perform_jobs(unsigned int tid)
                 ": " + std::to_string(get_job.count()) + " s; " +
                 "time to execute job: " +
                 std::to_string(execute_job.count()) + " s";
-            log_data(LLDeveloper, message);
+            safelog(_client, LLDeveloper, message);
         }
     }
 
-    log_data(LLDeveloper, "Thread " + std::to_string(tid) + " shutting down");
+    safelog(_client,
+        LLDeveloper, "Thread " + std::to_string(tid) + " shutting down");
 }
 
 // Submit a job to threadpool for execution

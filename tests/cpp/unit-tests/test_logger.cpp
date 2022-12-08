@@ -40,8 +40,8 @@ using namespace SmartRedis;
 SCENARIO("Additional Testing for logging", "[LOG]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for logging" << std::endl;
-    Logger::get_instance().rename_client("test_logger");
-    log_data(LLDebug, "***Beginning Logger testing***");
+    std::string context("test_logger");
+    log_data(context, LLDebug, "***Beginning Logger testing***");
 
     GIVEN("A Client object")
     {
@@ -50,14 +50,14 @@ SCENARIO("Additional Testing for logging", "[LOG]")
         THEN("Logging should be able to be done")
         {
             // log_data()
-            log_data(LLInfo, "This is data logged at the Info level");
+            log_data(context, LLInfo, "This is data logged at the Info level");
 
             // log_warning()
-            log_warning(LLInfo, "This is a warning logged at the Info level");
+            log_warning(context, LLInfo, "This is a warning logged at the Info level");
 
             // log_error()
-            log_error(LLInfo, "This is an error logged at the Info level");
+            log_error(context, LLInfo, "This is an error logged at the Info level");
         }
     }
-    log_data(LLDebug, "***End Logger testing***");
+    log_data(context, LLDebug, "***End Logger testing***");
 }

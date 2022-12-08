@@ -38,8 +38,8 @@ using namespace SmartRedis;
 SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Retrieve field to empty SingleKeyCommand" << std::endl;
-    Logger::get_instance().rename_client("test_singlekeycommand");
-    log_data(LLDebug, "***Beginning SingleKeyCommand empty testing***");
+    std::string context("test_singlekeycommand");
+    log_data(context, LLDebug, "***Beginning SingleKeyCommand empty testing***");
 
     GIVEN("An empty SingleKeyCommand object")
     {
@@ -54,13 +54,14 @@ SCENARIO("Retrieve field to empty SingleKeyCommand", "[SingleKeyCommand]")
             }
         }
     }
-    log_data(LLDebug, "***End SingleKeyCommand empty testing***");
+    log_data(context, LLDebug, "***End SingleKeyCommand empty testing***");
 }
 
 SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing copy constructor for SingleKeyCommand on heap" << std::endl;
-    log_data(LLDebug, "***Beginning SingleKeyCommand copy testing***");
+    std::string context("test_singlekeycommand");
+    log_data(context, LLDebug, "***Beginning SingleKeyCommand copy testing***");
 
     GIVEN("A SingleKeyCommand object on the heap")
     {
@@ -126,5 +127,5 @@ SCENARIO("Testing copy constructor for SingleKeyCommand on heap", "[SingleKeyCom
             delete cmd_cpy;
         }
     }
-    log_data(LLDebug, "***End SingleKeyCommand copy testing***");
+    log_data(context, LLDebug, "***End SingleKeyCommand copy testing***");
 }

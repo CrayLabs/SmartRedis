@@ -37,8 +37,8 @@ using namespace SmartRedis;
 SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Adding fields of different types" << std::endl;
-    Logger::get_instance().rename_client("test_multikeycommand");
-    log_data(LLDebug, "***Beginning MultiKeyCommand testing***");
+    std::string context("test_multikeycommand");
+    log_data(context, LLDebug, "***Beginning MultiKeyCommand testing***");
 
     GIVEN("A MultiKeyCommand object")
     {
@@ -78,5 +78,5 @@ SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
             }
         }
     }
-    log_data(LLDebug, "***End MultiKeyCommand testing***");
+    log_data(context, LLDebug, "***End MultiKeyCommand testing***");
 }

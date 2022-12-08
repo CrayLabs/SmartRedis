@@ -26,32 +26,62 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../../third-party/catch/single_include/catch2/catch.hpp"
-#include "dbinfocommand.h"
-#include "logger.h"
+#ifndef PYSROBJECT_H
+#define PYSROBJECT_H
 
-unsigned long get_time_offset();
+#include "srobject.h"
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <string>
 
-using namespace SmartRedis;
+///@file
 
-SCENARIO("Parsing an empty string for db info")
+namespace py = pybind11;
+
+namespace SmartRedis {
+
+/*!
+*   \brief The PySRObject class is a wrapper around the
+           C++ SRObject class.
+*/
+class PySRObject
 {
-    std::cout << std::to_string(get_time_offset()) << ": Parsing an empty string for db info" << std::endl;
-    std::string context("test_dbinfocommand");
-    log_data(context, LLDebug, "***Beginning DBInfoCommand testing***");
+    public:
 
-    GIVEN("A DBInfoCommand and an empty string")
-    {
-        DBInfoCommand cmd;
-        std::string info = "";
+        /*!
+        *   \brief PySRObject constructor
+        *   \param context The context to use for log messages
+        */
+        PySRObject(const std::string& context);
 
-        WHEN("calling parse_db_node_info on the empty string")
-        {
-            THEN("An empty info_map is returned")
-            {
-                CHECK(cmd.parse_db_node_info(info).size() == 0);
-            }
-        }
-    }
-    log_data(context, LLDebug, "***End DBInfoCommand testing***");
-}
+        /*!
+        *   \brief PySRObject constructor from a
+        *          SmartRedis::SRObject object
+        *   \param logcontext A SmartRedis::SRObject pointer to
+        *                  a SmartRedis::SRObject allocated on
+        *                  the heap.  The SmartRedis::SRObject
+        *                  will be deleted upton PySRObject
+        *                  deletion.
+        */
+        PySRObject(SRObject* srobject);
+
+        /*!
+        *   \brief PySRObject destructor
+        */
+        ~PySRObject();
+
+        /*!
+        *   \brief Retrieve a pointer to the underlying
+        *          SmartRedis::SRObject object
+        *   \returns SRObject pointer within PySRObject
+        */
+        SRObject* get();
+
+    private:
+
+        SRObject* _srobject;
+};
+
+} //namespace SmartRedis
+
+#endif // PYSROBJECT_H

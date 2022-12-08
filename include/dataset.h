@@ -90,9 +90,9 @@ class DataSet : public SRObject
         DataSet& operator=(DataSet&& dataset) = default;
 
         /*!
-        *   \brief DataSet default destructor
+        *   \brief DataSet destructor
         */
-        virtual ~DataSet() = default;
+        virtual ~DataSet();
 
         /*!
         *   \brief Add a tensor to the DataSet.

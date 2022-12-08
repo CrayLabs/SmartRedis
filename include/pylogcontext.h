@@ -26,30 +26,63 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdlib>
+#ifndef PYLOGCONTEXT_H
+#define PYLOGCONTEXT_H
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <string>
-#include <ctime>
-#include <iostream>
-#include <fstream>
-#include <iomanip>
-#include <algorithm>
-#include <cctype>
+#include "logcontext.h"
+#include "pysrobject.h"
 
-#include "srobject.h"
-#include "logger.h"
+///@file
 
-using namespace SmartRedis;
+namespace py = pybind11;
 
-// SRObject constructor
-SRObject::SRObject(const std::string& logging_name)
- : _lname(logging_name)
+namespace SmartRedis {
+
+/*!
+*   \brief The PyLogContext class is a wrapper around the
+           C++ LogContext class.
+*/
+class PyLogContext : public PySRObject
 {
-    // NOP
-}
+    public:
 
+        /*!
+        *   \brief PyLogContext constructor
+        *   \param context The context to use for log messages
+        */
+        PyLogContext(const std::string& context);
 
-// Conditionally log data if the logging level is high enough
-void SRObject::log_data(SRLoggingLevel level, const std::string& data) const
-{
-    Logger::get_instance().log_data(_lname, level, data);
-}
+        /*!
+        *   \brief PyLogContext constructor from a
+        *          SmartRedis::LogContext object
+        *   \param logcontext A SmartRedis::LogContext pointer to
+        *                  a SmartRedis::LogContext allocated on
+        *                  the heap.  The SmartRedis::LogContext
+        *                  will be deleted upton PyLogContext
+        *                  deletion.
+        */
+        PyLogContext(LogContext* logcontext);
+
+        /*!
+        *   \brief PyLogContext destructor
+        */
+        virtual ~PyLogContext();
+
+        /*!
+        *   \brief Retrieve a pointer to the underlying
+        *          SmartRedis::LogContext object
+        *   \returns LogContext pointer within PyLogContext
+        */
+        LogContext* get();
+
+    private:
+
+        LogContext* _logcontext;
+};
+
+} //namespace SmartRedis
+
+#endif // PYLOGCONTEXT_H
