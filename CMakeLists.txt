@@ -100,11 +100,12 @@ include_directories(SYSTEM
 
 if (BUILD_FORTRAN)
     set(FORTRAN_SRC
-        src/fortran/fortran_c_interop.F90
-        src/fortran/dataset.F90
         src/fortran/client.F90
-        src/fortran/logger.F90
+        src/fortran/dataset.F90
         src/fortran/errors.F90
+        src/fortran/fortran_c_interop.F90
+        src/fortran/logcontext.F90
+        src/fortran/logger.F90
     )
     include_directories(src/fortran)
     # Note the following has to be before ANY add_library command)
