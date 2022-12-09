@@ -48,11 +48,12 @@ type, public :: logcontext_type
 
   !> Initialize a new dataset with a given name
   procedure :: initialize => initialize_logcontext
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
 
 end type logcontext_type
 
 contains
-
 
 !> Initialize the logcontext
 function initialize_logcontext(self, context) result(code)
@@ -69,5 +70,12 @@ function initialize_logcontext(self, context) result(code)
 
   code = logcontext_constructor(c_context, context_length, self%logcontext_ptr)
 end function initialize_logcontext
+
+!> Access the raw C pointer for the logcontext
+function get_c_pointer(self)
+  type(c_ptr)                        :: get_c_pointer
+  class(logcontext_type), intent(in) :: self
+  get_c_pointer = self%logcontext_ptr
+end function get_c_pointer
 
 end module smartredis_logcontext

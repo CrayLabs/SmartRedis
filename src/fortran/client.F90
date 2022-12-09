@@ -79,6 +79,8 @@ type, public :: client_type
   procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
   !> Check the database for the existence of a specific model
   procedure :: model_exists
   !> Check the database for the existence of a specific tensor
@@ -272,6 +274,13 @@ function destructor(self)
   destructor = c_destructor(self%client_ptr)
   self%client_ptr = C_NULL_PTR
 end function destructor
+
+!> Access the raw C pointer for the client
+function get_c_pointer(self)
+  type(c_ptr)                    :: get_c_pointer
+  class(client_type), intent(in) :: self
+  get_c_pointer = self%client_ptr
+end function get_c_pointer
 
 !> Check if the specified key exists in the database
 function key_exists(self, key, exists)

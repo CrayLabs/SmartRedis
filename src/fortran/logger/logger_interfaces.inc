@@ -25,9 +25,10 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  subroutine c_log_data(level, data, data_length) bind(c, name="log_data_noexcept")
+  subroutine c_log_data(context, level, data, data_length) bind(c, name="log_data_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
+    type(c_ptr),             value :: context
     integer(kind=enum_kind), value :: level
     character(kind=c_char)         :: data(*)
     integer(kind=c_size_t), value  :: data_length
@@ -35,9 +36,10 @@ interface
 end interface
 
 interface
-  subroutine c_log_warning(level, data, data_length) bind(c, name="log_warning_noexcept")
+  subroutine c_log_warning(context, level, data, data_length) bind(c, name="log_warning_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
+    type(c_ptr),             value :: context
     integer(kind=enum_kind), value :: level
     character(kind=c_char)         :: data(*)
     integer(kind=c_size_t), value  :: data_length
@@ -45,9 +47,10 @@ interface
 end interface
 
 interface
-  subroutine c_log_error(level, data, data_length) bind(c, name="log_error_noexcept")
+  subroutine c_log_error(context, level, data, data_length) bind(c, name="log_error_noexcept")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
+    type(c_ptr),             value :: context
     integer(kind=enum_kind), value :: level
     character(kind=c_char)         :: data(*)
     integer(kind=c_size_t), value  :: data_length

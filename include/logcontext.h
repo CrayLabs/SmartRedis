@@ -50,7 +50,10 @@ class LogContext : public SRObject
         *          when logging with this as a context
         */
         LogContext(const std::string& logging_name)
-            : SRObject(logging_name) {}
+            : SRObject(logging_name)
+        {
+            log_data(LLDebug, "New LogContext created");
+        }
 
         /*!
         *   \brief LogContext default destructor
