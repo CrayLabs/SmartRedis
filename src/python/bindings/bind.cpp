@@ -32,8 +32,8 @@
 #include "pylogcontext.h"
 #include "srexception.h"
 #include "logger.h"
-#include "srobject.h"
-#include "logcontext.h"
+//#include "srobject.h"
+//#include "logcontext.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -137,6 +137,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .value("LLDebug", LLDebug)
         .value("LLDeveloper", LLDeveloper)
         .export_values();
+
     // Error management routines
     m.def("c_get_last_error_location", &SRGetLastErrorLocation);
 

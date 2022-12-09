@@ -38,7 +38,6 @@ namespace py = pybind11;
 PyDataset::PyDataset(const std::string& name)
     : PySRObject(name)
 {
-    log_data("PyDataset::PyDataset(const std::string& name)", LLInfo, "pydataset constructor (" + name + ")");
     _dataset = NULL;
     try {
         _dataset = new DataSet(name);
@@ -59,14 +58,9 @@ PyDataset::PyDataset(const std::string& name)
 }
 
 PyDataset::PyDataset(DataSet* dataset)
-    : PySRObject(dataset)
+    : PySRObject(dataset->get_context())
 {
-    log_data("PyDataset::PyDataset(DataSet* dataset)", LLInfo, "pydataset constructor");
-    if (_dataset != NULL)
-        _dataset->log_data(LLInfo, "pydataset getting overwritten");
     _dataset = dataset;
-    if (_dataset != NULL)
-        _dataset->log_data(LLInfo, "pydataset overwritten");
 }
 
 PyDataset::~PyDataset()

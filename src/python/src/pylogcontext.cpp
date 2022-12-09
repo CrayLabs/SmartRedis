@@ -58,7 +58,7 @@ PyLogContext::PyLogContext(const std::string& context)
 }
 
 PyLogContext::PyLogContext(LogContext* logcontext)
-    : PySRObject(logcontext)
+    : PySRObject(logcontext->get_context())
 {
     _logcontext = logcontext;
 }

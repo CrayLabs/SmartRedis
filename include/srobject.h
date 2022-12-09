@@ -91,6 +91,15 @@ class SRObject
             log_data(level, "ERROR: " + data);
         }
 
+        /*!
+        *   \brief Retrieve the context for this object
+        *   \returns The context for this object
+        */
+        virtual std::string get_context() const
+        {
+            return _lname;
+        }
+
     private:
 
         /*!
