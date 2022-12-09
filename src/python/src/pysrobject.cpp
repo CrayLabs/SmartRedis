@@ -65,7 +65,6 @@ PySRObject::PySRObject(SRObject* srobject)
 PySRObject::~PySRObject()
 {
     if (_srobject != NULL) {
-        _srobject->log_data(LLInfo, "pysrobject destructor");
         delete _srobject;
         _srobject = NULL;
     }

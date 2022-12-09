@@ -66,7 +66,6 @@ PyDataset::PyDataset(DataSet* dataset)
 PyDataset::~PyDataset()
 {
     if (_dataset != NULL) {
-        _dataset->log_data(LLInfo, "pydataset destructor");
         delete _dataset;
         _dataset = NULL;
     }
