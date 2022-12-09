@@ -28,6 +28,7 @@
 
 #include "c_client.h"
 #include "c_dataset.h"
+#include "c_logcontext.h"
 #include "c_client_test_utils.h"
 #include <stdio.h>
 #include <string.h>
@@ -38,35 +39,120 @@
 
 bool cluster = true;
 
-#define TEST_LOG(logtype, loglevel, logmessage) \
-log_##logtype(loglevel, logmessage, strlen(logmessage))
+#define TEST_LOG(logtype, context, loglevel, logmessage) \
+log_##logtype(context, loglevel, logmessage, strlen(logmessage))
 
 int main(int argc, char* argv[])
 {
   int result = 0;
-  void *client = NULL;
-  const char* logger_name = "client_test_logging";
-  size_t cid_len = strlen(logger_name);
+  void* client = NULL;
+  void* dataset = NULL;
+  void* logcontext = NULL;
+  const char* ctx_client = "client_test_logging (client)";
+  const char* ctx_dataset = "client_test_logging (dataset)";
+  const char* ctx_logcontext = "client_test_logging (logcontext)";
+  size_t ctx_client_len = strlen(ctx_client);
+  size_t ctx_dataset_len = strlen(ctx_dataset);
+  size_t ctx_logcontext_len = strlen(ctx_logcontext);
 
-  // Initialize client
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client) || NULL == client)
+  // Initialize client, dataset, logcontext
+  if (SRNoError != SmartRedisCClient(
+    use_cluster(), ctx_client, ctx_client_len,
+    &client) || NULL == client) {
     return -1;
+  }
+  if (SRNoError != CDataSet(
+    ctx_dataset, ctx_dataset_len, &dataset) || NULL == dataset) {
+    return -1;
+  }
+  if (SRNoError != SmartRedisCLogContext(
+    ctx_logcontext, ctx_logcontext_len, &logcontext) || NULL == logcontext) {
+    return -1;
+  }
 
-  // Log stuff
-  TEST_LOG(data, LLQuiet, "This is data logged at the Quiet level");
-  TEST_LOG(data, LLInfo, "This is data logged at the Info level");
-  TEST_LOG(data, LLDebug, "This is data logged at the Debug level");
-  TEST_LOG(data, LLDeveloper, "This is data logged at the Developer level");
+  // Log stuff against a client
+  TEST_LOG(data, client, LLQuiet,
+    "This is data logged against the client at the Quiet level");
+  TEST_LOG(data, client, LLInfo,
+    "This is data logged against the client at the Info level");
+  TEST_LOG(data, client, LLDebug,
+    "This is data logged against the client at the Debug level");
+  TEST_LOG(data, client, LLDeveloper,
+    "This is data logged against the client at the Developer level");
 
-  TEST_LOG(warning, LLQuiet, "This is a warning logged at the Quiet level");
-  TEST_LOG(warning, LLInfo, "This is a warning logged at the Info level");
-  TEST_LOG(warning, LLDebug, "This is a warning logged at the Debug level");
-  TEST_LOG(warning, LLDeveloper, "This is a warning logged at the Developer level");
+  TEST_LOG(warning, client, LLQuiet,
+    "This is a warning logged against the client at the Quiet level");
+  TEST_LOG(warning, client, LLInfo,
+    "This is a warning logged against the client at the Info level");
+  TEST_LOG(warning, client, LLDebug,
+    "This is a warning logged against the client at the Debug level");
+  TEST_LOG(warning, client, LLDeveloper,
+    "This is a warning logged against the client at the Developer level");
 
-  TEST_LOG(error, LLQuiet, "This is an error logged at the Quiet level");
-  TEST_LOG(error, LLInfo, "This is an error logged at the Info level");
-  TEST_LOG(error, LLDebug, "This is an error logged at the Debug level");
-  TEST_LOG(error, LLDeveloper, "This is an error logged at the Developer level");
+  TEST_LOG(error, client, LLQuiet,
+    "This is an error logged against the client at the Quiet level");
+  TEST_LOG(error, client, LLInfo,
+    "This is an error logged against the client at the Info level");
+  TEST_LOG(error, client, LLDebug,
+    "This is an error logged against the client at the Debug level");
+  TEST_LOG(error, client, LLDeveloper,
+    "This is an error logged against the client at the Developer level");
+
+  // Log stuff against a dataset
+  TEST_LOG(data, dataset, LLQuiet,
+    "This is data logged against the dataset at the Quiet level");
+  TEST_LOG(data, dataset, LLInfo,
+    "This is data logged against the dataset at the Info level");
+  TEST_LOG(data, dataset, LLDebug,
+    "This is data logged against the dataset at the Debug level");
+  TEST_LOG(data, dataset, LLDeveloper,
+    "This is data logged against the dataset at the Developer level");
+
+  TEST_LOG(warning, dataset, LLQuiet,
+    "This is a warning logged against the dataset at the Quiet level");
+  TEST_LOG(warning, dataset, LLInfo,
+    "This is a warning logged against the dataset at the Info level");
+  TEST_LOG(warning, dataset, LLDebug,
+    "This is a warning logged against the dataset at the Debug level");
+  TEST_LOG(warning, dataset, LLDeveloper,
+    "This is a warning logged against the dataset at the Developer level");
+
+  TEST_LOG(error, dataset, LLQuiet,
+    "This is an error logged against the dataset at the Quiet level");
+  TEST_LOG(error, dataset, LLInfo,
+    "This is an error logged against the dataset at the Info level");
+  TEST_LOG(error, dataset, LLDebug,
+    "This is an error logged against the dataset at the Debug level");
+  TEST_LOG(error, dataset, LLDeveloper,
+    "This is an error logged against the dataset at the Developer level");
+
+  // Log stuff against a logcontext
+  TEST_LOG(data, logcontext, LLQuiet,
+    "This is data logged against the logcontext at the Quiet level");
+  TEST_LOG(data, logcontext, LLInfo,
+    "This is data logged against the logcontext at the Info level");
+  TEST_LOG(data, logcontext, LLDebug,
+    "This is data logged against the logcontext at the Debug level");
+  TEST_LOG(data, logcontext, LLDeveloper,
+    "This is data logged against the logcontext at the Developer level");
+
+  TEST_LOG(warning, logcontext, LLQuiet,
+    "This is a warning logged against the logcontext at the Quiet level");
+  TEST_LOG(warning, logcontext, LLInfo,
+    "This is a warning logged against the logcontext at the Info level");
+  TEST_LOG(warning, logcontext, LLDebug,
+    "This is a warning logged against the logcontext at the Debug level");
+  TEST_LOG(warning, logcontext, LLDeveloper,
+    "This is a warning logged against the logcontext at the Developer level");
+
+  TEST_LOG(error, logcontext, LLQuiet,
+    "This is an error logged against the logcontext at the Quiet level");
+  TEST_LOG(error, logcontext, LLInfo,
+    "This is an error logged against the logcontext at the Info level");
+  TEST_LOG(error, logcontext, LLDebug,
+    "This is an error logged against the logcontext at the Debug level");
+  TEST_LOG(error, logcontext, LLDeveloper,
+    "This is an error logged against the logcontexts at the Developer level");
 
   // Done
   printf("Test passed: %s\n", result == 0 ? "YES" : "NO");

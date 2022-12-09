@@ -48,7 +48,7 @@ SRError CDataSet(const char* name, const size_t name_length, void** new_dataset)
   }
   catch (const std::bad_alloc& e) {
     *new_dataset = NULL;
-    SRSetLastError(SRBadAllocException("client allocation"));
+    SRSetLastError(SRBadAllocException("dataset allocation"));
     result = SRBadAllocError;
   }
   catch (const Exception& e) {

@@ -59,6 +59,7 @@ set(CLIENT_SRC
     src/c/c_client.cpp
     src/c/c_dataset.cpp
     src/c/c_error.cpp
+    src/c/c_logcontext.cpp
     src/cpp/address.cpp
     src/cpp/client.cpp
     src/cpp/dataset.cpp
