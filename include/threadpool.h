@@ -8,7 +8,10 @@
 #include <functional>
 
 #ifndef SMARTREDIS_THREADPOOL_H
+#define SMARTREDIS_THREADPOOL_H
 namespace SmartRedis {
+
+class Client;
 
 /*!
 *   \brief  A thread pool for concurrent execution of parallel jobs
@@ -18,10 +21,11 @@ class ThreadPool
   public:
     /*!
     *   \brief ThreadPool constructor
+    *   \param client The owning client
     *   \param num_threads The number of threads to create in the pool,
     *          or 0 to use one thread per hardware context
     */
-    ThreadPool(unsigned int num_threads=0);
+    ThreadPool(const Client* client, unsigned int num_threads=0);
 
     /*!
     *   \brief ThreadPool destructor
@@ -80,6 +84,11 @@ class ThreadPool
     *   \brief Flag for if the thread pool shut down has completed.
     */
     volatile bool shutdown_complete;
+
+    /*!
+    *   \brief Owning client object
+    */
+    const Client* _client;
 };
 
 } // namespace SmartRedis

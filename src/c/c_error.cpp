@@ -39,24 +39,6 @@ static Exception __lastError = Exception("no error");
 extern "C"
 void SRSetLastError(const Exception& last_error)
 {
-  // Check environment for debug level if we haven't done so yet
-  static bool __debug_level_verbose = false;
-  static bool __debug_level_checked = false;
-  if (!__debug_level_checked)
-  {
-    __debug_level_checked = true;
-    char *dbg_setting = getenv("SMARTREDIS_DEBUG_LEVEL");
-    if (dbg_setting != NULL) {
-      std::string dbgLevel(dbg_setting);
-      __debug_level_verbose = dbgLevel.compare("VERBOSE") == 0;
-    }
-  }
-
-  // Print out the error message if verbose
-  if (__debug_level_verbose && SRNoError != last_error.to_error_code()) {
-    printf("%s\n", last_error.what());
-  }
-
   // Store the last error
   __lastError = last_error;
 }

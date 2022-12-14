@@ -28,6 +28,7 @@
 
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "multikeycommand.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -36,6 +37,9 @@ using namespace SmartRedis;
 SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Adding fields of different types" << std::endl;
+    std::string context("test_multikeycommand");
+    log_data(context, LLDebug, "***Beginning MultiKeyCommand testing***");
+
     GIVEN("A MultiKeyCommand object")
     {
         MultiKeyCommand cmd;
@@ -74,4 +78,5 @@ SCENARIO("Adding fields of different types", "[MultiKeyCommand]")
             }
         }
     }
+    log_data(context, LLDebug, "***End MultiKeyCommand testing***");
 }

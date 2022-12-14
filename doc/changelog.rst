@@ -14,6 +14,7 @@ Description
 
 - Improved error reporting capabilities for Fortran clients
 - Python error messages from SmartRedis contain more information
+- Added logging functionality to the SmartRedis library
 - A bug related to thread pool initialization was fixed.
 - This version adds new functionality in the form of support for Unix Domain Sockets.
 - Fortran client can now be optionally built with the rest of the library
@@ -23,6 +24,7 @@ Detailed Notes
 
 - Fortran clients can now access error text and source location (PR284_)
 - Add exception location information from CPP code to Python exceptions (PR283_)
+- Added client activity and manual logging for developer use (PR281_)
 - Fix thread pool error (PR280_)
 - Update library linking instructions and update Fortran tester build process (PR277_)
 - Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
@@ -32,6 +34,7 @@ Detailed Notes
 
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/284
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/283
+.. _PR281: https://github.com/CrayLabs/SmartRedis/pull/281
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
 .. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
 .. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262

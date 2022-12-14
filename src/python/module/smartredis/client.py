@@ -39,7 +39,7 @@ from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
 class Client(PyClient):
-    def __init__(self, address=None, cluster=False):
+    def __init__(self, address=None, cluster=False, logger_name="default"):
         """Initialize a RedisAI client
 
         For clusters, the address can be a single tcp/ip address and port
@@ -52,6 +52,8 @@ class Client(PyClient):
         :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool, optional
+        :param logger_name: Identifier for the current client
+        :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
         if address:
@@ -59,7 +61,7 @@ class Client(PyClient):
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
-            super().__init__(cluster)
+            super().__init__(cluster, logger_name)
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:

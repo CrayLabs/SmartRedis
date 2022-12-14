@@ -59,6 +59,7 @@ set(CLIENT_SRC
     src/c/c_client.cpp
     src/c/c_dataset.cpp
     src/c/c_error.cpp
+    src/c/c_logcontext.cpp
     src/cpp/address.cpp
     src/cpp/client.cpp
     src/cpp/dataset.cpp
@@ -87,6 +88,9 @@ set(CLIENT_SRC
     src/cpp/stringfield.cpp
     src/cpp/pipelinereply.cpp
     src/cpp/threadpool.cpp
+    src/cpp/utility.cpp
+    src/cpp/logger.cpp
+    src/cpp/srobject.cpp
 )
 
 include_directories(SYSTEM
@@ -96,10 +100,12 @@ include_directories(SYSTEM
 
 if (BUILD_FORTRAN)
     set(FORTRAN_SRC
-        src/fortran/fortran_c_interop.F90
-        src/fortran/dataset.F90
         src/fortran/client.F90
+        src/fortran/dataset.F90
         src/fortran/errors.F90
+        src/fortran/fortran_c_interop.F90
+        src/fortran/logcontext.F90
+        src/fortran/logger.F90
     )
     include_directories(src/fortran)
     # Note the following has to be before ANY add_library command)
@@ -137,6 +143,8 @@ if(BUILD_PYTHON)
     add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
+                        src/python/src/pysrobject.cpp
+                        src/python/src/pylogcontext.cpp
 	                    src/python/src/pyclient.cpp
                         src/python/src/pydataset.cpp
                         ${CLIENT_SRC}

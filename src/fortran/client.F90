@@ -79,6 +79,8 @@ type, public :: client_type
   procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
   !> Check the database for the existence of a specific model
   procedure :: model_exists
   !> Check the database for the existence of a specific tensor
@@ -232,14 +234,27 @@ function SR_error_parser(self, response_code) result(is_error)
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster)
-  integer(kind=enum_kind)           :: initialize_client
-  class(client_type), intent(inout) :: self    !< Receives the initialized client
-  logical, optional,  intent(in   ) :: cluster !< If true, client uses a database cluster (Default: .false.)
+function initialize_client(self, cluster, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client
+  class(client_type),         intent(inout)   :: self      !< Receives the initialized client
+  logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
+
+  if (present(logger_name)) then
+    c_logger_name = logger_name
+  else
+    c_logger_name = 'default'
+  endif
+  logger_name_length = len_trim(c_logger_name)
 
   if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, self%client_ptr)
+  initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
   self%is_initialized = initialize_client .eq. SRNoError
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
 end function initialize_client
 
 !> Check whether the client has been initialized
@@ -256,6 +271,13 @@ function destructor(self)
   destructor = c_destructor(self%client_ptr)
   self%client_ptr = C_NULL_PTR
 end function destructor
+
+!> Access the raw C pointer for the client
+function get_c_pointer(self)
+  type(c_ptr)                    :: get_c_pointer
+  class(client_type), intent(in) :: self
+  get_c_pointer = self%client_ptr
+end function get_c_pointer
 
 !> Check if the specified key exists in the database
 function key_exists(self, key, exists)

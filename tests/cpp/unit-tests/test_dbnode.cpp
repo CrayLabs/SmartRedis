@@ -29,6 +29,7 @@
 #include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "dbnode.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -37,6 +38,9 @@ using namespace SmartRedis;
 SCENARIO("Testing DBNode object", "[DBNode]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing DBNode object" << std::endl;
+    std::string context("test_dbnode");
+    log_data(context, LLDebug, "***Beginning DBNode testing***");
+
     GIVEN("Two DBNode objects created with the default contructor")
     {
         DBNode node_1;
@@ -92,4 +96,5 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1 < node_2);
         }
     }
+    log_data(context, LLDebug, "***End DBNode testing***");
 }

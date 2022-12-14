@@ -42,7 +42,7 @@ class Dataset:
         """
         typecheck(name, "name", str)
         self._data = PyDataset(name)
-          
+
 
     @staticmethod
     def from_pybind(dataset):

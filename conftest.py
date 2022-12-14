@@ -65,6 +65,10 @@ def mock_data():
 def mock_model():
     return MockTestModel
 
+@pytest.fixture
+def context(request):
+    return request.node.name
+
 class MockTestData:
 
     @staticmethod

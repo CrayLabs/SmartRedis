@@ -30,6 +30,7 @@
 #include "redis.h"
 #include "client.h"
 #include "address.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -39,7 +40,7 @@ using namespace SmartRedis;
 class TestSSDB : public Redis
 {
     public:
-        TestSSDB() : Redis() {}
+        TestSSDB() : Redis(NULL) {}
 
         SRAddress get_ssdb()
         {
@@ -59,13 +60,16 @@ void setenv_ssdb(const char* ssdb)
 SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
+    std::string context("test_ssdb");
+    log_data(context, LLDebug, "***Beginning SSDB testing***");
+
     GIVEN("A TestSSDB object")
     {
         const char* old_ssdb = std::getenv("SSDB");
 
-    INFO("SSDB must be set to a valid host and "\
-         "port before running this test.");
-    REQUIRE(old_ssdb != NULL);
+        INFO("SSDB must be set to a valid host and "\
+            "port before running this test.");
+        REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb;
         Client* c = NULL;
@@ -87,9 +91,10 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
 
             // SSDB points to a unix domain socket and we're using clustered Redis
             setenv_ssdb ("unix://127.0.0.1:6349");
-            CHECK_THROWS_AS(c = new Client(true), SmartRedis::RuntimeException);
+            CHECK_THROWS_AS(c = new Client(true, "test_ssdb"), SmartRedis::RuntimeException);
 
             setenv_ssdb(old_ssdb);
         }
     }
+    log_data(context, LLDebug, "***End SSDB testing***");
 }

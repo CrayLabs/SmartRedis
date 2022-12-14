@@ -52,6 +52,8 @@ type, public :: dataset_type
 
   !> Initialize a new dataset with a given name
   procedure :: initialize => initialize_dataset
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
   !> Add metadata to the dataset with a given field and string
   procedure :: add_meta_string
   ! procedure :: get_meta_strings ! Not supported currently
@@ -109,6 +111,13 @@ function initialize_dataset(self, name) result(code)
 
   code = dataset_constructor(c_name, name_length, self%dataset_ptr)
 end function initialize_dataset
+
+!> Access the raw C pointer for the dataset
+function get_c_pointer(self)
+  type(c_ptr)                     :: get_c_pointer
+  class(dataset_type), intent(in) :: self
+  get_c_pointer = self%dataset_ptr
+end function get_c_pointer
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
 function add_tensor_i8(self, name, data, dims) result(code)

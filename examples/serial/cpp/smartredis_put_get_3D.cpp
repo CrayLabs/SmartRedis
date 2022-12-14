@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize a SmartRedis client
     bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode);
+    SmartRedis::Client client(cluster_mode, __FILE__);
 
     // Put the tensor in the database
     std::string key = "3d_tensor";

@@ -30,11 +30,14 @@
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
 #include "srexception.h"
+#include "utility.h"
+#include "client.h"
 
 using namespace SmartRedis;
 
 // RedisCluster constructor
-RedisCluster::RedisCluster() : RedisServer()
+RedisCluster::RedisCluster(const Client* client)
+    : RedisServer(client)
 {
     SRAddress db_address(_get_ssdb());
     if (!db_address._is_tcp) {
@@ -52,7 +55,8 @@ RedisCluster::RedisCluster() : RedisServer()
 
 // RedisCluster constructor. Uses address provided to constructor instead of
 // environment variables
-RedisCluster::RedisCluster(std::string address_spec) : RedisServer()
+RedisCluster::RedisCluster(const Client* client, std::string address_spec)
+    : RedisServer(client)
 {
     SRAddress db_address(address_spec);
     _connect(db_address);
@@ -615,8 +619,8 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
 {
     // Check for a non-default timeout setting
     int run_timeout;
-    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           _DEFAULT_MODEL_TIMEOUT);
+    get_config_integer(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                       _DEFAULT_MODEL_TIMEOUT);
 
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select

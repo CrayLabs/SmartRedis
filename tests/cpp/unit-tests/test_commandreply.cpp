@@ -29,6 +29,7 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "commandreply.h"
 #include "srexception.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -104,6 +105,9 @@ void fill_reply_array(redisReply*& reply, int num_of_children)
 SCENARIO("Testing CommandReply object", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing CommandReply object" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply object testing***");
+
     GIVEN("A CommandReply object with type REDIS_REPLY_INTEGER")
     {
         redisReply* reply = new redisReply;
@@ -159,12 +163,16 @@ SCENARIO("Testing CommandReply object", "[CommandReply]")
             CHECK_THROWS_AS(cmd_reply.redis_reply_type(), RuntimeException);
         }
     }
+    log_data(context, LLDebug, "***End CommandReply object testing***");
 }
 
 SCENARIO("Test CommandReply copy assignment operator and copy "
          "constructor on simple REDIS_REPLY_TYPES", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CommandReply copy assignment operator and copy" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply copy testing***");
+
     GIVEN("A CommandReply")
     {
         redisReply* reply = new redisReply;
@@ -205,11 +213,15 @@ SCENARIO("Test CommandReply copy assignment operator and copy "
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply copy testing***");
 }
 
 SCENARIO("Test CommandReply::has_error", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CommandReply::has_error" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply has_error testing***");
+
     GIVEN("A parent and child redisReply")
     {
         char const* str = "ERR";
@@ -230,13 +242,16 @@ SCENARIO("Test CommandReply::has_error", "[CommandReply]")
             }
         }
     }
-
+    log_data(context, LLDebug, "***End CommandReply has_error testing***");
 }
 
 SCENARIO("CommandReply copy assignment operator preserves the state of the "
          "rvalue and the lvalue when one of the objects are deleted", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": CommandReply copy assignment operator preserves the state of the" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply delete testing***");
+
     GIVEN("Two dynamically allocated CommandReply. One with a complex "
           "redisReply, and the other with a simple redisReply")
     {
@@ -320,11 +335,15 @@ SCENARIO("CommandReply copy assignment operator preserves the state of the "
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply delete testing***");
 }
 
 SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Simple tests on CommandReply constructors that use redisReply*" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply redisReply testing***");
+
     GIVEN("A redisReply")
     {
         char const* str = "100.0";
@@ -366,11 +385,15 @@ SCENARIO("Simple tests on CommandReply constructors that use redisReply*", "[Com
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply redisReply testing***");
 }
 
 SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CommandReply copy constructor with an inconsistent redisReply" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply inconsistent redisReply testing***");
+
     GIVEN("An inconsistent redisReply where its 'elements' doesn't "\
           "correspond to its 'element'")
     {
@@ -392,11 +415,14 @@ SCENARIO("Test CommandReply copy constructor with an inconsistent redisReply", "
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply inconsistent redisReply testing***");
 }
 
 SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CommandReply's redisReply deep copy on a shallow copy" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply deep copy testing***");
     GIVEN("A CommandReply with redisReply type REDIS_REPLY_ARRAY")
     {
         char const* strs[] = {"zero", "one"};
@@ -431,11 +457,15 @@ SCENARIO("Test CommandReply's redisReply deep copy on a shallow copy", "[Command
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply deep copy testing***");
 }
 
 SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test CommandReply string retrieval for non REDIS_REPLY_STRING" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply string retrieval testing***");
+
     char const* strs[] = {"OK", "42.5", "99999999999999999999", "Verbatim string"};
     int lens[] = {3, 5, 21, 16};
     int types[] = {REDIS_REPLY_STATUS, REDIS_REPLY_DOUBLE, REDIS_REPLY_BIGNUM, REDIS_REPLY_VERB};
@@ -469,12 +499,16 @@ SCENARIO("Test CommandReply string retrieval for non REDIS_REPLY_STRING", "[Comm
         }
         delete cmd_reply;
     }
+    log_data(context, LLDebug, "***End CommandReply string retrieval testing***");
 }
 
 
 SCENARIO("Test REDIS_REPLY_ERROR retrieval from a CommandReply", "[CommandReply]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Test REDIS_REPLY_ERROR retrieval from a CommandReply" << std::endl;
+    std::string context("test_commandreply");
+    log_data(context, LLDebug, "***Beginning CommandReply REDIS_REPLY_ERROR retrieval testing***");
+
     /*
             CommanReply (ARRAY)     LEVEL 0
             /    |    \
@@ -517,4 +551,5 @@ SCENARIO("Test REDIS_REPLY_ERROR retrieval from a CommandReply", "[CommandReply]
             }
         }
     }
+    log_data(context, LLDebug, "***End CommandReply REDIS_REPLY_ERROR retrieval testing***");
 }

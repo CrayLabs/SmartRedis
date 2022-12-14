@@ -39,7 +39,7 @@ using namespace SmartRedis;
 class RedisClusterTestObject : public RedisCluster
 {
     public:
-        RedisClusterTestObject() : RedisCluster() {};
+        RedisClusterTestObject() : RedisCluster(NULL) {};
 
         std::string get_crc16_prefix(uint64_t hash_slot) {
             return _get_crc16_prefix(hash_slot);

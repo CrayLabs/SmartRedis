@@ -112,7 +112,7 @@ void check_dataset(SmartRedis::DataSet& dataset_1,
 int main(int argc, char* argv[]) {
 
     // Create client for dataset and aggregation list actions
-    SmartRedis::Client client(use_cluster());
+    SmartRedis::Client client(use_cluster(), "client_test_dataset_aggregation");
 
     // Set a fill function for dataset creation
     void (*fill_function)(double***, int, int, int) =

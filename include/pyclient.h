@@ -26,11 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef PY_CLIENT_H
 #define PY_CLIENT_H
-#ifdef __cplusplus
 
-#include "client.h"
-#include "pydataset.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl_bind.h>
@@ -38,6 +36,9 @@
 #include <pybind11/numpy.h>
 #include <string>
 #include <unordered_map>
+#include "client.h"
+#include "pydataset.h"
+#include "pysrobject.h"
 
 ///@file
 
@@ -45,14 +46,12 @@ namespace SmartRedis {
 
 namespace py = pybind11;
 
-class PyClient;
-
 /*!
 *   \brief The PyClient class is a wrapper around the
            C++ client that is needed for the Python
            client.
 */
-class PyClient
+class PyClient : public PySRObject
 {
     public:
 
@@ -60,13 +59,16 @@ class PyClient
         *   \brief PyClient constructor
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
+        *   \param logger_name Identifier for the current client
         */
-        PyClient(bool cluster);
+        PyClient(
+            bool cluster,
+            const std::string& logger_name = std::string("default"));
 
         /*!
         *   \brief PyClient destructor
         */
-        ~PyClient();
+        virtual ~PyClient();
 
         /*!
         *   \brief Put a tensor into the database

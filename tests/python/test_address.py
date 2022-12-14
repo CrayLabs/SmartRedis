@@ -29,13 +29,13 @@ import os
 from smartredis import Client
 
 
-def test_address(use_cluster):
+def test_address(use_cluster, context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster)
+    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
 
     # check if SSDB was set anyway
     assert os.environ["SSDB"] == ssdb

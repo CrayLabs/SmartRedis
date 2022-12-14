@@ -29,12 +29,14 @@
 
 #include "pydataset.h"
 #include "srexception.h"
+#include "logger.h"
 
 using namespace SmartRedis;
 
 namespace py = pybind11;
 
 PyDataset::PyDataset(const std::string& name)
+    : PySRObject(name)
 {
     _dataset = NULL;
     try {
@@ -56,6 +58,7 @@ PyDataset::PyDataset(const std::string& name)
 }
 
 PyDataset::PyDataset(DataSet* dataset)
+    : PySRObject(dataset->get_context())
 {
     _dataset = dataset;
 }

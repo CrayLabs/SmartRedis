@@ -60,8 +60,7 @@
 
 namespace SmartRedis {
 
-class RedisServer;
-
+class Client;
 
 /*!
 *   \brief Abstract class that defines interface for
@@ -73,8 +72,9 @@ class RedisServer {
 
         /*!
         *   \brief Default constructor
+        *   \param client The owning Client
         */
-        RedisServer();
+        RedisServer(const Client* client);
 
         /*!
         *   \brief Destructor
@@ -563,6 +563,11 @@ class RedisServer {
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
+        *   \brief The owning Client
+        */
+        const Client* _client;
+
+        /*!
         *   \brief Seeding for the random number engine
         */
         std::random_device _rd;
@@ -646,24 +651,6 @@ class RedisServer {
         *          in SSDB environment variable format
         */
         void _check_ssdb_string(const std::string& env_str);
-
-        /*!
-        *   \brief Initialize a variable of type integer from an environment
-        *          variable.  If the environment variable is not set,
-        *          the default value is assigned.
-        *   \param value Reference to a integer value which will be assigned
-        *                a default value or environment variable value
-        *   \param env_var std::string of the environment variable name
-        *   \param default_value The default value to assign if the environment
-        *                        variable is not set.
-        *   \throw SmartRedis::RuntimeException if environment variable
-        *          retrieval fails, conversion to integer fails, or
-        *          if the value of the environment value contains
-        *          characters other than [0,9] or a negative sign ('-').
-        */
-        void _init_integer_from_env(int& value,
-                                    const std::string& env_var,
-                                    const int& default_value);
 
         /*!
         *   \brief This function checks that _connection_timeout,

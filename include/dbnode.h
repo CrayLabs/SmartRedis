@@ -44,7 +44,7 @@ class DBNode;
 *   \brief The DBNode class stores connection and hash slot
 *          information for the database node.
 */
-class DBNode{
+class DBNode {
 
     public:
 

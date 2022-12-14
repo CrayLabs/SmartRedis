@@ -29,6 +29,7 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "addressanycommand.h"
 #include "redisserver.h"
+#include "logger.h"
 
 unsigned long get_time_offset();
 
@@ -37,6 +38,8 @@ using namespace SmartRedis;
 SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing assignment operator for AddressAnyCommand" << std::endl;
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand testing***");
     GIVEN("An AddressAnyCommand object")
     {
         AddressAnyCommand cmd;
@@ -100,11 +103,14 @@ SCENARIO("Testing assignment operator for AddressAnyCommand", "[AddressAnyComman
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAnyCommand testing***");
 }
 
 SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing AddressAnyCommand member variables" << std::endl;
+    std::string context("test_addressanycommand");
+    log_data(context, LLDebug, "***Beginning AddressAnyCommand member testing***");
     GIVEN("An AddressAnyCommand object and a db node address and port")
     {
         AddressAnyCommand cmd;
@@ -121,4 +127,5 @@ SCENARIO("Testing AddressAnyCommand member variables", "[AddressAnyCommand]")
             }
         }
     }
+    log_data(context, LLDebug, "***End AddressAnyCommand member testing***");
 }

@@ -26,11 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_SRException_H
-#define SMARTREDIS_SRException_H
+#ifndef SMARTREDIS_SREXCEPTION_H
+#define SMARTREDIS_SREXCEPTION_H
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "sr_enums.h"
+#include "logger.h"
 
 ///@file
 
@@ -114,6 +116,9 @@ class Exception: public std::exception
         _loc(std::string("\"") + file + std::string("\", line ") + std::to_string(line))
     {
         SRSetLastError(*this);
+        log_error(
+            "SmartRedis Library", LLInfo,
+            exception_class() + " at " + _loc + ": " + _msg);
     }
 
     /*!
@@ -127,6 +132,9 @@ class Exception: public std::exception
         _loc(std::string("\"") + file + std::string("\", line ") + std::to_string(line))
     {
         SRSetLastError(*this);
+        log_error(
+            "SmartRedis Library", LLInfo,
+            exception_class() + " at " + _loc + ": " + _msg);
     }
 
     /*!
@@ -181,6 +189,14 @@ class Exception: public std::exception
     }
 
     /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("Exception");
+    }
+
+    /*!
     *   \brief Retrieve the message for an exception
     *   \returns String of message data
     */
@@ -216,6 +232,7 @@ class Exception: public std::exception
 class BadAllocException: public Exception
 {
     public:
+
     using Exception::Exception;
 
     /*!
@@ -224,6 +241,14 @@ class BadAllocException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRBadAllocError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("BadAllocException");
     }
 };
 
@@ -248,6 +273,14 @@ class DatabaseException: public Exception
     SRError to_error_code() const noexcept override {
         return SRDatabaseError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("DatabaseException");
+    }
 };
 
 /*!
@@ -270,6 +303,14 @@ class RuntimeException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRRuntimeError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("RuntimeException");
     }
 };
 
@@ -294,6 +335,14 @@ class ParameterException: public Exception
     SRError to_error_code() const noexcept override {
         return SRParameterError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("ParameterException");
+    }
 };
 
 /*!
@@ -316,6 +365,14 @@ class TimeoutException: public Exception
     */
     SRError to_error_code() const noexcept override {
         return SRTimeoutError;
+    }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("TimeoutException");
     }
 };
 
@@ -340,6 +397,14 @@ class InternalException: public Exception
     SRError to_error_code() const noexcept override {
         return SRInternalError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("InternalException");
+    }
 };
 
 /*!
@@ -363,6 +428,14 @@ class KeyException: public Exception
     SRError to_error_code() const noexcept override {
         return SRKeyError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("KeyException");
+    }
 };
 
 /*!
@@ -385,6 +458,14 @@ class TypeException: public Exception
     SRError to_error_code() const noexcept override {
         return SRTypeError;
     }
+
+    /*!
+    *   \brief Get a string representation of the exception class
+    *   \returns Stringified version of the class name
+    */
+    virtual std::string exception_class() {
+        return std::string("TypeException");
+    }
 };
 
 /*!
@@ -395,4 +476,4 @@ class TypeException: public Exception
 } // namespace SmartRedis
 
 #endif // __cplusplus
-#endif // SMARTREDIS_SRException_H
+#endif // SMARTREDIS_SREXCEPTION_H

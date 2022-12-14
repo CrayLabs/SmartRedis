@@ -72,4 +72,15 @@ typedef enum {
     SRTensorTypeUint16  = 8  // 16-bit unsigned integer tensor type
 } SRTensorType;
 
+/*!
+*   \brief  Enumeration for logging levels
+*/
+typedef enum {
+    LLInvalid   = 0, // Invalid or uninitialized logging level
+    LLQuiet     = 1, // No logging at all
+    LLInfo      = 2, // Informational logging only
+    LLDebug     = 3, // Verbose logging for debugging purposes
+    LLDeveloper = 4  // Extra verbose logging for internal use
+} SRLoggingLevel;
+
 #endif // SMARTREDIS_ENUMS_H

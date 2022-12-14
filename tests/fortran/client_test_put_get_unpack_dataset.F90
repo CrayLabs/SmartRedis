@@ -61,7 +61,8 @@ program main
 
   integer :: err_code
 
-  result = client%initialize(use_cluster())
+  result = client%initialize(use_cluster(), &
+    "client_test_put_get_unpack_dataset")
   if (result .ne. SRNoError) error stop
 
   call random_number(true_array_real_32)
