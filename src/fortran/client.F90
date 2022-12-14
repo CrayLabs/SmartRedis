@@ -245,14 +245,11 @@ function initialize_client(self, cluster, logger_name)
   integer(kind=c_size_t) :: logger_name_length
 
   if (present(logger_name)) then
-    logger_name_length = len_trim(logger_name)
-    allocate(character(kind=c_char, len=logger_name_length) :: c_logger_name)
     c_logger_name = logger_name
   else
-    logger_name_length = len_trim(c_logger_name)
-    allocate(character(kind=c_char, len=logger_name_length) :: c_logger_name)
     c_logger_name = 'default'
   endif
+  logger_name_length = len_trim(c_logger_name)
 
   if (present(cluster)) self%cluster = cluster
   initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
