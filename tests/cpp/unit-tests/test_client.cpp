@@ -33,6 +33,7 @@
 #include "srexception.h"
 #include <sstream>
 #include "logger.h"
+#include "logcontext.h"
 
 unsigned long get_time_offset();
 
@@ -817,7 +818,8 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 
     GIVEN("A test RedisCluster test object")
     {
-        RedisClusterTestObject redis_cluster;
+        LogContext context("test_client");
+        RedisClusterTestObject redis_cluster(&context);
 
         WHEN("A prefix is requested for a hash slot between 0 and 16384")
         {

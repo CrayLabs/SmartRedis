@@ -43,7 +43,7 @@ namespace SmartRedis {
 
 ///@file
 
-class Client;
+class SRObject;
 
 /*!
 *   \brief  The RedisCluster class executes RedisServer
@@ -55,18 +55,18 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief RedisCluster constructor.
-        *   \param client The owning Client
+        *   \param context The owning context
         */
-        RedisCluster(const Client* client);
+        RedisCluster(const SRObject* context);
 
         /*!
         *   \brief RedisCluster constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param client The owning Client
+        *   \param context The owning context
         *   \param address_spec The TCP or UDS address of the server
         */
-        RedisCluster(const Client* client, std::string address_spec);
+        RedisCluster(const SRObject* context, std::string address_spec);
 
         /*!
         *   \brief RedisCluster copy constructor is not allowed

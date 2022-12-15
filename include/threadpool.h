@@ -11,7 +11,7 @@
 #define SMARTREDIS_THREADPOOL_H
 namespace SmartRedis {
 
-class Client;
+class SRObject;
 
 /*!
 *   \brief  A thread pool for concurrent execution of parallel jobs
@@ -21,11 +21,11 @@ class ThreadPool
   public:
     /*!
     *   \brief ThreadPool constructor
-    *   \param client The owning client
+    *   \param context The owning context
     *   \param num_threads The number of threads to create in the pool,
     *          or 0 to use one thread per hardware context
     */
-    ThreadPool(const Client* client, unsigned int num_threads=0);
+    ThreadPool(const SRObject* context, unsigned int num_threads=0);
 
     /*!
     *   \brief ThreadPool destructor
@@ -88,7 +88,7 @@ class ThreadPool
     /*!
     *   \brief Owning client object
     */
-    const Client* _client;
+    const SRObject* _context;
 };
 
 } // namespace SmartRedis
