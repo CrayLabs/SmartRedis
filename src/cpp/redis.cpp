@@ -596,21 +596,27 @@ inline CommandReply Redis::_run(const Command& cmd)
         }
         catch (sw::redis::IoError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis IO error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis IO error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::ClosedError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis Closed error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis Closed error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::Error &e) {
             // For other errors from Redis, report them immediately
@@ -672,10 +678,14 @@ inline void Redis::_connect(SRAddress& db_address)
                 delete _redis;
                 _redis = NULL;
             }
+            std::string message("Unable to connect to backend database: ");
+            message += e.what();
             if (i == _connection_attempts) {
-                throw SRDatabaseException(
-                    std::string("Unable to connect to backend database: ") +
-                                e.what());
+                throw SRDatabaseException(message);
+            }
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
             }
         }
         catch (std::exception& e) {
