@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #include "stdint.h"
 #include "srexception.h"
-#include "logger.h"
+#include "c_logger.h"
 
 bool cluster = true;
 
