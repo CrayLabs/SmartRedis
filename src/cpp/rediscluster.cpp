@@ -31,13 +31,13 @@
 #include "keyedcommand.h"
 #include "srexception.h"
 #include "utility.h"
-#include "client.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
 // RedisCluster constructor
-RedisCluster::RedisCluster(const Client* client)
-    : RedisServer(client)
+RedisCluster::RedisCluster(const SRObject* context)
+    : RedisServer(context)
 {
     SRAddress db_address(_get_ssdb());
     if (!db_address._is_tcp) {
@@ -55,8 +55,8 @@ RedisCluster::RedisCluster(const Client* client)
 
 // RedisCluster constructor. Uses address provided to constructor instead of
 // environment variables
-RedisCluster::RedisCluster(const Client* client, std::string address_spec)
-    : RedisServer(client)
+RedisCluster::RedisCluster(const SRObject* context, std::string address_spec)
+    : RedisServer(context)
 {
     SRAddress db_address(address_spec);
     _connect(db_address);

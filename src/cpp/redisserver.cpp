@@ -30,13 +30,13 @@
 #include "redisserver.h"
 #include "srexception.h"
 #include "utility.h"
-#include "client.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
 // RedisServer constructor
-RedisServer::RedisServer(const Client* client)
-    : _client(client), _gen(_rd())
+RedisServer::RedisServer(const SRObject* context)
+    : _context(context), _gen(_rd())
 {
     get_config_integer(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
                          _DEFAULT_CONN_TIMEOUT);
@@ -57,7 +57,7 @@ RedisServer::RedisServer(const Client* client)
     _command_attempts = (_command_timeout * 1000) /
                          _command_interval + 1;
 
-    _tp = new ThreadPool(_client, _thread_count);
+    _tp = new ThreadPool(_context, _thread_count);
 }
 
 // RedisServer destructor

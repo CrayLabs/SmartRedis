@@ -33,7 +33,7 @@
 
 namespace SmartRedis {
 
-class Client;
+class SRObject;
 
 ///@file
 
@@ -46,18 +46,18 @@ class Redis : public RedisServer
     public:
         /*!
         *   \brief Redis constructor.
-        *   \param client The owning Client
+        *   \param context The owning context
         */
-        Redis(const Client* client);
+        Redis(const SRObject* context);
 
         /*!
         *   \brief Redis constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param client The owning Client
+        *   \param context The owning context
         *   \param addr_spec The TCP or UDS server address
         */
-        Redis(const Client* client, std::string addr_spec);
+        Redis(const SRObject* context, std::string addr_spec);
 
         /*!
         *   \brief Redis copy constructor is not allowed
