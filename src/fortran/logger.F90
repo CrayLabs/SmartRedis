@@ -42,15 +42,18 @@ implicit none; private
 #include "logger/logger_interfaces.inc"
 
 interface log_data
-  module procedure log_data_client, log_data_dataset, log_data_logcontext
+  module procedure log_data_client, log_data_dataset, &
+    log_data_logcontext, log_data_string
 end interface log_data
 
 interface log_warning
-  module procedure log_warning_client, log_warning_dataset, log_warning_logcontext
+  module procedure log_warning_client, log_warning_dataset, &
+    log_warning_logcontext, log_warning_string
 end interface log_warning
 
 interface log_error
-  module procedure log_error_client, log_error_dataset, log_error_logcontext
+  module procedure log_error_client, log_error_dataset, &
+    log_error_logcontext, log_error_string
 end interface log_error
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
@@ -67,9 +70,9 @@ contains
 
 !> Log data to the SmartRedis log against a Client object
 subroutine log_data_client(context, level, data)
-  type(client_type),        intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(client_type),        intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -85,9 +88,9 @@ end subroutine log_data_client
 
 !> Log data to the SmartRedis log against a Dataset object
 subroutine log_data_dataset(context, level, data)
-  type(dataset_type),       intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(dataset_type),       intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -103,9 +106,9 @@ end subroutine log_data_dataset
 
 !> Log data to the SmartRedis log against a Logcontext object
 subroutine log_data_logcontext(context, level, data)
-  type(logcontext_type),    intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(logcontext_type),    intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -119,14 +122,38 @@ subroutine log_data_logcontext(context, level, data)
   deallocate(c_data)
 end subroutine log_data_logcontext
 
+!> Log data to the SmartRedis log against a string object
+subroutine log_data_string(context, level, data)
+  character(len=*),         intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_context, c_data
+  integer(kind=c_size_t) :: c_context_length, c_data_length
+
+  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
+  c_context = context
+  c_context_length = len_trim(context)
+
+  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
+  c_data = data
+  c_data_length = len_trim(data)
+
+  call c_log_data_string(&
+    c_context, c_context_length, level, c_data, c_data_length)
+  deallocate(c_data)
+  deallocate(c_context)
+end subroutine log_data_string
+
 ! log_warning overloads
 ! =====================
 
 !> Log a warning to the SmartRedis log against a Client object
 subroutine log_warning_client(context, level, data)
-  type(client_type),        intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(client_type),        intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -142,9 +169,9 @@ end subroutine log_warning_client
 
 !> Log a warning to the SmartRedis log against a Dataset object
 subroutine log_warning_dataset(context, level, data)
-  type(dataset_type),       intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(dataset_type),       intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -160,9 +187,9 @@ end subroutine log_warning_dataset
 
 !> Log a warning to the SmartRedis log against a LogContext object
 subroutine log_warning_logcontext(context, level, data)
-  type(logcontext_type),    intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(logcontext_type),    intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -176,14 +203,38 @@ subroutine log_warning_logcontext(context, level, data)
   deallocate(c_data)
 end subroutine log_warning_logcontext
 
+!> Log a warning to the SmartRedis log against a string object
+subroutine log_warning_string(context, level, data)
+  character(len=*),         intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_context, c_data
+  integer(kind=c_size_t) :: c_context_length, c_data_length
+
+  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
+  c_context = context
+  c_context_length = len_trim(context)
+
+  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
+  c_data = data
+  c_data_length = len_trim(data)
+
+  call c_log_warning_string(&
+    c_context, c_context_length, level, c_data, c_data_length)
+  deallocate(c_context)
+  deallocate(c_data)
+end subroutine log_warning_string
+
 ! log_error overloads
 ! ===================
 
 !> Log an error to the SmartRedis log against a Client object
 subroutine log_error_client(context, level, data)
-  type(client_type),        intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(client_type),        intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -199,9 +250,9 @@ end subroutine log_error_client
 
 !> Log an error to the SmartRedis log against a Dataset object
 subroutine log_error_dataset(context, level, data)
-  type(dataset_type),       intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(dataset_type),       intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -217,9 +268,9 @@ end subroutine log_error_dataset
 
 !> Log an error to the SmartRedis log against a LogContext object
 subroutine log_error_logcontext(context, level, data)
-  type(logcontext_type),        intent(in) :: context
-  integer (kind=enum_kind), intent(in) :: level !< Minimum logging level to log the data at
-  character(len=*),         intent(in) :: data  !< Data to be logged
+  type(logcontext_type),    intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
   ! Local variables
   character(kind=c_char, len=:), allocatable :: c_data
@@ -233,5 +284,28 @@ subroutine log_error_logcontext(context, level, data)
   deallocate(c_data)
 end subroutine log_error_logcontext
 
-end module smartredis_logger
+!> Log an error to the SmartRedis log against a string object
+subroutine log_error_string(context, level, data)
+  character(len=*),         intent(in) :: context !< Context for logging
+  integer (kind=enum_kind), intent(in) :: level   !< Minimum logging level to log the data at
+  character(len=*),         intent(in) :: data    !< Data to be logged
 
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_context, c_data
+  integer(kind=c_size_t) :: c_context_length, c_data_length
+
+  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
+  c_context = context
+  c_context_length = len_trim(context)
+
+  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
+  c_data = data
+  c_data_length = len_trim(data)
+
+  call c_log_error_string(&
+    c_context, c_context_length, level, c_data, c_data_length)
+  deallocate(c_context)
+  deallocate(c_data)
+end subroutine log_error_string
+
+end module smartredis_logger

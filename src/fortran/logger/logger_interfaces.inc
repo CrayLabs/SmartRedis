@@ -56,3 +56,43 @@ interface
     integer(kind=c_size_t), value  :: data_length
   end subroutine c_log_error
 end interface
+
+
+interface
+  subroutine c_log_data_string(context, context_length, level, data, data_length) &
+    bind(c, name="log_data_noexcept_string")
+    use iso_c_binding, only : c_char, c_size_t
+    import :: enum_kind
+    character(kind=c_char)         :: context(*)
+    integer(kind=c_size_t), value  :: context_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
+  end subroutine c_log_data_string
+end interface
+
+interface
+  subroutine c_log_warning_string(context, context_length, level, data, data_length) &
+    bind(c, name="log_warning_noexcept_string")
+    use iso_c_binding, only : c_char, c_size_t
+    import :: enum_kind
+    character(kind=c_char)         :: context(*)
+    integer(kind=c_size_t), value  :: context_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
+  end subroutine c_log_warning_string
+end interface
+
+interface
+  subroutine c_log_error_string(context, context_length, level, data, data_length) &
+    bind(c, name="log_error_noexcept_string")
+    use iso_c_binding, only : c_ptr, c_char, c_size_t
+    import :: enum_kind
+    character(kind=c_char)         :: context(*)
+    integer(kind=c_size_t), value  :: context_length
+    integer(kind=enum_kind), value :: level
+    character(kind=c_char)         :: data(*)
+    integer(kind=c_size_t), value  :: data_length
+  end subroutine c_log_error_string
+end interface
