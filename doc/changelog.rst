@@ -12,6 +12,8 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Add support for string-based logging for C and Fortran clients
+- Additional error reporting for connections to and commands run against Redis databases
 - Improved error reporting capabilities for Fortran clients
 - Python error messages from SmartRedis contain more information
 - Added logging functionality to the SmartRedis library
@@ -22,6 +24,10 @@ Description
 
 Detailed Notes
 
+- Add support for string-based logging for C and Fortran clients via _string() methods (PR288_)
+- Added logging to capture transient errors that arise in the _run() and _connect() methods of the Redis and RedisCluster classes (PR287_)
+- Tweak direct testing of Redis and RedisCluster classes (PR286_)
+- Resolve a disparity in the construction of Python client and database classes (PR285_)
 - Fortran clients can now access error text and source location (PR284_)
 - Add exception location information from CPP code to Python exceptions (PR283_)
 - Added client activity and manual logging for developer use (PR281_)
@@ -32,8 +38,12 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
-.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/284
-.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/283
+.. _PR288: https://github.com/CrayLabs/SmartRedis/pull/288
+.. _PR287: https://github.com/CrayLabs/SmartRedis/pull/287
+.. _PR286: https://github.com/CrayLabs/SmartRedis/pull/286
+.. _PR285: https://github.com/CrayLabs/SmartRedis/pull/285
+.. _PR284: https://github.com/CrayLabs/SmartRedis/pull/284
+.. _PR283: https://github.com/CrayLabs/SmartRedis/pull/283
 .. _PR281: https://github.com/CrayLabs/SmartRedis/pull/281
 .. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
 .. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
