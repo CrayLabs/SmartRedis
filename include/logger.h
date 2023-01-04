@@ -39,15 +39,6 @@
 
 ///@file
 
-/*
-* Redirect logging functions to exception-free variants for C and Fortran
-*/
-#ifndef __cplusplus
-#define log_data log_data_noexcept
-#define log_warning log_warning_noexcept
-#define log_error log_error_noexcept
-#endif // __cplusplus
-
 #ifdef __cplusplus
 namespace SmartRedis {
 
@@ -300,57 +291,5 @@ class FunctionLogger {
 
 } //namespace SmartRedis
 #endif // __cplusplus
-
-
-/////////////////////////////////////////////////////////
-// Prototypes for C and Fortran logging methods
-
-/*!
-*   \brief Macro to establish C linkage in both C and C++
-*/
-#ifdef __cplusplus
-#define C_API extern "C"
-#else
-#define C_API
-#endif
-
-/*!
-*   \brief Conditionally log data if the logging level is high enough
-*   \param context Object containing the log context
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
-C_API void log_data_noexcept(
-    const void* context,
-    SRLoggingLevel level,
-    const char* data,
-    size_t data_len);
-
-/*!
-*   \brief Conditionally log a warning if the logging level is high enough
-*   \param context Object containing the log context
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
-C_API void log_warning_noexcept(
-    const void* context,
-    SRLoggingLevel level,
-    const char* data,
-    size_t data_len);
-
-/*!
-*   \brief Conditionally log an error if the logging level is high enough
-*   \param context Object containing the log context
-*   \param level Minimum logging level for data to be logged
-*   \param data Text of data to be logged
-*   \param data_len Length in characters of data to be logged
-*/
-C_API void log_error_noexcept(
-    const void* context,
-    SRLoggingLevel level,
-    const char* data,
-    size_t data_len);
 
 #endif //SMARTREDIS_LOGGER_H

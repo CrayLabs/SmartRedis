@@ -41,6 +41,7 @@ program main
   type(client_type)     :: client
   type(dataset_type)    :: dataset
   type(logcontext_type) :: logcontext
+  character(kind=c_char, len=:), allocatable :: string_context
   integer               :: result
 
   result = logcontext%initialize("client_test_logging (logcontext)")
@@ -49,6 +50,7 @@ program main
   if (result .ne. SRNoError) error stop
   result = dataset%initialize("client_test_logging (dataset)")
   if (result .ne. SRNoError) error stop
+  string_context = 'client_test_logging (string)'
 
   ! Logging against the Client
   ! ==========================
@@ -136,6 +138,35 @@ program main
     "This is an error logged against the LogContext at the Debug level")
   call log_error(logcontext, LLDeveloper, &
     "This is an error logged against the LogContext at the Developer level")
+
+  ! Logging against the string
+  ! ==============================
+  call log_data(string_context, LLQuiet, &
+    "This is data logged against a string context at the Quiet level")
+  call log_data(string_context, LLInfo, &
+    "This is data logged against a string context at the Info level")
+  call log_data(string_context, LLDebug, &
+    "This is data logged against a string context at the Debug level")
+  call log_data(string_context, LLDeveloper, &
+    "This is data logged against a string context at the Developer level")
+
+  call log_warning(string_context, LLQuiet, &
+    "This is a warning logged against a string context at the Quiet level")
+  call log_warning(string_context, LLInfo, &
+    "This is a warning logged against a string context at the Info level")
+  call log_warning(string_context, LLDebug, &
+    "This is a warning logged against a string context at the Debug level")
+  call log_warning(string_context, LLDeveloper, &
+    "This is a warning logged against a string context at the Developer level")
+
+  call log_error(string_context, LLQuiet, &
+    "This is an error logged against a string context at the Quiet level")
+  call log_error(string_context, LLInfo, &
+    "This is an error logged against a string context at the Info level")
+  call log_error(string_context, LLDebug, &
+    "This is an error logged against a string context at the Debug level")
+  call log_error(string_context, LLDeveloper, &
+    "This is an error logged against a string context at the Developer level")
 
   ! Done
   write(*,*) "client logging: passed"

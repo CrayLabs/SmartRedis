@@ -35,12 +35,16 @@
 #include <stdlib.h>
 #include "stdint.h"
 #include "srexception.h"
-#include "logger.h"
+#include "c_logger.h"
 
 bool cluster = true;
 
 #define TEST_LOG(logtype, context, loglevel, logmessage) \
 log_##logtype(context, loglevel, logmessage, strlen(logmessage))
+
+#define TEST_LOG_STRING(logtype, context, loglevel, logmessage) \
+log_##logtype##_string(\
+  context, strlen(context), loglevel, logmessage, strlen(logmessage))
 
 int main(int argc, char* argv[])
 {
@@ -51,6 +55,7 @@ int main(int argc, char* argv[])
   const char* ctx_client = "client_test_logging (client)";
   const char* ctx_dataset = "client_test_logging (dataset)";
   const char* ctx_logcontext = "client_test_logging (logcontext)";
+  const char* ctx_string = "client_test_logging (string)";
   size_t ctx_client_len = strlen(ctx_client);
   size_t ctx_dataset_len = strlen(ctx_dataset);
   size_t ctx_logcontext_len = strlen(ctx_logcontext);
@@ -152,7 +157,36 @@ int main(int argc, char* argv[])
   TEST_LOG(error, logcontext, LLDebug,
     "This is an error logged against the logcontext at the Debug level");
   TEST_LOG(error, logcontext, LLDeveloper,
-    "This is an error logged against the logcontexts at the Developer level");
+    "This is an error logged against the logcontext at the Developer level");
+
+   // Log stuff against a string
+  TEST_LOG_STRING(data, ctx_string, LLQuiet,
+    "This is data logged against a string at the Quiet level");
+  TEST_LOG_STRING(data, ctx_string, LLInfo,
+    "This is data logged against a string at the Info level");
+  TEST_LOG_STRING(data, ctx_string, LLDebug,
+    "This is data logged against a string at the Debug level");
+  TEST_LOG_STRING(data, ctx_string, LLDeveloper,
+    "This is data logged against a string at the Developer level");
+
+  TEST_LOG_STRING(warning, ctx_string, LLQuiet,
+    "This is a warning logged against a string at the Quiet level");
+  TEST_LOG_STRING(warning, ctx_string, LLInfo,
+    "This is a warning logged against a string at the Info level");
+  TEST_LOG_STRING(warning, ctx_string, LLDebug,
+    "This is a warning logged against a string at the Debug level");
+  TEST_LOG_STRING(warning, ctx_string, LLDeveloper,
+    "This is a warning logged against a string at the Developer level");
+
+  TEST_LOG_STRING(error, ctx_string, LLQuiet,
+    "This is an error logged against a string at the Quiet level");
+  TEST_LOG_STRING(error, ctx_string, LLInfo,
+    "This is an error logged against a string at the Info level");
+  TEST_LOG_STRING(error, ctx_string, LLDebug,
+    "This is an error logged against a string at the Debug level");
+  TEST_LOG_STRING(error, ctx_string, LLDeveloper,
+    "This is an error logged against a string at the Developer level");
+
 
   // Done
   printf("Test passed: %s\n", result == 0 ? "YES" : "NO");
