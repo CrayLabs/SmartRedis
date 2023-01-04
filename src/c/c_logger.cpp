@@ -53,9 +53,10 @@ extern "C" void log_data_noexcept(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
+        const SRObject* temp_context =
+            reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        ctxt->log_data(level, strData);
+        temp_context->log_data(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -73,9 +74,10 @@ extern "C" void log_warning_noexcept(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
+        const SRObject* temp_context =
+            reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        ctxt->log_warning(level, strData);
+        temp_context->log_warning(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -93,9 +95,10 @@ extern "C" void log_error_noexcept(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* ctxt = reinterpret_cast<const SRObject*>(context);
+        const SRObject* temp_context =
+            reinterpret_cast<const SRObject*>(context);
         std::string strData(data, data_len);
-        ctxt->log_error(level, strData);
+        temp_context->log_error(level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -115,9 +118,9 @@ extern "C" void log_data_noexcept_string(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string ctxt(context, context_len);
+        std::string temp_context(context, context_len);
         std::string strData(data, data_len);
-        log_data(ctxt, level, strData);
+        log_data(temp_context, level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -136,9 +139,9 @@ extern "C" void log_warning_noexcept_string(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string ctxt(context, context_len);
+        std::string temp_context(context, context_len);
         std::string strData(data, data_len);
-        log_warning(ctxt, level, strData);
+        log_warning(temp_context, level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()
@@ -157,9 +160,9 @@ extern "C" void log_error_noexcept_string(
 {
     try {
         SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string ctxt(context, context_len);
+        std::string temp_context(context, context_len);
         std::string strData(data, data_len);
-        log_error(ctxt, level, strData);
+        log_error(temp_context, level, strData);
     }
     catch (Exception& e) {
         std::cout << "Logging failure: " << e.where()

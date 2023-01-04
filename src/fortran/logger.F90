@@ -43,17 +43,17 @@ implicit none; private
 
 interface log_data
   module procedure log_data_client, log_data_dataset, &
-    log_data_logcontext, log_data_string
+                   log_data_logcontext, log_data_string
 end interface log_data
 
 interface log_warning
   module procedure log_warning_client, log_warning_dataset, &
-    log_warning_logcontext, log_warning_string
+                   log_warning_logcontext, log_warning_string
 end interface log_warning
 
 interface log_error
   module procedure log_error_client, log_error_dataset, &
-    log_error_logcontext, log_error_string
+                   log_error_logcontext, log_error_string
 end interface log_error
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
@@ -78,8 +78,7 @@ subroutine log_data_client(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_data(context%get_c_pointer(), level, c_data, c_data_length)
@@ -96,8 +95,7 @@ subroutine log_data_dataset(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_data(context%get_c_pointer(), level, c_data, c_data_length)
@@ -114,8 +112,7 @@ subroutine log_data_logcontext(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_data(context%get_c_pointer(), level, c_data, c_data_length)
@@ -132,12 +129,10 @@ subroutine log_data_string(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_context, c_data
   integer(kind=c_size_t) :: c_context_length, c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
-  c_context = context
+  c_context = trim(context)
   c_context_length = len_trim(context)
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_data_string(&
@@ -159,8 +154,7 @@ subroutine log_warning_client(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_warning(context%get_c_pointer(), level, c_data, c_data_length)
@@ -177,8 +171,7 @@ subroutine log_warning_dataset(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_warning(context%get_c_pointer(), level, c_data, c_data_length)
@@ -195,8 +188,7 @@ subroutine log_warning_logcontext(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_warning(context%get_c_pointer(), level, c_data, c_data_length)
@@ -213,12 +205,10 @@ subroutine log_warning_string(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_context, c_data
   integer(kind=c_size_t) :: c_context_length, c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
-  c_context = context
+  c_context = trim(context)
   c_context_length = len_trim(context)
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_warning_string(&
@@ -240,8 +230,7 @@ subroutine log_error_client(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_error(context%get_c_pointer(), level, c_data, c_data_length)
@@ -258,8 +247,7 @@ subroutine log_error_dataset(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_error(context%get_c_pointer(), level, c_data, c_data_length)
@@ -276,8 +264,7 @@ subroutine log_error_logcontext(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_data
   integer(kind=c_size_t) :: c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_error(context%get_c_pointer(), level, c_data, c_data_length)
@@ -294,12 +281,10 @@ subroutine log_error_string(context, level, data)
   character(kind=c_char, len=:), allocatable :: c_context, c_data
   integer(kind=c_size_t) :: c_context_length, c_data_length
 
-  allocate(character(kind=c_char, len=len_trim(context)) :: c_context)
-  c_context = context
+  c_context = trim(context)
   c_context_length = len_trim(context)
 
-  allocate(character(kind=c_char, len=len_trim(data)) :: c_data)
-  c_data = data
+  c_data = trim(data)
   c_data_length = len_trim(data)
 
   call c_log_error_string(&

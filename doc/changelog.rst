@@ -12,7 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
-- Add support for string-based logging for C and Fortran clients
+- Add support for user-directed logging for C and Fortran clients without a Client or Dataset context
 - Additional error reporting for connections to and commands run against Redis databases
 - Improved error reporting capabilities for Fortran clients
 - Python error messages from SmartRedis contain more information
@@ -24,7 +24,7 @@ Description
 
 Detailed Notes
 
-- Add support for string-based logging for C and Fortran clients via _string() methods (PR288_)
+- Added support for user-directed logging without a Client or Dataset context to C and Fortran clients via _string() methods (PR288_)
 - Added logging to capture transient errors that arise in the _run() and _connect() methods of the Redis and RedisCluster classes (PR287_)
 - Tweak direct testing of Redis and RedisCluster classes (PR286_)
 - Resolve a disparity in the construction of Python client and database classes (PR285_)
