@@ -32,13 +32,14 @@ import functools
 import numpy as np
 
 from .dataset import Dataset
+from .srobject import SRObject
 from .smartredisPy import PyClient
 from .util import Dtypes, init_default, exception_handler, typecheck
 
 from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
-class Client:
+class Client(SRObject):
     def __init__(self, address=None, cluster=False, logger_name="default"):
         """Initialize a RedisAI client
 
@@ -56,12 +57,14 @@ class Client:
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
+        super().__init__(logger_name)
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
             self._client = PyClient(cluster, logger_name)
+            self._srobject = self._client
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:

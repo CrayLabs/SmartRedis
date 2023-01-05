@@ -77,6 +77,32 @@ class PySRObject
         */
         SRObject* get();
 
+        /*!
+        *   \brief Conditionally log data if the logging level is high enough
+        *   \param level Minimum logging level for data to be logged
+        *   \param data Text of data to be logged
+        */
+        virtual void log_data(
+            SRLoggingLevel level, const std::string& data) const;
+
+        /*!
+        *   \brief Conditionally log warning data if the logging level is
+        *          high enough
+        *   \param level Minimum logging level for data to be logged
+        *   \param data Text of data to be logged
+        */
+        virtual void log_warning(
+            SRLoggingLevel level, const std::string& data) const;
+
+        /*!
+        *   \brief Conditionally log error data if the logging level is
+        *          high enough
+        *   \param level Minimum logging level for data to be logged
+        *   \param data Text of data to be logged
+        */
+        virtual void log_error(
+            SRLoggingLevel level, const std::string& data) const;
+
     private:
 
         SRObject* _srobject;

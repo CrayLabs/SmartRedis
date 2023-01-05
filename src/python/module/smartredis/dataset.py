@@ -29,19 +29,22 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
+from .srobject import SRObject
 from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
-class Dataset:
+class Dataset(SRObject):
     def __init__(self, name):
         """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
         """
+        super().__init__(name)
         typecheck(name, "name", str)
         self._data = PyDataset(name)
+        self._srobject = self._data
 
 
     @staticmethod

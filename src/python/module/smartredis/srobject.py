@@ -24,7 +24,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .smartredisPy import PySRObject
+from .smartredisPy import PySRObject, SRLoggingLevel
 from .util import exception_handler, typecheck
 
 from .error import *
@@ -38,7 +38,7 @@ class SRObject:
         """
         typecheck(context, "context", str)
         self._name = context
-        self._data = PySRObject(context)
+        self._srobject = PySRObject(context)
 
 
     @staticmethod
@@ -46,11 +46,9 @@ class SRObject:
         """Initialize a SRObject object from
         a PySRObject object
 
-        :param srobject: The pybind PySRObject object
-                           to use for construction
+        :param srobject: The pybind PySRObject object to use for construction
         :type srobject: PySRObject
-        :return: The newly constructor SRObject from
-                 the PySRObject
+        :return: The newly constructor SRObject from the PySRObject
         :rtype: SRObject
         """
         typecheck(srobject, "srobject", PySRObject)
@@ -59,21 +57,62 @@ class SRObject:
         return new_srobject
 
     @exception_handler
-    def get_data(self):
+    def get_srobject(self):
         """Return the PySRObject attribute
 
-        :return: The PySRObject attribute containing
-                 the srobject information
+        :return: The PySRObject attribute containing the srobject information
         :rtype: PySRObject
         """
-        return self._data
+        return self._srobject
 
     @exception_handler
-    def set_data(self, srobject):
+    def set_srobject(self, srobject):
         """Set the PySRObject attribute
 
         :param srobject: The PySRObject object
         :type srobject: PySRObject
         """
         typecheck(srobject, "srobject", PySRObject)
-        self._data = srobject
+        self._srobject = srobject
+
+    @exception_handler
+    def log_data(self, level, data):
+        """Conditionally log data if the logging level is high enough
+
+        :param level: Minimum logging level for data to be logged
+        :type name: enum
+        :param data: Text of data to be logged
+        :type name: str
+        :raises RedisReplyError: if logging fails
+        """
+        typecheck(level, "level", SRLoggingLevel)
+        typecheck(data, "data", str)
+        self._srobject.log_data(level, data)
+
+    @exception_handler
+    def log_warning(self, level, data):
+        """Conditionally log warning data if the logging level is high enough
+
+        :param level: Minimum logging level for data to be logged
+        :type name: enum
+        :param data: Text of data to be logged
+        :type name: str
+        :raises RedisReplyError: if logging fails
+        """
+        typecheck(level, "level", SRLoggingLevel)
+        typecheck(data, "data", str)
+        self._srobject.log_warning(level, data)
+
+    @exception_handler
+    def log_error(self, level, data):
+        """Conditionally log error data if the logging level is high enough
+
+        :param level: Minimum logging level for data to be logged
+        :type name: enum
+        :param data: Text of data to be logged
+        :type name: str
+        :raises RedisReplyError: if logging fails
+        """
+        typecheck(level, "level", SRLoggingLevel)
+        typecheck(data, "data", str)
+        self._srobject.log_error(level, data)
