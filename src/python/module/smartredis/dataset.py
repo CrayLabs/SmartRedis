@@ -41,11 +41,14 @@ class Dataset(SRObject):
         :param name: name of dataset
         :type name: str
         """
-        super().__init__(name)
+        super().__init__(PyDataset(name))
         typecheck(name, "name", str)
-        self._data = PyDataset(name)
-        self._srobject = self._data
 
+    @property
+    def _data(self):
+        """Alias _srobject to _data
+        """
+        return self._srobject
 
     @staticmethod
     def from_pybind(dataset):
@@ -82,7 +85,7 @@ class Dataset(SRObject):
         :type dataset: PyDataset
         """
         typecheck(dataset, "dataset", PyDataset)
-        self._data = dataset
+        self._srobject = dataset
 
     @exception_handler
     def add_tensor(self, name, data):

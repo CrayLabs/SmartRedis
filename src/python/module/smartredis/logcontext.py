@@ -37,12 +37,15 @@ class LogContext(SRObject):
         :param context: logging context
         :type name: str
         """
-        super().__init__(context)
+        super().__init__(PyLogContext(context))
         typecheck(context, "context", str)
         self._name = context
-        self._logcontext = PyLogContext(context)
-        self._srobject = self._logcontext
 
+    @property
+    def _logcontext(self):
+        """Alias _srobject to _logcontext
+        """
+        return self._srobject
 
     @staticmethod
     def from_pybind(logcontext):
@@ -79,4 +82,4 @@ class LogContext(SRObject):
         :type logcontext: PyLogContext
         """
         typecheck(logcontext, "logcontext", PyLogContext)
-        self._logcontext = logcontext
+        self._srobject = logcontext

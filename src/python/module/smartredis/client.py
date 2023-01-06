@@ -57,18 +57,22 @@ class Client(SRObject):
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
-        super().__init__(logger_name)
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
-            self._client = PyClient(cluster, logger_name)
-            self._srobject = self._client
+            super().__init__(PyClient(cluster, logger_name))
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
+
+    @property
+    def _client(self):
+        """Alias _srobject to _client
+        """
+        return self._srobject
 
     @exception_handler
     def put_tensor(self, name, data):

@@ -36,10 +36,12 @@ class SRObject:
         :param context: logging context
         :type name: str
         """
-        typecheck(context, "context", str)
-        self._name = context
-        self._srobject = PySRObject(context)
-
+        typecheck(context, "context", (str, PySRObject))
+        if isinstance(context, str):
+            self._name = context
+            self._srobject = PySRObject(context)
+        else:
+            self._srobject = context
 
     @staticmethod
     def from_pybind(srobject):
@@ -48,7 +50,7 @@ class SRObject:
 
         :param srobject: The pybind PySRObject object to use for construction
         :type srobject: PySRObject
-        :return: The newly constructor SRObject from the PySRObject
+        :return: The newly constructed¸ SRObject from the PySRObject
         :rtype: SRObject
         """
         typecheck(srobject, "srobject", PySRObject)
