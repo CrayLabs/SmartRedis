@@ -752,6 +752,51 @@ def test_bad_type_log_function(use_cluster, context, log_fn):
     with pytest.raises(TypeError):
         log_fn("test_bad_type_log_function", LLInfo, 42)
 
+def test_bad_type_client_log(use_cluster, context):
+    c = Client(None, use_cluster, logger_name=context)
+    with pytest.raises(TypeError):
+        c.log_data("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        c.log_warning("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        c.log_error("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        c.log_data(LLInfo, 42)
+    with pytest.raises(TypeError):
+        c.log_warning(LLInfo, 42)
+    with pytest.raises(TypeError):
+        c.log_error(LLInfo, 42)
+
+def test_bad_type_dataset_log(context):
+    d = Dataset(context)
+    with pytest.raises(TypeError):
+        d.log_data("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        d.log_warning("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        d.log_error("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        d.log_data(LLInfo, 42)
+    with pytest.raises(TypeError):
+        d.log_warning(LLInfo, 42)
+    with pytest.raises(TypeError):
+        d.log_error(LLInfo, 42)
+
+def test_bad_type_logcontext_log(context):
+    lc = LogContext(context)
+    with pytest.raises(TypeError):
+        lc.log_data("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        lc.log_warning("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        lc.log_error("Not a logging level", "Data to be logged")
+    with pytest.raises(TypeError):
+        lc.log_data(LLInfo, 42)
+    with pytest.raises(TypeError):
+        lc.log_warning(LLInfo, 42)
+    with pytest.raises(TypeError):
+        lc.log_error(LLInfo, 42)
+
 #####
 # Test type errors from bad parameter types to Dataset API calls
 

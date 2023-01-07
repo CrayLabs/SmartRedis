@@ -44,7 +44,10 @@ PYBIND11_MODULE(smartredisPy, m) {
 
     // Python SRObject class
     py::class_<PySRObject>(m, "PySRObject")
-        .def(py::init<std::string&>());
+        .def(py::init<std::string&>())
+        .def("log_data", &PySRObject::log_data)
+        .def("log_warning", &PySRObject::log_warning)
+        .def("log_error", &PySRObject::log_error);
 
     // Python LogContext class
     py::class_<PyLogContext, PySRObject>(m, "PyLogContext")

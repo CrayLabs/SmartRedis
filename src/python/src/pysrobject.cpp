@@ -73,3 +73,66 @@ PySRObject::~PySRObject()
 SRObject* PySRObject::get() {
     return _srobject;
 }
+
+void PySRObject::log_data(
+    SRLoggingLevel level, const std::string& data) const
+{
+    try {
+        _srobject->log_data(level, data);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing log_data.");
+    }
+}
+
+void PySRObject::log_warning(
+    SRLoggingLevel level, const std::string& data) const
+{
+    try {
+        _srobject->log_warning(level, data);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing log_warning.");
+    }
+}
+
+void PySRObject::log_error(
+    SRLoggingLevel level, const std::string& data) const
+{
+    try {
+        _srobject->log_error(level, data);
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing log_error.");
+    }
+}

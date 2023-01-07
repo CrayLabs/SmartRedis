@@ -29,20 +29,26 @@ from numbers import Number
 import numpy as np
 
 from .smartredisPy import PyDataset
+from .srobject import SRObject
 from .util import Dtypes, exception_handler, typecheck
 
 from .error import *
 
-class Dataset:
+class Dataset(SRObject):
     def __init__(self, name):
         """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
         """
+        super().__init__(PyDataset(name))
         typecheck(name, "name", str)
-        self._data = PyDataset(name)
 
+    @property
+    def _data(self):
+        """Alias _srobject to _data
+        """
+        return self._srobject
 
     @staticmethod
     def from_pybind(dataset):
@@ -79,7 +85,7 @@ class Dataset:
         :type dataset: PyDataset
         """
         typecheck(dataset, "dataset", PyDataset)
-        self._data = dataset
+        self._srobject = dataset
 
     @exception_handler
     def add_tensor(self, name, data):
