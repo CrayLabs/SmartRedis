@@ -238,6 +238,23 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
     return _tensorpack.get_tensor(name)->type();
 }
 
+// Retrieve the names of all metadata fields in the DataSet
+std::vector<std::string> DataSet::get_metadata_field_names()
+{
+    return _metadata.get_field_names();
+}
+
+// Retrieve the data type of a metadata field in the DataSet
+SRMetaDataType DataSet::get_metadata_field_type(std::string& name)
+{
+    if (!_metadata.has_field(name)) {
+        throw SRKeyException(
+            "Dataset " + _dsname +
+            " does not contain the field " + name);
+    }
+    return _metadata.get_field_type(name);
+}
+
 // Add a Tensor (not yet allocated) to the TensorPack
 void DataSet::_add_to_tensorpack(const std::string& name,
                                  void* data,

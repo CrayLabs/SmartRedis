@@ -235,6 +235,17 @@ class MetaData
         std::vector<std::pair<std::string, std::string>>
             get_metadata_serialization_map();
 
+        /*!
+        *   \brief Retrieve the type of a metadata field
+        *   \param name The name of the field to check
+        *   \throw KeyException if the name is not present
+        */
+        SRMetaDataType get_field_type(std::string& name);
+
+        /*!
+        *   \brief Retrieve a vector of metadata field names
+        */
+        std::vector<std::string> get_field_names();
 
     private:
 

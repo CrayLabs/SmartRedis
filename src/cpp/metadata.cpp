@@ -234,6 +234,31 @@ void MetaData::get_scalar_values(const std::string& name,
     }
 }
 
+// Retrieve the type of a metadata field
+SRMetaDataType MetaData::get_field_type(std::string& name)
+{
+    // Make sure the field exists
+    if (_field_map[name] == NULL) {
+        throw SRKeyException(
+            "The metadata field " + name + " does not exist.");
+    }
+
+    // Return the type
+    return _field_map[name]->type();
+}
+
+// Retrieve a vector of metadata field names
+std::vector<std::string> MetaData::get_field_names()
+{
+    std::vector<std::string> fieldnames;
+    fieldnames.reserve(_field_map.size());
+
+    for (auto mapping : _field_map) {
+        fieldnames.push_back(mapping.first);
+    }
+    return fieldnames;
+}
+
 // Get metadata string field using a c-style interface.
 void MetaData::get_string_values(const std::string& name,
                                  char**& data,

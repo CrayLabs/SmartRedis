@@ -293,6 +293,26 @@ class DataSet : public SRObject
         */
         void set_name(std::string name) { _dsname = name; }
 
+        /*!
+        *   \brief Retrieve the data type of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns The data type for the tensor
+        */
+        SRTensorType get_tensor_type(const std::string& name);
+
+        /*!
+        *   \brief Retrieve the names of all metadata fields in the DataSet
+        *   \returns A vector of metadata field names
+        */
+        std::vector<std::string> get_metadata_field_names();
+
+        /*!
+        *   \brief Retrieve the data type of a metadata field in the DataSet
+        *   \param name The name of the metadata field
+        *   \returns The data type for the metadata field
+        */
+        SRMetaDataType get_metadata_field_type(std::string& name);
+
         friend class Client;
         friend class PyDataset;
 
@@ -333,13 +353,6 @@ class DataSet : public SRObject
         *   \returns const_tensor_iterator to the past-the-end Tensor
         */
         const_tensor_iterator tensor_cend();
-
-        /*!
-        *   \brief Retrieve the data type of a Tensor in the DataSet
-        *   \param name The name of the tensor
-        *   \returns The data type for the tensor
-        */
-        SRTensorType get_tensor_type(const std::string& name);
 
         /*!
         *   \brief Returns a vector of std::pair with
