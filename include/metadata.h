@@ -240,12 +240,12 @@ class MetaData
         *   \param name The name of the field to check
         *   \throw KeyException if the name is not present
         */
-        SRMetaDataType get_field_type(std::string& name);
+        SRMetaDataType get_field_type(const std::string& name);
 
         /*!
         *   \brief Retrieve a vector of metadata field names
         */
-        std::vector<std::string> get_field_names();
+        std::vector<std::string> get_field_names(bool skip_internal = false);
 
     private:
 

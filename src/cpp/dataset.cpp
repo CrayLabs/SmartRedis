@@ -241,11 +241,11 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
 // Retrieve the names of all metadata fields in the DataSet
 std::vector<std::string> DataSet::get_metadata_field_names()
 {
-    return _metadata.get_field_names();
+    return _metadata.get_field_names(true);
 }
 
 // Retrieve the data type of a metadata field in the DataSet
-SRMetaDataType DataSet::get_metadata_field_type(std::string& name)
+SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
 {
     if (!_metadata.has_field(name)) {
         throw SRKeyException(

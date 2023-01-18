@@ -311,7 +311,7 @@ class DataSet : public SRObject
         *   \param name The name of the metadata field
         *   \returns The data type for the metadata field
         */
-        SRMetaDataType get_metadata_field_type(std::string& name);
+        SRMetaDataType get_metadata_field_type(const std::string& name);
 
         friend class Client;
         friend class PyDataset;

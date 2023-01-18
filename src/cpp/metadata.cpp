@@ -235,7 +235,7 @@ void MetaData::get_scalar_values(const std::string& name,
 }
 
 // Retrieve the type of a metadata field
-SRMetaDataType MetaData::get_field_type(std::string& name)
+SRMetaDataType MetaData::get_field_type(const std::string& name)
 {
     // Make sure the field exists
     if (_field_map[name] == NULL) {
@@ -248,12 +248,14 @@ SRMetaDataType MetaData::get_field_type(std::string& name)
 }
 
 // Retrieve a vector of metadata field names
-std::vector<std::string> MetaData::get_field_names()
+std::vector<std::string> MetaData::get_field_names(bool skip_internal)
 {
     std::vector<std::string> fieldnames;
     fieldnames.reserve(_field_map.size());
 
     for (auto mapping : _field_map) {
+        if (skip_internal && mapping.first == ".tensor_names")
+            continue;
         fieldnames.push_back(mapping.first);
     }
     return fieldnames;

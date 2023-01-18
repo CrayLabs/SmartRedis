@@ -123,7 +123,10 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("add_meta_string", &PyDataset::add_meta_string)
         .def("get_meta_scalars", &PyDataset::get_meta_scalars)
         .def("get_meta_strings", &PyDataset::get_meta_strings)
-        .def("get_name", &PyDataset::get_name);
+        .def("get_name", &PyDataset::get_name)
+        .def("get_metadata_field_names", &PyDataset::get_metadata_field_names)
+        .def("get_tensor_type", &PyDataset::get_tensor_type)
+        .def("get_metadata_field_type", &PyDataset::get_metadata_field_type);
 
     // Logging functions
     m.def("cpp_log_data", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_data))
