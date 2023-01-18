@@ -220,7 +220,7 @@ std::vector<std::string> DataSet::get_tensor_names()
 
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
-// std::vectorstd::string.
+// std::vector<std::string>.
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 {
     // Track calls to this API function
@@ -241,12 +241,18 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
 // Retrieve the names of all metadata fields in the DataSet
 std::vector<std::string> DataSet::get_metadata_field_names()
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _metadata.get_field_names(true);
 }
 
 // Retrieve the data type of a metadata field in the DataSet
 SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (!_metadata.has_field(name)) {
         throw SRKeyException(
             "Dataset " + _dsname +

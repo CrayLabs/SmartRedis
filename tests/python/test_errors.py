@@ -890,11 +890,19 @@ def test_get_tensor_type_wrong_type():
         d.get_tensor_type(42)
 
 def test_get_metadata_field_type_wrong_type():
-    """A call to Dataset.get_tensor_type is made with the wrong type
+    """A call to Dataset.get_metadata_field_type is made with the wrong type
     """
     d = Dataset("test_dataset")
     with pytest.raises(TypeError):
         d.get_metadata_field_type(42)
+
+def test_get_tensor_names_wrong_type():
+    """A call to Dataset.get_tensor_names is made with the wrong type
+    """
+    d = Dataset("test_dataset")
+    with pytest.raises(TypeError):
+        d.get_tensor_names(42)
+
 
 ####
 # Utility functions

@@ -132,6 +132,12 @@ class PyDataset : public PySRObject
         py::list get_meta_strings(const std::string& name);
 
         /*!
+        *   \brief Retrieve the names of all tensors in the DataSet
+        *   \returns A vector of tensor names
+        */
+        py::list get_tensor_names();
+
+        /*!
         *   \brief Retrieve the data type of a Tensor in the DataSet
         *   \param name The name of the tensor
         *   \returns The data type for the tensor

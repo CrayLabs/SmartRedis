@@ -187,19 +187,6 @@ class Dataset(SRObject):
         return self._data.get_metadata_field_names()
 
     @exception_handler
-    def get_tensor_type(self, name):
-        """Get the type of a tensor in the DataSet
-
-        :param name: The name used to reference the tensor in the DataSet
-        :type name: str
-        :return: the numpy type for the tensor
-        :rtype: type
-        """
-        typecheck(name, "name", str)
-        type_str = self._data.get_tensor_type(name)
-        return Dtypes.from_string(type_str)
-
-    @exception_handler
     def get_metadata_field_type(self, name):
         """Get the names of all metadata scalars and strings from the DataSet
 
@@ -213,3 +200,24 @@ class Dataset(SRObject):
         type_str = self._data.get_metadata_field_type(name)
         return Dtypes.from_string(type_str)
 
+    @exception_handler
+    def get_tensor_type(self, name):
+        """Get the type of a tensor in the DataSet
+
+        :param name: The name used to reference the tensor in the DataSet
+        :type name: str
+        :return: the numpy type for the tensor
+        :rtype: type
+        """
+        typecheck(name, "name", str)
+        type_str = self._data.get_tensor_type(name)
+        return Dtypes.from_string(type_str)
+
+    @exception_handler
+    def get_tensor_names(self):
+        """Get the names of all tensors in the DataSet
+
+        :return: a list of tensor names
+        :rtype: list
+        """
+        return self._data.get_tensor_names()

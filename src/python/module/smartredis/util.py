@@ -67,7 +67,7 @@ class Dtypes:
     def from_string(type_name):
         mapping = {
             "DOUBLE": np.double,
-            "FLOAT":  np.float,
+            "FLOAT":  np.float64,
             "UINT8":  np.uint8,
             "UINT16": np.uint16,
             "UINT32": np.uint32,

@@ -320,6 +320,28 @@ py::list PyDataset::get_meta_strings(const std::string& name)
     }
 }
 
+// Retrieve the names of all tensors in the DataSet
+py::list PyDataset::get_tensor_names()
+{
+    try {
+        // We return a copy
+        return py::cast(_dataset->get_tensor_names());
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor_names.");
+    }
+}
+
 // Retrieve the data type of a Tensor in the DataSet
 std::string PyDataset::get_tensor_type(const std::string& name)
 {
