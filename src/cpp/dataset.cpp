@@ -218,6 +218,24 @@ std::vector<std::string> DataSet::get_tensor_names()
 
 }
 
+// Retrieve tensor names from the DataSet
+void DataSet::get_tensor_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    if (_metadata.has_field(".tensor_names")) {
+        _metadata.get_string_values(
+            ".tensor_names", data, n_strings, lengths);
+    }
+    else {
+        *data = NULL;
+        n_strings = 0;
+    }
+
+}
+
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
 // std::vector<std::string>.
@@ -245,6 +263,16 @@ std::vector<std::string> DataSet::get_metadata_field_names()
     LOG_API_FUNCTION();
 
     return _metadata.get_field_names(true);
+}
+
+// Retrieve metadata field names from the DataSet
+void DataSet::get_metadata_field_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _metadata.get_field_names(data, n_strings, lengths, true);
 }
 
 // Retrieve the data type of a metadata field in the DataSet

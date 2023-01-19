@@ -275,13 +275,6 @@ class DataSet : public SRObject
         void clear_field(const std::string& field_name);
 
         /*!
-        *   \brief Retrieve the names of tensors in the DataSet
-        *   \returns The name of the tensors in the DataSet
-        *   \throw SmartRedis::Exception if metadata retrieval fails
-        */
-        std::vector<std::string> get_tensor_names();
-
-        /*!
         *   \brief Retrieve the name of the DataSet
         *   \returns The name of the DataSet
         */
@@ -292,6 +285,26 @@ class DataSet : public SRObject
         *   \param name The name for the DataSet
         */
         void set_name(std::string name) { _dsname = name; }
+
+        /*!
+        *   \brief Retrieve the names of tensors in the DataSet
+        *   \returns The name of the tensors in the DataSet
+        *   \throw SmartRedis::Exception if metadata retrieval fails
+        */
+        std::vector<std::string> get_tensor_names();
+
+        /*!
+        *   \brief Retrieve tensor names from the DataSet.
+        *   \details The memory of the data pointer is valid until the
+        *            DataSet is destroyed.
+        *   \param data Receives an array of tensor names
+        *   \param n_strings Receives the number of tensor names
+        *   \param lengths Receives an array of the lengths of the tensor names
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        void get_tensor_names(char**& data,
+                              size_t& n_strings,
+                              size_t*& lengths);
 
         /*!
         *   \brief Retrieve the data type of a Tensor in the DataSet
@@ -305,6 +318,20 @@ class DataSet : public SRObject
         *   \returns A vector of metadata field names
         */
         std::vector<std::string> get_metadata_field_names();
+
+        /*!
+        *   \brief Retrieve metadata field names from the DataSet.
+        *   \details The memory of the data pointer is valid until the
+        *            DataSet is destroyed.
+        *   \param data Receives an array of metadata field names
+        *   \param n_strings Receives the number of metadata field names
+        *   \param lengths Receives an array of the lengths of the metadata
+        *                  field names
+        *   \throw SmartRedis::Exception if metadata field name retrieval fails
+        */
+        void get_metadata_field_names(char**& data,
+                                      size_t& n_strings,
+                                      size_t*& lengths);
 
         /*!
         *   \brief Retrieve the data type of a metadata field in the DataSet

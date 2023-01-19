@@ -261,6 +261,40 @@ std::vector<std::string> MetaData::get_field_names(bool skip_internal)
     return fieldnames;
 }
 
+// Get metadata field names using a c-style interface
+void MetaData::get_field_names(char**& data,
+                               size_t& n_strings,
+                               size_t*& lengths,
+                               bool skip_internal /*= false*/)
+{
+    // Retrieve the names
+    std::vector<std::string> name_strings = get_field_names(skip_internal);
+
+    // Allocate space to copy the strings
+    n_strings = 0; // Set to zero until all data copied
+    data = _char_array_mem_mgr.allocate(name_strings.size());
+    if (data == NULL)
+        throw SRBadAllocException("name strings array");
+    lengths = _str_len_mem_mgr.allocate(name_strings.size());
+    if (lengths == NULL)
+        throw SRBadAllocException("name string lengths");
+
+    // Copy each metadata string into the string buffer
+    for (size_t i = 0; i < name_strings.size(); i++) {
+        size_t size = name_strings[i].size();
+        char* cstr = _char_mem_mgr.allocate(size + 1);
+        if (cstr == NULL)
+            throw SRBadAllocException("name string data");
+        name_strings[i].copy(cstr, size, 0);
+        cstr[size] = '\0';
+        data[i] = cstr;
+        lengths[i] = size;
+    }
+
+    // Write down the number of strings copied
+    n_strings = name_strings.size();
+}
+
 // Get metadata string field using a c-style interface.
 void MetaData::get_string_values(const std::string& name,
                                  char**& data,

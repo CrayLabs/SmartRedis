@@ -244,9 +244,35 @@ class MetaData
 
         /*!
         *   \brief Retrieve a vector of metadata field names
+        *   \param skip_internal Omit internal items (such as .tensor_names)
+        *                        from the results
         */
         std::vector<std::string> get_field_names(bool skip_internal = false);
 
+        /*!
+        *   \brief  Get metadata field names using a c-style
+        *           interface
+        *   \details This function allocates memory to
+        *            return a pointer (via pointer reference "data")
+        *            to the user and sets the value of n_strings to
+        *            the number of strings in the field.  Memory is also
+        *            allocated to store the length of each string in the
+        *            field, and the provided lengths pointer is pointed
+        *            to this new memory.  The memory for the strings and
+        *            string lengths is valid until the MetaData object is
+        *            destroyed.
+        *   \param data A c-ptr pointed to newly allocated memory
+        *               for the names
+        *   \param n_strings The number of names returned
+        *   \param lengths A size_t pointer pointed to newly allocated
+        *                  memory that stores the length of each string
+        *   \param skip_internal Omit internal items (such as .tensor_names)
+        *                        from the results
+        */
+        void get_field_names(char**& data,
+                             size_t& n_strings,
+                             size_t*& lengths,
+                             bool skip_internal = false);
     private:
 
        /*!
