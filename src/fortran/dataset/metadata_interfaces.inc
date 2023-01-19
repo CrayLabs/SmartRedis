@@ -69,3 +69,17 @@ interface
     type(c_ptr),                   intent(  out) :: scalar_data !< Receives scalar data
   end function get_meta_scalars_c
 end interface
+
+interface
+  function get_metadata_field_type_c( dataset, name, name_length, mdtype ) &
+      bind(c, name="get_metadata_field_type")
+    use iso_c_binding, only : c_ptr, c_size_t, c_char
+    import :: enum_kind
+    integer(kind=enum_kind)                     :: get_metadata_field_type_c
+    type(c_ptr),             value, intent(in)  :: dataset     !< A c_ptr to the dataset object
+    character(kind=c_char),         intent(in)  :: name(*)     !< The name of the metadata field
+    integer(kind=c_size_t),  value, intent(in)  :: name_length !< The length of the name c-string,
+                                                               !! excluding null terminating character
+    integer(kind=enum_kind),        intent(out) :: mdtype      !< Receives the metadata type
+  end function get_metadata_field_type_c
+end interface
