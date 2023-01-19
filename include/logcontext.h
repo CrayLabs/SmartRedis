@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef LOG_CONTEXT_H
-#define LOG_CONTEXT_H
+#ifndef SMARTREDIS_LOGCONTEXT_H
+#define SMARTREDIS_LOGCONTEXT_H
+
 #ifdef __cplusplus
 #include <string>
 #include "srobject.h"
@@ -65,4 +66,4 @@ class LogContext : public SRObject
 } // namespace SmartRedis
 
 #endif // __cplusplus
-#endif // LOG_CONTEXT_H
+#endif // SMARTREDIS_LOGCONTEXT_H

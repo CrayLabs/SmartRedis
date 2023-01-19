@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,14 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_REDISSERVER_H
-#define SMARTREDIS_CPP_REDISSERVER_H
+#ifndef SMARTREDIS_REDISSERVER_H
+#define SMARTREDIS_REDISSERVER_H
 
 #include <thread>
 #include <iostream>
 #include <random>
-#include "limits.h"
-
+#include <limits.h>
 #include <sw/redis++/redis++.h>
 
 #include "command.h"
@@ -676,4 +675,4 @@ class RedisServer {
 
 } // namespace SmartRedis
 
-#endif //SMARTREDIS_CPP_REDISSERVER_H
+#endif // SMARTREDIS_REDISSERVER_H

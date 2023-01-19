@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PY_CLIENT_H
-#define PY_CLIENT_H
+#ifndef SMARTREDIS_PYCLIENT_H
+#define SMARTREDIS_PYCLIENT_H
 
 #include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
@@ -921,6 +921,6 @@ class PyClient : public PySRObject
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //PY_CLIENT_H
+#endif // SMARTREDIS_PYCLIENT_H

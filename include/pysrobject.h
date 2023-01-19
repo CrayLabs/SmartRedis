@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PYSROBJECT_H
-#define PYSROBJECT_H
+#ifndef SMARTREDIS_PYSROBJECT_H
+#define SMARTREDIS_PYSROBJECT_H
 
-#include "srobject.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
+#include "srobject.h"
 
 ///@file
 
@@ -108,6 +108,6 @@ class PySRObject
         SRObject* _srobject;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif // PYSROBJECT_H
+#endif // SMARTREDIS_PYSROBJECT_H

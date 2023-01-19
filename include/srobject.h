@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_OBJECT_H
-#define SMARTREDIS_OBJECT_H
+#ifndef SMARTREDIS_SROBJECT_H
+#define SMARTREDIS_SROBJECT_H
+
 #ifdef __cplusplus
 #include <stdlib.h>
 #include <string>
@@ -111,4 +112,4 @@ class SRObject
 } // namespace SmartRedis
 
 #endif // __cplusplus
-#endif // SMARTREDIS_OBJECT_H
+#endif // SMARTREDIS_SROBJECT_H

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_CLUSTER_H
-#define SMARTREDIS_CPP_CLUSTER_H
+#ifndef SMARTREDIS_REDISCLUSTER_H
+#define SMARTREDIS_REDISCLUSTER_H
 
 #include <unordered_set>
 #include <mutex>
@@ -723,6 +723,6 @@ class RedisCluster : public RedisServer
                                     std::string& shard_prefix);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_CPP_CLUSTER_H
+#endif // SMARTREDIS_REDISCLUSTER_H

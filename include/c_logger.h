@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef C_LOGGER_H
-#define C_LOGGER_H
+#ifndef SMARTREDIS_C_LOGGER_H
+#define SMARTREDIS_C_LOGGER_H
 
 #include <stdlib.h>
 #include "sr_enums.h"
@@ -143,4 +143,4 @@ void log_error_noexcept_string(
 #endif
 
 
-#endif // C_LOGGER_H
+#endif // SMARTREDIS_C_LOGGER_H
