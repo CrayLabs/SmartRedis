@@ -1,7 +1,7 @@
  /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_METADATA_H
 #define SMARTREDIS_METADATA_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -64,8 +64,6 @@ static const std::unordered_map<std::string, SRMetaDataType>
         {DATATYPE_METADATA_STR_UINT32, SRMetadataTypeUint32},
         {DATATYPE_METADATA_STR_UINT64, SRMetadataTypeUint64},
         {DATATYPE_METADATA_STR_STRING, SRMetadataTypeString} };
-
-class MetaData;
 
 /*!
 *   \brief The MetaData class stages metadata fields and
@@ -410,6 +408,6 @@ class MetaData
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_METADATA_H
+#endif // SMARTREDIS_METADATA_H

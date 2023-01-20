@@ -2,7 +2,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,13 @@
 
 #ifndef SMARTREDIS_C_DATASET_H
 #define SMARTREDIS_C_DATASET_H
-///@file
-///\brief C-wrappers for the C++ DataSet class
+
 #include "dataset.h"
 #include "sr_enums.h"
 #include "srexception.h"
+
+///@file
+///\brief C-wrappers for the C++ DataSet class
 
 #ifdef __cplusplus
 extern "C" {
@@ -271,4 +273,4 @@ SRError get_metadata_field_names(
 #ifdef __cplusplus
 }
 #endif
-#endif //SMARTREDIS_C_DATASET_H
+#endif // SMARTREDIS_C_DATASET_H

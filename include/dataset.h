@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,6 +28,7 @@
 
 #ifndef SMARTREDIS_DATASET_H
 #define SMARTREDIS_DATASET_H
+
 #ifdef __cplusplus
 #include <stdlib.h>
 #include <string>
@@ -467,7 +468,7 @@ class DataSet : public SRObject
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
 #endif
-#endif //SMARTREDIS_DATASET_H
+#endif // SMARTREDIS_DATASET_H
