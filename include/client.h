@@ -1250,6 +1250,12 @@ class Client : public SRObject
                                                     const int start_index,
                                                     const int end_index);
 
+        /*!
+        *   \brief Create a string representation of the client
+        *   \returns A string containing client details
+        */
+        std::string to_string();
+
     protected:
 
         /*!

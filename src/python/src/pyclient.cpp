@@ -1353,4 +1353,25 @@ py::list PyClient::get_dataset_list_range(
     }
 }
 
+// Create a string representation of the Client
+std::string PyClient::to_string()
+{
+    try {
+        return _client->to_string();
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing to_string.");
+    }
+}
+
 // EOF

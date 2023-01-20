@@ -911,6 +911,13 @@ class PyClient : public PySRObject
                                         const int start_index,
                                         const int end_index);
 
+        /*!
+        *   \brief Create a string representation of the Client
+        *   \returns A string representation of the Client
+        */
+        std::string to_string();
+
+
     private:
 
         /*!

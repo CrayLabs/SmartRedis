@@ -112,7 +112,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("poll_list_length_gte", &PyClient::poll_list_length_gte)
         .def("poll_list_length_lte", &PyClient::poll_list_length_lte)
         .def("get_datasets_from_list", &PyClient::get_datasets_from_list)
-        .def("get_dataset_list_range", &PyClient::get_dataset_list_range);
+        .def("get_dataset_list_range", &PyClient::get_dataset_list_range)
+        .def("to_string", &PyClient::to_string);
 
     // Python Dataset class
     py::class_<PyDataset, PySRObject>(m, "PyDataset")
