@@ -37,7 +37,6 @@
 
 namespace SmartRedis {
 
-//@file
 /*!
 *   \brief The DBNode class stores connection and hash slot
 *          information for the database node.

@@ -34,7 +34,7 @@
 #include "command.h"
 #include "srexception.h"
 
-//@file
+///@file
 
 namespace SmartRedis {
 
