@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PYDATASET_H
-#define PYDATASET_H
+#ifndef SMARTREDIS_PYDATASET_H
+#define SMARTREDIS_PYDATASET_H
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -149,6 +149,6 @@ class PyDataset : public PySRObject
         DataSet* _dataset;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif // PYDATASET_H
+#endif // SMARTREDIS_PYDATASET_H

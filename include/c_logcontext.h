@@ -2,7 +2,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,13 @@
 
 #ifndef SMARTREDIS_C_LOGCONTEXT_H
 #define SMARTREDIS_C_LOGCONTEXT_H
-///@file
-///\brief C-wrappers for the C++ LogContext class
+
 #include "logcontext.h"
 #include "sr_enums.h"
 #include "srexception.h"
+
+///@file
+///\brief C-wrappers for the C++ LogContext class
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,4 +65,4 @@ SRError DeallocateLogContext(void** logcontext);
 #ifdef __cplusplus
 }
 #endif
-#endif //SMARTREDIS_C_LOGCONTEXT_H
+#endif // SMARTREDIS_C_LOGCONTEXT_H

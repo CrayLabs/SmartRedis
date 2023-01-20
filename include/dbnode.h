@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_DBNODE_H
 #define SMARTREDIS_DBNODE_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include "address.h"
 
@@ -37,9 +37,6 @@
 
 namespace SmartRedis {
 
-class DBNode;
-
-//@file
 /*!
 *   \brief The DBNode class stores connection and hash slot
 *          information for the database node.
@@ -143,6 +140,6 @@ class DBNode {
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_DBNODE_H
+#endif // SMARTREDIS_DBNODE_H

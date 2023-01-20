@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef PYLOGCONTEXT_H
-#define PYLOGCONTEXT_H
+#ifndef SMARTREDIS_PYLOGCONTEXT_H
+#define SMARTREDIS_PYLOGCONTEXT_H
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -83,6 +83,6 @@ class PyLogContext : public PySRObject
         LogContext* _logcontext;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif // PYLOGCONTEXT_H
+#endif // SMARTREDIS_PYLOGCONTEXT_H

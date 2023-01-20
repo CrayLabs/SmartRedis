@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_CLIENT_H
-#define SMARTREDIS_CPP_CLIENT_H
+#ifndef SMARTREDIS_CLIENT_H
+#define SMARTREDIS_CLIENT_H
+
 #ifdef __cplusplus
 #include <string.h>
 #include <stdlib.h>
@@ -1652,7 +1653,7 @@ class Client : public SRObject
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //__cplusplus
-#endif //SMARTREDIS_CPP_CLIENT_H
+#endif // __cplusplus
+#endif // SMARTREDIS_CLIENT_H
