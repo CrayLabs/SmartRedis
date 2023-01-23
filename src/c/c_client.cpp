@@ -2068,3 +2068,28 @@ SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
 
   return result;
 }
+
+// Retrieve a string representation of the client
+const char* client_to_string(void* c_client)
+{
+  static std::string result;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    result = s->to_string();
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.what();
+  }
+  catch (...) {
+    result = "Unknown exception occurred";
+    SRSetLastError(SRInternalException(result));
+    result = SRInternalError;
+  }
+
+  return result.c_str();
+}

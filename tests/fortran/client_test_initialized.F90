@@ -37,6 +37,7 @@ program main
 
   type(client_type) :: client
   integer :: result
+  character(kind=c_char, len=:), allocatable :: client_str
 
   if (client%isinitialized()) error stop 'client not initialized'
 
@@ -44,6 +45,12 @@ program main
   if (result .ne. SRNoError) error stop
 
   if (.not. client%isinitialized()) error stop 'client is initialized'
+
+  client_str = client%client_to_string()
+  write(*,*) client_str
+
+  call client%print_client()
+  call client%print_client(stderr)
 
   write(*,*) "client initialized: passed"
 

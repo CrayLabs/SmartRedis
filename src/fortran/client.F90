@@ -34,6 +34,8 @@ use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use smartredis_dataset, only : dataset_type
 use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
+use smartredis_errors, only : make_str
+
 
 implicit none; private
 
@@ -47,6 +49,7 @@ implicit none; private
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
 #include "client/aggregation_interfaces.inc"
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
@@ -179,6 +182,10 @@ type, public :: client_type
   procedure :: get_datasets_from_list
   !> Retrieve vector of datasets from the list over a given range
   procedure :: get_datasets_from_list_range
+  !> Retrieve a string representation of the client
+  procedure :: client_to_string
+  !> Print a string representation of the client
+  procedure :: print_client
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -1815,6 +1822,35 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   enddo
   deallocate(dataset_ptrs)
 end function get_datasets_from_list_range
+
+!> Retrieve a string representation of the client
+function client_to_string(self)
+  character(kind=c_char, len=:), allocatable :: client_to_string  !< Text version of client
+  class(client_type),   intent(in)           :: self              !< An initialized SmartRedis client
+
+  character(kind=c_char, len=:), allocatable :: clistr
+  type(c_ptr)                                :: cclistr
+  integer(kind=c_size_t)                     :: cclistr_len
+
+  ! Get the string representation of the client from C
+  cclistr = client_to_string_c(self%client_ptr)
+  cclistr_len = c_strlen(cclistr)
+  client_to_string = make_str(cclistr, cclistr_len)
+end function client_to_string
+
+!> Print a string representation of the client
+subroutine print_client(self, unit)
+  class(client_type),   intent(in)           :: self              !< An initialized SmartRedis client
+  integer, optional, intent(in)              :: unit
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) client_to_string(self)
+end subroutine print_client
 
 end module smartredis_client
 
