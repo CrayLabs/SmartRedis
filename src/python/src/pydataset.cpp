@@ -435,5 +435,26 @@ std::string PyDataset::get_metadata_field_type(const std::string& name)
     }
 }
 
+// Create a string representation of the DataSet
+std::string PyDataset::to_string()
+{
+    try {
+        return _dataset->to_string();
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing to_string.");
+    }
+}
+
 // EOF
 
