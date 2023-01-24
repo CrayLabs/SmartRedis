@@ -27,6 +27,12 @@
 import numpy as np
 from smartredis import Dataset
 
+def test_serialize_dataset():
+    """Test serializing a dataset
+    """
+    dataset = Dataset("test-dataset")
+    print(dataset)
+
 
 def test_add_get_tensor(mock_data):
     """Test adding and retrieving 1D tensors to
