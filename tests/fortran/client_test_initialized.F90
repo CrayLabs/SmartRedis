@@ -46,7 +46,7 @@ program main
 
   if (.not. client%isinitialized()) error stop 'client is initialized'
 
-  client_str = client%client_to_string()
+  client_str = client%to_string()
   write(*,*) client_str
 
   call client%print_client()

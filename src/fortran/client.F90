@@ -183,7 +183,7 @@ type, public :: client_type
   !> Retrieve vector of datasets from the list over a given range
   procedure :: get_datasets_from_list_range
   !> Retrieve a string representation of the client
-  procedure :: client_to_string
+  procedure :: to_string
   !> Print a string representation of the client
   procedure :: print_client
 
@@ -1824,19 +1824,18 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
 end function get_datasets_from_list_range
 
 !> Retrieve a string representation of the client
-function client_to_string(self)
-  character(kind=c_char, len=:), allocatable :: client_to_string  !< Text version of client
-  class(client_type),   intent(in)           :: self              !< An initialized SmartRedis client
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string  !< Text version of client
+  class(client_type),   intent(in)           :: self       !< An initialized SmartRedis client
 
-  character(kind=c_char, len=:), allocatable :: clistr
-  type(c_ptr)                                :: cclistr
-  integer(kind=c_size_t)                     :: cclistr_len
+  type(c_ptr)                                :: c_cli_str
+  integer(kind=c_size_t)                     :: c_cli_str_len
 
   ! Get the string representation of the client from C
-  cclistr = client_to_string_c(self%client_ptr)
-  cclistr_len = c_strlen(cclistr)
-  client_to_string = make_str(cclistr, cclistr_len)
-end function client_to_string
+  c_cli_str = client_to_string_c(self%client_ptr)
+  c_cli_str_len = c_strlen(c_cli_str)
+  to_string = make_str(c_cli_str, c_cli_str_len)
+end function to_string
 
 !> Print a string representation of the client
 subroutine print_client(self, unit)
@@ -1849,7 +1848,7 @@ subroutine print_client(self, unit)
   if (present(unit)) target_unit = unit
 
   ! Write the error to the target unit
-  write(target_unit,*) client_to_string(self)
+  write(target_unit,*) to_string(self)
 end subroutine print_client
 
 end module smartredis_client
