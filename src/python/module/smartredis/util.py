@@ -28,6 +28,7 @@ from .error import *
 from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
+import numpy as np
 
 class Dtypes:
     @staticmethod
@@ -62,6 +63,24 @@ class Dtypes:
             return mapping[dtype]
         raise TypeError(f"Incompatible metadata type provided {dtype}")
 
+    @staticmethod
+    def from_string(type_name):
+        mapping = {
+            "DOUBLE": np.double,
+            "FLOAT":  np.float64,
+            "UINT8":  np.uint8,
+            "UINT16": np.uint16,
+            "UINT32": np.uint32,
+            "UINT64": np.uint64,
+            "INT8":   np.int8,
+            "INT16":  np.int16,
+            "INT32":  np.int32,
+            "INT64":  np.int64,
+            "STRING": str,
+        }
+        if type_name in mapping:
+            return mapping[type_name]
+        raise TypeError(f"Unrecognized type name {type_name}")
 
 def init_default(default, init_value, expected_type=None):
     """Used for setting a mutable type to a default value.

@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Add support for inspection of tensors and metadata inside datasets
 - Add support for user-directed logging for Python clients, using Client, Dataset, or LogContext logging methods
 - Add support for user-directed logging for C and Fortran clients without a Client or Dataset context
 - Additional error reporting for connections to and commands run against Redis databases
@@ -25,6 +26,7 @@ Description
 
 Detailed Notes
 
+- Added support for retrieval of names and types of tensors and metadata inside datasets (PR291_)
 - Added support for user-directed logging for Python clients via {Client, Dataset, LogContext}.{log_data, log_warning, log_error} methods (PR289_)
 - Added support for user-directed logging without a Client or Dataset context to C and Fortran clients via _string() methods (PR288_)
 - Added logging to capture transient errors that arise in the _run() and _connect() methods of the Redis and RedisCluster classes (PR287_)
@@ -40,6 +42,7 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR288: https://github.com/CrayLabs/SmartRedis/pull/291
 .. _PR288: https://github.com/CrayLabs/SmartRedis/pull/289
 .. _PR288: https://github.com/CrayLabs/SmartRedis/pull/288
 .. _PR287: https://github.com/CrayLabs/SmartRedis/pull/287

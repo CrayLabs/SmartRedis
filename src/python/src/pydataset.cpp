@@ -320,5 +320,120 @@ py::list PyDataset::get_meta_strings(const std::string& name)
     }
 }
 
+// Retrieve the names of all tensors in the DataSet
+py::list PyDataset::get_tensor_names()
+{
+    try {
+        // We return a copy
+        return py::cast(_dataset->get_tensor_names());
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor_names.");
+    }
+}
+
+// Retrieve the data type of a Tensor in the DataSet
+std::string PyDataset::get_tensor_type(const std::string& name)
+{
+    try {
+        // get the type
+        SRTensorType ttype = _dataset->get_tensor_type(name);
+        switch (ttype) {
+            case SRTensorTypeDouble:
+                return "DOUBLE";
+            case SRTensorTypeFloat:
+                return "FLOAT";
+            case SRTensorTypeInt64:
+                return "INT64";
+            case SRTensorTypeInt32:
+                return "INT32";
+            case SRTensorTypeInt16:
+                return "INT16";
+            case SRTensorTypeInt8:
+                return "INT8";
+            case SRTensorTypeUint16:
+                return "UINT6";
+            case SRTensorTypeUint8:
+                return "UINT8";
+            default :
+                throw SRRuntimeException("Unrecognized type in "\
+                                         "PyDataSet::get_tensor_type().");
+        }
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor_type.");
+    }}
+
+// Retrieve the names of all metadata fields in the DataSet
+py::list PyDataset::get_metadata_field_names()
+{
+    try {
+        // We return a copy
+        return py::cast(_dataset->get_metadata_field_names());
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_metadata_field_names.");
+    }
+}
+
+// Retrieve the data type of a metadata field in the DataSet
+std::string PyDataset::get_metadata_field_type(const std::string& name)
+{
+    try {
+        // get the type
+        auto mdtype = _dataset->get_metadata_field_type(name);
+        for (auto it = METADATA_TYPE_MAP.begin();
+             it != METADATA_TYPE_MAP.end(); ++it) {
+            if (it->second == mdtype)
+                return it->first;
+        }
+        throw SRRuntimeException("Unrecognized type in "\
+                                 "PyDataSet::get_metadata_field_type().");
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_metadata_field_type.");
+    }
+}
+
 // EOF
 

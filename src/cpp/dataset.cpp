@@ -218,9 +218,28 @@ std::vector<std::string> DataSet::get_tensor_names()
 
 }
 
+// Retrieve tensor names from the DataSet
+void DataSet::get_tensor_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    if (_metadata.has_field(".tensor_names")) {
+        _metadata.get_string_values(
+            ".tensor_names", data, n_strings, lengths);
+    }
+    else {
+        data = NULL;
+        lengths = NULL;
+        n_strings = 0;
+    }
+
+}
+
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
-// std::vectorstd::string.
+// std::vector<std::string>.
 std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 {
     // Track calls to this API function
@@ -235,7 +254,48 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
     // Track calls to this API function
     LOG_API_FUNCTION();
 
-    return _tensorpack.get_tensor(name)->type();
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its type
+    return tensor->type();
+}
+
+// Retrieve the names of all metadata fields in the DataSet
+std::vector<std::string> DataSet::get_metadata_field_names()
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    return _metadata.get_field_names(true);
+}
+
+// Retrieve metadata field names from the DataSet
+void DataSet::get_metadata_field_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _metadata.get_field_names(data, n_strings, lengths, true);
+}
+
+// Retrieve the data type of a metadata field in the DataSet
+SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    if (!_metadata.has_field(name)) {
+        throw SRKeyException(
+            "Dataset " + _dsname +
+            " does not contain the field " + name);
+    }
+    return _metadata.get_field_type(name);
 }
 
 // Add a Tensor (not yet allocated) to the TensorPack
