@@ -485,6 +485,13 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     {
         Client client(use_cluster(), "test_client");
 
+        THEN("The client can be serialized")
+        {
+            std::string serial = client.to_string();
+            CHECK(serial.length() > 0);
+            std::cout << client;
+        }
+
         WHEN("INFO or CLUSTER INFO is called on database with "
              "an invalid address")
         {
