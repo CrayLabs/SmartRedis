@@ -270,6 +270,13 @@ SRError get_metadata_field_names(
  SRError get_metadata_field_type(
     void* dataset, const char* name, size_t name_len, SRMetaDataType* mdtype);
 
+/*!
+*   \brief Retrieve a string representation of the dataset
+*   \param dataset The dataset to use for this operation
+*   \return A string with either the client representation or an error message
+*/
+const char* dataset_to_string(void* dataset);
+
 #ifdef __cplusplus
 }
 #endif

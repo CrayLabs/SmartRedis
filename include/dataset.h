@@ -348,6 +348,12 @@ class DataSet : public SRObject
         */
         SRMetaDataType get_metadata_field_type(const std::string& name);
 
+        /*!
+        *   \brief Create a string representation of the DataSet
+        *   \returns A string containing DataSet details
+        */
+        std::string to_string() const;
+
         friend class Client;
         friend class PyDataset;
 
@@ -474,6 +480,18 @@ class DataSet : public SRObject
         TensorPack _tensor_memory;
 
 };
+
+/*!
+*   \brief Serialize a dataset
+*   \param dataset The dataset to serialize
+*   \returns The output stream, for chaining
+*/
+inline
+std::ostream& operator<<(std::ostream& stream, const DataSet& dataset)
+{
+    stream << dataset.to_string();
+    return stream;
+}
 
 } // namespace SmartRedis
 

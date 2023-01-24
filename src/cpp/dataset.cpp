@@ -367,3 +367,11 @@ TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
     _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();
 }
+
+// Create a string representation of the DataSet
+std::string DataSet::to_string() const
+{
+    std::string result;
+    result = "DataSet (" + _lname + "):\n";
+    return result;
+}

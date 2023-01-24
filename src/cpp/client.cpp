@@ -2081,10 +2081,7 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
     return false;
 }
 
-/*!
-*   \brief Create a string representation of the client
-*   \returns A string containing client details
-*/
+// Create a string representation of the client
 std::string Client::to_string() const
 {
     std::string result;
