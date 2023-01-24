@@ -264,7 +264,7 @@ SRError get_metadata_field_names(
 *   \param dataset The dataset to use for this operation
 *   \param name The name of the metadata field (null-terminated string)
 *   \param name_len The length in bytes of the metadata field name
-*   \param ttype Receives the type for the specified metadata field
+*   \param mdtype Receives the type for the specified metadata field
 *   \return Returns SRNoError on success or an error code on failure
 */
  SRError get_metadata_field_type(
