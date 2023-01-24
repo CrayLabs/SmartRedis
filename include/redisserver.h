@@ -498,6 +498,12 @@ class RedisServer {
                                  const std::string& key,
                                  const bool reset_stat) = 0;
 
+        /*!
+        *   \brief Create a string representation of the Redis connection
+        *   \returns A string representation of the Redis connection
+        */
+        virtual std::string to_string() const = 0;
+
     protected:
 
         /*!

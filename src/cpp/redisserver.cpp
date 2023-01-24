@@ -154,3 +154,42 @@ inline void RedisServer::_check_runtime_variables()
                                    + std::to_string(INT_MAX / 1000));
     }
 }
+
+// Create a string representation of the Redis connection
+std::string RedisServer::to_string() const
+{
+    std::string result;
+
+    // Shards
+    result += "  Redis shards at:\n";
+    auto it = _address_node_map.begin();
+    for ( ; it != _address_node_map.end(); it++) {
+        result += "    " + it->first + "\n";
+    }
+
+    // Protocol
+    result += "  Protocol: ";
+    result += _is_domain_socket ? "Unix Domain Socket" : "TCP";
+    result += "\n";
+
+    // Parameters
+    result += "  Command parameters:\n";
+    result += "    Retry attempts: "
+           + std::to_string(_command_attempts) + "\n";
+    result += "    Retry interval (ms): "
+           + std::to_string(_command_interval) + "\n";
+    result += "    Attempt timeout (ms): "
+           + std::to_string(_command_timeout) + "\n";
+    result += "  Connection parameters:\n";
+    result += "    Retry attempts: "
+           + std::to_string(_connection_attempts) + "\n";
+    result += "    Retry interval (ms): "
+           + std::to_string(_connection_interval) + "\n";
+    result += "    Attempt timeout (ms): "
+           + std::to_string(_connection_timeout) + "\n";
+
+    // Threadpool
+    result += "  Threadpool: " + std::to_string(_thread_count) + " threads\n";
+
+    return result;
+}

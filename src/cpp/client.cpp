@@ -2085,10 +2085,10 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
 *   \brief Create a string representation of the client
 *   \returns A string containing client details
 */
-std::string Client::to_string()
+std::string Client::to_string() const
 {
     std::string result;
     result = "Client (" + _lname + "):\n";
-
+    result += _redis_server->to_string();
     return result;
 }
