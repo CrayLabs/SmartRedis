@@ -230,8 +230,8 @@ void DataSet::get_tensor_names(
             ".tensor_names", data, n_strings, lengths);
     }
     else {
-        *data = NULL;
-        *lengths = NULL;
+        data = NULL;
+        lengths = NULL;
         n_strings = 0;
     }
 
