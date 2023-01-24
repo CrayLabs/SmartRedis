@@ -285,7 +285,12 @@ class DataSet : public SRObject
         *   \brief Change the name for the DataSet
         *   \param name The name for the DataSet
         */
-        void set_name(std::string name) { _dsname = name; }
+        void set_name(std::string name) {
+            if (name.length() > 0)
+                _dsname = name;
+            else
+                throw SRParameterException("Name must be non-zero length");
+        }
 
         /*!
         *   \brief Retrieve the names of tensors in the DataSet
@@ -311,6 +316,7 @@ class DataSet : public SRObject
         *   \brief Retrieve the data type of a Tensor in the DataSet
         *   \param name The name of the tensor
         *   \returns The data type for the tensor
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
         */
         SRTensorType get_tensor_type(const std::string& name);
 
@@ -338,6 +344,7 @@ class DataSet : public SRObject
         *   \brief Retrieve the data type of a metadata field in the DataSet
         *   \param name The name of the metadata field
         *   \returns The data type for the metadata field
+        *   \throw SmartRedis::Exception if metadata field name retrieval fails
         */
         SRMetaDataType get_metadata_field_type(const std::string& name);
 

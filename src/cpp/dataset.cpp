@@ -230,7 +230,8 @@ void DataSet::get_tensor_names(
             ".tensor_names", data, n_strings, lengths);
     }
     else {
-        *data = NULL;
+        data = NULL;
+        lengths = NULL;
         n_strings = 0;
     }
 
@@ -253,7 +254,15 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
     // Track calls to this API function
     LOG_API_FUNCTION();
 
-    return _tensorpack.get_tensor(name)->type();
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its type
+    return tensor->type();
 }
 
 // Retrieve the names of all metadata fields in the DataSet
