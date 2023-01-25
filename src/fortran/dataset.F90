@@ -29,10 +29,10 @@ module smartredis_dataset
 use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
-use fortran_c_interop, only : enum_kind
 
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
+use fortran_c_interop, only : enum_kind
 use smartredis_errors, only : make_str
 
 implicit none; private
