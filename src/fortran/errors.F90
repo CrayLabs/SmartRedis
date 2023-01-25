@@ -34,7 +34,7 @@ implicit none; private
 #include "enum_fortran.inc"
 #include "errors/errors_interfaces.inc"
 
-public :: get_last_error, print_last_error, make_str
+public :: get_last_error, print_last_error
 
 contains
 

@@ -34,7 +34,6 @@ use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use smartredis_dataset, only : dataset_type
 use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
-use smartredis_errors, only : make_str
 
 
 implicit none; private
@@ -1836,6 +1835,17 @@ function to_string(self)
   c_cli_str_len = c_strlen(c_cli_str)
   to_string = make_str(c_cli_str, c_cli_str_len)
 end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
 
 !> Print a string representation of the client
 subroutine print_client(self, unit)

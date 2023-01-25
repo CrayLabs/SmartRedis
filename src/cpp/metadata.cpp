@@ -191,13 +191,13 @@ void MetaData::get_scalar_values(const std::string& name,
                                 SRMetaDataType& type)
 {
     // Make sure the field exists
-    if (_field_map.at(name) == NULL) {
+    if (_field_map[name] == NULL) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
 
     // Get values for the field
-    type = _field_map.at(name)->type();
+    type = _field_map[name]->type();
     switch (type) {
         case SRMetadataTypeDouble:
             _get_numeric_field_values<double>
@@ -237,14 +237,15 @@ void MetaData::get_scalar_values(const std::string& name,
 // Retrieve the type of a metadata field
 SRMetaDataType MetaData::get_field_type(const std::string& name) const
 {
-    // Make sure the field exists
-    if (_field_map.at(name) == NULL) {
+    try {
+        // Return the type. If it doesn't exist, the exception below will
+        // be thrown
+        return _field_map.at(name)->type();
+    }
+    catch (std::out_of_range) {
         throw SRKeyException(
             "The metadata field " + name + " does not exist.");
     }
-
-    // Return the type
-    return _field_map.at(name)->type();
 }
 
 // Retrieve a vector of metadata field names
@@ -335,8 +336,11 @@ std::vector<std::string>
 MetaData::get_string_values(const std::string& name) const
 {
     // Get the field
-    const MetadataField* mdf = _field_map.at(name);
-    if (mdf == NULL) {
+    const MetadataField* mdf = NULL;
+    try {
+        mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }

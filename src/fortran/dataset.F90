@@ -33,7 +33,6 @@ use iso_c_binding,   only : c_loc, c_f_pointer
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use fortran_c_interop, only : enum_kind
-use smartredis_errors, only : make_str
 
 implicit none; private
 
@@ -492,6 +491,17 @@ function to_string(self)
   c_ds_str_len = c_strlen(c_ds_str)
   to_string = make_str(c_ds_str, c_ds_str_len)
 end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
 
 !> Print a string representation of the dataset
 subroutine print_dataset(self, unit)
