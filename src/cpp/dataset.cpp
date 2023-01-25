@@ -408,9 +408,3 @@ std::string DataSet::to_string() const
     return result;
 }
 
-#if 0
-std::vector<std::string> DataSet::get_tensor_names()
-SRTensorType DataSet::get_tensor_type(const std::string& name)
-std::vector<std::string> DataSet::get_metadata_field_names()
-SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
-#endif

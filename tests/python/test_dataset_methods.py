@@ -31,6 +31,13 @@ def test_serialize_dataset():
     """Test serializing a dataset
     """
     dataset = Dataset("test-dataset")
+    data = np.uint8([2,4,8])
+    dataset.add_tensor("u8_tensor", data)
+    data = np.double([2.0,4.1,8.3, 5.6])
+    dataset.add_tensor("double_tensor", data)
+    dataset.add_meta_scalar("float2_scalar", float(3.1415926535))
+    dataset.add_meta_scalar("float_scalar", np.double(3.1415926535))
+    dataset.add_meta_string("metastring", "metavalue")
     print(dataset)
 
 
