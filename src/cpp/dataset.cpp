@@ -379,13 +379,32 @@ std::string DataSet::to_string() const
 
     // Tensors
     result += "Tensors:\n";
-    std::vector<std::string> tensornames = get_tensor_names();
-    for (auto it = tensornames.cbegin(); it != tensornames.cend(); ++it) {
-        result += "  " + *it + "\n";
-        result += "    type: " + ::to_string(get_tensor_type(*it)) + "\n";
-//        result += "    dimensions: " + to_string(tensor->type) + "\n";
+    auto it = _tensorpack.tensor_cbegin();
+    for ( ; it != _tensorpack.tensor_cend(); ++it) {
+        result += "  " + (*it)->name() + ":\n";
+        result += "    type: " + ::to_string((*it)->type()) + "\n";
+        auto dims = (*it)->dims();
+        result += "    dimensions: [";
+        size_t ndims = dims.size();
+        for (auto itdims = dims.cbegin(); itdims != dims.cend(); ++itdims) {
+            result += std::to_string(*itdims);
+            if (--ndims > 0)
+                result += ", ";
+        }
+        result += "]\n";
+        result += "    elements: " + std::to_string((*it)->num_values()) + "\n";
     }
 
+    // Metadata
+    result += "Metadata:\n";
+    auto mdnames = get_metadata_field_names();
+    for (auto itmd = mdnames.cbegin(); itmd != mdnames.cend(); ++itmd) {
+        result += "  " + (*itmd) + ":\n";
+        result += "    type: " + ::to_string(get_metadata_field_type(*itmd))
+               + "\n";
+    }
+
+    // Done
     return result;
 }
 
