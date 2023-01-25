@@ -30,6 +30,7 @@
 #include "dataset.h"
 #include "srexception.h"
 #include "logger.h"
+#include "utility.h"
 
 using namespace SmartRedis;
 
@@ -188,7 +189,7 @@ void DataSet::get_meta_strings(const std::string& name,
 }
 
 // Check if the DataSet has a field
-bool DataSet::has_field(const std::string& field_name)
+bool DataSet::has_field(const std::string& field_name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -206,7 +207,7 @@ void DataSet::clear_field(const std::string& field_name)
 }
 
 // Retrieve the names of the tensors in the DataSet
-std::vector<std::string> DataSet::get_tensor_names()
+std::vector<std::string> DataSet::get_tensor_names() const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -240,7 +241,8 @@ void DataSet::get_tensor_names(
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
 // std::vector<std::string>.
-std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
+std::vector<std::string> DataSet::get_meta_strings(
+    const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -249,7 +251,7 @@ std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
 }
 
 // Get the Tensor type of the Tensor
-SRTensorType DataSet::get_tensor_type(const std::string& name)
+SRTensorType DataSet::get_tensor_type(const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -266,7 +268,7 @@ SRTensorType DataSet::get_tensor_type(const std::string& name)
 }
 
 // Retrieve the names of all metadata fields in the DataSet
-std::vector<std::string> DataSet::get_metadata_field_names()
+std::vector<std::string> DataSet::get_metadata_field_names() const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -285,7 +287,8 @@ void DataSet::get_metadata_field_names(
 }
 
 // Retrieve the data type of a metadata field in the DataSet
-SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
+SRMetaDataType DataSet::get_metadata_field_type(
+    const std::string& name) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -373,5 +376,22 @@ std::string DataSet::to_string() const
 {
     std::string result;
     result = "DataSet (" + _lname + "):\n";
+
+    // Tensors
+    result += "Tensors:\n";
+    std::vector<std::string> tensornames = get_tensor_names();
+    for (auto it = tensornames.cbegin(); it != tensornames.cend(); ++it) {
+        result += "  " + *it + "\n";
+        result += "    type: " + ::to_string(get_tensor_type(*it)) + "\n";
+//        result += "    dimensions: " + to_string(tensor->type) + "\n";
+    }
+
     return result;
 }
+
+#if 0
+std::vector<std::string> DataSet::get_tensor_names()
+SRTensorType DataSet::get_tensor_type(const std::string& name)
+std::vector<std::string> DataSet::get_metadata_field_names()
+SRMetaDataType DataSet::get_metadata_field_type(const std::string& name)
+#endif
