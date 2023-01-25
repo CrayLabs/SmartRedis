@@ -1446,9 +1446,9 @@ class Client(SRObject):
         See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  src_name The source list name
+        :param src_name: The source list name
         :type src_name: str
-        :param  dest_name The destination list name
+        :param dest_name: The destination list name
         :type dest_name: str
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1466,9 +1466,9 @@ class Client(SRObject):
         the supplied old_name and new_name. See set_data_source()
         and use_list_ensemble_prefix() for more details.
 
-        :param  src_name The source list name
+        :param src_name: The source list name
         :type src_name: str
-        :param  dest_name The destination list name
+        :param dest_name: The destination list name
         :type dest_name: str
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1481,7 +1481,7 @@ class Client(SRObject):
     def get_list_length(self, list_name):
         """Get the number of entries in the list
 
-        :param  list_name The list name
+        :param list_name: The list name
         :type list_name: str
         :return: The length of the list
         :rtype: int
@@ -1502,16 +1502,16 @@ class Client(SRObject):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired length of the list
+        :param list_length: The desired length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length greater
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length greater
+                than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1534,16 +1534,16 @@ class Client(SRObject):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired minimum length of the list
+        :param list_length: The desired minimum length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length greater
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length greater
+                 than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1566,16 +1566,16 @@ class Client(SRObject):
         name. See set_data_source() and use_list_ensemble_prefix()
         for more details.
 
-        :param  name The name of the list
+        :param name: The name of the list
         :type name: str
-        :param  list_length The desired maximum length of the list
+        :param list_length: The desired maximum length of the list
         :type list_length: int
-        :param  poll_frequency_ms The time delay between checks, in milliseconds
+        :param poll_frequency_ms: The time delay between checks, in milliseconds
         :type poll_frequency_ms: int
-        :param  num_tries The total number of times to check for the name
+        :param num_tries: The total number of times to check for the name
         :type num_tries: int
-        :return:  Returns true if the list is found with a length less
-                  than or equal to the provided length, otherwise false
+        :return: Returns true if the list is found with a length less
+                 than or equal to the provided length, otherwise false
         :rtype: bool
         :raises RedisReplyError: if there is an error
                 in command execution.
@@ -1597,9 +1597,9 @@ class Client(SRObject):
         for more details.  An empty or nonexistant
         aggregation list returns an empty vector.
 
-        :param  list_name The name of the list
+        :param list_name: The name of the list
         :type list_name: str
-        :return:  A list of DataSet objects.
+        :return: A list of DataSet objects.
         :rtype: list[DataSet]
         :raises RedisReplyError: if there is an error in command execution.
         """
@@ -1620,20 +1620,20 @@ class Client(SRObject):
         and end_index are inconsistent (e.g. end_index is less
         than start_index), an empty list of datasets will be returned.
 
-        :param  list_name The name of the list
+        :param list_name: The name of the list
         :type list_name: str
-        :param  start_index The starting index of the range (inclusive,
-                starting at zero).  Negative values are
-                supported.  A negative value indicates offsets
-                starting at the end of the list. For example, -1 is
-                the last element of the list.
-        :type start_index: int
-        :param end_index The ending index of the range (inclusive,
+        :param start_index: The starting index of the range (inclusive,
                starting at zero).  Negative values are
                supported.  A negative value indicates offsets
                starting at the end of the list. For example, -1 is
                the last element of the list.
-        :return:  A list of DataSet objects.
+        :type start_index: int
+        :param end_index: The ending index of the range (inclusive,
+               starting at zero).  Negative values are
+               supported.  A negative value indicates offsets
+               starting at the end of the list. For example, -1 is
+               the last element of the list.
+        :return: A list of DataSet objects.
         :rtype: list[DataSet]
         :raises RedisReplyError: if there is an error in command execution.
         """
