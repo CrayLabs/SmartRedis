@@ -78,6 +78,7 @@ program main
   integer :: ttype
   integer :: mdtype
   logical(kind=c_bool) :: exists
+  character(kind=c_char, len=:), allocatable :: dumpstr
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -198,7 +199,8 @@ program main
   if (.not. all(meta_int64_recv == meta_int64_vec)) error stop 'meta_int64: FAILED'
 
   ! Test dataset serialization
-  write (*,*) dataset%to_string()
+  dumpstr = dataset%to_string()
+  if (dumpstr(1:7) .ne. "DataSet") error stop
   call dataset%print_dataset()
   call dataset%print_dataset(stdout)
 

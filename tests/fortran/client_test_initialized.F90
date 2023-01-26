@@ -28,6 +28,7 @@ program main
   use smartredis_client, only : client_type
   use test_utils, only : use_cluster
   use iso_fortran_env, only : STDERR => error_unit
+  use iso_fortran_env, only : STDOUT => output_unit
   use iso_c_binding, only : c_ptr, c_bool, c_null_ptr, c_char, c_int
   use iso_c_binding, only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 
@@ -47,10 +48,11 @@ program main
   if (.not. client%isinitialized()) error stop 'client is initialized'
 
   client_str = client%to_string()
+  if (client_str(1:6) .ne. "Client") error stop
   write(*,*) client_str
 
   call client%print_client()
-  call client%print_client(stderr)
+  call client%print_client(STDOUT)
 
   write(*,*) "client initialized: passed"
 
