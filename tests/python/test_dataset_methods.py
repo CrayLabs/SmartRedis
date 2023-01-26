@@ -38,7 +38,7 @@ def test_serialize_dataset():
     dataset.add_meta_scalar("float2_scalar", float(3.1415926535))
     dataset.add_meta_scalar("float_scalar", np.double(3.1415926535))
     dataset.add_meta_string("metastring", "metavalue")
-    assert print(dataset) != repr(dataset)
+    assert str(dataset) != repr(dataset)
 
 
 def test_add_get_tensor(mock_data):

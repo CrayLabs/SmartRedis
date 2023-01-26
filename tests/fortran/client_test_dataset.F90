@@ -28,6 +28,7 @@ program main
 
   use iso_c_binding
   use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+  use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use smartredis_client,  only : client_type
   use smartredis_dataset, only : dataset_type
   use test_utils,         only : irand, use_cluster
@@ -199,7 +200,7 @@ program main
   ! Test dataset serialization
   write (*,*) dataset%to_string()
   call dataset%print_dataset()
-  call dataset%print_dataset(stderr)
+  call dataset%print_dataset(stdout)
 
   ! test dataset_existence
   result = client%initialize(use_cluster(), "client_test_dataset")
