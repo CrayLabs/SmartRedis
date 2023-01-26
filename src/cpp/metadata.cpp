@@ -242,7 +242,7 @@ SRMetaDataType MetaData::get_field_type(const std::string& name) const
         // be thrown
         return _field_map.at(name)->type();
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range& e) {
         throw SRKeyException(
             "The metadata field " + name + " does not exist.");
     }
@@ -340,7 +340,7 @@ MetaData::get_string_values(const std::string& name) const
     try {
         mdf = _field_map.at(name);
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
