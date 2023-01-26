@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Update to the latest version of PyBind
 - Change documentation theme to sphinx_book_theme and fix doc strings
 - Add support for inspection of tensors and metadata inside datasets
 - Add support for user-directed logging for Python clients, using Client, Dataset, or LogContext logging methods
@@ -27,6 +28,7 @@ Description
 
 Detailed Notes
 
+- Updated from PyBind v2.6.2 to v2.10.3 (PR295_)
 - Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
 - Added support for retrieval of names and types of tensors and metadata inside datasets (PR291_)
 - Added support for user-directed logging for Python clients via {Client, Dataset, LogContext}.{log_data, log_warning, log_error} methods (PR289_)
@@ -44,6 +46,7 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
 .. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
 .. _PR291: https://github.com/CrayLabs/SmartRedis/pull/291
 .. _PR289: https://github.com/CrayLabs/SmartRedis/pull/289
