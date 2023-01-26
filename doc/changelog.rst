@@ -48,7 +48,7 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
-.. _PR295: https://github.com/CrayLabs/SmartRedis/pull/296
+.. _PR296: https://github.com/CrayLabs/SmartRedis/pull/296
 .. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
 .. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
 .. _PR291: https://github.com/CrayLabs/SmartRedis/pull/291
