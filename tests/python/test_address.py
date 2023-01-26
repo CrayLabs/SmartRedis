@@ -32,7 +32,7 @@ def test_serialization(use_cluster, context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-    print(c)
+    assert print(c) != repr(c)
 
 
 def test_address(use_cluster, context):
