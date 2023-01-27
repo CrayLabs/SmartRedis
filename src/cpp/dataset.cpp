@@ -380,7 +380,9 @@ std::string DataSet::to_string() const
     // Tensors
     result += "Tensors:\n";
     auto it = _tensorpack.tensor_cbegin();
+    int ntensors = 0;
     for ( ; it != _tensorpack.tensor_cend(); ++it) {
+        ntensors++;
         result += "  " + (*it)->name() + ":\n";
         result += "    type: " + ::to_string((*it)->type()) + "\n";
         auto dims = (*it)->dims();
@@ -394,14 +396,22 @@ std::string DataSet::to_string() const
         result += "]\n";
         result += "    elements: " + std::to_string((*it)->num_values()) + "\n";
     }
+    if (ntensors == 0) {
+        result += "  none\n";
+    }
 
     // Metadata
     result += "Metadata:\n";
     auto mdnames = get_metadata_field_names();
+    int nmetadata = 0;
     for (auto itmd = mdnames.cbegin(); itmd != mdnames.cend(); ++itmd) {
+        nmetadata++;
         result += "  " + (*itmd) + ":\n";
-        result += "    type: " + ::to_string(get_metadata_field_type(*itmd))
-               + "\n";
+        result += "    type: "
+                + ::to_string(get_metadata_field_type(*itmd)) + "\n";
+    }
+    if (nmetadata == 0) {
+        result += "  none\n";
     }
 
     // Done
