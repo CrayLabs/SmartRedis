@@ -886,25 +886,44 @@ class Client : public SRObject
         void set_data_source(std::string source_id);
 
         /*!
-        *   \brief Control whether names of tensor and dataset keys are
+        *   \brief Control whether names of tensor keys are
         *          prefixed (e.g. in an ensemble) when forming database keys.
         *   \details This function can be used to avoid key collisions in an
         *            ensemble by prepending the string value from the
-        *            environment variable SSKEYIN to tensor and dataset names.
+        *            environment variable SSKEYIN to tensor names.
         *            Prefixes will only be used if they were previously set
         *            through the environment variables SSKEYOUT and SSKEYIN.
         *            Keys of entities created before this function is called
         *            will not be retroactively prefixed.
-        *            By default, the client prefixes tensor and dataset keys
+        *            By default, the client prefixes tensor keys
         *            with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.
         *
-        *  \param use_prefix If set to true, all future operations
-        *                    on tensors and datasets will use
-        *                    a prefix, if available.
+        *  \param use_prefix If set to true, all future operations on tensors
+        *                    will use a prefix, if available.
         *  \throw SmartRedis::Exception for failed activation of tensor prefixing
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        *   \brief Control whether names of dataset keys are
+        *          prefixed (e.g. in an ensemble) when forming database keys.
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN to dataset names.
+        *            Prefixes will only be used if they were previously set
+        *            through the environment variables SSKEYOUT and SSKEYIN.
+        *            Keys of entities created before this function is called
+        *            will not be retroactively prefixed.
+        *            By default, the client prefixes dataset keys
+        *            with the first prefix specified with the SSKEYIN
+        *            and SSKEYOUT environment variables.
+        *
+        *  \param use_prefix If set to true, all future operations on datasets
+        *                    will use a prefix, if available.
+        *  \throw SmartRedis::Exception for failed activation of dataset prefixing
+        */
+        void use_dataset_ensemble_prefix(bool use_prefix);
 
         /*!
         *   \brief Control whether model and script keys are
@@ -1467,6 +1486,12 @@ class Client : public SRObject
         *        for tensor keys.
         */
         bool _use_tensor_prefix;
+
+        /*!
+        * \brief Flag determining whether prefixes should be used
+        *        for dataset keys.
+        */
+        bool _use_dataset_prefix;
 
         /*!
         * \brief Flag determining whether prefixes should be used
