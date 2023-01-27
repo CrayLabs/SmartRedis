@@ -1249,16 +1249,16 @@ SRError set_data_source(void* c_client,
                         const size_t source_id_length);
 
 /*!
-*   \brief Control whether tensor and dataset names are
-*          prefixed (e.g. in an ensemble) when forming database keys
+*   \brief Control whether tensor names are prefixed (e.g. in an
+*          ensemble) when forming database keys
 *   \details This function can be used to avoid key collisions in an
 *            ensemble by prepending the string value from the
-*            environment variable SSKEYIN to tensor and dataset names.
+*            environment variable SSKEYIN to tensor names.
 *            Prefixes will only be used if they were previously set through
 *            Keys for entities created before this function is called
 *            the environment variables SSKEYOUT and SSKEYIN.
 *            will not be retroactively prefixed.
-*            By default, the client prefixes tensor and dataset keys
+*            By default, the client prefixes tensor keys
 *            with the first prefix specified with the SSKEYIN
 *            and SSKEYOUT environment variables.
 *
@@ -1268,6 +1268,27 @@ SRError set_data_source(void* c_client,
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix);
+
+/*!
+*   \brief Control whether dataset names are prefixed (e.g. in an
+*          ensemble) when forming database keys
+*   \details This function can be used to avoid key collisions in an
+*            ensemble by prepending the string value from the
+*            environment variable SSKEYIN to tensor and dataset names.
+*            Prefixes will only be used if they were previously set through
+*            Keys for entities created before this function is called
+*            the environment variables SSKEYOUT and SSKEYIN.
+*            will not be retroactively prefixed.
+*            By default, the client prefixes dataset keys
+*            with the first prefix specified with the SSKEYIN
+*            and SSKEYOUT environment variables.
+*
+*   \param c_client The client object to use for communication
+*   \param use_prefix If true, all future operations on tensors and
+*                     datasets will use a prefix, if available.
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix);
 
 /*!
 *   \brief Control whether model and script names are

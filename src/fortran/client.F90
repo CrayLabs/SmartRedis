@@ -152,6 +152,8 @@ type, public :: client_type
 
   !> If true, preprend the ensemble id for tensor-related keys
   procedure :: use_tensor_ensemble_prefix
+  !> If true, preprend the ensemble id for dataset-related keys
+  procedure :: use_dataset_ensemble_prefix
   !> If true, preprend the ensemble id for model-related keys
   procedure :: use_model_ensemble_prefix
   !> If true, preprend the ensemble id for dataset list-related keys
@@ -1540,10 +1542,10 @@ function use_model_ensemble_prefix(self, use_prefix) result(code)
 end function use_model_ensemble_prefix
 
 
-!> Set whether names of tensor and dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!> Set whether names of tensor entities should be prefixed (e.g. in an ensemble) to form database keys.
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client prefixes
-!! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+!! tensor keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
 function use_tensor_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
@@ -1551,6 +1553,18 @@ function use_tensor_ensemble_prefix(self, use_prefix) result(code)
 
   code = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_tensor_ensemble_prefix
+
+!> Set whether names of dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before client function is called will not be affected. By default, the client prefixes
+!! dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+function use_dataset_ensemble_prefix(self, use_prefix) result(code)
+  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
+  logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
+
+  code = use_dataset_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+end function use_dataset_ensemble_prefix
 
 !> Control whether aggregation lists are prefixed
 function use_list_ensemble_prefix(self, use_prefix) result(code)

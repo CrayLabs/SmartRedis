@@ -1680,6 +1680,31 @@ SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
   return result;
 }
 
+// Control whether a dataset ensemble prefix is used
+extern "C"
+SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_dataset_ensemble_prefix(use_prefix);
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
 // Control whether aggregation lists are prefixed
 extern "C"
 SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
