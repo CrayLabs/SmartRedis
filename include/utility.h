@@ -31,6 +31,7 @@
 
 #include <cstdlib>
 #include <string>
+#include "sr_enums.h"
 
 ///@file
 
@@ -63,6 +64,19 @@ void get_config_string(std::string& value,
                        const std::string& cfg_key,
                        const std::string& default_value,
                        bool suppress_warning = false);
+
+/*!
+*   \brief Create a string representation of a tensor type
+*   \param ttype The tensor type to put in string form
+*/
+std::string to_string(SRTensorType ttype);
+
+/*!
+*   \brief Create a string representation of a metadata field type
+*   \param ttype The metadata field type to put in string form
+*/
+std::string to_string(SRMetaDataType mdtype);
+
 
 } // namespace SmartRedis
 

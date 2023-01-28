@@ -14,6 +14,7 @@ Description
 
 - Update to the latest version of PyBind
 - Change documentation theme to sphinx_book_theme and fix doc strings
+- Add print capability for Client and DataSet
 - Add support for inspection of tensors and metadata inside datasets
 - Add support for user-directed logging for Python clients, using Client, Dataset, or LogContext logging methods
 - Add support for user-directed logging for C and Fortran clients without a Client or Dataset context
@@ -30,6 +31,7 @@ Detailed Notes
 
 - Updated from PyBind v2.6.2 to v2.10.3 (PR295_)
 - Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
+- Added print capability for Client and DataSet to give details diagnostic information for debugging (PR293_)
 - Added support for retrieval of names and types of tensors and metadata inside datasets (PR291_)
 - Added support for user-directed logging for Python clients via {Client, Dataset, LogContext}.{log_data, log_warning, log_error} methods (PR289_)
 - Added support for user-directed logging without a Client or Dataset context to C and Fortran clients via _string() methods (PR288_)
@@ -48,6 +50,7 @@ Detailed Notes
 
 .. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
 .. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
+.. _PR294: https://github.com/CrayLabs/SmartRedis/pull/293
 .. _PR291: https://github.com/CrayLabs/SmartRedis/pull/291
 .. _PR289: https://github.com/CrayLabs/SmartRedis/pull/289
 .. _PR288: https://github.com/CrayLabs/SmartRedis/pull/288

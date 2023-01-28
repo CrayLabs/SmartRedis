@@ -1530,6 +1530,7 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
                                void*** datasets, size_t* num_datasets);
+
 /*
 *   \brief Get a range of datasets (by index) from an aggregation list and
            copy them into an already allocated vector of datasets. Note,
@@ -1566,6 +1567,14 @@ SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
                                          const size_t list_name_length,
                                          const int start_index, const int end_index,
                                          void** datasets);
+
+
+/*!
+*   \brief Retrieve a string representation of the client
+*   \param c_client The client object to use for communication
+*   \return A string with either the client representation or an error message
+*/
+const char* client_to_string(void* c_client);
 
 #ifdef __cplusplus
 }

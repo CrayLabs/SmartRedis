@@ -1250,6 +1250,12 @@ class Client : public SRObject
                                                     const int start_index,
                                                     const int end_index);
 
+        /*!
+        *   \brief Create a string representation of the client
+        *   \returns A string containing client details
+        */
+        std::string to_string() const;
+
     protected:
 
         /*!
@@ -1652,6 +1658,19 @@ class Client : public SRObject
                                std::function<bool(int,int)> comp_func);
 
 };
+
+/*!
+*   \brief Serialize a client
+*   \param client The client to serialize
+*   \returns The output stream, for chaining
+*/
+inline
+std::ostream& operator<<(std::ostream& stream, const Client& client)
+{
+    stream << client.to_string();
+    return stream;
+}
+
 
 } // namespace SmartRedis
 

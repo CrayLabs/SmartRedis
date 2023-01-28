@@ -27,6 +27,8 @@
 program main
 
   use iso_c_binding
+  use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+  use, intrinsic :: iso_fortran_env, only: stdout => output_unit
   use smartredis_client,  only : client_type
   use smartredis_dataset, only : dataset_type
   use test_utils,         only : irand, use_cluster
@@ -76,6 +78,7 @@ program main
   integer :: ttype
   integer :: mdtype
   logical(kind=c_bool) :: exists
+  character(kind=c_char, len=:), allocatable :: dumpstr
 
   call random_number(true_array_real_32)
   call random_number(true_array_real_64)
@@ -194,6 +197,12 @@ program main
   result = dataset%get_meta_scalars(str_meta_int64, meta_int64_recv)
   if (result .ne. SRNoError) error stop
   if (.not. all(meta_int64_recv == meta_int64_vec)) error stop 'meta_int64: FAILED'
+
+  ! Test dataset serialization
+  dumpstr = dataset%to_string()
+  if (dumpstr(1:7) .ne. "DataSet") error stop
+  call dataset%print_dataset()
+  call dataset%print_dataset(stdout)
 
   ! test dataset_existence
   result = client%initialize(use_cluster(), "client_test_dataset")

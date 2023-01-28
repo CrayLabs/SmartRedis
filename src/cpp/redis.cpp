@@ -724,3 +724,11 @@ inline void Redis::_connect(SRAddress& db_address)
     throw SRTimeoutException(std::string("Connection attempt failed after ") +
                              std::to_string(_connection_attempts) + "tries");
 }
+
+// Create a string representation of the Redis connection
+std::string Redis::to_string() const
+{
+    std::string result("Non-clustered Redis connection:\n");
+    result += RedisServer::to_string();
+    return result;
+}
