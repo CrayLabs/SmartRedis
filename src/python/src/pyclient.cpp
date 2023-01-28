@@ -935,6 +935,11 @@ void PyClient::use_tensor_ensemble_prefix(bool use_prefix)
   _client->use_tensor_ensemble_prefix(use_prefix);
 }
 
+void PyClient::use_dataset_ensemble_prefix(bool use_prefix)
+{
+  _client->use_dataset_ensemble_prefix(use_prefix);
+}
+
 void PyClient::use_model_ensemble_prefix(bool use_prefix)
 {
   _client->use_model_ensemble_prefix(use_prefix);

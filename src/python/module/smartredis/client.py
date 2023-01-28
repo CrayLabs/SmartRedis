@@ -1185,26 +1185,47 @@ class Client(SRObject):
 
     @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
-        """Control whether tensor and dataset keys are
-           prefixed (e.g. in an ensemble) when forming database keys
+        """Control whether tensor and keys are prefixed (e.g. in an
+        ensemble) when forming database keys
 
         This function can be used to avoid key collisions in an ensemble
         by prepending the string value from the environment variable SSKEYIN
-        to tensor and dataset names.
+        to tensor names.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
         Keys for entities created before this function is called
         will not be retroactively prefixed.
-        By default, the client prefixes tensor and dataset
-        keys when a prefix is available.
+        By default, the client prefixes tensor keys when a prefix is
+        available.
 
-        :param use_prefix: If set to true, all future operations
-                           on tensors and datasets will use a prefix, if
-                           available.
+        :param use_prefix: If set to true, all future operations on tensors
+                           will use a prefix, if available.
         :type use_prefix: bool
         """
         typecheck(use_prefix, "use_prefix", bool)
         return self._client.use_tensor_ensemble_prefix(use_prefix)
+
+    @exception_handler
+    def use_dataset_ensemble_prefix(self, use_prefix):
+        """Control whether dataset keys are prefixed (e.g. in an ensemble)
+           when forming database keys
+
+        This function can be used to avoid key collisions in an ensemble
+        by prepending the string value from the environment variable SSKEYIN
+        to dataset names.
+        Prefixes will only be used if they were previously set through
+        environment variables SSKEYIN and SSKEYOUT.
+        Keys for entities created before this function is called
+        will not be retroactively prefixed.
+        By default, the client prefixes dataset keys when a prefix is
+        available.
+
+        :param use_prefix: If set to true, all future operations on datasets
+                           will use a prefix, if available.
+        :type use_prefix: bool
+        """
+        typecheck(use_prefix, "use_prefix", bool)
+        return self._client.use_dataset_ensemble_prefix(use_prefix)
 
     @exception_handler
     def get_db_node_info(self, addresses):
