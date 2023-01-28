@@ -29,6 +29,9 @@ module smartredis_dataset
 use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
+
+use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+
 use fortran_c_interop, only : enum_kind
 
 implicit none; private
@@ -38,6 +41,7 @@ include 'dataset/dataset_interfaces.inc'
 include 'dataset/tensor_interfaces.inc'
 include 'dataset/unpack_dataset_tensor_interfaces.inc'
 include 'dataset/metadata_interfaces.inc'
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
@@ -82,6 +86,10 @@ type, public :: dataset_type
   !> procedure :: get_tensor_names ! Not supported currently
   !> Retrieve the type for a tensor
   procedure :: get_tensor_type
+  !> Retrieve a string representation of the dataset
+  procedure :: to_string
+  !> Print a string representation of the dataset
+  procedure :: print_dataset
 
   ! Private procedures
   procedure, private :: add_tensor_i8
@@ -469,5 +477,44 @@ function get_tensor_type(self, name, ttype) result(code)
 
   code = get_tensor_type_c(self%dataset_ptr, c_name, name_length, ttype)
 end function get_tensor_type
+
+!> Retrieve a string representation of the dataset
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string !< Text version of dataset
+  class(dataset_type),     intent(in)        :: self      !< The dataset
+
+  type(c_ptr)                                :: c_ds_str
+  integer(kind=c_size_t)                     :: c_ds_str_len
+
+  ! Get the string representation of the dataset from C
+  c_ds_str = dataset_to_string_c(self%dataset_ptr)
+  c_ds_str_len = c_strlen(c_ds_str)
+  to_string = make_str(c_ds_str, c_ds_str_len)
+end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
+
+!> Print a string representation of the dataset
+subroutine print_dataset(self, unit)
+  class(dataset_type),     intent(in)  :: self  !< The dataset
+  integer, optional, intent(in)        :: unit
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) to_string(self)
+end subroutine print_dataset
 
 end module smartredis_dataset

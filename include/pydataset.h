@@ -170,6 +170,12 @@ class PyDataset : public PySRObject
         */
         DataSet* get();
 
+        /*!
+        *   \brief Create a string representation of the DataSet
+        *   \returns A string representation of the DataSet
+        */
+        std::string to_string();
+
     private:
 
         DataSet* _dataset;

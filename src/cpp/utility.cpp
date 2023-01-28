@@ -145,4 +145,56 @@ void get_config_string(std::string& value,
     log_data("SmartRedis Library", LLDebug, message);
 }
 
-} // namespace SmartRedis {
+// Create a string representation of a tensor type
+std::string to_string(SRTensorType ttype)
+{
+    switch (ttype) {
+        case SRTensorTypeDouble:
+            return "double";
+        case SRTensorTypeFloat:
+            return "float";
+        case SRTensorTypeInt8:
+            return "8 bit signed integer";
+        case SRTensorTypeInt16:
+            return "16 bit signed integer";
+        case SRTensorTypeInt32:
+            return "32 bit signed integer";
+        case SRTensorTypeInt64:
+            return "64 bit signed integer";
+        case SRTensorTypeUint8:
+            return "8 bit unsigned integer";
+        case SRTensorTypeUint16:
+            return "16 bit unsigned integer";
+        case SRTensorTypeInvalid:
+            // Fall through
+        default:
+            return "Invalid tensor type";
+    }
+}
+
+// Create a string representation of a metadata field type
+std::string to_string(SRMetaDataType mdtype)
+{
+    switch (mdtype) {
+        case SRMetadataTypeDouble:
+            return "double";
+        case SRMetadataTypeFloat:
+            return "float";
+        case SRMetadataTypeInt32:
+            return "32 bit signed integer";
+        case SRMetadataTypeInt64:
+            return "64 bit signed integer";
+        case SRMetadataTypeUint32:
+            return "32 bit unsigned integer";
+        case SRMetadataTypeUint64:
+            return "64 bit unsigned integer";
+        case SRMetadataTypeString:
+            return "string";
+        case SRMetadataTypeInvalid:
+            // Fall through
+        default:
+            return "Invalid metadata type";
+    }
+}
+
+} // namespace SmartRedis

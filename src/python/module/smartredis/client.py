@@ -68,6 +68,14 @@ class Client(SRObject):
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 
+    def __str__(self):
+        """Create a string representation of the client
+
+        :return: A string representation of the client
+        :rtype: str
+        """
+        return self._client.to_string()
+
     @property
     def _client(self):
         """Alias _srobject to _client

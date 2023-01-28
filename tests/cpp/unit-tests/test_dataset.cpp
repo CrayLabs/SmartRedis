@@ -208,6 +208,13 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     dataset.get_meta_strings(meta_str_name);
                 CHECK(meta_str_data[0] == meta_str_val);
             }
+
+            THEN("The dataset can be printed")
+            {
+                std::string dump = dataset.to_string();
+                CHECK(dump.length() > 0);
+                std::cout << dataset;
+            }
         }
     }
     log_data(context, LLDebug, "***End DataSet testing***");

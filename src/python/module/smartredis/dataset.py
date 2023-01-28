@@ -44,6 +44,14 @@ class Dataset(SRObject):
         super().__init__(PyDataset(name))
         typecheck(name, "name", str)
 
+    def __str__(self):
+        """Create a string representation of the client
+
+        :return: A string representation of the client
+        :rtype: str
+        """
+        return self._data.to_string()
+
     @property
     def _data(self):
         """Alias _srobject to _data

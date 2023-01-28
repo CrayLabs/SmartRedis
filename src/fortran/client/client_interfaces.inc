@@ -152,3 +152,11 @@ interface
     logical(kind=c_bool)          :: exists
   end function poll_key_c
 end interface
+
+interface
+  function client_to_string_c(client) bind(c, name="client_to_string")
+    use iso_c_binding, only : c_ptr, c_char
+    type(c_ptr)                   :: client_to_string_c
+    type(c_ptr), value            :: client
+  end function client_to_string_c
+end interface

@@ -32,8 +32,6 @@
 #include "pylogcontext.h"
 #include "srexception.h"
 #include "logger.h"
-//#include "srobject.h"
-//#include "logcontext.h"
 
 using namespace SmartRedis;
 namespace py = pybind11;
@@ -54,6 +52,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def(py::init<std::string&>());
 
     // Python client class
+    #define CLIENT_METHOD(name)  def(#name, &PyClient::name)
     py::class_<PyClient, PySRObject>(m, "PyClient")
         .def(py::init<bool, const std::string&>())
         .def("put_tensor", &PyClient::put_tensor)
@@ -113,9 +112,11 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("poll_list_length_gte", &PyClient::poll_list_length_gte)
         .def("poll_list_length_lte", &PyClient::poll_list_length_lte)
         .def("get_datasets_from_list", &PyClient::get_datasets_from_list)
-        .def("get_dataset_list_range", &PyClient::get_dataset_list_range);
+        .def("get_dataset_list_range", &PyClient::get_dataset_list_range)
+        .def("to_string", &PyClient::to_string);
 
     // Python Dataset class
+    #define DATASET_METHOD(name) def(#name, &PyClient::name)
     py::class_<PyDataset, PySRObject>(m, "PyDataset")
         .def(py::init<std::string&>())
         .def("add_tensor", &PyDataset::add_tensor)
@@ -128,7 +129,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def("get_metadata_field_names", &PyDataset::get_metadata_field_names)
         .def("get_metadata_field_type", &PyDataset::get_metadata_field_type)
         .def("get_tensor_type", &PyDataset::get_tensor_type)
-        .def("get_tensor_names", &PyDataset::get_tensor_names);
+        .def("get_tensor_names", &PyDataset::get_tensor_names)
+        .def("to_string", &PyDataset::to_string);
 
     // Logging functions
     m.def("cpp_log_data", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_data))

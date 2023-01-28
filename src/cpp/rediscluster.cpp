@@ -43,6 +43,7 @@ RedisCluster::RedisCluster(const SRObject* context)
     if (!db_address._is_tcp) {
         throw SRRuntimeException("Unix Domain Socket is not supported with clustered Redis");
     }
+    _is_domain_socket = false;
     _connect(db_address);
     _map_cluster();
     if (_address_node_map.count(db_address.to_string()) > 0)
@@ -1421,4 +1422,12 @@ RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
 
     // Return the reply
     return reply;
+}
+
+// Create a string representation of the Redis connection
+std::string RedisCluster::to_string() const
+{
+    std::string result("Clustered Redis connection:\n");
+    result += RedisServer::to_string();
+    return result;
 }

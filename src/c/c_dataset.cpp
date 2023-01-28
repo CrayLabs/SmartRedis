@@ -447,3 +447,28 @@ SRError get_metadata_field_type(
 
   return result;
 }
+
+// Retrieve a string representation of the dataset
+const char* dataset_to_string(void* dataset)
+{
+  static std::string result;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    result = d->to_string();
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.what();
+  }
+  catch (...) {
+    result = "Unknown exception occurred";
+    SRSetLastError(SRInternalException(result));
+    result = SRInternalError;
+  }
+
+  return result.c_str();
+}
