@@ -180,7 +180,7 @@ class Client(SRObject):
         The final dataset key under which the dataset is stored
         is generated from the name that was supplied when the
         dataset was created and may be prefixed. See
-        use_tensor_ensemble_prefix() for more details.
+        use_dataset_ensemble_prefix() for more details.
 
         All associated tensors and metadata within the Dataset
         instance will also be stored.
@@ -201,7 +201,7 @@ class Client(SRObject):
         The dataset key used to locate the dataset
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: name the dataset is stored under
         :type name: str
@@ -221,7 +221,7 @@ class Client(SRObject):
         The dataset key used to locate the dataset to be deleted
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: name of the dataset
         :type name: str
@@ -237,7 +237,7 @@ class Client(SRObject):
         The source and destination dataset keys used to
         locate the dataset may be formed by applying prefixes
         to the supplied src_name and dest_name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param src_name: source name for dataset to be copied
         :type src_name: str
@@ -256,7 +256,7 @@ class Client(SRObject):
         The old and new dataset keys used to find and relocate
         the dataset may be formed by applying prefixes to the supplied
         old_name and new_name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param old_name: original name of the dataset to be renamed
         :type old_name: str
@@ -964,7 +964,7 @@ class Client(SRObject):
         The dataset key used to check for existence
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: The dataset name that will be checked in the database
         :type name: str
@@ -1065,7 +1065,7 @@ class Client(SRObject):
         The dataset key used to check for existence
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: The dataset name that will be checked in the database
         :type name: str
@@ -1177,9 +1177,9 @@ class Client(SRObject):
         prefixed. By default, the client prefixes aggregation
         list keys with the first prefix specified with the SSKEYIN
         and SSKEYOUT environment variables.  Note that
-        use_tensor_ensemble_prefix() controls prefixing
+        use_dataset_ensemble_prefix() controls prefixing
         for the entities in the aggregation list, and
-        use_tensor_ensemble_prefix() should be given the
+        use_dataset_ensemble_prefix() should be given the
         same value that was used during the initial
         setting of the DataSet into the database.
 

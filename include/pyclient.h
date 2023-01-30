@@ -618,9 +618,9 @@ class PyClient : public PySRObject
         *            prefixed. By default, the client prefixes aggregation
         *            list keys with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.  Note that
-        *            use_tensor_ensemble_prefix() controls prefixing
+        *            use_dataset_ensemble_prefix() controls prefixing
         *            for the entities in the aggregation list, and
-        *            use_tensor_ensemble_prefix() should be given the
+        *            use_dataset_ensemble_prefix() should be given the
         *            same value that was used during the initial
         *            setting of the DataSet into the database.
         *  \param use_prefix If set to true, all future operations
