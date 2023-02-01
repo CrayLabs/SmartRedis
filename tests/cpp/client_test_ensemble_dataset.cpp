@@ -37,6 +37,7 @@ void rename_dataset(std::string keyout)
 
     DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
+    client.use_dataset_ensemble_prefix(true);
 
     double*** t_send_1 =
         allocate_3D_array<double>(dims[0], dims[1], dims[2]);
@@ -139,6 +140,7 @@ void add_to_aggregation_list(std::string keyout)
 
     DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
+    client.use_dataset_ensemble_prefix(true);
     client.use_list_ensemble_prefix(true);
 
     double*** t_send_1 =

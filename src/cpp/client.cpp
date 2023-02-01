@@ -1114,7 +1114,7 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
 // and SSKEYIN. Keys of entities created before this function is called
-// will not be affected. By default, the client prefixes tensor and dataset
+// will not be affected. By default, the client prefixes dataset
 // keys with the first prefix specified with the SSKEYIN and SSKEYOUT
 // environment variables.
 void Client::use_dataset_ensemble_prefix(bool use_prefix)
