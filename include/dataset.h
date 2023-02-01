@@ -322,6 +322,15 @@ class DataSet : public SRObject
         SRTensorType get_tensor_type(const std::string& name) const;
 
         /*!
+        *   \brief Retrieve the dimensions of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns A vector of the tensor's dimensions
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        const std::vector<size_t> get_tensor_dims(
+            const std::string& name) const;
+
+        /*!
         *   \brief Retrieve the names of all metadata fields in the DataSet
         *   \returns A vector of metadata field names
         */

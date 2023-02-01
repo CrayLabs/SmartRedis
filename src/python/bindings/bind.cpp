@@ -130,6 +130,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .DATASET_METHOD(get_metadata_field_type)
         .DATASET_METHOD(get_tensor_type)
         .DATASET_METHOD(get_tensor_names)
+        .DATASET_METHOD(get_tensor_dims)
         .DATASET_METHOD(to_string)
     ;
 

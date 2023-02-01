@@ -229,3 +229,13 @@ class Dataset(SRObject):
         :rtype: list
         """
         return self._data.get_tensor_names()
+
+    @exception_handler
+    def get_tensor_dims(self, name):
+        """Get the dimensions of a tensor in the DataSet
+
+        :return: a list of the tensor dimensions
+        :rtype: list
+        """
+        typecheck(name, "name", str)
+        return self._data.get_tensor_dims(name)
