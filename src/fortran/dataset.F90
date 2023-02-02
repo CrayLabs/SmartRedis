@@ -481,12 +481,13 @@ function get_tensor_type(self, name, ttype) result(code)
 end function get_tensor_type
 
 
-!> Retrieve the dimensions for a tensor
+!> Retrieve the dimensions for a tensor into a supplied buffer, or receive the
+!! number of dimensions if the supplied buffer is too small
 function get_tensor_dims(self, name, dims, dims_length) result(code)
   class(dataset_type),     intent(in)    :: self  !< The dataset
   character(len=*),        intent(in)    :: name  !< The name of the tensor
-  integer(kind=c_size_t), dimension(:), target, intent(inout) :: dims        !< Receives the tensor dimensions
-  integer(kind=c_size_t),  intent(inout) :: dims_length !< Receives the tensor dimensions
+  integer(kind=c_size_t), dimension(:), target, intent(inout) :: dims !< Receives the tensor dimensions
+  integer(kind=c_size_t),  intent(inout) :: dims_length !< Receives the number of tensor dimensions
   integer(kind=enum_kind)                :: code  !< Result of the operation
 
   ! local variables
