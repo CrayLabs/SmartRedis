@@ -86,6 +86,8 @@ type, public :: dataset_type
   !> procedure :: get_tensor_names ! Not supported currently
   !> Retrieve the type for a tensor
   procedure :: get_tensor_type
+  !> Retrieve the dimensions for a tensor
+  procedure :: get_tensor_dims
   !> Retrieve a string representation of the dataset
   procedure :: to_string
   !> Print a string representation of the dataset
@@ -477,6 +479,36 @@ function get_tensor_type(self, name, ttype) result(code)
 
   code = get_tensor_type_c(self%dataset_ptr, c_name, name_length, ttype)
 end function get_tensor_type
+
+
+!> Retrieve the dimensions for a tensor
+function get_tensor_dims(self, name, dims, dims_length) result(code)
+  class(dataset_type),     intent(in)    :: self  !< The dataset
+  character(len=*),        intent(in)    :: name  !< The name of the tensor
+  integer(kind=c_size_t), dimension(:), target, intent(inout) :: dims        !< Receives the tensor dimensions
+  integer(kind=c_size_t),  intent(inout) :: dims_length !< Receives the tensor dimensions
+  integer(kind=enum_kind)                :: code  !< Result of the operation
+
+  ! local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length, i
+  type(c_ptr) :: dims_ptr
+
+  c_name = trim(name)
+  name_length = len_trim(c_name)
+
+  do i=1, size(dims)
+    dims(i) = i
+  end do
+
+  if (dims_length .gt. size(dims)) then
+    error stop 'undersized buffer in call to get_tensor_dims'
+  end if
+  dims_ptr = c_loc(dims)
+
+  code = get_tensor_dims_c(self%dataset_ptr, c_name, name_length, dims_ptr, dims_length)
+end function get_tensor_dims
+
 
 !> Retrieve a string representation of the dataset
 function to_string(self)
