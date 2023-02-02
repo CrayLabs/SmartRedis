@@ -498,10 +498,6 @@ function get_tensor_dims(self, name, dims, dims_length) result(code)
   c_name = trim(name)
   name_length = len_trim(c_name)
 
-  do i=1, size(dims)
-    dims(i) = i
-  end do
-
   if (dims_length .gt. size(dims)) then
     error stop 'undersized buffer in call to get_tensor_dims'
   end if

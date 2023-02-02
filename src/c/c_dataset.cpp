@@ -398,7 +398,6 @@ SRError get_tensor_dims(
     void* dataset, const char* name, size_t name_len,
     size_t** dims, size_t *ndims)
 {
-  std::cout << "Reached C layer" << std::endl;
   SRError result = SRNoError;
   try
   {
@@ -409,10 +408,6 @@ SRError get_tensor_dims(
     std::string tensor_name(name, name_len);
     auto result = d->get_tensor_dims(tensor_name);
     size_t num_dims = result.size();
-
-  for (int i = 0; i < *ndims; i++)
-    std::cout << std::to_string((*dims)[i]) << ", ";
-  std::cout << std::endl;
 
     // Make sure they gave us a big enough buffer
     if (*ndims < num_dims) {
