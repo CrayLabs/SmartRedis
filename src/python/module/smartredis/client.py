@@ -1193,7 +1193,7 @@ class Client(SRObject):
 
     @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
-        """Control whether tensor and keys are prefixed (e.g. in an
+        """Control whether tensor keys are prefixed (e.g. in an
         ensemble) when forming database keys
 
         This function can be used to avoid key collisions in an ensemble
