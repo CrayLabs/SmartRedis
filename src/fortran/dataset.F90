@@ -492,7 +492,7 @@ function get_tensor_dims(self, name, dims, dims_length) result(code)
 
   ! local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
-  integer(kind=c_size_t) :: name_length, i
+  integer(kind=c_size_t) :: name_length
   type(c_ptr) :: dims_ptr
 
   c_name = trim(name)
