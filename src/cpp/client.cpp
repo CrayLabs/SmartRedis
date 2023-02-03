@@ -591,9 +591,14 @@ void Client::set_model(const std::string& name,
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_model(key, model, backend, device,
-                             batch_size, min_batch_size,
-                             tag, inputs, outputs);
+    auto response = _redis_server->set_model(
+        key, model, backend, device,
+        batch_size, min_batch_size,
+        tag, inputs, outputs);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the model");
+    }
 }
 
 void Client::set_model_multigpu(const std::string& name,
@@ -730,7 +735,11 @@ void Client::set_script(const std::string& name,
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_script(key, device, script);
+    auto response = _redis_server->set_script(key, device, script);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the scriot");
+    }
 }
 
 // Set a script in the database for future execution in a multi-GPU system
