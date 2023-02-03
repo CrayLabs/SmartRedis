@@ -29,20 +29,10 @@ import numpy as np
 
 from smartredis import Client, Dataset
 
-def test_prefixing(use_cluster, context):
-    # save env var for prefixing
-    try:
-        old_out_prefix = os.environ["SSKEYOUT"]
-    except (KeyError):
-        old_out_prefix = None
-    try:
-        old_in_prefix = os.environ["SSKEYIN"]
-    except (KeyError):
-        old_in_prefix = None
-
+def test_prefixing(use_cluster, context, monkeypatch):
     # configure prefix variables
-    os.environ["SSKEYOUT"] = "prefix_test"
-    os.environ["SSKEYIN"] = "prefix_test"
+    monkeypatch.setenv("SSKEYOUT", "prefix_test")
+    monkeypatch.setenv("SSKEYIN", "prefix_test")
 
     # Set up client
     c = Client(address=None, cluster=use_cluster, logger_name=context)
@@ -61,16 +51,3 @@ def test_prefixing(use_cluster, context):
     assert c.tensor_exists("test_tensor")
     assert c.key_exists("prefix_test.test_tensor")
     assert not c.key_exists("test_tensor")
-
-    # restore environment variables
-    if not old_out_prefix is None:
-        os.environ["SSKEYOUT"] = old_out_prefix
-    else:
-        del os.environ["SSKEYOUT"]
-        os.unsetenv("SSKEYOUT")
-    if not old_in_prefix is None:
-        os.environ["SSKEYIN"] = old_in_prefix
-    else:
-        del os.environ["SSKEYIN"]
-        os.unsetenv("SSKEYIN")
-
