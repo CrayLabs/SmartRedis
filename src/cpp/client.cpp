@@ -738,7 +738,7 @@ void Client::set_script(const std::string& name,
     auto response = _redis_server->set_script(key, device, script);
     if (response.has_error()) {
         throw SRInternalException(
-            "An unknown error occurred while setting the scriot");
+            "An unknown error occurred while setting the script");
     }
 }
 
