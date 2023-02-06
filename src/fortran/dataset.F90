@@ -486,14 +486,16 @@ end function get_tensor_type
 function get_tensor_dims(self, name, dims, dims_length) result(code)
   class(dataset_type),     intent(in)    :: self  !< The dataset
   character(len=*),        intent(in)    :: name  !< The name of the tensor
-  integer(kind=c_size_t), dimension(:), target, intent(inout) :: dims !< Receives the tensor dimensions
-  integer(kind=c_size_t),  intent(inout) :: dims_length !< Receives the number of tensor dimensions
+  integer, dimension(:), target, intent(inout) :: dims !< Receives the tensor dimensions
+  integer,  intent(inout) :: dims_length !< Receives the number of tensor dimensions
   integer(kind=enum_kind)                :: code  !< Result of the operation
 
   ! local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
   integer(kind=c_size_t) :: name_length
   type(c_ptr) :: dims_ptr
+  integer(kind=c_size_t), dimension(size(dims)), target :: c_dims
+  integer(kind=c_size_t) ::  c_dims_length
 
   c_name = trim(name)
   name_length = len_trim(c_name)
@@ -501,9 +503,12 @@ function get_tensor_dims(self, name, dims, dims_length) result(code)
   if (dims_length .gt. size(dims)) then
     error stop 'undersized buffer in call to get_tensor_dims'
   end if
-  dims_ptr = c_loc(dims)
+  dims_ptr = c_loc(c_dims)
+  c_dims_length = dims_length
 
-  code = get_tensor_dims_c(self%dataset_ptr, c_name, name_length, dims_ptr, dims_length)
+  code = get_tensor_dims_c(self%dataset_ptr, c_name, name_length, dims_ptr, c_dims_length)
+  dims = c_dims
+  dims_length = c_dims_length
 end function get_tensor_dims
 
 

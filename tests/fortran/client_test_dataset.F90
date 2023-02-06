@@ -69,8 +69,8 @@ program main
   integer(kind=c_int64_t), dimension(dim1) :: meta_int64_vec
   integer(kind=c_int64_t), dimension(:), pointer :: meta_int64_recv
 
-  integer(kind=c_size_t), dimension(10) :: dims
-  integer(kind=c_size_t) :: ndims
+  integer, dimension(10) :: dims
+  integer :: ndims
 
   integer :: i, j, k
   type(dataset_type) :: dataset

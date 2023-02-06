@@ -190,7 +190,7 @@ class Dataset(SRObject):
         """Get the names of all metadata scalars and strings from the DataSet
 
         :return: a list of metadata field names
-        :rtype: list
+        :rtype: list[str]
         """
         return self._data.get_metadata_field_names()
 
@@ -226,7 +226,7 @@ class Dataset(SRObject):
         """Get the names of all tensors in the DataSet
 
         :return: a list of tensor names
-        :rtype: list
+        :rtype: list[str]
         """
         return self._data.get_tensor_names()
 
@@ -235,7 +235,7 @@ class Dataset(SRObject):
         """Get the dimensions of a tensor in the DataSet
 
         :return: a list of the tensor dimensions
-        :rtype: list
+        :rtype: list[int]
         """
         typecheck(name, "name", str)
         return self._data.get_tensor_dims(name)
