@@ -84,6 +84,7 @@ set(UNIT_TESTS
 	test_aggregation_list.cpp
 	test_client.cpp
 	test_client_ensemble.cpp
+	test_client_prefixing.cpp
 	test_dataset.cpp
 	test_tensorbase.cpp
 	test_dbnode.cpp

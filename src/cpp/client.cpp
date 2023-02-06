@@ -54,6 +54,7 @@ Client::Client(bool cluster, const std::string& logger_name)
     // Initialize key prefixing
     _set_prefixes_from_env();
     _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
 }
@@ -1103,7 +1104,7 @@ void Client::use_list_ensemble_prefix(bool use_prefix)
 }
 
 
-// Set whether names of tensor and dataset entities should be prefixed
+// Set whether names of tensor entities should be prefixed
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
 // and SSKEYIN. Keys of entities created before this function is called
@@ -1116,6 +1117,21 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
     LOG_API_FUNCTION();
 
     _use_tensor_prefix = use_prefix;
+}
+
+// Set whether names of dataset entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be used
+// if they were previously set through the environment variables SSKEYOUT
+// and SSKEYIN. Keys of entities created before this function is called
+// will not be affected. By default, the client prefixes dataset
+// keys with the first prefix specified with the SSKEYIN and SSKEYOUT
+// environment variables.
+void Client::use_dataset_ensemble_prefix(bool use_prefix)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_dataset_prefix = use_prefix;
 }
 
 // Returns information about the given database node
@@ -1801,7 +1817,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
 inline std::string Client::_build_tensor_key(const std::string& key,
                                              const bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_tensor_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1813,7 +1829,7 @@ inline std::string Client::_build_tensor_key(const std::string& key,
 inline std::string Client::_build_model_key(const std::string& key,
                                             const bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_model_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1824,8 +1840,8 @@ inline std::string Client::_build_model_key(const std::string& key,
 inline std::string Client::_build_dataset_key(const std::string& dataset_name,
                                               const bool on_db)
 {
-    std::string prefix;
-    if (_use_tensor_prefix)
+    std::string prefix("");
+    if (_use_dataset_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
     return prefix + "{" + dataset_name + "}";

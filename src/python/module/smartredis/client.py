@@ -180,7 +180,7 @@ class Client(SRObject):
         The final dataset key under which the dataset is stored
         is generated from the name that was supplied when the
         dataset was created and may be prefixed. See
-        use_tensor_ensemble_prefix() for more details.
+        use_dataset_ensemble_prefix() for more details.
 
         All associated tensors and metadata within the Dataset
         instance will also be stored.
@@ -201,7 +201,7 @@ class Client(SRObject):
         The dataset key used to locate the dataset
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: name the dataset is stored under
         :type name: str
@@ -221,7 +221,7 @@ class Client(SRObject):
         The dataset key used to locate the dataset to be deleted
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: name of the dataset
         :type name: str
@@ -237,7 +237,7 @@ class Client(SRObject):
         The source and destination dataset keys used to
         locate the dataset may be formed by applying prefixes
         to the supplied src_name and dest_name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param src_name: source name for dataset to be copied
         :type src_name: str
@@ -256,7 +256,7 @@ class Client(SRObject):
         The old and new dataset keys used to find and relocate
         the dataset may be formed by applying prefixes to the supplied
         old_name and new_name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param old_name: original name of the dataset to be renamed
         :type old_name: str
@@ -964,7 +964,7 @@ class Client(SRObject):
         The dataset key used to check for existence
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: The dataset name that will be checked in the database
         :type name: str
@@ -1065,7 +1065,7 @@ class Client(SRObject):
         The dataset key used to check for existence
         may be formed by applying a prefix to the supplied
         name. See set_data_source()
-        and use_tensor_ensemble_prefix() for more details.
+        and use_dataset_ensemble_prefix() for more details.
 
         :param name: The dataset name that will be checked in the database
         :type name: str
@@ -1177,9 +1177,9 @@ class Client(SRObject):
         prefixed. By default, the client prefixes aggregation
         list keys with the first prefix specified with the SSKEYIN
         and SSKEYOUT environment variables.  Note that
-        use_tensor_ensemble_prefix() controls prefixing
+        use_dataset_ensemble_prefix() controls prefixing
         for the entities in the aggregation list, and
-        use_tensor_ensemble_prefix() should be given the
+        use_dataset_ensemble_prefix() should be given the
         same value that was used during the initial
         setting of the DataSet into the database.
 
@@ -1193,26 +1193,47 @@ class Client(SRObject):
 
     @exception_handler
     def use_tensor_ensemble_prefix(self, use_prefix):
-        """Control whether tensor and dataset keys are
-           prefixed (e.g. in an ensemble) when forming database keys
+        """Control whether tensor keys are prefixed (e.g. in an
+        ensemble) when forming database keys
 
         This function can be used to avoid key collisions in an ensemble
         by prepending the string value from the environment variable SSKEYIN
-        to tensor and dataset names.
+        to tensor names.
         Prefixes will only be used if they were previously set through
         environment variables SSKEYIN and SSKEYOUT.
         Keys for entities created before this function is called
         will not be retroactively prefixed.
-        By default, the client prefixes tensor and dataset
-        keys when a prefix is available.
+        By default, the client prefixes tensor keys when a prefix is
+        available.
 
-        :param use_prefix: If set to true, all future operations
-                           on tensors and datasets will use a prefix, if
-                           available.
+        :param use_prefix: If set to true, all future operations on tensors
+                           will use a prefix, if available.
         :type use_prefix: bool
         """
         typecheck(use_prefix, "use_prefix", bool)
         return self._client.use_tensor_ensemble_prefix(use_prefix)
+
+    @exception_handler
+    def use_dataset_ensemble_prefix(self, use_prefix):
+        """Control whether dataset keys are prefixed (e.g. in an ensemble)
+           when forming database keys
+
+        This function can be used to avoid key collisions in an ensemble
+        by prepending the string value from the environment variable SSKEYIN
+        to dataset names.
+        Prefixes will only be used if they were previously set through
+        environment variables SSKEYIN and SSKEYOUT.
+        Keys for entities created before this function is called
+        will not be retroactively prefixed.
+        By default, the client prefixes dataset keys when a prefix is
+        available.
+
+        :param use_prefix: If set to true, all future operations on datasets
+                           will use a prefix, if available.
+        :type use_prefix: bool
+        """
+        typecheck(use_prefix, "use_prefix", bool)
+        return self._client.use_dataset_ensemble_prefix(use_prefix)
 
     @exception_handler
     def get_db_node_info(self, addresses):

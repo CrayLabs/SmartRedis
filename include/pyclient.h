@@ -618,9 +618,9 @@ class PyClient : public PySRObject
         *            prefixed. By default, the client prefixes aggregation
         *            list keys with the first prefix specified with the SSKEYIN
         *            and SSKEYOUT environment variables.  Note that
-        *            use_tensor_ensemble_prefix() controls prefixing
+        *            use_dataset_ensemble_prefix() controls prefixing
         *            for the entities in the aggregation list, and
-        *            use_tensor_ensemble_prefix() should be given the
+        *            use_dataset_ensemble_prefix() should be given the
         *            same value that was used during the initial
         *            setting of the DataSet into the database.
         *  \param use_prefix If set to true, all future operations
@@ -630,20 +630,34 @@ class PyClient : public PySRObject
         void use_list_ensemble_prefix(bool use_prefix);
 
         /*!
-        * \brief Set whether names of tensors or datasets should be
-        *        prefixed (e.g. in an ensemble) to form database keys.
+        * \brief Set whether names of tensors should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
         *        the environment variables SSKEYOUT and SSKEYIN.
         *        Keys formed before this function is called will not be affected.
-        *        By default, the client prefixes tensor and dataset keys
-        *        with the first prefix specified with the SSKEYIN
-        *        and SSKEYOUT environment variables.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
         *
-        * \param use_prefix If set to true, all future operations
-        *                   on tensors and datasets will add
-        *                   a prefix to the entity names, if available.
+        * \param use_prefix If set to true, all future operations on tensors will
+        *                   add a prefix to the entity names, if available.
         */
         void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        * \brief Set whether names of datasets should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
+        *
+        * \param use_prefix If set to true, all future operations on datasets will
+        *                   add a prefix to the entity names, if available.
+        */
+        void use_dataset_ensemble_prefix(bool use_prefix);
 
         /*!
         *   \brief Returns information about the given database nodes

@@ -93,6 +93,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .CLIENT_METHOD(poll_dataset)
         .CLIENT_METHOD(set_data_source)
         .CLIENT_METHOD(use_tensor_ensemble_prefix)
+        .CLIENT_METHOD(use_dataset_ensemble_prefix)
         .CLIENT_METHOD(use_model_ensemble_prefix)
         .CLIENT_METHOD(use_list_ensemble_prefix)
         .CLIENT_METHOD(get_db_node_info)
