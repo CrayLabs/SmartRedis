@@ -56,6 +56,7 @@ class Redis : public RedisServer
         *          of environment variables.
         *   \param context The owning context
         *   \param addr_spec The TCP or UDS server address
+        *   \throw SmartRedis::Exception if connection fails
         */
         Redis(const SRObject* context, std::string addr_spec);
 
@@ -91,50 +92,49 @@ class Redis : public RedisServer
        /*!
         *   \brief Run a SingleKeyCommand on the server
         *   \param cmd The SingleKeyCommand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(SingleKeyCommand& cmd);
 
         /*!
         *   \brief Run a MultiKeyCommand on the server
         *   \param cmd The MultiKeyCommand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(MultiKeyCommand& cmd);
 
         /*!
         *   \brief Run a CompoundCommand on the server
         *   \param cmd The CompoundCommand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(CompoundCommand& cmd);
 
         /*!
         *   \brief Run an AddressAtCommand on the server
         *   \param cmd The AddressAtCommand command to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAtCommand& cmd);
 
         /*!
         *   \brief Run an AddressAnyCommand on the server
         *   \param cmd The AddressAnyCommand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run a non-keyed Command that
         *          addresses every db node on the server
-        *   \param cmd The non-keyed Command that
-        *              addresses any db node
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The non-keyed Command that addresses any db node
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAllCommand& cmd);
 
@@ -142,11 +142,11 @@ class Redis : public RedisServer
         *   \brief Run multiple single-key or single-hash slot
         *          Command on the server.  Each Command in the
         *          CommandList is run sequentially.
-        *   \param cmd The CommandList containing multiple
-        *              single-key or single-hash
-        *              slot Comand to run
+        *   \param cmd The CommandList containing multiple single-key or
+        *              single-hash slot Command to run
         *   \returns A list of CommandReply for each Command
         *            in the CommandList
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual std::vector<CommandReply> run(CommandList& cmd);
 
@@ -163,6 +163,7 @@ class Redis : public RedisServer
         *   \returns A list of CommandReply for each Command
         *            in the CommandList. The order of the result
         *            matches the order of the input CommandList.
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual PipelineReply
         run_via_unordered_pipelines(CommandList& cmd_list);
@@ -174,6 +175,7 @@ class Redis : public RedisServer
         *          be used.
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool key_exists(const std::string& key);
 
@@ -182,6 +184,7 @@ class Redis : public RedisServer
         *   \param key The key containing the field
         *   \param field The field in the key to check
         *   \returns True if the hash field exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool hash_field_exists(const std::string& key,
                                        const std::string& field);
@@ -190,6 +193,7 @@ class Redis : public RedisServer
         *   \brief Check if a model or script key exists in the database
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool model_key_exists(const std::string& key);
 
@@ -203,8 +207,8 @@ class Redis : public RedisServer
         /*!
         *   \brief Put a Tensor on the server
         *   \param tensor The Tensor to put on the server
-        *   \returns The CommandReply from the put tensor
-        *            command execution
+        *   \returns The CommandReply from the put tensor command execution
+        *   \throw SmartRedis::Exception if tensor storage fails
         */
         virtual CommandReply put_tensor(TensorBase& tensor);
 
@@ -213,6 +217,7 @@ class Redis : public RedisServer
         *   \param key The name of the tensor to retrieve
         *   \returns The CommandReply from the get tensor server
         *            command execution
+        *   \throw SmartRedis::Exception if tensor retrieval fails
         */
         virtual CommandReply get_tensor(const std::string& key);
 
@@ -220,8 +225,8 @@ class Redis : public RedisServer
         *   \brief Rename a tensor in the database
         *   \param key The original key for the tensor
         *   \param new_key The new key for the tensor
-        *   \returns The CommandReply from executing the RENAME
-        *            command
+        *   \returns The CommandReply from executing the RENAME command
+        *   \throw SmartRedis::Exception if tensor rename fails
         */
         virtual CommandReply rename_tensor(const std::string& key,
                                            const std::string& new_key);
@@ -231,6 +236,7 @@ class Redis : public RedisServer
         *   \param key The database key for the tensor
         *   \returns The CommandReply from delete command
         *            executed on the server
+        *   \throw SmartRedis::Exception if tensor removal fails
         */
         virtual CommandReply delete_tensor(const std::string& key);
 
@@ -239,8 +245,8 @@ class Redis : public RedisServer
         *          the destination key
         *   \param src_key The source key for the tensor copy
         *   \param dest_key The destination key for the tensor copy
-        *   \returns The CommandReply from executing the COPY
-        *            command
+        *   \returns The CommandReply from executing the COPY command
+        *   \throw SmartRedis::Exception if tensor copy fails
         */
         virtual CommandReply copy_tensor(const std::string& src_key,
                                          const std::string& dest_key);
@@ -252,6 +258,7 @@ class Redis : public RedisServer
         *   \param dest Vector of destination keys
         *   \returns The CommandReply from the last put command
         *            associated with the tensor copy
+        *   \throw SmartRedis::Exception if tensor copy fails
         */
         virtual CommandReply copy_tensors(const std::vector<std::string>& src,
                                           const std::vector<std::string>& dest);
@@ -267,15 +274,14 @@ class Redis : public RedisServer
         *   \param device The name of the device for execution
         *                 (e.g. CPU or GPU)
         *   \param batch_size The batch size for model execution
-        *   \param min_batch_size The minimum batch size for model
-        *                         execution
-        *   \param tag A tag to attach to the model for
-        *              information purposes
+        *   \param min_batch_size The minimum batch size for model execution
+        *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
         *   \returns The CommandReply from the set_model Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_model(const std::string& key,
                                        std::string_view model,
@@ -299,10 +305,8 @@ class Redis : public RedisServer
         *   \param first_gpu The first GPU to use with this model
         *   \param num_gpus The number of GPUs to use with this model
         *   \param batch_size The batch size for model execution
-        *   \param min_batch_size The minimum batch size for model
-        *                         execution
-        *   \param tag A tag to attach to the model for
-        *              information purposes
+        *   \param min_batch_size The minimum batch size for model execution
+        *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only)
         *   \param outputs One or more names of model output nodes
@@ -330,6 +334,7 @@ class Redis : public RedisServer
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
         *   \returns The CommandReply from set_script Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_script(const std::string& key,
                                         const std::string& device,
@@ -353,12 +358,11 @@ class Redis : public RedisServer
         *   \brief Run a model in the database using the
         *          specified input and output tensors
         *   \param key The key associated with the model
-        *   \param inputs The keys of inputs tensors to use
-        *                 in the model
+        *   \param inputs The keys of inputs tensors to use in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
-        *   \returns The CommandReply from the run model server
-        *            Command
+        *   \returns The CommandReply from the run model server Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply run_model(const std::string& key,
                                        std::vector<std::string> inputs,
@@ -389,12 +393,11 @@ class Redis : public RedisServer
         *          specified input and output tensors
         *   \param key The key associated with the script
         *   \param function The name of the function in the script to run
-        *   \param inputs The keys of inputs tensors to use
-        *                 in the script
+        *   \param inputs The keys of inputs tensors to use in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
-        *   \returns The CommandReply from script run Command
-        *            execution
+        *   \returns The CommandReply from script run Command execution
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply run_script(const std::string& key,
                                         const std::string& function,
@@ -466,6 +469,7 @@ class Redis : public RedisServer
         *   \param key The key associated with the model
         *   \returns The CommandReply that contains the result
         *            of the get model execution on the server
+        *   \throw SmartRedis::Exception if model retrieval fails
         */
         virtual CommandReply get_model(const std::string& key);
 
@@ -474,6 +478,7 @@ class Redis : public RedisServer
         *   \param key The key associated with the script
         *   \returns The CommandReply that contains the result
         *            of the get script execution on the server
+        *   \throw SmartRedis::Exception if script retrieval fails
         */
         virtual CommandReply get_script(const std::string& key);
 
@@ -485,6 +490,7 @@ class Redis : public RedisServer
         *                     with the model or script should be reset.
         *   \returns The CommandReply that contains the result
         *            of the AI.INFO execution on the server
+        *   \throw SmartRedis::Exception if info retrieval fails
         */
         virtual CommandReply
         get_model_script_ai_info(const std::string& address,
@@ -509,6 +515,7 @@ class Redis : public RedisServer
         *   \param cmd The Command to run
         *   \returns The CommandReply from the
         *            command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         inline CommandReply _run(const Command& cmd);
 
@@ -521,6 +528,7 @@ class Redis : public RedisServer
         /*!
         *   \brief Connect to the server at the address and port
         *   \param db_address The server address
+        *   \throw SmartRedis::Exception if connection fails
         */
         inline void _connect(SRAddress& db_address);
 };
