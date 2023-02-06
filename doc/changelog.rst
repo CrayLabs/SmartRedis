@@ -12,6 +12,8 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Improve documentation of exception handling in Redis server classes
+- Improve error handling for setting of scripts and models
 - Split dataset prefixing control from use_tensor_ensemble_prefix() to use_dataset_ensemble_prefix()
 - Update to the latest version of PyBind
 - Change documentation theme to sphinx_book_theme and fix doc strings
@@ -30,6 +32,8 @@ Description
 
 Detailed Notes
 
+- Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
+- Added error handling for a rare edge condition when setting scripts and models (PR300_)
 - The use_tensor_ensemble_prefix() API method no longer controls whether datasets are prefixed. A new API method, use_dataset_ensemble_prefix() now manages this. (PR298_)
 - Updated from PyBind v2.6.2 to v2.10.3 (PR295_)
 - Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
@@ -50,6 +54,8 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
+.. _PR300: https://github.com/CrayLabs/SmartRedis/pull/300
 .. _PR298: https://github.com/CrayLabs/SmartRedis/pull/298
 .. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
 .. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
