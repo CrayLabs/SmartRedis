@@ -593,6 +593,12 @@ def test_bad_type_use_tensor_ensemble_prefix(use_cluster, context):
         c.use_tensor_ensemble_prefix("not a boolean")
 
 
+def test_bad_type_use_dataset_ensemble_prefix(use_cluster, context):
+    c = Client(None, use_cluster, logger_name=context)
+    with pytest.raises(TypeError):
+        c.use_dataset_ensemble_prefix("not a boolean")
+
+
 def test_bad_type_get_db_node_info(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
