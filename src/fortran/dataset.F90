@@ -508,7 +508,7 @@ function get_tensor_dims(self, name, dims, dims_length) result(code)
 
   code = get_tensor_dims_c(self%dataset_ptr, c_name, name_length, dims_ptr, c_dims_length)
   dims = c_dims
-  dims_length = c_dims_length
+  dims_length = int(c_dims_length, kind(dims_length))
 end function get_tensor_dims
 
 
