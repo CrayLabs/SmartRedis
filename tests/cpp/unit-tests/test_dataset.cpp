@@ -281,6 +281,11 @@ SCENARIO("Testing DataSet inspection", "[DataSet]")
 
             THEN("The tensor's type can be inspected")
             {
+                std::vector<size_t> inspect_dims = dataset.get_tensor_dims(tensor_name);
+                CHECK(dims.size() == inspect_dims.size());
+                for (int i = 0; i < dims.size(); i++) {
+                    CHECK(dims[i] == inspect_dims[i]);
+                }
                 CHECK(SRTensorTypeFloat == dataset.get_tensor_type(tensor_name));
             }
         }

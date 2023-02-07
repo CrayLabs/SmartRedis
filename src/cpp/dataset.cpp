@@ -267,6 +267,24 @@ SRTensorType DataSet::get_tensor_type(const std::string& name) const
     return tensor->type();
 }
 
+// Retrieve the dimensions of a Tensor in the DataSet
+const std::vector<size_t> DataSet::get_tensor_dims(
+    const std::string& name) const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its dimensions
+    return tensor->dims();
+}
+
 // Retrieve the names of all metadata fields in the DataSet
 std::vector<std::string> DataSet::get_metadata_field_names() const
 {

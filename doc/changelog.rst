@@ -14,6 +14,7 @@ Description
 
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
+- Add support to inspect the dimensions of a tensor via get_tensor_dims()
 - Split dataset prefixing control from use_tensor_ensemble_prefix() to use_dataset_ensemble_prefix()
 - Update to the latest version of PyBind
 - Change documentation theme to sphinx_book_theme and fix doc strings
@@ -34,6 +35,7 @@ Detailed Notes
 
 - Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
 - Added error handling for a rare edge condition when setting scripts and models (PR300_)
+- Added support to inspect the dimensions of a tensor via new get_tensor_dims() method (PR299_)
 - The use_tensor_ensemble_prefix() API method no longer controls whether datasets are prefixed. A new API method, use_dataset_ensemble_prefix() now manages this. (PR298_)
 - Updated from PyBind v2.6.2 to v2.10.3 (PR295_)
 - Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
@@ -56,6 +58,7 @@ Detailed Notes
 
 .. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
 .. _PR300: https://github.com/CrayLabs/SmartRedis/pull/300
+.. _PR299: https://github.com/CrayLabs/SmartRedis/pull/299
 .. _PR298: https://github.com/CrayLabs/SmartRedis/pull/298
 .. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
 .. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
