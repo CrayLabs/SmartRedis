@@ -54,6 +54,7 @@ Client::Client(bool cluster, const std::string& logger_name)
     // Initialize key prefixing
     _set_prefixes_from_env();
     _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
 }
@@ -591,9 +592,14 @@ void Client::set_model(const std::string& name,
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_model(key, model, backend, device,
-                             batch_size, min_batch_size,
-                             tag, inputs, outputs);
+    auto response = _redis_server->set_model(
+        key, model, backend, device,
+        batch_size, min_batch_size,
+        tag, inputs, outputs);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the model");
+    }
 }
 
 void Client::set_model_multigpu(const std::string& name,
@@ -730,7 +736,11 @@ void Client::set_script(const std::string& name,
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_script(key, device, script);
+    auto response = _redis_server->set_script(key, device, script);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the script");
+    }
 }
 
 // Set a script in the database for future execution in a multi-GPU system
@@ -1094,7 +1104,7 @@ void Client::use_list_ensemble_prefix(bool use_prefix)
 }
 
 
-// Set whether names of tensor and dataset entities should be prefixed
+// Set whether names of tensor entities should be prefixed
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
 // and SSKEYIN. Keys of entities created before this function is called
@@ -1107,6 +1117,21 @@ void Client::use_tensor_ensemble_prefix(bool use_prefix)
     LOG_API_FUNCTION();
 
     _use_tensor_prefix = use_prefix;
+}
+
+// Set whether names of dataset entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be used
+// if they were previously set through the environment variables SSKEYOUT
+// and SSKEYIN. Keys of entities created before this function is called
+// will not be affected. By default, the client prefixes dataset
+// keys with the first prefix specified with the SSKEYIN and SSKEYOUT
+// environment variables.
+void Client::use_dataset_ensemble_prefix(bool use_prefix)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_dataset_prefix = use_prefix;
 }
 
 // Returns information about the given database node
@@ -1792,7 +1817,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
 inline std::string Client::_build_tensor_key(const std::string& key,
                                              const bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_tensor_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1804,7 +1829,7 @@ inline std::string Client::_build_tensor_key(const std::string& key,
 inline std::string Client::_build_model_key(const std::string& key,
                                             const bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_model_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1815,8 +1840,8 @@ inline std::string Client::_build_model_key(const std::string& key,
 inline std::string Client::_build_dataset_key(const std::string& dataset_name,
                                               const bool on_db)
 {
-    std::string prefix;
-    if (_use_tensor_prefix)
+    std::string prefix("");
+    if (_use_dataset_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
     return prefix + "{" + dataset_name + "}";
@@ -2079,4 +2104,13 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
     }
 
     return false;
+}
+
+// Create a string representation of the client
+std::string Client::to_string() const
+{
+    std::string result;
+    result = "Client (" + _lname + "):\n";
+    result += _redis_server->to_string();
+    return result;
 }

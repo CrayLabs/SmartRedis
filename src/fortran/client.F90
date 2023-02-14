@@ -35,6 +35,7 @@ use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 use smartredis_dataset, only : dataset_type
 use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
 
+
 implicit none; private
 
 #include "enum_fortran.inc"
@@ -47,6 +48,7 @@ implicit none; private
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
 #include "client/aggregation_interfaces.inc"
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
@@ -152,6 +154,8 @@ type, public :: client_type
 
   !> If true, preprend the ensemble id for tensor-related keys
   procedure :: use_tensor_ensemble_prefix
+  !> If true, preprend the ensemble id for dataset-related keys
+  procedure :: use_dataset_ensemble_prefix
   !> If true, preprend the ensemble id for model-related keys
   procedure :: use_model_ensemble_prefix
   !> If true, preprend the ensemble id for dataset list-related keys
@@ -179,6 +183,10 @@ type, public :: client_type
   procedure :: get_datasets_from_list
   !> Retrieve vector of datasets from the list over a given range
   procedure :: get_datasets_from_list_range
+  !> Retrieve a string representation of the client
+  procedure :: to_string
+  !> Print a string representation of the client
+  procedure :: print_client
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -1540,10 +1548,10 @@ function use_model_ensemble_prefix(self, use_prefix) result(code)
 end function use_model_ensemble_prefix
 
 
-!> Set whether names of tensor and dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!> Set whether names of tensor entities should be prefixed (e.g. in an ensemble) to form database keys.
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client prefixes
-!! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+!! tensor keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
 function use_tensor_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
@@ -1551,6 +1559,18 @@ function use_tensor_ensemble_prefix(self, use_prefix) result(code)
 
   code = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_tensor_ensemble_prefix
+
+!> Set whether names of dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before client function is called will not be affected. By default, the client prefixes
+!! dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+function use_dataset_ensemble_prefix(self, use_prefix) result(code)
+  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
+  logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
+
+  code = use_dataset_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+end function use_dataset_ensemble_prefix
 
 !> Control whether aggregation lists are prefixed
 function use_list_ensemble_prefix(self, use_prefix) result(code)
@@ -1815,6 +1835,45 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   enddo
   deallocate(dataset_ptrs)
 end function get_datasets_from_list_range
+
+!> Retrieve a string representation of the client
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string  !< Text version of client
+  class(client_type),   intent(in)           :: self       !< An initialized SmartRedis client
+
+  type(c_ptr)                                :: c_cli_str
+  integer(kind=c_size_t)                     :: c_cli_str_len
+
+  ! Get the string representation of the client from C
+  c_cli_str = client_to_string_c(self%client_ptr)
+  c_cli_str_len = c_strlen(c_cli_str)
+  to_string = make_str(c_cli_str, c_cli_str_len)
+end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
+
+!> Print a string representation of the client
+subroutine print_client(self, unit)
+  class(client_type),   intent(in)           :: self              !< An initialized SmartRedis client
+  integer, optional, intent(in)              :: unit
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) to_string(self)
+end subroutine print_client
 
 end module smartredis_client
 

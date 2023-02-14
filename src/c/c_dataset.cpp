@@ -393,6 +393,49 @@ SRError get_tensor_type(
   return result;
 }
 
+// Retrieve the dimensions of a Tensor in the DataSet
+SRError get_tensor_dims(
+    void* dataset, const char* name, size_t name_len,
+    size_t** dims, size_t *ndims)
+{
+  SRError result = SRNoError;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL && dims != NULL && ndims != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    std::string tensor_name(name, name_len);
+    auto result = d->get_tensor_dims(tensor_name);
+    size_t num_dims = result.size();
+
+    // Make sure they gave us a big enough buffer
+    if (*ndims < num_dims) {
+      *ndims = num_dims;
+      throw SRBadAllocException(
+        "Insufficient space in buffer for tensor dimensions");
+    }
+
+    // Give them the results
+    *ndims = num_dims;
+    int i = 0;
+    for (auto it = result.cbegin(); it != result.cend(); ++it, ++i) {
+      (*dims)[i] = *it;
+    }
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.to_error_code();
+  }
+  catch (...) {
+    SRSetLastError(SRInternalException("Unknown exception occurred"));
+    result = SRInternalError;
+  }
+
+  return result;
+}
+
+
 // Retrieve the names of all metadata fields in the DataSet
 extern "C"
 SRError get_metadata_field_names(
@@ -446,4 +489,29 @@ SRError get_metadata_field_type(
   }
 
   return result;
+}
+
+// Retrieve a string representation of the dataset
+const char* dataset_to_string(void* dataset)
+{
+  static std::string result;
+  try
+  {
+    // Sanity check params
+    SR_CHECK_PARAMS(dataset != NULL);
+
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    result = d->to_string();
+  }
+  catch (const Exception& e) {
+    SRSetLastError(e);
+    result = e.what();
+  }
+  catch (...) {
+    result = "Unknown exception occurred";
+    SRSetLastError(SRInternalException(result));
+    result = SRInternalError;
+  }
+
+  return result.c_str();
 }

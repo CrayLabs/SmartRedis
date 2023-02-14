@@ -129,15 +129,22 @@ The functions for changing this default behavior are:
 
     void use_tensor_ensemble_prefix(bool use_prefix);
 
+    void use_dataset_ensemble_prefix(bool use_prefix);
+
     void use_model_ensemble_prefix(bool use_prefix);
 
 
 .. note::
 
     The function ``Client.use_tensor_ensemble_prefix()`` controls
-    object prefixing for objects stored with ``Client.put_tensor()``
-    and all ``DataSet`` components added via ``DataSet.add_tensor()``,
-    ``DataSet.add_meta_scalar()``, and ``DataSet.add_meta_string()``.
+    object prefixing for objects stored with ``Client.put_tensor()``.
+
+.. note::
+
+    The function ``Client.use_dataset_ensemble_prefix()`` controls
+    object prefixing for``DataSet`` components added via
+    ``DataSet.add_tensor()``, ``DataSet.add_meta_scalar()``, and
+    ``DataSet.add_meta_string()``.
 
 .. note::
 

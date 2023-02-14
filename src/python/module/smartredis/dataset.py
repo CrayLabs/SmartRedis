@@ -44,6 +44,14 @@ class Dataset(SRObject):
         super().__init__(PyDataset(name))
         typecheck(name, "name", str)
 
+    def __str__(self):
+        """Create a string representation of the client
+
+        :return: A string representation of the client
+        :rtype: str
+        """
+        return self._data.to_string()
+
     @property
     def _data(self):
         """Alias _srobject to _data
@@ -182,7 +190,7 @@ class Dataset(SRObject):
         """Get the names of all metadata scalars and strings from the DataSet
 
         :return: a list of metadata field names
-        :rtype: list
+        :rtype: list[str]
         """
         return self._data.get_metadata_field_names()
 
@@ -218,6 +226,16 @@ class Dataset(SRObject):
         """Get the names of all tensors in the DataSet
 
         :return: a list of tensor names
-        :rtype: list
+        :rtype: list[str]
         """
         return self._data.get_tensor_names()
+
+    @exception_handler
+    def get_tensor_dims(self, name):
+        """Get the dimensions of a tensor in the DataSet
+
+        :return: a list of the tensor dimensions
+        :rtype: list[int]
+        """
+        typecheck(name, "name", str)
+        return self._data.get_tensor_dims(name)

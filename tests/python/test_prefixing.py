@@ -25,23 +25,29 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import numpy as np
 
-from smartredis import Client
+from smartredis import Client, Dataset
 
-def test_serialization(use_cluster, context):
-    # get env var to set through client init
-    ssdb = os.environ["SSDB"]
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-    assert str(c) != repr(c)
+def test_prefixing(use_cluster, context, monkeypatch):
+    # configure prefix variables
+    monkeypatch.setenv("SSKEYOUT", "prefix_test")
+    monkeypatch.setenv("SSKEYIN", "prefix_test")
 
+    # Set up client
+    c = Client(address=None, cluster=use_cluster, logger_name=context)
+    c.use_dataset_ensemble_prefix(True)
+    c.use_tensor_ensemble_prefix(True)
+    d = Dataset("test_dataset")
+    data = np.uint16([1, 2, 3, 4])
+    d.add_tensor("dataset_tensor", data)
+    c.put_dataset(d)
+    c.put_tensor("test_tensor", data)
 
-def test_address(use_cluster, context):
-    # get env var to set through client init
-    ssdb = os.environ["SSDB"]
-    del os.environ["SSDB"]
-
-    # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
-
-    # check if SSDB was set anyway
-    assert os.environ["SSDB"] == ssdb
+    # Validate keys to see whether prefixing was applied properly
+    assert c.dataset_exists("test_dataset")
+    assert c.key_exists("prefix_test.{test_dataset}.meta")
+    assert not c.key_exists("test_dataset")
+    assert c.tensor_exists("test_tensor")
+    assert c.key_exists("prefix_test.test_tensor")
+    assert not c.key_exists("test_tensor")

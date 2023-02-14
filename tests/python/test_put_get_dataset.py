@@ -31,7 +31,7 @@ from smartredis import Client, Dataset
 
 
 def test_put_get_dataset(mock_data, use_cluster, context):
-    """test sending and recieving a dataset with 2D tensors
+    """test sending and receiving a dataset with 2D tensors
     of every datatype
     """
 

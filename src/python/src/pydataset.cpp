@@ -382,7 +382,30 @@ std::string PyDataset::get_tensor_type(const std::string& name)
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing get_tensor_type.");
-    }}
+    }
+}
+
+// Retrieve the dimensions of a Tensor in the DataSet
+py::list PyDataset::get_tensor_dims(const std::string& name)
+{
+    try {
+        // We return a copy
+        return py::cast(_dataset->get_tensor_dims(name));
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing get_tensor_dims.");
+    }
+}
 
 // Retrieve the names of all metadata fields in the DataSet
 py::list PyDataset::get_metadata_field_names()
@@ -432,6 +455,27 @@ std::string PyDataset::get_metadata_field_type(const std::string& name)
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing get_metadata_field_type.");
+    }
+}
+
+// Create a string representation of the DataSet
+std::string PyDataset::to_string()
+{
+    try {
+        return _dataset->to_string();
+    }
+    catch (Exception& e) {
+        // exception is already prepared for caller
+        throw;
+    }
+    catch (std::exception& e) {
+        // should never happen
+        throw SRInternalException(e.what());
+    }
+    catch (...) {
+        // should never happen
+        throw SRInternalException("A non-standard exception was encountered "\
+                                  "while executing to_string.");
     }
 }
 

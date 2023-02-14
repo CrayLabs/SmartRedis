@@ -65,6 +65,7 @@ list(APPEND EXECUTABLES
 	 client_test_misc_tensor
 	 client_test_mnist_multigpu
 	 client_test_mnist
+	 client_test_prefixing
 	 client_test_put_get_1D
 	 client_test_put_get_2D
 	 client_test_put_get_3D
