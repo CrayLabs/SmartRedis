@@ -42,7 +42,7 @@ else:
 # ----helper decorators -----
 
 
-def _requires_xarray(fn, /):
+def _requires_xarray(fn):
     @functools.wraps(fn)
     def _import_xarray(*args, **kwargs):
         global xr
