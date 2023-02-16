@@ -193,6 +193,7 @@ def assert_equality_2d(dataset):
 # -------- start of tests --------------
 
 
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_add_metadata_for_xarray_1d():
     """Test add_metadata_for_xarray method with 1d tensor
     data and metadata
@@ -218,6 +219,7 @@ def test_add_metadata_for_xarray_1d():
     assert_equality_1d(ds1)
 
 
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_string_single_variable_param_names_add_metadata_for_xarray_1d():
     """Test single variable string parameter names"""
 
@@ -241,6 +243,7 @@ def test_string_single_variable_param_names_add_metadata_for_xarray_1d():
     assert_equality_1d(ds1)
 
 
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_bad_type_add_metadata_for_xarray_1d():
     """Wrong type check for various versions of passing wrong
     parameter types on 1d data
@@ -290,6 +293,7 @@ def test_bad_type_add_metadata_for_xarray_1d():
 # ------ beginning of 2d add_metadata_to_xarray_tests ----------
 
 
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_add_metadata_for_xarray_2d():
     """Wrong type check for various versions of passing wrong
     parameter types on 2d data
@@ -324,6 +328,7 @@ def test_add_metadata_for_xarray_2d():
     assert_equality_2d(ds2)
 
 
+@pytest.mark.skipif(not xr, reason=_xarray_not_found)
 def test_bad_type_add_metadata_for_xarray_2d():
     """Test add_metadata_for_xarray method with 2d tensor
     data and metadata
