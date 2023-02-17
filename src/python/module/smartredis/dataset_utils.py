@@ -76,7 +76,6 @@ def typecheck_stringlist(names, strings_name, string_name):
 
 class DatasetConverter:
     @staticmethod
-    @_requires_xarray
     def add_metadata_for_xarray(
         dataset, data_names, dim_names, coord_names=None, attr_names=None
     ):
