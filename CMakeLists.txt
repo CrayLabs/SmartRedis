@@ -92,6 +92,7 @@ set(CLIENT_SRC
     src/cpp/utility.cpp
     src/cpp/logger.cpp
     src/cpp/srobject.cpp
+    src/cpp/configoptions.cpp
 )
 
 include_directories(SYSTEM

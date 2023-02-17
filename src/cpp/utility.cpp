@@ -145,6 +145,48 @@ void get_config_string(std::string& value,
     log_data("SmartRedis Library", LLDebug, message);
 }
 
+// Initialize a boolean from an environment variable
+void get_config_bool(bool& value,
+                     const std::string& cfg_key,
+                     bool default_value,
+                     bool suppress_warning /*= false*/)
+{
+    value = default_value;
+    std::string message = "Getting value for " + cfg_key;
+    log_data("SmartRedis Library", LLDebug, message);
+
+    char* cfg_val = std::getenv(cfg_key.c_str());
+    message = "Retrieved value \"";
+    message += cfg_val == NULL ? "<NULL>" : cfg_val;
+    message += "\"";
+    if (NULL == cfg_val) {
+        message += ". Using default value of \"";
+        message += (default_value ? "TRUE" : "FALSE");
+        message += "\"";
+    }
+    log_data("SmartRedis Library", LLDebug, message);
+
+    if ((cfg_val == NULL || std::strlen(cfg_val) == 0) && !suppress_warning) {
+        log_warning(
+            "SmartRedis Library",
+            LLDebug,
+            "Configuration variable " + cfg_key + " not set"
+        );
+    }
+    else {
+        std::string val_read(cfg_val);
+        value = !(val_read == "0" ||
+                  val_read == "false" ||
+                  val_read == "FALSE" ||
+                  val_read == "False");
+    }
+
+    message = "Exiting with value \"";
+    message += (value ? "TRUE" : "FALSE");
+    message += "\"";
+    log_data("SmartRedis Library", LLDebug, message);
+}
+
 // Create a string representation of a tensor type
 std::string to_string(SRTensorType ttype)
 {

@@ -66,6 +66,20 @@ void get_config_string(std::string& value,
                        bool suppress_warning = false);
 
 /*!
+*   \brief Initialize a boolean from configuration, such as an
+*          environment variable
+*   \param value Receives the configuration value
+*   \param cfg_key The key to query for the configuration variable
+*   \param default_value Default if configuration key is not set
+*   \param suppress_warning Do not issue a warning if the variable
+*                           is not set
+*/
+void get_config_bool(bool& value,
+                     const std::string& cfg_key,
+                     bool default_value,
+                     bool suppress_warning = false);
+
+/*!
 *   \brief Create a string representation of a tensor type
 *   \param ttype The tensor type to put in string form
 */
