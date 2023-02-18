@@ -24,17 +24,43 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-try:
-    import xarray as xr
-except ImportError:
-    xr = None
+import functools
+from typing import TYPE_CHECKING
 
 from .dataset import Dataset
-from .util import Dtypes, exception_handler, typecheck
+from .util import typecheck
 from itertools import permutations
 from .error import *
 
+if TYPE_CHECKING:  # pragma: no cover
+    # Import optional deps for intellisense
+    import xarray as xr
+else:
+    # Leave optional deps as nullish
+    xr = None
+
+# ----helper decorators -----
+
+
+def _requires_xarray(fn):
+    @functools.wraps(fn)
+    def _import_xarray(*args, **kwargs):
+        global xr
+        try:
+            import xarray as xr
+        except ImportError as e:
+            raise RedisRuntimeError(
+                "Optional package xarray must be installed; "
+                "Consider running `pip install smartredis[xarray]`"
+            ) from e
+        return fn(*args, **kwargs)
+
+    return _import_xarray
+
+
 # ----helper function -----
+
+
 def get_data(dataset, name, type):
     return dataset.get_meta_strings(f"_xarray_{name}_{type}_names")[0].split(",")
 
@@ -104,6 +130,7 @@ class DatasetConverter:
                         dataset.add_meta_string(f"_xarray_{name}_{sarg}", "null")
 
     @staticmethod
+    @_requires_xarray
     def transform_to_xarray(dataset):
         """Transform a SmartRedis Dataset, with the appropriate metadata,
         to an Xarray Dataarray
@@ -116,10 +143,6 @@ class DatasetConverter:
         fieldnames and appropriately formatted metadata.
         rtype: dict
         """
-
-        if (not xr):
-            raise RedisRuntimeError("Optional package xarray must be installed")
-
         typecheck(dataset, "dataset", Dataset)
 
         coord_dict = {}
