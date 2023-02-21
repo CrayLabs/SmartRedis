@@ -126,7 +126,7 @@ class ConfigOptions
         *   \throw SmartRedis::Exception if db_prefix contains invalid
         *          characters
         */
-        ConfigOptions* create_from_environment(
+        static ConfigOptions* create_from_environment(
             const std::string& db_prefix, const std::string& log_context);
 
         /*!
@@ -140,7 +140,7 @@ class ConfigOptions
         *   \throw SmartRedis::Exception if the file cannot be found or
         *          the data within it cannot be parsed
         */
-        ConfigOptions* create_from_file(
+        static ConfigOptions* create_from_file(
             const std::string& filename, const std::string& log_context);
 
         /*!
@@ -152,7 +152,7 @@ class ConfigOptions
         *   \returns The constructed ConfigOptions object
         *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
         */
-        ConfigOptions* create_from_string(
+        static ConfigOptions* create_from_string(
             const std::string& json_blob, const std::string& log_context);
 
         /*!
@@ -162,7 +162,7 @@ class ConfigOptions
         *                      object using this ConfigOptions
         *   \returns The constructed ConfigOptions object
         */
-        ConfigOptions* create_from_default(const std::string& log_context);
+        static ConfigOptions* create_from_default(const std::string& log_context);
 
         /////////////////////////////////////////////////////////////
         // Default configuration selectors

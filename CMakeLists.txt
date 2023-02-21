@@ -57,6 +57,7 @@ set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
 set(CLIENT_SRC
     src/c/c_client.cpp
+    src/c/c_configoptions.cpp
     src/c/c_dataset.cpp
     src/c/c_error.cpp
     src/c/c_logcontext.cpp
