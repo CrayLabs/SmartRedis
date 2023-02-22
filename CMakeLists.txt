@@ -105,6 +105,7 @@ if (BUILD_FORTRAN)
     set(FORTRAN_SRC
         src/fortran/errors.F90
         src/fortran/client.F90
+        src/fortran/configoptions.F90
         src/fortran/dataset.F90
         src/fortran/fortran_c_interop.F90
         src/fortran/logcontext.F90

@@ -56,7 +56,7 @@ type, public :: dataset_type
 
   !> Initialize a new dataset with a given name
   procedure :: initialize => initialize_dataset
-  !> Access the raw C pointer for the client
+  !> Access the raw C pointer for the dataset
   procedure :: get_c_pointer
 
   ! Metadata procedures
