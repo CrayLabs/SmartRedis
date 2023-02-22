@@ -37,21 +37,17 @@ extern "C"
 SRError create_configoptions_from_environment(
     const char* db_prefix,
     const size_t db_prefix_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(db_prefix != NULL && log_context != NULL
-                    && new_configoptions != NULL);
+    SR_CHECK_PARAMS(db_prefix != NULL && new_configoptions != NULL);
 
     std::string db_prefix_str(db_prefix, db_prefix_length);
-    std::string log_context_str(log_context, log_context_length);
 
     ConfigOptions* cfgOpts = ConfigOptions::create_from_environment(
-        db_prefix_str, log_context_str);
+        db_prefix_str);
     *new_configoptions = reinterpret_cast<void* >(cfgOpts);
   }
   catch (const std::bad_alloc& e) {
@@ -78,21 +74,17 @@ extern "C"
 SRError create_configoptions_from_file(
     const char* filename,
     const size_t filename_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(filename != NULL && log_context != NULL
-                    && new_configoptions != NULL);
+    SR_CHECK_PARAMS(filename != NULL && new_configoptions != NULL);
 
     std::string filename_str(filename, filename_length);
-    std::string log_context_str(log_context, log_context_length);
 
     ConfigOptions* cfgOpts = ConfigOptions::create_from_file(
-        filename_str, log_context_str);
+        filename_str);
     *new_configoptions = reinterpret_cast<void* >(cfgOpts);
   }
   catch (const std::bad_alloc& e) {
@@ -119,21 +111,17 @@ extern "C"
 SRError create_configoptions_from_string(
     const char* json_blob,
     const size_t json_blob_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(json_blob != NULL && log_context != NULL
-                    && new_configoptions != NULL);
+    SR_CHECK_PARAMS(json_blob != NULL && new_configoptions != NULL);
 
     std::string json_blob_str(json_blob, json_blob_length);
-    std::string log_context_str(log_context, log_context_length);
 
     ConfigOptions* cfgOpts = ConfigOptions::create_from_string(
-        json_blob_str, log_context_str);
+        json_blob_str);
     *new_configoptions = reinterpret_cast<void* >(cfgOpts);
   }
   catch (const std::bad_alloc& e) {
@@ -157,20 +145,14 @@ SRError create_configoptions_from_string(
 
 // Instantiate ConfigOptions from the current default source
 extern "C"
-SRError create_configoptions_from_default(
-    const char* log_context,
-    const size_t log_context_length,
-    void** new_configoptions)
+SRError create_configoptions_from_default(void** new_configoptions)
 {
   SRError result = SRNoError;
   try {
     // Sanity check params
-    SR_CHECK_PARAMS(log_context != NULL && new_configoptions != NULL);
+    SR_CHECK_PARAMS(new_configoptions != NULL);
 
-    std::string log_context_str(log_context, log_context_length);
-
-    ConfigOptions* cfgOpts = ConfigOptions::create_from_default(
-        log_context_str);
+    ConfigOptions* cfgOpts = ConfigOptions::create_from_default();
     *new_configoptions = reinterpret_cast<void* >(cfgOpts);
   }
   catch (const std::bad_alloc& e) {

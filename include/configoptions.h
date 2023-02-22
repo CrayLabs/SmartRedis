@@ -71,13 +71,8 @@ class ConfigOptions
         *          below.
         *   \param source The selected source for config data
         *   \param string The string associated with the source
-        *   \param context The context to associate with logging for an
-        *                  object using this ConfigOptions
         */
-        ConfigOptions(
-            cfgSrc source,
-            const std::string& string,
-            const std::string& context);
+        ConfigOptions(cfgSrc source, const std::string& string);
 
     public:
 
@@ -120,49 +115,41 @@ class ConfigOptions
         *          each environment variable that is read.
         *   \param db_prefix The prefix to use with environment variables,
         *                    or an empty string to disable prefixing
-        *   \param log_context The context to associate with logging for an
-        *                      object using this ConfigOptions
         *   \returns The constructed ConfigOptions object
         *   \throw SmartRedis::Exception if db_prefix contains invalid
         *          characters
         */
         static ConfigOptions* create_from_environment(
-            const std::string& db_prefix, const std::string& log_context);
+            const std::string& db_prefix);
 
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
         *          a file with JSON data.
         *   \param filename A UTF-8 file with JSON data containing the
         *                   configuration data
-        *   \param log_context The context to associate with logging for an
-        *                      object using this ConfigOptions
         *   \returns The constructed ConfigOptions object
         *   \throw SmartRedis::Exception if the file cannot be found or
         *          the data within it cannot be parsed
         */
         static ConfigOptions* create_from_file(
-            const std::string& filename, const std::string& log_context);
+            const std::string& filename);
 
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
         *          a string containing a JSON blob
         *   \param json_blob A JSON blob containing the configuration data
-        *   \param log_context The context to associate with logging for an
-        *                      object using this ConfigOptions
         *   \returns The constructed ConfigOptions object
         *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
         */
         static ConfigOptions* create_from_string(
-            const std::string& json_blob, const std::string& log_context);
+            const std::string& json_blob);
 
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
         *          the current default source
-        *   \param log_context The context to associate with logging for an
-        *                      object using this ConfigOptions
         *   \returns The constructed ConfigOptions object
         */
-        static ConfigOptions* create_from_default(const std::string& log_context);
+        static ConfigOptions* create_from_default();
 
         /////////////////////////////////////////////////////////////
         // Default configuration selectors
@@ -253,6 +240,14 @@ class ConfigOptions
         *   \returns The log context associated with this object
         */
         std::string get_log_context() { return _log_context; }
+
+        /*!
+        *   \brief Store the logging context
+        *   \param log_context The context to associate with logging
+        */
+        void set_log_context(const std::string& log_context) {
+            _log_context = log_context;
+        }
 
         /////////////////////////////////////////////////////////////
         // Option overrides

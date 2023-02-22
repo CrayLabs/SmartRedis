@@ -40,10 +40,9 @@ std::string ConfigOptions::_default_cfg_string = std::string("");
 // ConfigOptions constructor
 ConfigOptions::ConfigOptions(
     cfgSrc source,
-    const std::string& string,
-    const std::string& log_context)
+    const std::string& string)
     : _source(source), _string(string), _lazy(source == cs_envt),
-      _log_context(log_context)
+      _log_context("")
 {
     // Handle the default case
     if (_source == cs_default) {
@@ -62,31 +61,30 @@ ConfigOptions::ConfigOptions(
 
 // Instantiate ConfigOptions, getting selections from environment variables
 ConfigOptions* ConfigOptions::create_from_environment(
-    const std::string& db_prefix, const std::string& log_context)
+    const std::string& db_prefix)
 {
-    return new ConfigOptions(cs_envt, db_prefix, log_context);
+    return new ConfigOptions(cs_envt, db_prefix);
 }
 
 // Instantiate ConfigOptions, getting selections from a file with JSON data
 ConfigOptions* ConfigOptions::create_from_file(
-    const std::string& filename, const std::string& log_context)
+    const std::string& filename)
 {
-    return new ConfigOptions(cs_file, filename, log_context);
+    return new ConfigOptions(cs_file, filename);
 }
 
 // Instantiate ConfigOptions, getting selections from a JSON blob
 ConfigOptions* ConfigOptions::create_from_string(
-    const std::string& json_blob, const std::string& log_context)
+    const std::string& json_blob)
 {
-    return new ConfigOptions(cs_blob, json_blob, log_context);
+    return new ConfigOptions(cs_blob, json_blob);
 }
 
 // Instantiate ConfigOptions, getting selections from the default source
-ConfigOptions* ConfigOptions::create_from_default(
-    const std::string& log_context)
+ConfigOptions* ConfigOptions::create_from_default()
 {
     return new ConfigOptions(
-        _default_source, _default_cfg_string, log_context);
+        _default_source, _default_cfg_string);
 }
 
 // Set environment variables with a particular prefix as the default source

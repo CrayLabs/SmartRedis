@@ -76,87 +76,63 @@ function get_c_pointer(self)
 end function get_c_pointer
 
 !> Instantiate ConfigOptions, getting selections from environment variables
-function create_configoptions_from_environment(self, db_prefix, log_context) result(code)
+function create_configoptions_from_environment(self, db_prefix) result(code)
   class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
   character(len=*),    intent(in)          :: db_prefix   !< Prefix to apply to environment
                                                           !! variables; empty string for none
-  character(len=*),    intent(in)          :: log_context !< Logging context
   integer(kind=enum_kind)                  :: code !< Result of the operation
 
   ! Local variables
-  integer(kind=c_size_t) :: db_prefix_length, log_context_length
+  integer(kind=c_size_t) :: db_prefix_length
   character(kind=c_char, len=len_trim(db_prefix)) :: c_db_prefix
-  character(kind=c_char, len=len_trim(log_context)) :: c_log_context
 
   db_prefix_length = len_trim(db_prefix)
-  log_context_length = len_trim(log_context)
   c_db_prefix = trim(db_prefix)
-  c_log_context = trim(log_context)
 
   code = create_configoptions_from_environment_c( &
-    c_db_prefix, db_prefix_length, c_log_context, &
-    log_context_length, self%configoptions_ptr)
+    c_db_prefix, db_prefix_length, self%configoptions_ptr)
 end function create_configoptions_from_environment
 
 !> Instantiate ConfigOptions, getting selections from a file with JSON data
-function create_configoptions_from_file(self, filename, log_context) result(code)
+function create_configoptions_from_file(self, filename) result(code)
   class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
   character(len=*),    intent(in)          :: filename    !< File containing JSON data
-  character(len=*),    intent(in)          :: log_context !< Logging context
   integer(kind=enum_kind)                  :: code !< Result of the operation
 
   ! Local variables
-  integer(kind=c_size_t) :: filename_length, log_context_length
+  integer(kind=c_size_t) :: filename_length
   character(kind=c_char, len=len_trim(filename)) :: c_filename
-  character(kind=c_char, len=len_trim(log_context)) :: c_log_context
 
   filename_length = len_trim(filename)
-  log_context_length = len_trim(log_context)
   c_filename = trim(filename)
-  c_log_context = trim(log_context)
 
   code = create_configoptions_from_file_c( &
-    c_filename, filename_length, c_log_context, &
-    log_context_length, self%configoptions_ptr)
+    c_filename, filename_length, self%configoptions_ptr)
 end function create_configoptions_from_file
 
 !> Instantiate ConfigOptions, getting selections from a string containing a JSON blob
-function create_configoptions_from_string(self, json_blob, log_context) result(code)
+function create_configoptions_from_string(self, json_blob) result(code)
   class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
   character(len=*),    intent(in)          :: json_blob   !< String containing JSON data
-  character(len=*),    intent(in)          :: log_context !< Logging context
   integer(kind=enum_kind)                  :: code !< Result of the operation
 
   ! Local variables
-  integer(kind=c_size_t) :: json_blob_length, log_context_length
+  integer(kind=c_size_t) :: json_blob_length
   character(kind=c_char, len=len_trim(json_blob)) :: c_json_blob
-  character(kind=c_char, len=len_trim(log_context)) :: c_log_context
 
   json_blob_length = len_trim(json_blob)
-  log_context_length = len_trim(log_context)
   c_json_blob = trim(json_blob)
-  c_log_context = trim(log_context)
 
   code = create_configoptions_from_string_c( &
-    c_json_blob, json_blob_length, c_log_context, &
-    log_context_length, self%configoptions_ptr)
+    c_json_blob, json_blob_length, self%configoptions_ptr)
 end function create_configoptions_from_string
 
 !> Instantiate ConfigOptions, getting selections from the current default source
-function create_configoptions_from_default(self, log_context) result(code)
+function create_configoptions_from_default(self) result(code)
   class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
-  character(len=*),    intent(in)          :: log_context !< Logging context
   integer(kind=enum_kind)                  :: code !< Result of the operation
 
-  ! Local variables
-  integer(kind=c_size_t) :: log_context_length
-  character(kind=c_char, len=len_trim(log_context)) :: c_log_context
-
-  log_context_length = len_trim(log_context)
-  c_log_context = trim(log_context)
-
-  code = create_configoptions_from_default_c( &
-    c_log_context, log_context_length, self%configoptions_ptr)
+  code = create_configoptions_from_default_c(self%configoptions_ptr)
 end function create_configoptions_from_default
 
 end module smartredis_configoptions

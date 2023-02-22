@@ -27,52 +27,43 @@
 interface
 
   function create_configoptions_from_environment_c( &
-    db_prefix, db_prefix_length, log_context, log_context_length, &
-    configoptions) bind(c, name="create_configoptions_from_environment")
+    db_prefix, db_prefix_length, configoptions) &
+    bind(c, name="create_configoptions_from_environment")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_environment_c
     character(kind=c_char)        :: db_prefix          !< Prefix to add to environment vars
     integer(kind=c_size_t), value :: db_prefix_length   !< How many characters in db_prefix
-    character(kind=c_char)        :: log_context        !< Logging context
-    integer(kind=c_size_t), value :: log_context_length !< How many characters in log_context
     type(c_ptr)                   :: configoptions      !< Receives the constructed configoptions
   end function create_configoptions_from_environment_c
 
   function create_configoptions_from_file_c( &
-    filename, filename_length, log_context, log_context_length, &
-    configoptions) bind(c, name="create_configoptions_from_file")
+    filename, filename_length, configoptions) &
+    bind(c, name="create_configoptions_from_file")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_file_c
     character(kind=c_char)        :: filename           !< File containing JSON data
     integer(kind=c_size_t), value :: filename_length    !< How many characters in filename
-    character(kind=c_char)        :: log_context        !< Logging context
-    integer(kind=c_size_t), value :: log_context_length !< How many characters in log_context
     type(c_ptr)                   :: configoptions      !< Receives the constructed configoptions
   end function create_configoptions_from_file_c
 
   function create_configoptions_from_string_c( &
-    json_blob, json_blob_length, log_context, log_context_length, &
-    configoptions) bind(c, name="create_configoptions_from_string")
+    json_blob, json_blob_length, configoptions) &
+    bind(c, name="create_configoptions_from_string")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_string_c
     character(kind=c_char)        :: json_blob          !< String containing JSON data
     integer(kind=c_size_t), value :: json_blob_length   !< How many characters in json_blob
-    character(kind=c_char)        :: log_context        !< Logging context
-    integer(kind=c_size_t), value :: log_context_length !< How many characters in log_context
     type(c_ptr)                   :: configoptions      !< Receives the constructed configoptions
   end function create_configoptions_from_string_c
 
-  function create_configoptions_from_default_c( &
-    log_context, log_context_length, configoptions) &
+  function create_configoptions_from_default_c(configoptions) &
     bind(c, name="create_configoptions_from_default")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_default_c
-    character(kind=c_char)        :: log_context        !< Logging context
-    integer(kind=c_size_t), value :: log_context_length !< How many characters in log_context
     type(c_ptr)                   :: configoptions      !< Receives the constructed configoptions
   end function create_configoptions_from_default_c
 

@@ -48,18 +48,12 @@ extern "C" {
 *                    or an empty string to disable prefixing
 *   \param db_prefix_length The length of the db_prefix string,
 *                           excluding null terminating character
-*   \param log_context The context to associate with logging for an
-*                      object using this ConfigOptions
-*   \param log_context_length The length of the log_context string,
-*                             excluding null terminating character
 *   \param new_configoptions Receives the new configoptions object
 *   \returns Returns SRNoError on success or an error code on failure
 */
 SRError create_configoptions_from_environment(
     const char* db_prefix,
     const size_t db_prefix_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions);
 
 /*!
@@ -69,18 +63,12 @@ SRError create_configoptions_from_environment(
 *                   configuration data
 *   \param filename_length The length of the filename string,
 *                          excluding null terminating character
-*   \param log_context The context to associate with logging for an
-*                      object using this ConfigOptions
-*   \param log_context_length The length of the log_context string,
-*                             excluding null terminating character
 *   \param new_configoptions Receives the new configoptions object
 *   \returns Returns SRNoError on success or an error code on failure
 */
 SRError create_configoptions_from_file(
     const char* filename,
     const size_t filename_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions);
 
 /*!
@@ -89,33 +77,21 @@ SRError create_configoptions_from_file(
 *   \param json_blob A JSON blob containing the configuration data
 *   \param json_blob_length The length of the json_blob string,
 *                          excluding null terminating character
-*   \param log_context The context to associate with logging for an
-*                      object using this ConfigOptions
-*   \param log_context_length The length of the log_context string,
-*                             excluding null terminating character
 *   \param new_configoptions Receives the new configoptions object
 *   \returns Returns SRNoError on success or an error code on failure
 */
 SRError create_configoptions_from_string(
     const char* json_blob,
     const size_t json_blob_length,
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions);
 
 /*!
 *   \brief Instantiate ConfigOptions, getting selections from
 *          the current default source
-*   \param log_context The context to associate with logging for an
-*                      object using this ConfigOptions
-*   \param log_context_length The length of the log_context string,
-*                             excluding null terminating character
 *   \param new_configoptions Receives the new configoptions object
 *   \returns Returns SRNoError on success or an error code on failure
 */
 SRError create_configoptions_from_default(
-    const char* log_context,
-    const size_t log_context_length,
     void** new_configoptions);
 
 } // extern "C"
