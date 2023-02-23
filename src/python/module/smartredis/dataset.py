@@ -66,7 +66,7 @@ class Dataset(SRObject):
         :param dataset: The pybind PyDataset object
                         to use for construction
         :type dataset: PyDataset
-        :return: The newly constructor Dataset from
+        :return: The newly constructed Dataset from
                  the PyDataset
         :rtype: Dataset
         """
