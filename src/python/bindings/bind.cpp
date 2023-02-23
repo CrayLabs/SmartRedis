@@ -135,6 +135,21 @@ PYBIND11_MODULE(smartredisPy, m) {
         .DATASET_METHOD(to_string)
     ;
 
+    // Python ConfigOptions class
+    py::class_<PyConfigOptions>(m, "PyConfigOptions")
+        .def_static("config_from_environment",
+                    static_cast<ConfigOptions* (*)(const std::string&)>(
+                        &ConfigOptions::create_from_environment))
+        .def_static("config_from_file",
+                    static_cast<ConfigOptions* (*)(const std::string&)>(
+                        &ConfigOptions::config_from_file))
+        .def_static("config_from_string",
+                    static_cast<ConfigOptions* (*)(const std::string&)>(
+                        &ConfigOptions::config_from_string))
+        .def_static("config_from_default",
+                    static_cast<ConfigOptions* (*)()>(
+                        &ConfigOptions::config_from_default))
+
     // Logging functions
     m.def("cpp_log_data", py::overload_cast<const std::string&, SRLoggingLevel, const std::string&>(&log_data))
      .def("cpp_log_data", py::overload_cast<const SRObject*, SRLoggingLevel, const std::string&>(&log_data))
