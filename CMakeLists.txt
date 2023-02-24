@@ -147,10 +147,11 @@ if(BUILD_PYTHON)
     add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
-                        src/python/src/pysrobject.cpp
-                        src/python/src/pylogcontext.cpp
 	                    src/python/src/pyclient.cpp
+                        src/python/src/pyconfigoptions.cpp
                         src/python/src/pydataset.cpp
+                        src/python/src/pylogcontext.cpp
+                        src/python/src/pysrobject.cpp
                         ${CLIENT_SRC}
                         src/python/bindings/bind.cpp)
 
