@@ -154,9 +154,15 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def_static("config_from_default",
                     static_cast<ConfigOptions* (*)()>(
                         &ConfigOptions::create_from_default))
-        .CONFIGOPTIONS_METHOD(set_default_from_environment)
-        .CONFIGOPTIONS_METHOD(set_default_from_file)
-        .CONFIGOPTIONS_METHOD(set_default_from_string)
+        .def_static("set_default_from_environment",
+                    static_cast<void (*)(const std::string&)>(
+                        &ConfigOptions::set_default_from_environment))
+        .def_static("set_default_from_file",
+                    static_cast<void (*)(const std::string&)>(
+                        &ConfigOptions::set_default_from_file))
+        .def_static("set_default_from_string",
+                    static_cast<void (*)(const std::string&)>(
+                        &ConfigOptions::set_default_from_string))
         .CONFIGOPTIONS_METHOD(get_integer_option)
         .CONFIGOPTIONS_METHOD(get_string_option)
         .CONFIGOPTIONS_METHOD(get_boolean_option)

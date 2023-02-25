@@ -29,6 +29,8 @@ from .util import exception_handler, typecheck
 
 from .error import *
 
+_notfactory = "Method called on a ConfigOptions object not created from a factory method"
+
 class ConfigOptions:
     def __init__(self):
         """Initialize a ConfigOptions base object
@@ -106,6 +108,7 @@ class ConfigOptions:
         return result
 
     @staticmethod
+    @exception_handler
     def create_from_string(json_blob):
         """Instantiate ConfigOptions, getting selections from
         a string containing a JSON blob
@@ -122,6 +125,7 @@ class ConfigOptions:
         return result
 
     @staticmethod
+    @exception_handler
     def create_from_default():
         """Instantiate ConfigOptions, getting selections from
         the current default
@@ -133,3 +137,184 @@ class ConfigOptions:
         result = ConfigOptions.from_pybind(factory_object)
         result._is_created_via_factory = True
         return result
+
+    @staticmethod
+    @exception_handler
+    def set_default_from_environment(db_prefix):
+        """Set environment variables with a particular prefix
+        as the default configuration source
+
+        :param db_prefix: The prefix to be prepended to environment
+                          variables in the form {db_prefix}_{environment
+                          variable}. If the prefix is an empty string,
+                          no prepending is done.
+        :type db_prefix: str
+        """
+        typecheck(db_prefix, "db_prefix", str)
+        PyConfigOptions.set_default_from_environment(db_prefix)
+
+    @exception_handler
+    def set_default_from_file(filename):
+        """Set a file containing JSON data as the default configuration source
+
+        :param filename: The file containing JSON data
+        :type filename: str
+        :raises RedisRuntimeError: if the file cannot be accessed or contains
+                                   data that cannot be parsed
+        """
+        typecheck(filename, "filename", str)
+        PyConfigOptions.set_default_from_file(filename)
+
+    @exception_handler
+    def set_default_from_string(string):
+        """Set a string containing a JSON blob as the default
+        configuration source
+
+        :param string: The string containing a JSON blob
+        :type string: str
+        :raises RedisRuntimeError: if the string cannot be parsed
+        """
+        typecheck(string, "string", str)
+        PyConfigOptions.set_default_from_string(string)
+
+    @exception_handler
+    def get_integer_option(self, key, default_value):
+        """Retrieve the value of a numeric configuration option
+        from the selected source
+
+        :param key: The name of the configuration option to retrieve
+        :type key: str
+        :param default_value: The baseline value of the configuration
+                              option to be returned if a value was not
+                              set in the selected source
+        :return: The value of the selected option. Returns
+                 \p default_value if the option was not set in the
+                 selected source
+        :rtype: int
+        """
+        typecheck(key, "key", str)
+        typecheck(default_value, "default_value", int)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        return self._config_opts.get_integer_option(key, default_value)
+
+    @exception_handler
+    def get_string_option(self, key, default_value):
+        """Retrieve the value of a string configuration option
+        from the selected source
+
+        :param key: The name of the configuration option to retrieve
+        :type key: str
+        :param default_value: The baseline value of the configuration
+                              option to be returned if a value was not
+                              set in the selected source
+        :return: The value of the selected option. Returns
+                 \p default_value if the option was not set in the
+                 selected source
+        :rtype: str
+        """
+        typecheck(key, "key", str)
+        typecheck(default_value, "default_value", str)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        return self._config_opts.get_string_option(key, default_value)
+
+    @exception_handler
+    def get_boolean_option(self, key, default_value):
+        """Retrieve the value of a boolean configuration option
+        from the selected source
+
+        :param key: The name of the configuration option to retrieve
+        :type key: str
+        :param default_value: The baseline value of the configuration
+                              option to be returned if a value was not
+                              set in the selected source
+        :return: The value of the selected option. Returns
+                 \p default_value if the option was not set in the
+                 selected source
+        :rtype: bool
+        """
+        typecheck(key, "key", str)
+        typecheck(default_value, "default_value", bool)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        return self._config_opts.get_boolean_option(key, default_value)
+
+    @exception_handler
+    def is_defined(self, key):
+        """Check whether a configuration option is set in the selected source
+
+        :param key: The name of the configuration option to check
+        :type key: str
+        :return: True IFF the target option is defined in the selected source
+                 or if it has been overridden
+        :rtype: bool
+        """
+        typecheck(key, "key", str)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        return self._config_opts.is_defined(key)
+
+    @exception_handler
+    def override_integer_option(self, key, value):
+        """Override the value of a numeric configuration option
+        in the selected source
+
+        Overrides are specific to an instance of the
+        ConfigOptions class. An instance that references
+        the same source will not be affected by an override to
+        a different ConfigOptions instance
+
+        :param key: The name of the configuration option to override
+        :type key: str
+        :param value: The value to store for the configuration option
+        :type value: int
+        """
+        typecheck(key, "key", str)
+        typecheck(value, "value", int)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        self._config_opts.override_integer_option(key, value)
+
+    @exception_handler
+    def override_string_option(self, key, value):
+        """Override the value of a string configuration option
+        in the selected source
+
+        Overrides are specific to an instance of the
+        ConfigOptions class. An instance that references
+        the same source will not be affected by an override to
+        a different ConfigOptions instance
+
+        :param key: The name of the configuration option to override
+        :type key: str
+        :param value: The value to store for the configuration option
+        :type value: str
+        """
+        typecheck(key, "key", str)
+        typecheck(value, "value", str)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        self._config_opts.override_string_option(key, value)
+
+    @exception_handler
+    def override_boolean_option(self, key, value):
+        """Override the value of a boolean configuration option
+        in the selected source
+
+        Overrides are specific to an instance of the
+        ConfigOptions class. An instance that references
+        the same source will not be affected by an override to
+        a different ConfigOptions instance
+
+        :param key: The name of the configuration option to override
+        :type key: str
+        :param value: The value to store for the configuration option
+        :type value: bool
+        """
+        typecheck(key, "key", str)
+        typecheck(value, "value", bool)
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory) from None
+        self._config_opts.override_boolean_option(key, value)
+
