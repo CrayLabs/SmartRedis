@@ -999,7 +999,7 @@ SRError delete_model(void* c_client,
 *   \param c_client The client object to use for communication
 *   \param name The name associated with the model
 *   \param name_length The length of the name string,
-*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param first_gpu the first GPU (zero-based) to use with the model
 *   \param num_gpus the number of gpus for which the model was stored
 *   \return Returns SRNoError on success or an error code on failure
 */
