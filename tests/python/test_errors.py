@@ -914,16 +914,86 @@ def test_get_tensor_names_wrong_type():
 
 def test_create_from_environment_wrong_type():
     with pytest.raises(TypeError):
-        co = ConfigOptions.create_from_environment(42)
+        _ = ConfigOptions.create_from_environment(42)
 
 def test_create_from_file_wrong_type():
     with pytest.raises(TypeError):
-        co = ConfigOptions.create_from_file(42)
+        _ = ConfigOptions.create_from_file(42)
 
 def test_create_from_string_wrong_type():
     with pytest.raises(TypeError):
-        co = ConfigOptions.create_from_string(42)
+        _ = ConfigOptions.create_from_string(42)
 
+def test_set_default_from_environment_wrong_type():
+    with pytest.raises(TypeError):
+        ConfigOptions.set_default_from_environment(42)
+
+def test_set_default_from_file_wrong_type():
+    with pytest.raises(TypeError):
+        ConfigOptions.set_default_from_file(42)
+
+def test_set_default_from_string_wrong_type():
+    with pytest.raises(TypeError):
+        ConfigOptions.set_default_from_string(42)
+
+def test_get_integer_option_wrong_type():
+    co = ConfigOptions()
+    key = "intval"
+    default = 42
+    with pytest.raises(TypeError):
+        _ = co.get_integer_option(42, default)
+    with pytest.raises(TypeError):
+        _ = co.get_integer_option(key, "not an integer")
+
+def test_get_string_option_wrong_type():
+    co = ConfigOptions()
+    key = "stringval"
+    default = "default_string_value"
+    with pytest.raises(TypeError):
+        _ = co.get_string_option(42, default)
+    with pytest.raises(TypeError):
+        _ = co.get_string_option(key, 42)
+
+def test_get_boolean_option_wrong_type():
+    co = ConfigOptions()
+    key = "boolval"
+    default = False
+    with pytest.raises(TypeError):
+        _ = co.get_boolean_option(42, default)
+    with pytest.raises(TypeError):
+        _ = co.get_boolean_option(key, "not a boolean")
+
+def test_is_defined_wrong_type():
+    co = ConfigOptions()
+    with pytest.raises(TypeError):
+        _ = co.is_defined(42)
+
+def test_override_integer_option_wrong_type():
+    co = ConfigOptions()
+    key = "intval"
+    value = 42
+    with pytest.raises(TypeError):
+        _ = co.override_integer_option(42, value)
+    with pytest.raises(TypeError):
+        _ = co.override_integer_option(key, "not an integer")
+
+def test_override_string_option_wrong_type():
+    co = ConfigOptions()
+    key = "stringval"
+    value = "target_string_value"
+    with pytest.raises(TypeError):
+        _ = co.override_string_option(42, value)
+    with pytest.raises(TypeError):
+        _ = co.override_string_option(key, 42)
+
+def test_override_boolean_option_wrong_type():
+    co = ConfigOptions()
+    key = "boolval"
+    value = False
+    with pytest.raises(TypeError):
+        _ = co.override_boolean_option(42, value)
+    with pytest.raises(TypeError):
+        _ = co.override_boolean_option(key, "not a boolean")
 
 ####
 # Utility functions
