@@ -447,7 +447,7 @@ class PyClient : public PySRObject
         /*!
         *   \brief Remove a model from the database
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw RuntimeException for all client errors
         */
@@ -464,7 +464,7 @@ class PyClient : public PySRObject
         *   \brief Remove a script from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw RuntimeException for all client errors
         */
@@ -804,12 +804,12 @@ class PyClient : public PySRObject
 
         /*!
         *   \brief Rename an aggregation list
-        *   \details The old and new aggregation list key used to find and
+        *   \details The initial and target aggregation list key used to find and
         *            relocate the list may be formed by applying prefixes to
-        *            the supplied old_name and new_name. See set_data_source()
+        *            the supplied src_name and dest_name. See set_data_source()
         *            and use_list_ensemble_prefix() for more details.
-        *   \param old_name The old list name
-        *   \param new_name The new list name
+        *   \param src_name The initial list name
+        *   \param dest_name The target list name
         *   \throw SmartRedis::Exception if the command fails
         */
         void rename_list(const std::string& src_name,

@@ -712,7 +712,7 @@ class Client : public SRObject
         *            The first_gpu and num_gpus parameters must match those used
         *            when the model was stored.
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw SmartRedis::Exception if model deletion fails
         */
@@ -739,7 +739,7 @@ class Client : public SRObject
         *            The first_gpu and num_gpus parameters must match those used
         *            when the script was stored.
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
@@ -1150,10 +1150,10 @@ class Client : public SRObject
         *   \brief Rename an aggregation list
         *   \details The old and new aggregation list key used to find and
         *            relocate the list may be formed by applying prefixes to
-        *            the supplied old_name and new_name. See set_data_source()
+        *            the supplied src_name and dest_name. See set_data_source()
         *            and use_list_ensemble_prefix() for more details.
-        *   \param old_name The old list name
-        *   \param new_name The new list name
+        *   \param src_name The initial list name
+        *   \param dest_name The target list name
         *   \throw SmartRedis::Exception if the command fails
         */
         void rename_list(const std::string& src_name,
@@ -1401,7 +1401,7 @@ class Client : public SRObject
         /*!
         *  \brief Execute the command to retrieve a subset of a DataSet
         *         aggregation list
-        *   \param name The name of the dataset aggregation list
+        *   \param list_name The name of the dataset aggregation list
         *   \param start_index The starting index of the range
         *                      (inclusive, starting at zero)
         *   \param end_index The ending index of the range
@@ -1686,6 +1686,7 @@ class Client : public SRObject
 
 /*!
 *   \brief Serialize a client
+*   \param stream The stream onto which to serialize the client
 *   \param client The client to serialize
 *   \returns The output stream, for chaining
 */

@@ -12,7 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
-- Correct a typo in the name of a parameter for the C documentation
+- Correct assorted API documentation errors
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
 - Add support to inspect the dimensions of a tensor via get_tensor_dims()
@@ -35,7 +35,7 @@ Description
 
 Detailed Notes
 
-- Corrected a typo in the name of the first_gpu parameter of the delete_model_multigpu method (PR305_)
+- Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
 - Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
 - Added error handling for a rare edge condition when setting scripts and models (PR300_)
 - Added support to inspect the dimensions of a tensor via new get_tensor_dims() method (PR299_)

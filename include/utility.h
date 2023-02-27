@@ -73,7 +73,7 @@ std::string to_string(SRTensorType ttype);
 
 /*!
 *   \brief Create a string representation of a metadata field type
-*   \param ttype The metadata field type to put in string form
+*   \param mdtype The metadata field type to put in string form
 */
 std::string to_string(SRMetaDataType mdtype);
 

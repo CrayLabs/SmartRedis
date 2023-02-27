@@ -1863,8 +1863,8 @@ end function make_str
 
 !> Print a string representation of the client
 subroutine print_client(self, unit)
-  class(client_type),   intent(in)           :: self              !< An initialized SmartRedis client
-  integer, optional, intent(in)              :: unit
+  class(client_type), intent(in)  :: self !< An initialized SmartRedis client
+  integer, optional,  intent(in)  :: unit !< Unit to which to print the client
 
   ! Determine which unit to write to
   integer :: target_unit

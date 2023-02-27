@@ -606,7 +606,7 @@ class RedisServer {
         */
         ThreadPool *_tp;
 
-        /*
+        /*!
         *   \brief Indicates whether the server was connected to
         *          via a Unix domain socket (true) or TCP connection
         *          (false)
