@@ -635,12 +635,6 @@ SRError set_script_from_file(void* c_client,
 *   \param name The name to associate with the script
 *   \param name_length The length of the name string,
 *                      excluding null terminating character
-*   \param device The name of the device for execution. May be either
-*                 CPU or GPU. If multiple GPUs are present, a specific
-*                 GPU can be targeted by appending its zero-based
-*                 index, i.e. "GPU:1"
-*   \param device_length The length of the device name string,
-*                        excluding null terminating character
 *   \param script_file The source file for the script
 *   \param script_file_length The length of the script file name string,
 *                             excluding null terminating character
@@ -748,7 +742,6 @@ SRError get_script(void* c_client,
 *   \param output_lengths The length of each output name string,
 *                         excluding null terminating character
 *   \param n_outputs The number of outputs
-*   \return Returns SRNoError on success or an error code on failure
 */
 void _check_params_run_script(void* c_client,
                               const char* name,
@@ -999,7 +992,7 @@ SRError delete_model(void* c_client,
 *   \param c_client The client object to use for communication
 *   \param name The name associated with the model
 *   \param name_length The length of the name string,
-*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param first_gpu the first GPU (zero-based) to use with the model
 *   \param num_gpus the number of gpus for which the model was stored
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1032,7 +1025,7 @@ SRError delete_script(void* c_client,
 *   \param c_client The client object to use for communication
 *   \param name The name associated with the model
 *   \param name_length The length of the name string,
-*   \param first_cpu the first GPU (zero-based) to use with the model
+*   \param first_gpu the first GPU (zero-based) to use with the model
 *   \param num_gpus the number of gpus for which the model was stored
 *   \return Returns SRNoError on success or an error code on failure
 */
@@ -1393,17 +1386,17 @@ SRError copy_list(void* c_client,
 
 /*!
 *   \brief Rename an aggregation list
-*   \details The old and new aggregation list key used to find and
+*   \details The initial and target aggregation list key used to find and
 *            relocate the list may be formed by applying prefixes to
-*            the supplied old_name and new_name. See set_data_source()
+*            the supplied src_name and dest_name. See set_data_source()
 *            and use_list_ensemble_prefix() for more details.
 *   \param c_client The client object to use for communication
-*   \param old_name The old list name
-*   \param src_name_length The size in characters of the old list name,
+*   \param src_name The initial list name
+*   \param src_name_length The size in characters of the initial list name,
 *                          including null terminator
-*   \param new_name The new list name
-*   \param new_name_length The size in characters of the new list name,
-*                          including null terminator
+*   \param dest_name The target list name
+*   \param dest_name_length The size in characters of the target list name,
+*                           including null terminator
 *   \return Returns SRNoError on success or an error code on failure
 */
 SRError rename_list(void* c_client,
@@ -1547,12 +1540,16 @@ SRError get_datasets_from_list(void* c_client, const char* list_name,
 *   \param num_datasets Receives the number of datasets returned
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError get_dataset_list_range(void* c_client, const char* list_name,
-                               const size_t list_name_length,
-                               const int start_index, const int end_index,
-                               void*** datasets, size_t* num_datasets);
+SRError get_dataset_list_range(
+    void* c_client,
+    const char* list_name,
+    const size_t list_name_length,
+    const int start_index,
+    const int end_index,
+    void*** datasets,
+    size_t* num_datasets);
 
-/*
+/*!
 *   \brief Get a range of datasets (by index) from an aggregation list and
            copy them into an already allocated vector of datasets. Note,
            while this method could be used by C clients, its primary
@@ -1581,13 +1578,15 @@ SRError get_dataset_list_range(void* c_client, const char* list_name,
 *                    starting at the end of the list. For example, -1 is
 *                    the last element of the list.
 *   \param datasets Receives an array of datasets included in the list
-*   \param num_datasets Receives the number of datasets returned
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
-                                         const size_t list_name_length,
-                                         const int start_index, const int end_index,
-                                         void** datasets);
+SRError _get_dataset_list_range_allocated(
+    void* c_client,
+    const char* list_name,
+    const size_t list_name_length,
+    const int start_index,
+    const int end_index,
+    void** datasets);
 
 
 /*!

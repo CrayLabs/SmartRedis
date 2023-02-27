@@ -492,6 +492,7 @@ class DataSet : public SRObject
 
 /*!
 *   \brief Serialize a dataset
+*   \param stream The stream onto which to serialize the dataset
 *   \param dataset The dataset to serialize
 *   \returns The output stream, for chaining
 */

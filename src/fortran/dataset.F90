@@ -539,8 +539,8 @@ end function make_str
 
 !> Print a string representation of the dataset
 subroutine print_dataset(self, unit)
-  class(dataset_type),     intent(in)  :: self  !< The dataset
-  integer, optional, intent(in)        :: unit
+  class(dataset_type), intent(in)  :: self  !< The dataset
+  integer, optional,   intent(in)  :: unit !< Unit to which to print the dataset
 
   ! Determine which unit to write to
   integer :: target_unit
