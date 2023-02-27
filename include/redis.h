@@ -456,7 +456,7 @@ class Redis : public RedisServer
         *   \brief Remove a script from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
