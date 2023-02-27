@@ -909,6 +909,21 @@ def test_get_tensor_names_wrong_type():
     with pytest.raises(TypeError):
         d.get_tensor_names(42)
 
+#####
+# Test type errors from bad parameter types to ConfigOptions API calls
+
+def test_create_from_environment_wrong_type():
+    with pytest.raises(TypeError):
+        co = ConfigOptions.create_from_environment(42)
+
+def test_create_from_file_wrong_type():
+    with pytest.raises(TypeError):
+        co = ConfigOptions.create_from_file(42)
+
+def test_create_from_string_wrong_type():
+    with pytest.raises(TypeError):
+        co = ConfigOptions.create_from_string(42)
+
 
 ####
 # Utility functions

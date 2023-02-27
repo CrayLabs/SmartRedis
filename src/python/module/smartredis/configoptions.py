@@ -74,7 +74,7 @@ class ConfigOptions:
     @exception_handler
     def create_from_environment(db_prefix):
         """Instantiate ConfigOptions, getting selections from
-        environment variables. If \p db_prefix is non-empty,
+        environment variables. If db_prefix is non-empty,
         then "{db_prefix}_" will be prepended to the name of
         each environment variable that is read
 
@@ -188,7 +188,7 @@ class ConfigOptions:
                               option to be returned if a value was not
                               set in the selected source
         :return: The value of the selected option. Returns
-                 \p default_value if the option was not set in the
+                 default_value if the option was not set in the
                  selected source
         :rtype: int
         """
@@ -209,7 +209,7 @@ class ConfigOptions:
                               option to be returned if a value was not
                               set in the selected source
         :return: The value of the selected option. Returns
-                 \p default_value if the option was not set in the
+                 default_value if the option was not set in the
                  selected source
         :rtype: str
         """
@@ -230,7 +230,7 @@ class ConfigOptions:
                               option to be returned if a value was not
                               set in the selected source
         :return: The value of the selected option. Returns
-                 \p default_value if the option was not set in the
+                 default_value if the option was not set in the
                  selected source
         :rtype: bool
         """
