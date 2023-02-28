@@ -43,7 +43,7 @@ SCENARIO("Additional Testing for logging", "[LOG]")
     std::string context("test_logger");
     log_data(context, LLDebug, "***Beginning Logger testing***");
 
-    GIVEN("A Client object")
+    GIVEN("A Logger object")
     {
         Client client(use_cluster(), "test_logger");
 

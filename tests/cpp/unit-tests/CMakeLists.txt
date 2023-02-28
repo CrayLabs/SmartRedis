@@ -104,6 +104,7 @@ set(UNIT_TESTS
 	test_redisserver.cpp
 	test_logger.cpp
 	test_ssdb.cpp
+	test_configopts.cpp
 )
 
 # Compare the number of source files given above to the number of source CPP
