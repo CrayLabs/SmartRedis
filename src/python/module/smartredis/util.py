@@ -98,6 +98,11 @@ def exception_handler(func):
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
+    WARNING: using this decorator with a class' @staticmethod or with an
+    unbound function that takes a type as its first argument will fail
+    because that will make the decorator think it's working with a
+    @classmethod
+
     :param func: the API function to decorate with this wrapper
     :type func: function
     :raises RedisReplyError: if the wrapped function raised an exception
@@ -105,7 +110,13 @@ def exception_handler(func):
     @wraps(func)
     def smartredis_api_wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            # For a classmethod, args[0] is the class but that is not
+            # expected by the PyBind callee, so we have to strip out
+            # that argument before calling the underlying class method
+            calling_args = args
+            if isinstance(args[0], type):
+                _, *calling_args = args
+            return func(*calling_args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
         # pyerror to our error module).
         # TypeErrors and ValueErrors we pass straight through
