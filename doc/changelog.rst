@@ -13,6 +13,7 @@ This section details changes made in the development branch that have not yet be
 Description
 
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
+- Correct assorted API documentation errors
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
 - Add support to inspect the dimensions of a tensor via get_tensor_dims()
@@ -36,6 +37,7 @@ Description
 Detailed Notes
 
 - An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
+- Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
 - Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
 - Added error handling for a rare edge condition when setting scripts and models (PR300_)
 - Added support to inspect the dimensions of a tensor via new get_tensor_dims() method (PR299_)
@@ -60,7 +62,8 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
-.. _PR302: https://github.com/CrayLabs/SmartRedis/pull/306
+.. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
+.. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
 .. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
 .. _PR300: https://github.com/CrayLabs/SmartRedis/pull/300
 .. _PR299: https://github.com/CrayLabs/SmartRedis/pull/299

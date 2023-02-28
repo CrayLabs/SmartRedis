@@ -57,11 +57,11 @@ class PySRObject
         /*!
         *   \brief PySRObject constructor from a
         *          SmartRedis::SRObject object
-        *   \param logcontext A SmartRedis::SRObject pointer to
-        *                  a SmartRedis::SRObject allocated on
-        *                  the heap.  The SmartRedis::SRObject
-        *                  will be deleted upton PySRObject
-        *                  deletion.
+        *   \param srobject A SmartRedis::SRObject pointer to
+        *                   a SmartRedis::SRObject allocated on
+        *                   the heap.  The SmartRedis::SRObject
+        *                   will be deleted upton PySRObject
+        *                   deletion.
         */
         PySRObject(SRObject* srobject);
 

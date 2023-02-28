@@ -150,9 +150,8 @@ class RedisServer {
         *          by shard, and executed in groups by shard.
         *          Commands are not guaranteed to be executed
         *          in any sequence or ordering.
-        *   \param cmd The CommandList containing multiple
-        *              single-key or single-hash
-        *              slot Command to run
+        *   \param cmd_list The CommandList containing multiple single-key
+        *                   or single-hash slot Command to run
         *   \returns A list of CommandReply for each Command
         *            in the CommandList. The order of the result
         *            matches the order of the input CommandList.
@@ -453,7 +452,7 @@ class RedisServer {
         *   \brief Remove a model from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw SmartRedis::Exception if model deletion fails
         */
@@ -472,7 +471,7 @@ class RedisServer {
         *   \brief Remove a script from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
@@ -606,7 +605,7 @@ class RedisServer {
         */
         ThreadPool *_tp;
 
-        /*
+        /*!
         *   \brief Indicates whether the server was connected to
         *          via a Unix domain socket (true) or TCP connection
         *          (false)
