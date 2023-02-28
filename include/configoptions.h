@@ -299,6 +299,13 @@ class ConfigOptions
         void _populate_options();
 
         /*!
+        *   \brief Apply a prefix to a key if the source is environment
+        *          variables and the prefix is nonempty
+        *   \param key The key to prefix
+        */
+        std::string _prefixed(const std::string& key);
+
+        /*!
         *  \brief Boolean option map
         */
         std::unordered_map<std::string, bool> _bool_options;

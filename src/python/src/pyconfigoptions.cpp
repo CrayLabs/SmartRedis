@@ -78,7 +78,8 @@ PyConfigOptions* PyConfigOptions::create_from_environment(
     try {
         ConfigOptions* cfgopts = ConfigOptions::create_from_environment(
             db_prefix);
-        return new PyConfigOptions(cfgopts);
+            PyConfigOptions* result = new PyConfigOptions(cfgopts);
+            return result;
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -171,12 +172,7 @@ void PyConfigOptions::set_default_from_environment(
     const std::string& db_prefix)
 {
     try {
-        if (_configoptions == NULL) {
-            throw SRRuntimeException(
-                "Attempted to call set_default_from_environment "\
-                "from a non-factory constructed ConfigOptions");
-        }
-        return _configoptions->set_default_from_environment(db_prefix);
+        ConfigOptions::set_default_from_environment(db_prefix);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -199,12 +195,7 @@ void PyConfigOptions::set_default_from_file(
     const std::string& filename)
 {
     try {
-        if (_configoptions == NULL) {
-            throw SRRuntimeException(
-                "Attempted to call set_default_from_file "\
-                "from a non-factory constructed ConfigOptions");
-        }
-        return _configoptions->set_default_from_file(filename);
+        ConfigOptions::set_default_from_file(filename);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -227,12 +218,7 @@ void PyConfigOptions::set_default_from_string(
     const std::string& json_blob)
 {
     try {
-        if (_configoptions == NULL) {
-            throw SRRuntimeException(
-                "Attempted to call set_default_from_string "\
-                "from a non-factory constructed ConfigOptions");
-        }
-        return _configoptions->set_default_from_string(json_blob);
+        ConfigOptions::set_default_from_string(json_blob);
     }
     catch (Exception& e) {
         // exception is already prepared for caller

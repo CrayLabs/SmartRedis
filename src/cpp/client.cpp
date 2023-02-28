@@ -112,7 +112,7 @@ DataSet Client::get_dataset(const std::string& name)
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
 
     // Retrieve DataSet tensors and fill the DataSet object
-    for(size_t i = 0; i < tensor_names.size(); i++) {
+    for (size_t i = 0; i < tensor_names.size(); i++) {
         // Build the tensor key
         std::string tensor_key =
             _build_dataset_tensor_key(name, tensor_names[i], true);

@@ -139,7 +139,7 @@ class PyConfigOptions
         *   \throw SmartRedis::Exception if the prefix contains invalid
         *          characters
         */
-        void set_default_from_environment(const std::string& db_prefix);
+        static void set_default_from_environment(const std::string& db_prefix);
 
         /*!
         *   \brief Set a UTF-8 file containing JSON data as the default
@@ -149,7 +149,7 @@ class PyConfigOptions
         *   \throw SmartRedis::Exception if the file cannot be found or
         *          the data within it cannot be parsed
         */
-        void set_default_from_file(const std::string& filename);
+        static void set_default_from_file(const std::string& filename);
 
         /*!
         *   \brief Set a string containing a JSON blob as the default
@@ -157,7 +157,7 @@ class PyConfigOptions
         *   \param json_blob A JSON blob containing the configuration data
         *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
         */
-        void set_default_from_string(const std::string& json_blob);
+        static void set_default_from_string(const std::string& json_blob);
 
         /////////////////////////////////////////////////////////////
         // Option access

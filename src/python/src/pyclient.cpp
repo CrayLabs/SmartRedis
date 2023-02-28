@@ -255,6 +255,8 @@ PyDataset* PyClient::get_dataset(const std::string& name)
     DataSet* data;
     try {
         data = new DataSet(_client->get_dataset(name));
+        PyDataset* dataset = new PyDataset(data);
+        return dataset;
     }
     catch (const std::bad_alloc& e) {
         data = NULL;
@@ -273,8 +275,6 @@ PyDataset* PyClient::get_dataset(const std::string& name)
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing get_dataset.");
     }
-    PyDataset* dataset = new PyDataset(data);
-    return dataset;
 }
 
 void PyClient::delete_dataset(const std::string& name) {

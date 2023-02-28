@@ -142,27 +142,27 @@ PYBIND11_MODULE(smartredisPy, m) {
     // Python ConfigOptions class
     #define CONFIGOPTIONS_METHOD(name) CLASS_METHOD(PyConfigOptions, name)
     py::class_<PyConfigOptions>(m, "PyConfigOptions")
-        .def_static("config_from_environment",
-                    static_cast<ConfigOptions* (*)(const std::string&)>(
-                        &ConfigOptions::create_from_environment))
-        .def_static("config_from_file",
-                    static_cast<ConfigOptions* (*)(const std::string&)>(
-                        &ConfigOptions::create_from_file))
-        .def_static("config_from_string",
-                    static_cast<ConfigOptions* (*)(const std::string&)>(
-                        &ConfigOptions::create_from_string))
-        .def_static("config_from_default",
-                    static_cast<ConfigOptions* (*)()>(
-                        &ConfigOptions::create_from_default))
+        .def_static("create_from_environment",
+                    static_cast<PyConfigOptions* (*)(const std::string&)>(
+                        &PyConfigOptions::create_from_environment))
+        .def_static("create_from_file",
+                    static_cast<PyConfigOptions* (*)(const std::string&)>(
+                        &PyConfigOptions::create_from_file))
+        .def_static("create_from_string",
+                    static_cast<PyConfigOptions* (*)(const std::string&)>(
+                        &PyConfigOptions::create_from_string))
+        .def_static("create_from_default",
+                    static_cast<PyConfigOptions* (*)()>(
+                        &PyConfigOptions::create_from_default))
         .def_static("set_default_from_environment",
                     static_cast<void (*)(const std::string&)>(
-                        &ConfigOptions::set_default_from_environment))
+                        &PyConfigOptions::set_default_from_environment))
         .def_static("set_default_from_file",
                     static_cast<void (*)(const std::string&)>(
-                        &ConfigOptions::set_default_from_file))
+                        &PyConfigOptions::set_default_from_file))
         .def_static("set_default_from_string",
                     static_cast<void (*)(const std::string&)>(
-                        &ConfigOptions::set_default_from_string))
+                        &PyConfigOptions::set_default_from_string))
         .CONFIGOPTIONS_METHOD(get_integer_option)
         .CONFIGOPTIONS_METHOD(get_string_option)
         .CONFIGOPTIONS_METHOD(get_boolean_option)

@@ -121,7 +121,7 @@ int64_t ConfigOptions::get_integer_option(
     int64_t result = default_value;
     if (_lazy) {
         int temp = 0;
-        get_config_integer(temp, key, default_value);
+        get_config_integer(temp, _prefixed(key), default_value);
         result = (int64_t)temp;
     }
 
@@ -142,7 +142,7 @@ std::string ConfigOptions::get_string_option(
     // If we're doing lazy evaluation of keys, fetch the value
     std::string result(default_value);
     if (_lazy) {
-        get_config_string(result, key, default_value);
+        get_config_string(result, _prefixed(key), default_value);
     }
 
     // Store the final value before we exit
@@ -162,7 +162,7 @@ bool ConfigOptions::get_boolean_option(
     // If we're doing lazy evaluation of keys, fetch the value
     bool result = default_value;
     if (_lazy) {
-        get_config_bool(result, key, default_value);
+        get_config_bool(result, _prefixed(key), default_value);
     }
 
     // Store the final value before we exit
@@ -213,4 +213,14 @@ void ConfigOptions::_populate_options()
         "Sources other than environment variables "
         "are not currently supported"
     );
+}
+
+// Apply a prefix to a key if the source is environment
+// variables and the prefix is nonempty
+std::string ConfigOptions::_prefixed(const std::string& key)
+{
+    std::string result(key);
+    if (_source == cs_envt && _string != "")
+        result = _string + + "_" + key;
+    return result;
 }
