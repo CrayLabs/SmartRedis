@@ -70,7 +70,7 @@ class ConfigOptions:
         """
         return self._is_created_via_factory
 
-    @staticmethod
+    @classmethod
     @exception_handler
     def create_from_environment(db_prefix):
         """Instantiate ConfigOptions, getting selections from
@@ -90,7 +90,7 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    @staticmethod
+    @classmethod
     @exception_handler
     def create_from_file(filename):
         """Instantiate ConfigOptions, getting selections from
@@ -107,7 +107,7 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    @staticmethod
+    @classmethod
     @exception_handler
     def create_from_string(json_blob):
         """Instantiate ConfigOptions, getting selections from
@@ -124,7 +124,7 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    @staticmethod
+    @classmethod
     @exception_handler
     def create_from_default():
         """Instantiate ConfigOptions, getting selections from
@@ -138,7 +138,7 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    @staticmethod
+    @classmethod
     @exception_handler
     def set_default_from_environment(db_prefix):
         """Set environment variables with a particular prefix
@@ -153,6 +153,7 @@ class ConfigOptions:
         typecheck(db_prefix, "db_prefix", str)
         PyConfigOptions.set_default_from_environment(db_prefix)
 
+    @classmethod
     @exception_handler
     def set_default_from_file(filename):
         """Set a file containing JSON data as the default configuration source
@@ -165,6 +166,7 @@ class ConfigOptions:
         typecheck(filename, "filename", str)
         PyConfigOptions.set_default_from_file(filename)
 
+    @classmethod
     @exception_handler
     def set_default_from_string(string):
         """Set a string containing a JSON blob as the default
