@@ -39,6 +39,9 @@
 extern "C" {
 #endif
 
+/////////////////////////////////////////////////////////////
+// Factory construction methods
+
 /*!
 *   \brief Instantiate ConfigOptions, getting selections from
 *          environment variables. If \p db_prefix is non-empty,
@@ -93,6 +96,209 @@ SRError create_configoptions_from_string(
 */
 SRError create_configoptions_from_default(
     void** new_configoptions);
+
+
+/////////////////////////////////////////////////////////////
+// Default configuration selectors
+
+/*!
+*   \brief Set environment variables with a particular prefix
+*          as the default configuration source
+*   \param db_prefix The prefix to be prepended to environment
+*                    variables in the form {db_prefix}_{environment
+*                    variable}. If the prefix is an empty string,
+*                    no prepending is done.
+*   \param db_prefix_length The length of the db_prefix string,
+*                           excluding null terminating character
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError set_default_from_environment(
+    const char* db_prefix,
+    const size_t db_prefix_length);
+
+/*!
+*   \brief Set a UTF-8 file containing JSON data as the default
+*          configuration source
+*   \param filename A UTF-8 file with JSON data containing the
+*                   configuration data
+*   \param filename_length The length of the filename string,
+*                          excluding null terminating character
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError set_default_from_file(
+    const char* filename,
+    const size_t filename_length);
+
+/*!
+*   \brief Set a string containing a JSON blob as the default
+*          configuration source
+*   \param json_blob A JSON blob containing the configuration data
+*   \param json_blob_length The length of the json_blob string,
+*                           excluding null terminating character
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError set_default_from_string(
+    const char* json_blob,
+    const size_t json_blob_length);
+
+/////////////////////////////////////////////////////////////
+// Option access
+
+/*!
+*   \brief Retrieve the value of a numeric configuration option
+*          from the selected source
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to retrieve
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param default_value The baseline value of the configuration
+*          option to be returned if a value was not set in the
+*          selected source
+*   \param result Receives the selected integer option result. Returns
+*            \p default_value if the option was not set in the
+*            selected source
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError get_integer_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    int64_t default_value,
+    int64_t* result);
+
+/*!
+*   \brief Retrieve the value of a string configuration option
+*          from the selected source
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to retrieve
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param default_value The baseline value of the configuration
+*          option to be returned if a value was not set in the
+*          selected source
+*   \param default_value_len The length of the default_value string,
+*                            excluding null terminating character
+*   \param result Receives the selected string option result. Returns
+*            \p default_value if the option was not set in the
+*            selected source
+*   \param result_len Receives the length of the result string,
+*                     excluding null terminating character
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError get_string_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    const char* default_value,
+    size_t default_value_len,
+    char** result,
+    size_t* result_len);
+
+/*!
+*   \brief Retrieve the value of a boolean configuration option
+*          from the selected source
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to retrieve
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param default_value The baseline value of the configuration
+*          option to be returned if a value was not set in the
+*          selected source
+*   \param result Receives the selected boolean option result. Returns
+*            \p default_value if the option was not set in the
+*            selected source
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError get_boolean_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    bool default_value,
+    bool* result);
+
+/*!
+*   \brief Check whether a configuration option is set in the
+*          selected source
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to check
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param result Receives true IFF the key was defined or has been
+*                 overridden; false otherwise
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError is_defined(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    bool* result);
+
+/////////////////////////////////////////////////////////////
+// Option overrides
+
+/*!
+*   \brief Override the value of a numeric configuration option
+*          in the selected source
+*   \details Overrides are specific to an instance of the
+*            ConfigOptions class. An instance that references
+*            the same source will not be affected by an override to
+*            a different ConfigOptions instance
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to override
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param value The value to store for the configuration option
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError override_integer_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    int64_t value);
+
+/*!
+*   \brief Override the value of a string configuration option
+*          in the selected source
+*   \details Overrides are specific to an instance of the
+*            ConfigOptions class. An instance that references
+*            the same source will not be affected by an override to
+*            a different ConfigOptions instance
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to override
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param value The value to store for the configuration option
+*   \param value_len The length of the value string,
+*                    excluding null terminating character
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError override_string_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    const char* value,
+    size_t value_len);
+
+/*!
+*   \brief Override the value of a boolean configuration option
+*          in the selected source
+*   \details Overrides are specific to an instance of the
+*            ConfigOptions class. An instance that references
+*            the same source will not be affected by an override to
+*            a different ConfigOptions instance
+*   \param c_cfgopts The ConfigOptions object to use for communication
+*   \param key The name of the configuration option to override
+*   \param key_len The length of the key string,
+*                  excluding null terminating character
+*   \param value The value to store for the configuration option
+*   \returns Returns SRNoError on success or an error code on failure
+*/
+SRError override_boolean_option(
+    void* c_cfgopts,
+    const char* key,
+    size_t key_len,
+    bool value);
+
 
 } // extern "C"
 
