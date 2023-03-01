@@ -323,8 +323,7 @@ SRError get_string_option(
     // be no way to reclaim it
     *option_result_len = option_result_str.length();
     *option_result = new char[*option_result_len + 1];
-    std::strncpy(
-      *option_result, option_result_str.c_str(), *option_result_len);
+    strncpy(*option_result, option_result_str.c_str(), *option_result_len);
   }
   catch (const Exception& e) {
     SRSetLastError(e);
