@@ -32,7 +32,7 @@ use iso_c_binding,   only : c_loc, c_f_pointer
 
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
-use fortran_c_interop, only : enum_kind
+use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
 
 implicit none; private
 
@@ -62,6 +62,32 @@ type, public :: configoptions_type
   procedure :: create_configoptions_from_string
   !> Instantiate ConfigOptions, getting selections from the current default source
   procedure :: create_configoptions_from_default
+
+  ! Defaults configuration
+  !> Set environment variables as the default configuration source
+  procedure, nopass :: set_default_from_environment
+  !> Set a UTF-8 file containing JSON data as the default configuration source
+  procedure, nopass :: set_default_from_file
+  !> Set a string containing a JSON blob as the default configuration source
+  procedure, nopass :: set_default_from_string
+
+  ! Option access
+  !> Retrieve the value of a numeric configuration option
+  procedure :: get_integer_option
+  !> Retrieve the value of a string configuration option
+  procedure :: get_string_option
+  !> Retrieve the value of a boolean configuration option
+  procedure :: get_boolean_option
+  !> Check whether a configuration option is set
+  procedure :: is_defined
+
+  ! Option value overrides
+  !> Override the value of a numeric configuration option
+  procedure :: override_integer_option
+  !> Override the value of a string configuration option
+  procedure :: override_string_option
+  !> Override the value of a boolean configuration option
+  procedure :: override_boolean_option
 
 end type configoptions_type
 
@@ -134,5 +160,205 @@ function create_configoptions_from_default(self) result(code)
 
   code = create_configoptions_from_default_c(self%configoptions_ptr)
 end function create_configoptions_from_default
+
+!> Set environment variables as the default configuration source
+function set_default_from_environment(db_prefix) result(code)
+  character(len=*),          intent(in) :: db_prefix !< Prefix to be prepended
+                                                     !! to environment vars
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(db_prefix)) :: c_db_prefix
+  integer(kind=c_size_t) :: c_db_prefix_length
+
+  c_db_prefix = trim(db_prefix)
+  c_db_prefix_length = len_trim(db_prefix)
+
+  code = set_default_from_environment_c(c_db_prefix, c_db_prefix_length)
+end function set_default_from_environment
+
+!> Set a UTF-8 file containing JSON data as the default configuration source
+function set_default_from_file(filename) result(code)
+  character(len=*),          intent(in) :: filename  !< UTF-8 file with JSON data
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(filename)) :: c_filename
+  integer(kind=c_size_t) :: c_filename_length
+
+  c_filename = trim(filename)
+  c_filename_length = len_trim(filename)
+
+  code = set_default_from_file_c(c_filename, c_filename_length)
+end function set_default_from_file
+
+!> Set a string containing a JSON blob as the default configuration source
+function set_default_from_string(json_blob) result(code)
+  character(len=*),          intent(in) :: json_blob !< A JSON blob containing the
+                                                     !! configuration data
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(json_blob)) :: c_json_blob
+  integer(kind=c_size_t) :: c_json_blob_length
+
+  c_json_blob = trim(json_blob)
+  c_json_blob_length = len_trim(json_blob)
+
+  code = set_default_from_string_c(c_json_blob, c_json_blob_length)
+end function set_default_from_string
+
+!> Retrieve the value of a numeric configuration option
+function get_integer_option(self, key, default_value, result) result(code)
+  class(configoptions_type), intent(in) :: self          !< The configoptions
+  character(len=*),          intent(in) :: key           !< The name of the configuration
+                                                         !! option to retrieve
+  integer(kind=8),           intent(in) :: default_value !< The baseline value of the
+                                                         !! configuration option to be returned
+  integer(kind=8),           intent(inout) :: result     !< Receives value of option
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  code = get_integer_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, default_value, result)
+end function get_integer_option
+
+!> Retrieve the value of a string configuration option
+function get_string_option(self, key, default_value, result) result(code)
+  class(configoptions_type), intent(in)  :: self          !< The configoptions
+  character(len=*),          intent(in)  :: key           !< The name of the configuration
+                                                          !! option to retrieve
+  character(len=*),          intent(in)  :: default_value !< The baseline value of the
+                                                          !! configuration option to be returned
+  character(len=*),          intent(out) :: result        !< Receives value of option
+  integer(kind=enum_kind)                :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(default_value)) :: c_default_value
+  integer(kind=c_size_t) :: c_key_length, c_default_value_length
+  integer(kind=c_size_t) :: c_result_length, i
+  character(kind=c_char), dimension(:), pointer :: f_result_ptr
+  type(c_ptr) :: c_result_ptr
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+  c_default_value = trim(default_value)
+  c_default_value_length = len_trim(default_value)
+
+  code = get_string_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, c_default_value, &
+      c_default_value_length, c_result_ptr, c_result_length)
+  call c_f_pointer(c_result_ptr, f_result_ptr, [ c_result_length ])
+
+  do i = 1, c_result_length
+    result(i:i) = f_result_ptr(i)
+  enddo
+end function get_string_option
+
+!> Retrieve the value of a boolean configuration option
+function get_boolean_option(self, key, default_value, result) result(code)
+  class(configoptions_type), intent(in) :: self          !< The configoptions
+  character(len=*),          intent(in) :: key           !< The name of the configuration
+                                                         !! option to retrieve
+  logical(kind=c_bool),      intent(in) :: default_value !< The baseline value of the
+                                                         !! configuration option to be returned
+  logical(kind=c_bool),      intent(inout) :: result     !< Receives value of option
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  code = get_boolean_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, default_value, result)
+end function get_boolean_option
+
+!> Check whether a configuration option is set
+function is_defined(self, key, result) result(code)
+  class(configoptions_type), intent(in) :: self          !< The configoptions
+  character(len=*),          intent(in) :: key           !< The name of the configuration
+                                                         !! option to check
+  logical(kind=c_bool),      intent(inout) :: result     !< Receives value of option
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  code = is_defined_c(self%configoptions_ptr, c_key, c_key_length, result)
+end function is_defined
+
+!> Override the value of a numeric configuration option
+function override_integer_option(self, key, value) result(code)
+  class(configoptions_type), intent(in) :: self      !< The configoptions
+  character(len=*),          intent(in) :: key       !< The name of the configuration
+                                                     !! option to override
+  integer(kind=8),           intent(in) :: value     !< The value to store for the option
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  code = override_integer_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, value)
+end function override_integer_option
+
+!> Override the value of a string configuration option
+function override_string_option(self, key, value) result(code)
+  class(configoptions_type), intent(in)  :: self   !< The configoptions
+  character(len=*),          intent(in)  :: key    !< The name of the configuration
+                                                   !! option to override
+  character(len=*),          intent(in)  :: value  !< The value to store for the option
+  integer(kind=enum_kind)                :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(value)) :: c_value
+  integer(kind=c_size_t) :: c_key_length, c_value_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+  c_value = trim(value)
+  c_value_length = len_trim(value)
+
+  code = override_string_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, c_value, c_value_length)
+end function override_string_option
+
+!> Override the value of a boolean configuration option
+function override_boolean_option(self, key, value) result(code)
+  class(configoptions_type), intent(in) :: self      !< The configoptions
+  character(len=*),          intent(in) :: key       !< The name of the configuration
+                                                     !! option to override
+  logical(kind=c_bool),      intent(in) :: value     !< The value to store for the option
+  integer(kind=enum_kind)               :: code
+
+  ! Local variables
+  character(kind=c_char, len=len_trim(key)) :: c_key
+  integer(kind=c_size_t) :: c_key_length
+
+  c_key = trim(key)
+  c_key_length = len_trim(key)
+
+  code = override_boolean_option_c( &
+    self%configoptions_ptr, c_key, c_key_length, value)
+end function override_boolean_option
 
 end module smartredis_configoptions
