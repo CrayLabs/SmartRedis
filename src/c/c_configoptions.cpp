@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstring>
 #include "srassert.h"
 #include "srexception.h"
 #include "configoptions.h"
@@ -333,7 +334,6 @@ SRError get_string_option(
     SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = SRInternalError;
   }
-
 
   return result;
 }
