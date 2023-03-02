@@ -63,7 +63,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
-        rai_v: [1.2.5] # versions of RedisAI
+        rai_v: [1.2.3] # versions of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
     env:
       FC: gfortran-${{ matrix.compiler }}
@@ -130,31 +130,50 @@ jobs:
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev,xarray]
 
-      # CI tests that should be run with standalone Redis go here
-      - name: Build dependencies
+      - name: Build and install dependencies
         run: |
-            make test-deps
-            echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+            mkdir -p ./third-party &&
+            cd ./third-party &&
+            bash ../build-scripts/build-lcov.sh &&
+            bash ../build-scripts/build-catch.sh
 
+      - name: Install docker and redis-server
+        run: |
+          sudo apt-get update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
+          # Add latest redis to apt sources
+          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
+          curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
+          # Add latest docker to apt sources
+          echo  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg && \
+          sudo apt-get -y update && \
+          sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1 &&
+          docker create --name redisai --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
+          docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
+          sudo mkdir -p /usr/lib/redis/modules/ &&
+          sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+
+      # CI tests that should be run with standalone Redis go here
       - name: Standalone Redis tests
         run: make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
       - name: Setup local redis servers
         run: |
-          REDIS_BIN=$PWD/third-party/redis/src/
-          REDISAI_PATH="$PWD/third-party/RedisAI/bin/linux-x64-release/install-cpu/redisai.so" &&
-          BACKENDS="TF redisai_tensorflow/redisai_tensorflow.so TORCH redisai_torch/redisai_torch.so" &&
           SSDB="127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" &&
           echo "SSDB=$SSDB" >> $GITHUB_ENV &&
           echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV &&
-          mkdir cluster_scratch; pushd cluster_scratch
+          mkdir cluster_scratch; pushd cluster_scratch &&
           for port in {7000..7002}; do
-            $REDIS_BIN/redis-server --port $port --cluster-enabled yes \
-                                    --cluster-config-file $port.conf --protected-mode no --save "" \
-                                    --loadmodule $REDISAI_PATH $BACKENDS &
+            redis-server --port $port --cluster-enabled yes --daemonize yes\
+                         --cluster-config-file "$port.conf" --protected-mode no --save "" \
+                         --logfile "$port.log" \
+                         --loadmodule $HOME/redisai.so \
+                           TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
+                           TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
           done &&
           sleep 2 &&
-          $REDIS_BIN/redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
+          redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
 
       # CI tests that should be run with clustered Redis go here
       - name: Run testing with redis cluster

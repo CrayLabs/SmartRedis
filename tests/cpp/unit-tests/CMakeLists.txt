@@ -46,6 +46,7 @@ include_directories(SYSTEM
 )
 
 # The source files to assess coverage on
+file(GLOB SOURCES CONFIGURE_DEPENDS ../../../src/cpp/*.cpp ../../../src/c/*.cpp)
 
 # The unit tests to be executed
 #set(UNIT_TESTS
