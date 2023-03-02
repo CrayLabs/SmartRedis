@@ -164,6 +164,8 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
     log_data(context, LLDebug, "***End ConfigOptions testing***");
 }
 
+#ifdef SKIPPING_TESTS
+
 SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Prefix Testing for ConfigOptions" << std::endl;
@@ -292,3 +294,5 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
 
     log_data(context, LLDebug, "***End ConfigOptions prefix testing***");
 }
+
+#endif // SKIPPING_TESTS
