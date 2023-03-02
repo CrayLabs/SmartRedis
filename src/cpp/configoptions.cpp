@@ -35,7 +35,7 @@
 using namespace SmartRedis;
 
 cfgSrc ConfigOptions::_default_source = cs_envt;
-std::string ConfigOptions::_default_cfg_string = std::string("");
+std::string* ConfigOptions::_default_cfg_string = new std::string("");
 
 // ConfigOptions constructor
 ConfigOptions::ConfigOptions(
@@ -47,7 +47,7 @@ ConfigOptions::ConfigOptions(
     // Handle the default case
     if (_source == cs_default) {
         _source = _default_source;
-        _string = _default_cfg_string;
+        _string = *_default_cfg_string;
     }
 
     // Decide how lazy to be
@@ -84,28 +84,31 @@ ConfigOptions* ConfigOptions::create_from_string(
 ConfigOptions* ConfigOptions::create_from_default()
 {
     return new ConfigOptions(
-        _default_source, _default_cfg_string);
+        _default_source, *_default_cfg_string);
 }
 
 // Set environment variables with a particular prefix as the default source
 void ConfigOptions::set_default_from_environment(const std::string& db_prefix)
 {
     _default_source = cs_envt;
-    _default_cfg_string = db_prefix;
+    delete _default_cfg_string;
+    _default_cfg_string = new std::string(db_prefix);
 }
 
 // Set a UTF-8 file containing JSON data as the default configuration source
 void ConfigOptions::set_default_from_file(const std::string& filename)
 {
     _default_source = cs_file;
-    _default_cfg_string = filename;
+    delete _default_cfg_string;
+    _default_cfg_string = new std::string(filename);
 }
 
 // Set a string containing a JSON blob as the default configuration source
 void ConfigOptions::set_default_from_string(const std::string& json_blob)
 {
     _default_source = cs_blob;
-    _default_cfg_string = json_blob;
+    delete _default_cfg_string;
+    _default_cfg_string = new std::string(json_blob);
 }
 
 // Retrieve the value of a numeric configuration option

@@ -78,29 +78,24 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
         setenv("test_boolean_key_t3", "fail", true);
 
         ConfigOptions* co = ConfigOptions::create_from_environment("");
-        std::string jsonfile("some_file.json");
-//        std::string jsonblob("{ \"key\" = \"value\" }");
-        std::string jsonblob("{ .key. = .value. }");
 
         THEN("Options should be configurable")
         {
             // Unimplemented bits
             CHECK_THROWS_AS(
-                ConfigOptions::create_from_file(jsonfile),
+                ConfigOptions::create_from_file("some_file.json"),
                 RuntimeException);
             CHECK_THROWS_AS(
-                ConfigOptions::create_from_string(jsonblob),
+                ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
                 RuntimeException);
-            ConfigOptions::set_default_from_file(jsonfile);
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_default(),
-                RuntimeException);
-#if 1
-            ConfigOptions::set_default_from_string(jsonblob);
+            ConfigOptions::set_default_from_file("some_file.json");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-#endif
+            ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
+            CHECK_THROWS_AS(
+                ConfigOptions::create_from_default(),
+                RuntimeException);
 
             // integer option tests
             CHECK(co->get_integer_option("test_integer_key", 0) == 42);
@@ -226,12 +221,10 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-#if 0
             ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-#endif
 
             // integer option tests
             CHECK(co->get_integer_option("integer_key", 0) == 42);

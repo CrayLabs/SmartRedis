@@ -352,7 +352,7 @@ class ConfigOptions
         *         the string is the key prefix. For from file, the string is
         *         the filename. For from string, it's the JSON blob
         */
-       static std::string _default_cfg_string;
+       static std::string* _default_cfg_string;
 };
 
 } // namespace SmartRedis
