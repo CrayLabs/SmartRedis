@@ -52,6 +52,8 @@ def get_test_names():
 def test_unit_cpp_client(test, use_cluster):
     cmd = []
     cmd.append(test)
+    cmd.append("-v")
+    cmd.append("high")
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     print(f"Using cluster: {use_cluster}")
@@ -68,11 +70,15 @@ def execute_cmd(cmd_list):
     try:
         out, err = proc.communicate(timeout=timeout_limit)
         if out:
-#            print("OUTPUT:", out.decode("utf-8"))
-            print("OUTPUT:", out)
+            print("OUTPUT:", out.decode("utf-8"))
+        else:
+            print("OUTPUT:", "None")
         if err:
-#            print("ERROR:", err.decode("utf-8"))
-            print("ERROR:", err)
+            print("ERROR:", err.decode("utf-8"))
+        else:
+            print("ERROR:", "None")
+        if (proc.returncode != 0):
+            print("Return code:", proc.returncode)
         assert(proc.returncode == 0)
     except UnicodeDecodeError:
         output, errs = proc.communicate()
