@@ -92,8 +92,9 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-#if 0
-            ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
+#if 1
+            ConfigOptions::set_default_from_string("some_file.json");
+//            ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
