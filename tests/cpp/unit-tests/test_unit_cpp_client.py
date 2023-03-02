@@ -89,7 +89,8 @@ def execute_cmd(cmd_list):
         print("OUTPUT:", out)
         print("ERROR:", errs)
         assert(False)
-    except Exception:
+    except Exception as e:
+        print(e)
         proc.kill()
         output, errs = proc.communicate()
 #        print("OUTPUT:", output.decode("utf-8"))
