@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include <cstring>
 #include "srassert.h"
 #include "srexception.h"
@@ -290,7 +291,6 @@ SRError get_integer_option(
     SRSetLastError(SRInternalException("Unknown exception occurred"));
     result = SRInternalError;
   }
-
 
   return result;
 }

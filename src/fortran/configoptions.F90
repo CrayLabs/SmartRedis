@@ -236,7 +236,8 @@ function get_string_option(self, key, default_value, result) result(code)
                                                           !! option to retrieve
   character(len=*),          intent(in)  :: default_value !< The baseline value of the
                                                           !! configuration option to be returned
-  character(len=*),          intent(out) :: result        !< Receives value of option
+!  character(len=*),          intent(out) :: result        !< Receives value of option
+  character(len=:), allocatable, intent(out) :: result        !< Receives value of option
   integer(kind=enum_kind)                :: code
 
   ! Local variables
@@ -257,6 +258,7 @@ function get_string_option(self, key, default_value, result) result(code)
       c_default_value_length, c_result_ptr, c_result_length)
   call c_f_pointer(c_result_ptr, f_result_ptr, [ c_result_length ])
 
+  ALLOCATE(character(len=c_result_length) :: result)
   do i = 1, c_result_length
     result(i:i) = f_result_ptr(i)
   enddo

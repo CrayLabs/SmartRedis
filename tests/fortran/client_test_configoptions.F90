@@ -35,12 +35,13 @@ program main
 
 #include "enum_fortran.inc"
 
-  type(configoptions_type) :: co
-  integer                  :: result
-  integer(kind=8)          :: ivalue, idefault, iresult ! int
-  logical(kind=c_bool)     :: bvalue, bdefault, bresult ! bool
-  char(kind=c_char)        :: svalue, sdefault, sresult ! string
+  type(configoptions_type)      :: co
+  integer                       :: result
+  integer(kind=8)               :: ivalue, idefault, iresult ! int
+  logical(kind=c_bool)          :: bvalue, bdefault, bresult ! bool
+  character(kind=c_char, len=:), allocatable :: svalue, sdefault, sresult ! string
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! Establish test keys
   ! non-prefixed testing keys
   call setenv("test_integer_key", "42")
@@ -66,6 +67,7 @@ program main
   call setenv("prefixtest_boolean_key_t3", "fail")
 
   ! Check unimplemented bits
+  write(*,*) "ConfigOption testing: unimplemented bits"
   result = co%create_configoptions_from_file("some_file.json")
   if (result .eq. SRNoError) error stop
   result = co%create_configoptions_from_string('{ "key" = "value" }')
@@ -79,7 +81,14 @@ program main
   result = co%create_configoptions_from_default()
   if (result .eq. SRNoError) error stop
 
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! non-prefixed option testing
+  result = co%create_configoptions_from_environment("");
+  if (result .ne. SRNoError) error stop
+
   ! integer option tests
+  write(*,*) "ConfigOption testing: integer option tests"
   idefault = 0
   result = co%get_integer_option("test_integer_key", idefault, iresult)
   if (result .ne. SRNoError) error stop
@@ -111,6 +120,7 @@ program main
 
 
   ! string option tests
+  write(*,*) "ConfigOption testing: string option tests"
   sdefault = "missing"
   result = co%get_string_option("test_string_key", sdefault, sresult)
   if (result .ne. SRNoError) error stop
@@ -141,6 +151,7 @@ program main
 
 
   ! boolean option tests
+  write(*,*) "ConfigOption testing: boolean option tests"
   bdefault = .true.
   result = co%get_boolean_option("test_boolean_key", bdefault, bresult)
   if (result .ne. SRNoError) error stop
@@ -193,65 +204,133 @@ program main
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .true.) error stop
 
-  !!!!!!!!!
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Prefixed testing
+  result = co%create_configoptions_from_environment("prefixtest");
+  if (result .ne. SRNoError) error stop
 
-#if 0
-            // integer option tests
-            result = co%get_integer_option("integer_key", 0) == 42);
-            CHECK_FALSE(co%is_defined("integer_key_that_is_not_really_present"));
-            result = co%get_integer_option(
-                "integer_key_that_is_not_really_present", 0) == 0);
-            result = co%is_defined("integer_key_that_is_not_really_present"));
-            co%override_integer_option(
-                "integer_key_that_is_not_really_present", 42
-            );
-            result = co%get_integer_option(
-                "integer_key_that_is_not_really_present", 0) == 42);
+  ! integer option tests
+  write(*,*) "ConfigOption testing: prefixed integer option tests"
 
-            // string option tests
-            result = co%get_string_option("string_key", "missing") == "charizard");
-            CHECK_FALSE(co%is_defined("string_key_that_is_not_really_present"));
-            result = co%get_string_option(
-                "string_key_that_is_not_really_present", "missing"
-            ) == "missing");
-            co%override_string_option(
-                "string_key_that_is_not_really_present", "meowth"
-            );
-            result = co%get_string_option(
-                "string_key_that_is_not_really_present", "missing"
-            ) == "meowth");
-            result = co%is_defined("string_key_that_is_not_really_present"));
+  idefault = 0
+  result = co%get_integer_option("integer_key", idefault, iresult)
+  if (result .ne. SRNoError) error stop
+  if (iresult .ne. 42) error stop
 
-            // boolean option tests
-            result = co%get_boolean_option("boolean_key", true) == false);
-            CHECK_FALSE(co%is_defined("boolean_key_that_is_not_really_present"));
-            result = co%get_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            ) == true);
-            co%override_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            );
-            result = co%get_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            ) == true);
-            result = co%is_defined("boolean_key_that_is_not_really_present"));
-            for (size_t i = 0; i < 3; i++) {
-                std::string test_key("boolean_key_f");
-                test_key += std::to_string(i);
-                result = co%get_boolean_option(test_key, true) == false);
-            }
-            for (size_t i = 0; i < 4; i++) {
-                std::string test_key("boolean_key_t");
-                test_key += std::to_string(i);
-                result = co%get_boolean_option(test_key, false) == true);
-            }
-        }
+  result = co%is_defined( &
+    "integer_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .eqv. .true.) error stop
 
-#endif
+  result = co%get_integer_option( &
+    "integer_key_that_is_not_really_present", idefault, iresult)
+  if (result .ne. SRNoError) error stop
+  if (iresult .ne. 0) error stop
+
+  result = co%is_defined("integer_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+  ivalue = 42
+  result = co%override_integer_option( &
+    "integer_key_that_is_not_really_present", ivalue)
+  if (result .ne. SRNoError) error stop
+
+  result = co%get_integer_option( &
+    "integer_key_that_is_not_really_present", idefault, iresult)
+  if (result .ne. SRNoError) error stop
+  if (iresult .ne. 42) error stop
 
 
-  ! Clean up test keys
+  ! string option tests
+  write(*,*) "ConfigOption testing: prefixed string option tests"
+  sdefault = "missing"
+  result = co%get_string_option("string_key", sdefault, sresult)
+  if (result .ne. SRNoError) error stop
+  if (sresult .ne. "charizard") error stop
+
+  result = co%is_defined("string_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .eqv. .true.) error stop
+
+  result = co%get_string_option( &
+    "string_key_that_is_not_really_present", sdefault, sresult)
+  if (result .ne. SRNoError) error stop
+  if (sresult .ne. "missing") error stop
+
+  svalue = "meowth"
+  result = co%override_string_option( &
+    "string_key_that_is_not_really_present", svalue)
+  if (result .ne. SRNoError) error stop
+
+  result = co%get_string_option( &
+    "string_key_that_is_not_really_present", sdefault, sresult)
+  if (result .ne. SRNoError) error stop
+  if (sresult .ne. "meowth") error stop
+
+  result = co%is_defined("string_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+
+  ! boolean option tests
+  write(*,*) "ConfigOption testing: prefixed boolean option tests"
+  bdefault = .true.
+  result = co%get_boolean_option("boolean_key", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
+
+  result = co%is_defined("boolean_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
+
+  result = co%get_boolean_option( &
+      "boolean_key_that_is_not_really_present", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+  bvalue = .true.
+  result = co%override_boolean_option( &
+      "boolean_key_that_is_not_really_present", bvalue)
+  if (result .ne. SRNoError) error stop
+
+  result = co%get_boolean_option( &
+      "boolean_key_that_is_not_really_present", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+  result = co%is_defined( &
+    "boolean_key_that_is_not_really_present", bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+  result = co%get_boolean_option("boolean_key_f0", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
+  result = co%get_boolean_option("boolean_key_f1", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
+  result = co%get_boolean_option("boolean_key_f2", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
+
+  result = co%get_boolean_option("boolean_key_t0", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+  result = co%get_boolean_option("boolean_key_t1", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+  result = co%get_boolean_option("boolean_key_t2", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+  result = co%get_boolean_option("boolean_key_t3", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .true.) error stop
+
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !! Clean up test keys
   ! non-prefixed testing keys
   call unsetenv("test_integer_key")
   call unsetenv("test_string_key")

@@ -101,14 +101,14 @@ interface
 
   function get_integer_option_c(cfgopts, key, key_len, default_value, result) &
     bind(c, name="get_integer_option")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
+    use iso_c_binding, only : c_ptr, c_char, c_size_t, c_int64_t
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: get_integer_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to retrieve
     integer(kind=c_size_t), value :: key_len           !< The length of the key string
-    integer(kind=8), value        :: default_value     !< The baseline value of the
+    integer(kind=c_int64_t), value :: default_value     !< The baseline value of the
                                                        !! configuration option to be returned
                                                        !! if a value is not set
     integer(kind=8)               :: result            !< Receives the integer result
@@ -119,7 +119,7 @@ interface
     bind(c, name="get_string_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: get_string_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to retrieve
@@ -136,7 +136,7 @@ interface
     bind(c, name="get_boolean_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: get_boolean_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to retrieve
@@ -151,7 +151,7 @@ interface
     bind(c, name="is_defined")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: is_defined_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to check
@@ -163,7 +163,7 @@ interface
     bind(c, name="override_integer_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: override_integer_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to override
@@ -175,7 +175,7 @@ interface
     bind(c, name="override_string_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: override_string_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to override
@@ -188,7 +188,7 @@ interface
     bind(c, name="override_boolean_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
     import :: enum_kind
-    type(c_ptr)                   :: cfgopts
+    type(c_ptr), value            :: cfgopts
     integer(kind=enum_kind)       :: override_boolean_option_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to override
