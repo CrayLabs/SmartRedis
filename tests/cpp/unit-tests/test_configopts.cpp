@@ -81,7 +81,6 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
 
         THEN("Options should be configurable")
         {
-#if 0
             // Unimplemented bits
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_file("some_file.json"),
@@ -98,6 +97,7 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
                 ConfigOptions::create_from_default(),
                 RuntimeException);
 
+#if 0
             // integer option tests
             CHECK(co->get_integer_option("test_integer_key", 0) == 42);
             CHECK_FALSE(co->is_defined("test_integer_key_that_is_not_really_present"));
