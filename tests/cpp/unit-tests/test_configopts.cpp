@@ -79,7 +79,8 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
 
         ConfigOptions* co = ConfigOptions::create_from_environment("");
         std::string jsonfile("some_file.json");
-        std::string jsonblob("{ \"key\" = \"value\" }");
+//        std::string jsonblob("{ \"key\" = \"value\" }");
+        std::string jsonblob("{ .key. = .value. }");
 
         THEN("Options should be configurable")
         {
