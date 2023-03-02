@@ -88,19 +88,17 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
                 RuntimeException);
-#if 0
             ConfigOptions::set_default_from_file("some_file.json");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-//#else
+#if 0
             ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
 #endif
 
-#if 1
             // integer option tests
             CHECK(co->get_integer_option("test_integer_key", 0) == 42);
             CHECK_FALSE(co->is_defined("test_integer_key_that_is_not_really_present"));
@@ -150,7 +148,6 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
                 test_key += std::to_string(i);
                 CHECK(co->get_boolean_option(test_key, false) == true);
             }
-#endif
         }
     }
 
@@ -168,8 +165,6 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
 
     log_data(context, LLDebug, "***End ConfigOptions testing***");
 }
-
-#ifdef SKIPPING_TESTS
 
 SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
 {
@@ -228,10 +223,12 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
+#if 0
             ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
+#endif
 
             // integer option tests
             CHECK(co->get_integer_option("integer_key", 0) == 42);
@@ -300,4 +297,3 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
     log_data(context, LLDebug, "***End ConfigOptions prefix testing***");
 }
 
-#endif // SKIPPING_TESTS
