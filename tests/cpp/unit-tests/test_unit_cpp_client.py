@@ -67,13 +67,13 @@ def execute_cmd(cmd_list):
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:
         out, err = proc.communicate(timeout=timeout_limit)
-        assert(proc.returncode == 0)
         if out:
 #            print("OUTPUT:", out.decode("utf-8"))
             print("OUTPUT:", out)
         if err:
 #            print("ERROR:", err.decode("utf-8"))
             print("ERROR:", err)
+        assert(proc.returncode == 0)
     except UnicodeDecodeError:
         output, errs = proc.communicate()
 #        print("ERROR:", errs.decode("utf-8"))
