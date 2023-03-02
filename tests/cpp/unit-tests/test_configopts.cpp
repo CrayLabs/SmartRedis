@@ -60,12 +60,9 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             "test_boolean_key_t3",
             "test_setting_a_string"
         };
+        INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
-            const char* temp = std::getenv(keys[i]);
-            std::string msg(keys[i]);
-            msg += " must not be set before running this test.";
-            INFO(msg.c_str());
-            REQUIRE(temp == NULL);
+            REQUIRE(std::getenv(keys[i]) == NULL);
         }
 
         // Set up keys for testing
@@ -192,12 +189,9 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
             "prefixtest_boolean_key_t3",
             "prefixtest_setting_a_string"
         };
+        INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
-            const char* temp = std::getenv(keys[i]);
-            std::string msg(keys[i]);
-            msg += " must not be set before running this test.";
-            INFO(msg.c_str());
-            REQUIRE(temp == NULL);
+            REQUIRE(std::getenv(keys[i]) == NULL);
         }
 
         // Set up keys for testing
