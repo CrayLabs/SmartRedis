@@ -1,5 +1,6 @@
 
 MAKEFLAGS += --no-print-directory
+COV_FLAGS :=
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -200,7 +201,7 @@ test:
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv -s ./tests
+	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c

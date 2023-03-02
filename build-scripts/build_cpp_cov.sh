@@ -5,9 +5,7 @@ CPP_COV_DIR=$BASEDIR/tests/cpp/unit-tests/build/CMakeFiles/cpp_unit_tests.dir
 LCOV_EXEC=$BASEDIR/third-party/lcov/install/usr/local/bin/lcov
 GEN_HTML_EXEC=$BASEDIR/third-party/lcov/install/usr/local/bin/genhtml
 
-
-
-cd ./CMakeFiles/cpp_unit_tests.dir
+cd $CPP_COV_DIR
 
 EXCLUDE_LIST=""
 ENV_VAR=$(echo "$SMARTREDIS_TEST_CLUSTER" | tr '[:upper:]' '[:lower:]')

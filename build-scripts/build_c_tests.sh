@@ -17,7 +17,7 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-make -j 4
+make -j
 
 if [ $? != 0 ]; then
     echo "ERROR: failed to make C tests"
