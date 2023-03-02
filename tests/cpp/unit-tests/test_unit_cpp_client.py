@@ -52,8 +52,6 @@ def get_test_names():
 def test_unit_cpp_client(test, use_cluster):
     cmd = []
     cmd.append(test)
-    cmd.append("-v")
-    cmd.append("high")
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
     print(f"Using cluster: {use_cluster}")
