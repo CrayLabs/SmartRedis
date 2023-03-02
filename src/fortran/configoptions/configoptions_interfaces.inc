@@ -103,15 +103,15 @@ interface
     bind(c, name="get_integer_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_int64_t
     import :: enum_kind
-    type(c_ptr), value            :: cfgopts
-    integer(kind=enum_kind)       :: get_integer_option_c
-    character(kind=c_char)        :: key(*)            !< The name of the configuration
-                                                       !! option to retrieve
-    integer(kind=c_size_t), value :: key_len           !< The length of the key string
+    type(c_ptr), value             :: cfgopts
+    integer(kind=enum_kind)        :: get_integer_option_c
+    character(kind=c_char)         :: key(*)            !< The name of the configuration
+                                                        !! option to retrieve
+    integer(kind=c_size_t), value  :: key_len           !< The length of the key string
     integer(kind=c_int64_t), value :: default_value     !< The baseline value of the
-                                                       !! configuration option to be returned
-                                                       !! if a value is not set
-    integer(kind=8)               :: result            !< Receives the integer result
+                                                        !! configuration option to be returned
+                                                        !! if a value is not set
+    integer(kind=c_int64_t)        :: result            !< Receives the integer result
   end function get_integer_option_c
 
   function get_string_option_c(cfgopts, key, key_len, default_value, &
@@ -161,14 +161,14 @@ interface
 
   function override_integer_option_c(cfgopts, key, key_len, value) &
     bind(c, name="override_integer_option")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
+    use iso_c_binding, only : c_ptr, c_char, c_size_t, c_int64_t
     import :: enum_kind
-    type(c_ptr), value            :: cfgopts
-    integer(kind=enum_kind)       :: override_integer_option_c
-    character(kind=c_char)        :: key(*)            !< The name of the configuration
+    type(c_ptr), value             :: cfgopts
+    integer(kind=enum_kind)        :: override_integer_option_c
+    character(kind=c_char)         :: key(*)            !< The name of the configuration
                                                        !! option to override
-    integer(kind=c_size_t), value :: key_len           !< The length of the key string
-    integer(kind=8), value        :: value             !< The value to store for the option
+    integer(kind=c_size_t), value  :: key_len           !< The length of the key string
+    integer(kind=c_int64_t), value :: value             !< The value to store for the option
   end function override_integer_option_c
 
   function override_string_option_c(cfgopts, key, key_len, value, value_len) &

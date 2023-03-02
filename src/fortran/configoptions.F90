@@ -213,9 +213,9 @@ function get_integer_option(self, key, default_value, result) result(code)
   class(configoptions_type), intent(in) :: self          !< The configoptions
   character(len=*),          intent(in) :: key           !< The name of the configuration
                                                          !! option to retrieve
-  integer(kind=8),           intent(in) :: default_value !< The baseline value of the
+  integer(kind=c_int64_t),   intent(in) :: default_value !< The baseline value of the
                                                          !! configuration option to be returned
-  integer(kind=8),           intent(inout) :: result     !< Receives value of option
+  integer(kind=c_int64_t),   intent(inout) :: result     !< Receives value of option
   integer(kind=enum_kind)               :: code
 
   ! Local variables
@@ -307,7 +307,7 @@ function override_integer_option(self, key, value) result(code)
   class(configoptions_type), intent(in) :: self      !< The configoptions
   character(len=*),          intent(in) :: key       !< The name of the configuration
                                                      !! option to override
-  integer(kind=8),           intent(in) :: value     !< The value to store for the option
+  integer(kind=c_int64_t),   intent(in) :: value     !< The value to store for the option
   integer(kind=enum_kind)               :: code
 
   ! Local variables
