@@ -236,8 +236,7 @@ function get_string_option(self, key, default_value, result) result(code)
                                                           !! option to retrieve
   character(len=*),          intent(in)  :: default_value !< The baseline value of the
                                                           !! configuration option to be returned
-!  character(len=*),          intent(out) :: result        !< Receives value of option
-  character(len=:), allocatable, intent(out) :: result        !< Receives value of option
+  character(len=:), allocatable, intent(out) :: result    !< Receives value of option
   integer(kind=enum_kind)                :: code
 
   ! Local variables
