@@ -93,14 +93,14 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
-#else
+//#else
             ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_default(),
                 RuntimeException);
 #endif
 
-#if 0
+#if 1
             // integer option tests
             CHECK(co->get_integer_option("test_integer_key", 0) == 42);
             CHECK_FALSE(co->is_defined("test_integer_key_that_is_not_really_present"));
