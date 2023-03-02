@@ -1461,7 +1461,7 @@ int Client::get_list_length(const std::string& list_name)
     LOG_API_FUNCTION();
 
     // Build the list key
-    std::string list_key = _build_list_key(list_name, false);
+    std::string list_key = _build_list_key(list_name, true);
 
     // Build the command
     SingleKeyCommand cmd;
