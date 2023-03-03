@@ -27,6 +27,8 @@
  */
 
 #include <cstdlib>
+#include <cctype>
+#include <algorithm>
 #include <string>
 #include <cstring>
 #include <stdio.h>
@@ -175,10 +177,9 @@ void get_config_bool(bool& value,
     }
     else {
         std::string val_read(cfg_val);
-        value = !(val_read == "0" ||
-                  val_read == "false" ||
-                  val_read == "FALSE" ||
-                  val_read == "False");
+        std::transform(val_read.begin(), val_read.end(), val_read.begin(),
+            [](unsigned char c){ return std::tolower(c); });
+        value = !(val_read == "0" || val_read == "false");
     }
 
     message = "Exiting with value \"";

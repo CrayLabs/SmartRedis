@@ -50,10 +50,10 @@ program main
   call setenv("test_boolean_key_f0", "false")
   call setenv("test_boolean_key_f1", "FALSE")
   call setenv("test_boolean_key_f2", "0")
-  call setenv("test_boolean_key_t0", "fAlse")
-  call setenv("test_boolean_key_t1", "pikachu")
-  call setenv("test_boolean_key_t2", "1")
-  call setenv("test_boolean_key_t3", "fail")
+  call setenv("test_boolean_key_f3", "fAlse")
+  call setenv("test_boolean_key_t0", "pikachu")
+  call setenv("test_boolean_key_t1", "1")
+  call setenv("test_boolean_key_t2", "fail")
   ! prefixed testing keys
   call setenv("prefixtest_integer_key", "42")
   call setenv("prefixtest_string_key", "charizard")
@@ -61,10 +61,10 @@ program main
   call setenv("prefixtest_boolean_key_f0", "false")
   call setenv("prefixtest_boolean_key_f1", "FALSE")
   call setenv("prefixtest_boolean_key_f2", "0")
-  call setenv("prefixtest_boolean_key_t0", "fAlse")
-  call setenv("prefixtest_boolean_key_t1", "pikachu")
-  call setenv("prefixtest_boolean_key_t2", "1")
-  call setenv("prefixtest_boolean_key_t3", "fail")
+  call setenv("prefixtest_boolean_key_f3", "fAlse")
+  call setenv("prefixtest_boolean_key_t0", "pikachu")
+  call setenv("prefixtest_boolean_key_t1", "1")
+  call setenv("prefixtest_boolean_key_t2", "fail")
 
   ! Check unimplemented bits
   write(*,*) "ConfigOption testing: unimplemented bits"
@@ -190,6 +190,9 @@ program main
   result = co%get_boolean_option("test_boolean_key_f2", bdefault, bresult)
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .false.) error stop
+  result = co%get_boolean_option("test_boolean_key_f3", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
 
   result = co%get_boolean_option("test_boolean_key_t0", bdefault, bresult)
   if (result .ne. SRNoError) error stop
@@ -198,9 +201,6 @@ program main
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .true.) error stop
   result = co%get_boolean_option("test_boolean_key_t2", bdefault, bresult)
-  if (result .ne. SRNoError) error stop
-  if (bresult .neqv. .true.) error stop
-  result = co%get_boolean_option("test_boolean_key_t3", bdefault, bresult)
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .true.) error stop
 
@@ -314,6 +314,9 @@ program main
   result = co%get_boolean_option("boolean_key_f2", bdefault, bresult)
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .false.) error stop
+  result = co%get_boolean_option("boolean_key_f3", bdefault, bresult)
+  if (result .ne. SRNoError) error stop
+  if (bresult .neqv. .false.) error stop
 
   result = co%get_boolean_option("boolean_key_t0", bdefault, bresult)
   if (result .ne. SRNoError) error stop
@@ -322,9 +325,6 @@ program main
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .true.) error stop
   result = co%get_boolean_option("boolean_key_t2", bdefault, bresult)
-  if (result .ne. SRNoError) error stop
-  if (bresult .neqv. .true.) error stop
-  result = co%get_boolean_option("boolean_key_t3", bdefault, bresult)
   if (result .ne. SRNoError) error stop
   if (bresult .neqv. .true.) error stop
 
@@ -338,10 +338,10 @@ program main
   call unsetenv("test_boolean_key_f0")
   call unsetenv("test_boolean_key_f1")
   call unsetenv("test_boolean_key_f2")
+  call unsetenv("test_boolean_key_f3")
   call unsetenv("test_boolean_key_t0")
   call unsetenv("test_boolean_key_t1")
   call unsetenv("test_boolean_key_t2")
-  call unsetenv("test_boolean_key_t3")
   ! prefixed testing keys
   call unsetenv("prefixtest_integer_key")
   call unsetenv("prefixtest_string_key")
@@ -349,10 +349,10 @@ program main
   call unsetenv("prefixtest_boolean_key_f0")
   call unsetenv("prefixtest_boolean_key_f1")
   call unsetenv("prefixtest_boolean_key_f2")
+  call unsetenv("prefixtest_boolean_key_f3")
   call unsetenv("prefixtest_boolean_key_t0")
   call unsetenv("prefixtest_boolean_key_t1")
   call unsetenv("prefixtest_boolean_key_t2")
-  call unsetenv("prefixtest_boolean_key_t3")
 
   ! Done
   write(*,*) "ConfigOption testing: passed"

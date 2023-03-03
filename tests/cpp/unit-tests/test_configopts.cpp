@@ -54,11 +54,10 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             "test_boolean_key_f0",
             "test_boolean_key_f1",
             "test_boolean_key_f2",
+            "test_boolean_key_f3",
             "test_boolean_key_t0",
             "test_boolean_key_t1",
-            "test_boolean_key_t2",
-            "test_boolean_key_t3",
-            "test_setting_a_string"
+            "test_boolean_key_t2"
         };
         INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
@@ -72,10 +71,10 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
         setenv("test_boolean_key_f0", "false", true);
         setenv("test_boolean_key_f1", "FALSE", true);
         setenv("test_boolean_key_f2", "0", true);
-        setenv("test_boolean_key_t0", "fAlse", true);
-        setenv("test_boolean_key_t1", "pikachu", true);
-        setenv("test_boolean_key_t2", "1", true);
-        setenv("test_boolean_key_t3", "fail", true);
+        setenv("test_boolean_key_f3", "fAlse", true);
+        setenv("test_boolean_key_t0", "pikachu", true);
+        setenv("test_boolean_key_t1", "1", true);
+        setenv("test_boolean_key_t2", "fail", true);
 
         ConfigOptions* co = ConfigOptions::create_from_environment("");
 
@@ -136,12 +135,12 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
                 "test_boolean_key_that_is_not_really_present", true
             ) == true);
             CHECK(co->is_defined("test_boolean_key_that_is_not_really_present"));
-            for (size_t i = 0; i < 3; i++) {
+            for (size_t i = 0; i < 4; i++) {
                 std::string test_key("test_boolean_key_f");
                 test_key += std::to_string(i);
                 CHECK(co->get_boolean_option(test_key, true) == false);
             }
-            for (size_t i = 0; i < 4; i++) {
+            for (size_t i = 0; i < 3; i++) {
                 std::string test_key("test_boolean_key_t");
                 test_key += std::to_string(i);
                 CHECK(co->get_boolean_option(test_key, false) == true);
@@ -156,10 +155,10 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
     unsetenv("test_boolean_key_f0");
     unsetenv("test_boolean_key_f1");
     unsetenv("test_boolean_key_f2");
+    unsetenv("test_boolean_key_f3");
     unsetenv("test_boolean_key_t0");
     unsetenv("test_boolean_key_t1");
     unsetenv("test_boolean_key_t2");
-    unsetenv("test_boolean_key_t3");
 
     log_data(context, LLDebug, "***End ConfigOptions testing***");
 }
@@ -183,11 +182,10 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
             "prefixtest_boolean_key_f0",
             "prefixtest_boolean_key_f1",
             "prefixtest_boolean_key_f2",
+            "prefixtest_boolean_key_f3",
             "prefixtest_boolean_key_t0",
             "prefixtest_boolean_key_t1",
-            "prefixtest_boolean_key_t2",
-            "prefixtest_boolean_key_t3",
-            "prefixtest_setting_a_string"
+            "prefixtest_boolean_key_t2"
         };
         INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
@@ -201,10 +199,10 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
         setenv("prefixtest_boolean_key_f0", "false", true);
         setenv("prefixtest_boolean_key_f1", "FALSE", true);
         setenv("prefixtest_boolean_key_f2", "0", true);
-        setenv("prefixtest_boolean_key_t0", "fAlse", true);
-        setenv("prefixtest_boolean_key_t1", "pikachu", true);
-        setenv("prefixtest_boolean_key_t2", "1", true);
-        setenv("prefixtest_boolean_key_t3", "fail", true);
+        setenv("prefixtest_boolean_key_f3", "fAlse", true);
+        setenv("prefixtest_boolean_key_t0", "pikachu", true);
+        setenv("prefixtest_boolean_key_t1", "1", true);
+        setenv("prefixtest_boolean_key_t2", "fail", true);
 
         ConfigOptions* co = ConfigOptions::create_from_environment("prefixtest");
 
@@ -265,12 +263,12 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
                 "boolean_key_that_is_not_really_present", true
             ) == true);
             CHECK(co->is_defined("boolean_key_that_is_not_really_present"));
-            for (size_t i = 0; i < 3; i++) {
+            for (size_t i = 0; i < 4; i++) {
                 std::string test_key("boolean_key_f");
                 test_key += std::to_string(i);
                 CHECK(co->get_boolean_option(test_key, true) == false);
             }
-            for (size_t i = 0; i < 4; i++) {
+            for (size_t i = 0; i < 3; i++) {
                 std::string test_key("boolean_key_t");
                 test_key += std::to_string(i);
                 CHECK(co->get_boolean_option(test_key, false) == true);
@@ -285,10 +283,10 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
     unsetenv("prefixtest_boolean_key_f0");
     unsetenv("prefixtest_boolean_key_f1");
     unsetenv("prefixtest_boolean_key_f2");
+    unsetenv("prefixtest_boolean_key_f3");
     unsetenv("prefixtest_boolean_key_t0");
     unsetenv("prefixtest_boolean_key_t1");
     unsetenv("prefixtest_boolean_key_t2");
-    unsetenv("prefixtest_boolean_key_t3");
 
     log_data(context, LLDebug, "***End ConfigOptions prefix testing***");
 }

@@ -69,10 +69,10 @@ def test_options(monkeypatch):
     monkeypatch.setenv("test_boolean_key_f0", "false")
     monkeypatch.setenv("test_boolean_key_f1", "FALSE")
     monkeypatch.setenv("test_boolean_key_f2", "0")
-    monkeypatch.setenv("test_boolean_key_t0", "fAlse")
-    monkeypatch.setenv("test_boolean_key_t1", "pikachu")
-    monkeypatch.setenv("test_boolean_key_t2", "1")
-    monkeypatch.setenv("test_boolean_key_t3", "fail")
+    monkeypatch.setenv("test_boolean_key_f3", "fAlse")
+    monkeypatch.setenv("test_boolean_key_t0", "pikachu")
+    monkeypatch.setenv("test_boolean_key_t1", "1")
+    monkeypatch.setenv("test_boolean_key_t2", "fail")
     co = ConfigOptions.create_from_environment("")
 
     # integer option tests
@@ -114,10 +114,10 @@ def test_options(monkeypatch):
         "test_boolean_key_that_is_not_really_present", True
     ) == True
     assert co.is_defined("test_boolean_key_that_is_not_really_present")
-    for i in range(3):
+    for i in range(4):
         key = f"test_boolean_key_f{i}"
         assert co.get_boolean_option(key, True) == False
-    for i in range(4):
+    for i in range(3):
         key = f"test_boolean_key_t{i}"
         assert co.get_boolean_option(key, False) == True
 
@@ -128,10 +128,10 @@ def test_options_with_prefix(monkeypatch):
     monkeypatch.setenv("prefixtest_boolean_key_f0", "false")
     monkeypatch.setenv("prefixtest_boolean_key_f1", "FALSE")
     monkeypatch.setenv("prefixtest_boolean_key_f2", "0")
-    monkeypatch.setenv("prefixtest_boolean_key_t0", "fAlse")
-    monkeypatch.setenv("prefixtest_boolean_key_t1", "pikachu")
-    monkeypatch.setenv("prefixtest_boolean_key_t2", "1")
-    monkeypatch.setenv("prefixtest_boolean_key_t3", "fail")
+    monkeypatch.setenv("prefixtest_boolean_key_f3", "fAlse")
+    monkeypatch.setenv("prefixtest_boolean_key_t0", "pikachu")
+    monkeypatch.setenv("prefixtest_boolean_key_t1", "1")
+    monkeypatch.setenv("prefixtest_boolean_key_t2", "fail")
     co = ConfigOptions.create_from_environment("prefixtest")
 
     # integer option tests
@@ -173,9 +173,9 @@ def test_options_with_prefix(monkeypatch):
         "boolean_key_that_is_not_really_present", True
     ) == True
     assert co.is_defined("boolean_key_that_is_not_really_present")
-    for i in range(3):
+    for i in range(4):
         key = f"boolean_key_f{i}"
         assert co.get_boolean_option(key, True) == False
-    for i in range(4):
+    for i in range(3):
         key = f"boolean_key_t{i}"
         assert co.get_boolean_option(key, False) == True
