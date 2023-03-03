@@ -90,7 +90,7 @@ jobs:
 
     steps:
       # download a copy of SmartRedis before running CI tests
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - uses: actions/setup-python@v4
         with:
