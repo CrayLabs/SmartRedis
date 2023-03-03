@@ -48,7 +48,7 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB_SINGLE: "127.0.0.1:6379"
+  SSDB_SINGLE: "127.0.0.1:6380"
   SSDB_CLUSTERED: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002"
   SMARTREDIS_TEST_CLUSTER: False
   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
@@ -113,7 +113,6 @@ jobs:
           echo "CXX=g++" >> $GITHUB_ENV &&
           echo "FC=gfortran" >> $GITHUB_ENV
 
-
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
         run: |
@@ -144,7 +143,6 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh
 
-
       - name: Install docker and redis-server
         run: |
           sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
@@ -157,23 +155,27 @@ jobs:
           sudo apt-get -y update && \
           sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1 &&
           docker create --name redisai --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
-          docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
           sudo mkdir -p /usr/lib/redis/modules/ &&
+          sudo docker cp redisai:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
           sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
-          echo "REDISAI_MODULES=$HOME/redisai.so \
+          echo "REDISAI_MODULES=/usr/lib/redis/modules/redisai.so \
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
-      - name: Setup single-shard DB
+      - name: Single-shard DB tests
         run: |
           SCRATCH_DIR="single_scratch"
           rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --port 6379 --daemonize yes \
+          redis-server --port 6380 --daemonize yes \
                        --logfile "single.log" \
-                       --loadmodule $REDISAI_MODULES
+                       --loadmodule $REDISAI_MODULES &&
+          sleep 5; cat single.log &&
+          popd &&
+          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
+          make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
-      - name: Setup clustered DB
+      - name: Clustered DB tests
         run: |
           SCRATCH_DIR="cluster_scratch"
           rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
@@ -184,19 +186,9 @@ jobs:
                          --loadmodule $REDISAI_MODULES
           done &&
           sleep 2 &&
-          redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes
-
-      # CI tests that should be run with standalone Redis go here
-      - name: Standalone Redis tests
-        run: |
-          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
-          echo "SSDB=$SSDB" &&
-          make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
-
-      # CI tests that should be run with clustered Redis go here
-      - name: Run testing with redis cluster
-        run: |
+          redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
           export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
+          popd &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests
 
