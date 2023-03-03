@@ -27,7 +27,7 @@
 from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 
-from .error import *
+from .error import RedisRuntimeError
 
 _notfactory = "Method called on a ConfigOptions object not created from a factory method"
 
@@ -65,7 +65,7 @@ class ConfigOptions:
         typecheck(configoptions, "configoptions", PyConfigOptions)
         self._config_opts = configoptions
 
-    def _is_factory_object():
+    def _is_factory_object(self):
         """Check whether this object was created via a factory method
         """
         return self._is_created_via_factory
@@ -197,7 +197,7 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(default_value, "default_value", int)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         return self._config_opts.get_integer_option(key, default_value)
 
     @exception_handler
@@ -218,7 +218,7 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(default_value, "default_value", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         return self._config_opts.get_string_option(key, default_value)
 
     @exception_handler
@@ -239,7 +239,7 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(default_value, "default_value", bool)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         return self._config_opts.get_boolean_option(key, default_value)
 
     @exception_handler
@@ -254,7 +254,7 @@ class ConfigOptions:
         """
         typecheck(key, "key", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         return self._config_opts.is_defined(key)
 
     @exception_handler
@@ -275,7 +275,7 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(value, "value", int)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         self._config_opts.override_integer_option(key, value)
 
     @exception_handler
@@ -296,7 +296,7 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(value, "value", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         self._config_opts.override_string_option(key, value)
 
     @exception_handler
@@ -317,6 +317,6 @@ class ConfigOptions:
         typecheck(key, "key", str)
         typecheck(value, "value", bool)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory) from None
+            raise RedisRuntimeError(_notfactory)
         self._config_opts.override_boolean_option(key, value)
 
