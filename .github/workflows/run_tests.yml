@@ -139,6 +139,10 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh
 
+      # CI tests that should be run with standalone Redis go here
+      - name: Standalone Redis tests
+        run: make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
+
       - name: Install docker and redis-server
         run: |
           sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
@@ -156,11 +160,7 @@ jobs:
           sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
 
-      # CI tests that should be run with standalone Redis go here
-      - name: Standalone Redis tests
-        run: make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
-
-      - name: Setup local redis servers
+      - name: Setup local redis cluster
         run: |
           SSDB="127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" &&
           echo "SSDB=$SSDB" >> $GITHUB_ENV &&
