@@ -72,12 +72,14 @@ class ConfigOptions:
 
     @classmethod
     @exception_handler
-    def create_from_environment(db_prefix):
+    def create_from_environment(cls, db_prefix):
         """Instantiate ConfigOptions, getting selections from
         environment variables. If db_prefix is non-empty,
         then "{db_prefix}_" will be prepended to the name of
         each environment variable that is read
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param db_prefix: Prefix to prepend to environment variables
                           or an empty string to eschew prepending
         :type db_prefix: str
@@ -86,16 +88,18 @@ class ConfigOptions:
         """
         typecheck(db_prefix, "db_prefix", str)
         factory_object = PyConfigOptions.create_from_environment(db_prefix)
-        result = ConfigOptions.from_pybind(factory_object)
+        result = cls.from_pybind(factory_object)
         result._is_created_via_factory = True
         return result
 
     @classmethod
     @exception_handler
-    def create_from_file(filename):
+    def create_from_file(cls, filename):
         """Instantiate ConfigOptions, getting selections from
         a file containing JSON data
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param filename: Path to file containing JSON data
         :type filename: str
         :return: An instantiated ConfigOptions object
@@ -103,16 +107,18 @@ class ConfigOptions:
         """
         typecheck(filename, "filename", str)
         factory_object = PyConfigOptions.create_from_file(filename)
-        result = ConfigOptions.from_pybind(factory_object)
+        result = cls.from_pybind(factory_object)
         result._is_created_via_factory = True
         return result
 
     @classmethod
     @exception_handler
-    def create_from_string(json_blob):
+    def create_from_string(cls, json_blob):
         """Instantiate ConfigOptions, getting selections from
         a string containing a JSON blob
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param json_blob: JSON data
         :type json_blob: str
         :return: An instantiated ConfigOptions object
@@ -120,30 +126,34 @@ class ConfigOptions:
         """
         typecheck(json_blob, "json_blob", str)
         factory_object = PyConfigOptions.create_from_string(json_blob)
-        result = ConfigOptions.from_pybind(factory_object)
+        result = cls.from_pybind(factory_object)
         result._is_created_via_factory = True
         return result
 
     @classmethod
     @exception_handler
-    def create_from_default():
+    def create_from_default(cls):
         """Instantiate ConfigOptions, getting selections from
         the current default
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :return: An instantiated ConfigOptions object
         :rtype: ConfigOptions
         """
         factory_object = PyConfigOptions.create_from_default()
-        result = ConfigOptions.from_pybind(factory_object)
+        result = cls.from_pybind(factory_object)
         result._is_created_via_factory = True
         return result
 
     @classmethod
     @exception_handler
-    def set_default_from_environment(db_prefix):
+    def set_default_from_environment(cls, db_prefix):
         """Set environment variables with a particular prefix
         as the default configuration source
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param db_prefix: The prefix to be prepended to environment
                           variables in the form {db_prefix}_{environment
                           variable}. If the prefix is an empty string,
@@ -155,9 +165,11 @@ class ConfigOptions:
 
     @classmethod
     @exception_handler
-    def set_default_from_file(filename):
+    def set_default_from_file(cls, filename):
         """Set a file containing JSON data as the default configuration source
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param filename: The file containing JSON data
         :type filename: str
         :raises RedisRuntimeError: if the file cannot be accessed or contains
@@ -168,10 +180,12 @@ class ConfigOptions:
 
     @classmethod
     @exception_handler
-    def set_default_from_string(string):
+    def set_default_from_string(cls, string):
         """Set a string containing a JSON blob as the default
         configuration source
 
+        :param cls: The ConfigOptions class
+        :type cls: type
         :param string: The string containing a JSON blob
         :type string: str
         :raises RedisRuntimeError: if the string cannot be parsed
