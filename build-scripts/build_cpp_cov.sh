@@ -18,7 +18,8 @@ case $ENV_VAR in
         ;;
 esac
 
-$LCOV_EXEC --capture --directory $CPP_COV_DIR --output-file $CPP_COV_DIR/coverage.info --exclude "$EXCLUDE_LIST" --include  "$BASEDIR/src*" --include "$BASEDIR/include*"
+$LCOV_EXEC --capture --directory $CPP_COV_DIR --output-file $CPP_COV_DIR/coverage.info \
+    --exclude "$EXCLUDE_LIST" --include  "$BASEDIR/src*" --include "$BASEDIR/include*"
 $GEN_HTML_EXEC $CPP_COV_DIR/coverage.info --output-directory $CPP_COV_DIR/../../htmlcov
 
 echo "Coverage information available in file: $CPP_COV_DIR/../../htmlcov/index.html"

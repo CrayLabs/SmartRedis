@@ -31,13 +31,18 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS --coverage)
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+    set(CMAKE_CXX_FLAGS --coverage)
+    add_link_options(--coverage)
+endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_library(REDISPP redis++ PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(REDISPP redis++    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(HIREDIS hiredis    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SRLIB   smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SRLIB_FORTRAN   smartredis-fortran PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
 find_package(Threads REQUIRED)
-set(EXT_LIBRARIES ${REDISPP} ${HIREDIS})
+set(EXT_LIBRARIES ${REDISPP} ${HIREDIS} ${SRLIB} ${SRLIB_FORTRAN})
 
 include_directories(SYSTEM
     /usr/local/include
@@ -45,38 +50,8 @@ include_directories(SYSTEM
 	../../../install/include
 )
 
-# The source files to assess coverage on
-file(GLOB SOURCES CONFIGURE_DEPENDS ../../../src/cpp/*.cpp ../../../src/c/*.cpp)
-
-# The unit tests to be executed
-#set(UNIT_TESTS
-#	main.cpp
-#	test_aggregation_list.cpp
-#	test_client.cpp
-#	test_client_ensemble.cpp
-#	test_client_prefixing.cpp
-#	test_dataset.cpp
-#	test_tensorbase.cpp
-#	test_dbnode.cpp
-#	test_commandlist.cpp
-#	test_tensor.cpp
-#	test_metadata.cpp
-#	test_stringfield.cpp
-#	test_commandreply.cpp
-#	test_singlekeycommand.cpp
-#	test_addressatcommand.cpp
-#	test_compoundcommand.cpp
-#	test_multikeycommand.cpp
-#	test_addressanycommand.cpp
-#	test_dbinfocommand.cpp
-#	test_clusterinfocommand.cpp
-#	test_redisserver.cpp
-#	test_logger.cpp
-#	test_ssdb.cpp
-#)
-
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
-add_executable(cpp_unit_tests ${SOURCES} ${UNIT_TESTS})
+add_executable(cpp_unit_tests ${UNIT_TESTS})
 
 target_link_libraries(cpp_unit_tests PUBLIC ${EXT_LIBRARIES} PRIVATE Threads::Threads)

@@ -44,7 +44,7 @@ test-lib: lib
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
 test-lib-with-fortran: SHELL:=/bin/bash
-test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON -DCOVERAGE=ON"
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
