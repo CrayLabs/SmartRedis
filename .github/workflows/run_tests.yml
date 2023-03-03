@@ -48,7 +48,8 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB: "127.0.0.1:6379"
+  SSDB_SINGLE: "127.0.0.1:6379"
+  SSDB_CLUSTERED: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002"
   SMARTREDIS_TEST_CLUSTER: False
   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
   SR_LOG_LEVEL: "INFO"
@@ -62,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
+        rai_v: [1.2.5] # versions of RedisAI
         # py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
         # compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
         py_v: ['3.9.x'] # versions of Python
@@ -71,22 +72,22 @@ jobs:
       FC: gfortran-${{ matrix.compiler }}
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
-    # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic
+    # # Service containers to run with `container-job`
+    # services:
+    #   # Label used to access the service container
+    #   redis:
+    #     # Docker Hub image
+    #     image: redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic
 
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # map port 6379 on service container to the host
-          - 6379:6379
+    #     # Set health checks to wait until redis has started
+    #     options: >-
+    #       --health-cmd "redis-cli ping"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #       # map port 6379 on service container to the host
+    #       - 6379:6379
 
     steps:
       # download a copy of SmartRedis before running CI tests
@@ -107,7 +108,11 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
           --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
-          --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V}
+          --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
+          echo "CC=gcc" >> $GITHUB_ENV &&
+          echo "CXX=g++" >> $GITHUB_ENV &&
+          echo "FC=gfortran" >> $GITHUB_ENV
+
 
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
@@ -139,9 +144,6 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh
 
-      # CI tests that should be run with standalone Redis go here
-      - name: Standalone Redis tests
-        run: make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
       - name: Install docker and redis-server
         run: |
@@ -158,28 +160,43 @@ jobs:
           docker cp redisai:/usr/lib/redis/modules/redisai.so $HOME &&
           sudo mkdir -p /usr/lib/redis/modules/ &&
           sudo docker cp redisai:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
+          echo "REDISAI_MODULES=$HOME/redisai.so \
+                TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
+                TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
-      - name: Setup local redis cluster
+      - name: Setup single-shard DB
         run: |
-          SSDB="127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" &&
-          echo "SSDB=$SSDB" >> $GITHUB_ENV &&
-          echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV &&
-          mkdir cluster_scratch; pushd cluster_scratch &&
+          SCRATCH_DIR="single_scratch"
+          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
+          redis-server --port 6379 --daemonize yes \
+                       --logfile "single.log" \
+                       --loadmodule $REDISAI_MODULES
+
+      - name: Setup clustered DB
+        run: |
+          SCRATCH_DIR="cluster_scratch"
+          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
           for port in {7000..7002}; do
-            redis-server --port $port --cluster-enabled yes --daemonize yes\
+            redis-server --port $port --cluster-enabled yes --daemonize yes \
                          --cluster-config-file "$port.conf" --protected-mode no --save "" \
                          --logfile "$port.log" \
-                         --loadmodule $HOME/redisai.so \
-                           TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
-                           TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so
+                         --loadmodule $REDISAI_MODULES
           done &&
           sleep 2 &&
-          redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
+          redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes
+
+      # CI tests that should be run with standalone Redis go here
+      - name: Standalone Redis tests
+        run: |
+          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
+          echo "SSDB=$SSDB" &&
+          make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
       # CI tests that should be run with clustered Redis go here
       - name: Run testing with redis cluster
         run: |
+          export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests
 
