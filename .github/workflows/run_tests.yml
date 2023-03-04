@@ -50,6 +50,7 @@ env:
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
   SSDB_SINGLE: "127.0.0.1:6380"
   SSDB_CLUSTERED: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002"
+  SSDB_UDS: "unix:///tmp/redis.sock"
   SMARTREDIS_TEST_CLUSTER: False
   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
   SR_LOG_LEVEL: "INFO"
@@ -64,10 +65,8 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.5] # versions of RedisAI
-        # py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
-        # compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
-        py_v: ['3.9.x'] # versions of Python
-        compiler: [11] # intel compiler, and versions of GNU compiler
+        py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
+        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
     env:
       FC: gfortran-${{ matrix.compiler }}
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
@@ -189,6 +188,21 @@ jobs:
           redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
           export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
           popd &&
+          python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
+                 --ignore ./tests/docker -vv -s ./tests
+
+      - name: UDS DB tests
+        run: |
+          mkdir -p /tmp && ## Create socketfile for UDS testing
+          touch /tmp/redis.sock &&
+          chmod 777 /tmp/redis.sock &&
+          SCRATCH_DIR="uds_scratch" &&
+          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
+          redis-server --unixsocket /tmp/redis.sock --unixsocketperm 777 --port 0 --bind 127.0.0.1 \
+                       --daemonize yes --protected-mode no --logfile "uds.log" \
+                       --loadmodule $REDISAI_MODULES &&
+          popd &&
+          export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests
 
