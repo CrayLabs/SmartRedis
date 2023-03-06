@@ -35,7 +35,6 @@ on:
     branches:
       - master
       - develop
-      - codecov_clustered
   pull_request:
     branches:
       - master
@@ -70,23 +69,6 @@ jobs:
     env:
       FC: gfortran-${{ matrix.compiler }}
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
-
-    # # Service containers to run with `container-job`
-    # services:
-    #   # Label used to access the service container
-    #   redis:
-    #     # Docker Hub image
-    #     image: redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic
-
-    #     # Set health checks to wait until redis has started
-    #     options: >-
-    #       --health-cmd "redis-cli ping"
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5
-    #     ports:
-    #       # map port 6379 on service container to the host
-    #       - 6379:6379
 
     steps:
       # download a copy of SmartRedis before running CI tests
