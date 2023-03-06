@@ -27,6 +27,7 @@
  */
 
 #include <ctype.h>
+#include <algorithm>
 #include "client.h"
 #include "srexception.h"
 #include "logger.h"
@@ -109,15 +110,24 @@ DataSet Client::get_dataset(const std::string& name)
     DataSet dataset(name);
     _unpack_dataset_metadata(dataset, reply);
 
+    // Build the tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    std::vector<std::string> tensor_keys;
+    std::transform(
+        tensor_names.cbegin(),
+        tensor_names.cend(),
+        std::back_inserter(tensor_keys),
+        [this, name](std::string s){
+            return _build_dataset_tensor_key(name, s, true);
+        });
 
     // Retrieve DataSet tensors and fill the DataSet object
     for(size_t i = 0; i < tensor_names.size(); i++) {
-        // Build the tensor key
-        std::string tensor_key =
-            _build_dataset_tensor_key(name, tensor_names[i], true);
+//        // Build the tensor key
+//        std::string tensor_key =
+//            _build_dataset_tensor_key(name, tensor_names[i], true);
         // Retrieve tensor and add it to the dataset
-        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_key);
+        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_keys[i]);
     }
 
     return dataset;

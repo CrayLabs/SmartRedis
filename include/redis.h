@@ -512,8 +512,7 @@ class Redis : public RedisServer
         /*!
         *   \brief Run a Command on the server
         *   \param cmd The Command to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
         *   \throw SmartRedis::Exception if command execution fails
         */
         inline CommandReply _run(const Command& cmd);
@@ -530,6 +529,15 @@ class Redis : public RedisServer
         *   \throw SmartRedis::Exception if connection fails
         */
         inline void _connect(SRAddress& db_address);
+
+        /*!
+        *   \brief Pipeline execute a series of commands
+        *   \param cms The commands to execute
+        *   \returns Pipeline reply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
+        */
+        PipelineReply _run_pipeline(std::vector<Command*>& cmds);
+
 };
 
 } // namespace SmartRedis

@@ -725,6 +725,83 @@ inline void Redis::_connect(SRAddress& db_address)
                              std::to_string(_connection_attempts) + "tries");
 }
 
+// Build and run unordered pipeline
+PipelineReply Redis::_run_pipeline(std::vector<Command*>& cmds)
+{
+    PipelineReply reply;
+    for (int i = 1; i <= _command_attempts; i++) {
+        try {
+            // Get pipeline object for shard (no new connection)
+            auto pipeline = _redis->pipeline(false);
+
+            // Loop over all commands and add to the pipeline
+            for (size_t i = 0; i < cmds.size(); i++) {
+                // Add the commands to the pipeline
+                pipeline.command(cmds[i]->cbegin(), cmds[i]->cend());
+            }
+
+            // Execute the pipeline
+            reply = pipeline.exec();
+
+            // Check the replies
+            if (reply.has_error()) {
+                throw SRRuntimeException("Redis failed to execute the pipeline");
+            }
+
+            // Done
+            return reply;
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
+        }
+        catch (sw::redis::IoError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing the pipeline: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing the "\
+                                "pipeline: ") + e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing the pipeline: ") +
+                    e.what());
+        }
+        catch (std::exception& e) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing the pipeline: ") +
+                    e.what());
+        }
+        catch (...) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing the pipeline");
+        }
+
+        // Sleep before the next attempt
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
+    }
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException("Unable to execute pipeline");
+
+    // Return the reply
+    return reply;
+}
+
 // Create a string representation of the Redis connection
 std::string Redis::to_string() const
 {
