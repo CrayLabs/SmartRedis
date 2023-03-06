@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Streamline pipelined execution of tasks for backend database
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
 - Added infrastructure for multiDB support
 - Correct assorted API documentation errors and omissions
@@ -37,6 +38,7 @@ Description
 
 Detailed Notes
 
+- RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
 - An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
 - Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
@@ -64,6 +66,8 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+
+.. _PR306: https://github.com/CrayLabs/SmartRedis/pull/309
 .. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
 .. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
 .. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303

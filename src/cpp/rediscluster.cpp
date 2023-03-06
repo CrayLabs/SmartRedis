@@ -1369,6 +1369,9 @@ RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
             if (reply.has_error()) {
                 throw SRRuntimeException("Redis failed to execute the pipeline");
             }
+
+            // If we get here, it all worked
+            return reply;
         }
         catch (SmartRedis::Exception& e) {
             // Exception is already prepared, just propagate it
@@ -1412,16 +1415,10 @@ RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
 
         // Sleep before the next attempt
         std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
-
-        // Return the reply
-        return reply;
     }
 
     // If we get here, we've run out of retry attempts
     throw SRTimeoutException("Unable to execute pipeline");
-
-    // Return the reply
-    return reply;
 }
 
 // Create a string representation of the Redis connection
