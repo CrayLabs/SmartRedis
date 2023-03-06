@@ -37,7 +37,7 @@ Description
 
 Detailed Notes
 
-- RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR307_)
+- RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
 - An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
 - Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
 - Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
@@ -65,7 +65,7 @@ Detailed Notes
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
 
-.. _PR306: https://github.com/CrayLabs/SmartRedis/pull/307
+.. _PR306: https://github.com/CrayLabs/SmartRedis/pull/309
 .. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
 .. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
 .. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
