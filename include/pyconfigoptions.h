@@ -119,45 +119,6 @@ class PyConfigOptions
         static PyConfigOptions* create_from_string(
             const std::string& json_blob);
 
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          the current default source
-        *   \returns The constructed ConfigOptions object
-        */
-        static PyConfigOptions* create_from_default();
-
-        /////////////////////////////////////////////////////////////
-        // Default configuration selectors
-
-        /*!
-        *   \brief Set environment variables with a particular prefix
-        *          as the default configuration source
-        *   \param db_prefix The prefix to be prepended to environment
-        *                    variables in the form {db_prefix}_{environment
-        *                    variable}. If the prefix is an empty string,
-        *                    no prepending is done.
-        *   \throw SmartRedis::Exception if the prefix contains invalid
-        *          characters
-        */
-        static void set_default_from_environment(const std::string& db_prefix);
-
-        /*!
-        *   \brief Set a UTF-8 file containing JSON data as the default
-        *          configuration source
-        *   \param filename A UTF-8 file with JSON data containing the
-        *                   configuration data
-        *   \throw SmartRedis::Exception if the file cannot be found or
-        *          the data within it cannot be parsed
-        */
-        static void set_default_from_file(const std::string& filename);
-
-        /*!
-        *   \brief Set a string containing a JSON blob as the default
-        *          configuration source
-        *   \param json_blob A JSON blob containing the configuration data
-        *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
-        */
-        static void set_default_from_string(const std::string& json_blob);
 
         /////////////////////////////////////////////////////////////
         // Option access

@@ -87,14 +87,6 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
                 RuntimeException);
-            ConfigOptions::set_default_from_file("some_file.json");
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_default(),
-                RuntimeException);
-            ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_default(),
-                RuntimeException);
 
             // integer option tests
             CHECK(co->get_integer_option("test_integer_key", 0) == 42);
@@ -214,14 +206,6 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
                 RuntimeException);
             CHECK_THROWS_AS(
                 ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
-                RuntimeException);
-            ConfigOptions::set_default_from_file("some_file.json");
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_default(),
-                RuntimeException);
-            ConfigOptions::set_default_from_string("{ \"key\" = \"value\" }");
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_default(),
                 RuntimeException);
 
             // integer option tests

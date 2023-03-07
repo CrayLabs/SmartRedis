@@ -59,46 +59,6 @@ interface
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_string_c
 
-  function create_configoptions_from_default_c(configoptions) &
-    bind(c, name="create_configoptions_from_default")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: create_configoptions_from_default_c
-    type(c_ptr)                   :: configoptions      !< Receives the constructed configoptions
-  end function create_configoptions_from_default_c
-
-  function set_default_from_environment_c(db_prefix, db_prefix_len) &
-    bind(c, name="set_default_from_environment")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: set_default_from_environment_c
-    character(kind=c_char)        :: db_prefix(*)  !< Prefix to be prepended to environment
-                                                   !! variables in the form {db_prefix}_
-                                                   !! {environment variable}. If the prefix
-                                                   !! is an empty string, no prepending is done
-    integer(kind=c_size_t), value :: db_prefix_len !< The length of the db_prefix string
-  end function set_default_from_environment_c
-
-  function set_default_from_file_c(filename, filename_len) &
-    bind(c, name="set_default_from_file")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: set_default_from_file_c
-    character(kind=c_char)        :: filename(*)   !< A UTF-8 file with JSON data containing the
-                                                   !! configuration data
-    integer(kind=c_size_t), value :: filename_len  !< The length of the filename string
-  end function set_default_from_file_c
-
-  function set_default_from_string_c(json_blob, json_blob_len) &
-    bind(c, name="set_default_from_string")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: set_default_from_string_c
-    character(kind=c_char)        :: json_blob(*)      !< A JSON blob containing the
-                                                       !! configuration data
-    integer(kind=c_size_t), value :: json_blob_len  !< The length of the json_blob string
-  end function set_default_from_string_c
-
   function get_integer_option_c(cfgopts, key, key_len, default_value, result) &
     bind(c, name="get_integer_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_int64_t

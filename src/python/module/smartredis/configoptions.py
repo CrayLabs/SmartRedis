@@ -130,69 +130,6 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    @classmethod
-    @exception_handler
-    def create_from_default(cls):
-        """Instantiate ConfigOptions, getting selections from
-        the current default
-
-        :param cls: The ConfigOptions class
-        :type cls: type
-        :return: An instantiated ConfigOptions object
-        :rtype: ConfigOptions
-        """
-        factory_object = PyConfigOptions.create_from_default()
-        result = cls.from_pybind(factory_object)
-        result._is_created_via_factory = True
-        return result
-
-    @classmethod
-    @exception_handler
-    def set_default_from_environment(cls, db_prefix):
-        """Set environment variables with a particular prefix
-        as the default configuration source
-
-        :param cls: The ConfigOptions class
-        :type cls: type
-        :param db_prefix: The prefix to be prepended to environment
-                          variables in the form {db_prefix}_{environment
-                          variable}. If the prefix is an empty string,
-                          no prepending is done.
-        :type db_prefix: str
-        """
-        typecheck(db_prefix, "db_prefix", str)
-        PyConfigOptions.set_default_from_environment(db_prefix)
-
-    @classmethod
-    @exception_handler
-    def set_default_from_file(cls, filename):
-        """Set a file containing JSON data as the default configuration source
-
-        :param cls: The ConfigOptions class
-        :type cls: type
-        :param filename: The file containing JSON data
-        :type filename: str
-        :raises RedisRuntimeError: if the file cannot be accessed or contains
-                                   data that cannot be parsed
-        """
-        typecheck(filename, "filename", str)
-        PyConfigOptions.set_default_from_file(filename)
-
-    @classmethod
-    @exception_handler
-    def set_default_from_string(cls, string):
-        """Set a string containing a JSON blob as the default
-        configuration source
-
-        :param cls: The ConfigOptions class
-        :type cls: type
-        :param string: The string containing a JSON blob
-        :type string: str
-        :raises RedisRuntimeError: if the string cannot be parsed
-        """
-        typecheck(string, "string", str)
-        PyConfigOptions.set_default_from_string(string)
-
     @exception_handler
     def get_integer_option(self, key, default_value):
         """Retrieve the value of a numeric configuration option

@@ -55,12 +55,6 @@ def test_unimplemented():
         _ = ConfigOptions.create_from_file("some_file.json")
     with pytest.raises(RedisRuntimeError):
         _ = ConfigOptions.create_from_string("{ \"key\" = \"value\" }")
-    ConfigOptions.set_default_from_file("some_file.json")
-    with pytest.raises(RedisRuntimeError):
-        _ = ConfigOptions.create_from_default()
-    ConfigOptions.set_default_from_string("{ \"key\" = \"value\" }")
-    with pytest.raises(RedisRuntimeError):
-        _ = ConfigOptions.create_from_default()
 
 def test_options(monkeypatch):
     monkeypatch.setenv("test_integer_key", "42")

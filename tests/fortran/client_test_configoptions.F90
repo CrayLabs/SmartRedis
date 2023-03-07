@@ -72,14 +72,6 @@ program main
   if (result .eq. SRNoError) error stop
   result = co%create_configoptions_from_string('{ "key" = "value" }')
   if (result .eq. SRNoError) error stop
-  result = co%set_default_from_file("some_file.json")
-  if (result .ne. SRNoError) error stop
-  result = co%create_configoptions_from_default()
-  if (result .eq. SRNoError) error stop
-  result = co%set_default_from_string('{ "key" = "value" }')
-  if (result .ne. SRNoError) error stop
-  result = co%create_configoptions_from_default()
-  if (result .eq. SRNoError) error stop
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -60,16 +60,6 @@ type, public :: configoptions_type
   procedure :: create_configoptions_from_file
   !> Instantiate ConfigOptions, getting selections from a string containing a JSON blob
   procedure :: create_configoptions_from_string
-  !> Instantiate ConfigOptions, getting selections from the current default source
-  procedure :: create_configoptions_from_default
-
-  ! Defaults configuration
-  !> Set environment variables as the default configuration source
-  procedure, nopass :: set_default_from_environment
-  !> Set a UTF-8 file containing JSON data as the default configuration source
-  procedure, nopass :: set_default_from_file
-  !> Set a string containing a JSON blob as the default configuration source
-  procedure, nopass :: set_default_from_string
 
   ! Option access
   !> Retrieve the value of a numeric configuration option
@@ -152,61 +142,6 @@ function create_configoptions_from_string(self, json_blob) result(code)
   code = create_configoptions_from_string_c( &
     c_json_blob, json_blob_length, self%configoptions_ptr)
 end function create_configoptions_from_string
-
-!> Instantiate ConfigOptions, getting selections from the current default source
-function create_configoptions_from_default(self) result(code)
-  class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
-  integer(kind=enum_kind)                  :: code !< Result of the operation
-
-  code = create_configoptions_from_default_c(self%configoptions_ptr)
-end function create_configoptions_from_default
-
-!> Set environment variables as the default configuration source
-function set_default_from_environment(db_prefix) result(code)
-  character(len=*),          intent(in) :: db_prefix !< Prefix to be prepended
-                                                     !! to environment vars
-  integer(kind=enum_kind)               :: code
-
-  ! Local variables
-  character(kind=c_char, len=len_trim(db_prefix)) :: c_db_prefix
-  integer(kind=c_size_t) :: c_db_prefix_length
-
-  c_db_prefix = trim(db_prefix)
-  c_db_prefix_length = len_trim(db_prefix)
-
-  code = set_default_from_environment_c(c_db_prefix, c_db_prefix_length)
-end function set_default_from_environment
-
-!> Set a UTF-8 file containing JSON data as the default configuration source
-function set_default_from_file(filename) result(code)
-  character(len=*),          intent(in) :: filename  !< UTF-8 file with JSON data
-  integer(kind=enum_kind)               :: code
-
-  ! Local variables
-  character(kind=c_char, len=len_trim(filename)) :: c_filename
-  integer(kind=c_size_t) :: c_filename_length
-
-  c_filename = trim(filename)
-  c_filename_length = len_trim(filename)
-
-  code = set_default_from_file_c(c_filename, c_filename_length)
-end function set_default_from_file
-
-!> Set a string containing a JSON blob as the default configuration source
-function set_default_from_string(json_blob) result(code)
-  character(len=*),          intent(in) :: json_blob !< A JSON blob containing the
-                                                     !! configuration data
-  integer(kind=enum_kind)               :: code
-
-  ! Local variables
-  character(kind=c_char, len=len_trim(json_blob)) :: c_json_blob
-  integer(kind=c_size_t) :: c_json_blob_length
-
-  c_json_blob = trim(json_blob)
-  c_json_blob_length = len_trim(json_blob)
-
-  code = set_default_from_string_c(c_json_blob, c_json_blob_length)
-end function set_default_from_string
 
 !> Retrieve the value of a numeric configuration option
 function get_integer_option(self, key, default_value, result) result(code)

@@ -924,18 +924,6 @@ def test_create_from_string_wrong_type():
     with pytest.raises(TypeError):
         _ = ConfigOptions.create_from_string(42)
 
-def test_set_default_from_environment_wrong_type():
-    with pytest.raises(TypeError):
-        ConfigOptions.set_default_from_environment(42)
-
-def test_set_default_from_file_wrong_type():
-    with pytest.raises(TypeError):
-        ConfigOptions.set_default_from_file(42)
-
-def test_set_default_from_string_wrong_type():
-    with pytest.raises(TypeError):
-        ConfigOptions.set_default_from_string(42)
-
 def test_get_integer_option_wrong_type():
     co = ConfigOptions()
     key = "intval"

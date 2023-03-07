@@ -88,58 +88,6 @@ SRError create_configoptions_from_string(
     const size_t json_blob_length,
     void** new_configoptions);
 
-/*!
-*   \brief Instantiate ConfigOptions, getting selections from
-*          the current default source
-*   \param new_configoptions Receives the new configoptions object
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError create_configoptions_from_default(
-    void** new_configoptions);
-
-
-/////////////////////////////////////////////////////////////
-// Default configuration selectors
-
-/*!
-*   \brief Set environment variables with a particular prefix
-*          as the default configuration source
-*   \param db_prefix The prefix to be prepended to environment
-*                    variables in the form {db_prefix}_{environment
-*                    variable}. If the prefix is an empty string,
-*                    no prepending is done.
-*   \param db_prefix_length The length of the db_prefix string,
-*                           excluding null terminating character
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError set_default_from_environment(
-    const char* db_prefix,
-    const size_t db_prefix_length);
-
-/*!
-*   \brief Set a UTF-8 file containing JSON data as the default
-*          configuration source
-*   \param filename A UTF-8 file with JSON data containing the
-*                   configuration data
-*   \param filename_length The length of the filename string,
-*                          excluding null terminating character
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError set_default_from_file(
-    const char* filename,
-    const size_t filename_length);
-
-/*!
-*   \brief Set a string containing a JSON blob as the default
-*          configuration source
-*   \param json_blob A JSON blob containing the configuration data
-*   \param json_blob_length The length of the json_blob string,
-*                           excluding null terminating character
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError set_default_from_string(
-    const char* json_blob,
-    const size_t json_blob_length);
 
 /////////////////////////////////////////////////////////////
 // Option access

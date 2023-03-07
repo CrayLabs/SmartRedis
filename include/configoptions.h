@@ -48,13 +48,11 @@ namespace SmartRedis {
 /*!
 *   \brief Configuration source enumeration. Currently, only
 *          configuration via environment variables is supported
-*          (including if that is the default source)
 */
 enum cfgSrc {
     cs_file,    // Configuration data is coming from a JSON file
     cs_envt,    // Configuration data is coming from environment variables
-    cs_blob,    // Configuration data is coming from a JSON blob string
-    cs_default  // Configuration data is coming from the default source
+    cs_blob     // Configuration data is coming from a JSON blob string
 } ;
 
 
@@ -145,47 +143,6 @@ class ConfigOptions
         */
         static ConfigOptions* create_from_string(
             const std::string& json_blob);
-
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          the current default source
-        *   \returns The constructed ConfigOptions object
-        */
-        static ConfigOptions* create_from_default();
-
-        /////////////////////////////////////////////////////////////
-        // Default configuration selectors
-
-        /*!
-        *   \brief Set environment variables with a particular prefix
-        *          as the default configuration source
-        *   \param db_prefix The prefix to be prepended to environment
-        *                    variables in the form {db_prefix}_{environment
-        *                    variable}. If the prefix is an empty string,
-        *                    no prepending is done.
-        *   \throw SmartRedis::Exception if the prefix contains invalid
-        *          characters
-        */
-        static void set_default_from_environment(
-            const std::string& db_prefix);
-
-        /*!
-        *   \brief Set a UTF-8 file containing JSON data as the default
-        *          configuration source
-        *   \param filename A UTF-8 file with JSON data containing the
-        *                   configuration data
-        *   \throw SmartRedis::Exception if the file cannot be found or
-        *          the data within it cannot be parsed
-        */
-        static void set_default_from_file(const std::string& filename);
-
-        /*!
-        *   \brief Set a string containing a JSON blob as the default
-        *          configuration source
-        *   \param json_blob A JSON blob containing the configuration data
-        *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
-        */
-        static void set_default_from_string(const std::string& json_blob);
 
         /////////////////////////////////////////////////////////////
         // Option access
@@ -342,19 +299,6 @@ class ConfigOptions
         *  \brief Logging context
         */
         std::string _log_context;
-
-        /*!
-        *  \brief Default configuration source
-        */
-        static cfgSrc _default_source;
-
-        /*!
-        *  \brief Default configuration string -- meaning is specific to the
-        *         default config source. For cs_envt, the string is the key
-        *         prefix. For cs_file, the string is the filename. For cs_blob
-        *         it's the JSON blob
-        */
-       static std::string* _default_cfg_string;
 };
 
 } // namespace SmartRedis
