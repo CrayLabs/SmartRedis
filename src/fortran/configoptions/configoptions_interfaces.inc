@@ -128,7 +128,7 @@ interface
                                                        !! configuration option to be returned
                                                        !! if a value is not set
     integer(kind=c_size_t), value :: default_value_len !< The length of the key string
-    type(c_ptr)                   :: result(*)         !< Receives the string result
+    type(c_ptr)                   :: result            !< Receives the string result
     integer(kind=c_size_t)        :: result_len        !< The length of the result string
   end function get_string_option_c
 
