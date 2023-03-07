@@ -46,7 +46,9 @@
 namespace SmartRedis {
 
 /*!
-*   \brief Configuration source enumeration
+*   \brief Configuration source enumeration. Currently, only
+*          configuration via environment variables is supported
+*          (including if that is the default source)
 */
 enum cfgSrc {
     cs_file,    // Configuration data is coming from a JSON file
@@ -57,18 +59,18 @@ enum cfgSrc {
 
 
 /*!
-*   \brief The ConfigOptions class bottlenecks all configuration
-*          options used in SmartRedis and allows them to be accessed
-*          from environment variables, from a JSON file, or from a
-*          JSON blob supplied as a text string.
+*   \brief The ConfigOptions class bottlenecks all configuration options
+*          used in SmartRedis and allows them to be accessed from environment
+*          variables, from a JSON file, or from a JSON blob supplied as a text
+*          string. Currently, only configuration via environment variables is
+*          supported.
 */
 class ConfigOptions
 {
     private:
         /*!
-        *   \brief ConfigOptions constructor. Do not use! To instantiate
-        *          a ConfigOptions object, use one of the factory methods
-        *          below.
+        *   \brief ConfigOptions constructor. Do not use! To instantiate a
+        *          ConfigOptions object, use one of the factory methods below
         *   \param source The selected source for config data
         *   \param string The string associated with the source
         */
