@@ -748,7 +748,7 @@ PipelineReply Redis::_run_pipeline(std::vector<Command*>& cmds)
                 throw SRRuntimeException("Redis failed to execute the pipeline");
             }
 
-            // Done
+            // If we get here, it all worked
             return reply;
         }
         catch (SmartRedis::Exception& e) {
@@ -797,9 +797,6 @@ PipelineReply Redis::_run_pipeline(std::vector<Command*>& cmds)
 
     // If we get here, we've run out of retry attempts
     throw SRTimeoutException("Unable to execute pipeline");
-
-    // Return the reply
-    return reply;
 }
 
 // Create a string representation of the Redis connection

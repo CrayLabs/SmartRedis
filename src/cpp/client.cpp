@@ -121,13 +121,12 @@ DataSet Client::get_dataset(const std::string& name)
             return _build_dataset_tensor_key(name, s, true);
         });
 
-    // Retrieve DataSet tensors and fill the DataSet object
-    for(size_t i = 0; i < tensor_names.size(); i++) {
-//        // Build the tensor key
-//        std::string tensor_key =
-//            _build_dataset_tensor_key(name, tensor_names[i], true);
-        // Retrieve tensor and add it to the dataset
-        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_keys[i]);
+    // Retrieve DataSet tensors
+    PipelineReply tensors = _redis_server->_get_tensors(tensor_keys);
+
+    // Put them into the dataset
+    for (size_t i = 0; i < tensor_names.size(); i++) {
+        _add_dataset_tensor(dataset, tensor_names[i], tensors[i]);
     }
 
     return dataset;
@@ -1662,14 +1661,12 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     return _run(cmd);
 }
 
-// Retrieve a tensor and add it to the dataset
-inline void Client::_get_and_add_dataset_tensor(DataSet& dataset,
-                                                const std::string& name,
-                                                const std::string& key)
+// Add a retrieved tensor to a dataset
+inline void Client::_add_dataset_tensor(
+    DataSet& dataset,
+    const std::string& name,
+    CommandReply data)
 {
-    // Run tensor retrieval command
-    CommandReply reply = _redis_server->get_tensor(key);
-
     // Extract tensor properties from command reply
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
