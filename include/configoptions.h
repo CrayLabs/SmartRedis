@@ -348,9 +348,9 @@ class ConfigOptions
 
         /*!
         *  \brief Default configuration string -- meaning is specific to the
-        *         default config source. For from environment variables,
-        *         the string is the key prefix. For from file, the string is
-        *         the filename. For from string, it's the JSON blob
+        *         default config source. For cs_envt, the string is the key
+        *         prefix. For cs_file, the string is the filename. For cs_blob
+        *         it's the JSON blob
         */
        static std::string* _default_cfg_string;
 };

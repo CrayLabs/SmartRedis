@@ -110,13 +110,6 @@ def exception_handler(func):
     @wraps(func)
     def smartredis_api_wrapper(*args, **kwargs):
         try:
-            # For a classmethod, args[0] is the class but that is not
-            # expected by the PyBind callee, so we have to strip out
-            # that argument before calling the underlying class method
-            #calling_args = args
-            #if isinstance(args[0], type):
-            #    _, *calling_args = args
-            #return func(*calling_args, **kwargs)
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
         # pyerror to our error module).

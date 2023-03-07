@@ -32,7 +32,7 @@ interface
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_environment_c
-    character(kind=c_char)        :: db_prefix     !< Prefix to add to environment vars
+    character(kind=c_char)        :: db_prefix(*)  !< Prefix to add to environment vars
     integer(kind=c_size_t), value :: db_prefix_len !< How many characters in db_prefix
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_environment_c
@@ -43,7 +43,7 @@ interface
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_file_c
-    character(kind=c_char)        :: filename      !< File containing JSON data
+    character(kind=c_char)        :: filename(*)   !< File containing JSON data
     integer(kind=c_size_t), value :: filename_len  !< How many characters in filename
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_file_c
@@ -54,7 +54,7 @@ interface
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_string_c
-    character(kind=c_char)        :: json_blob     !< String containing JSON data
+    character(kind=c_char)        :: json_blob(*)  !< String containing JSON data
     integer(kind=c_size_t), value :: json_blob_len !< How many characters in json_blob
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_string_c
@@ -128,7 +128,7 @@ interface
                                                        !! configuration option to be returned
                                                        !! if a value is not set
     integer(kind=c_size_t), value :: default_value_len !< The length of the key string
-    type(c_ptr)                   :: result            !< Receives the string result
+    type(c_ptr)                   :: result(*)         !< Receives the string result
     integer(kind=c_size_t)        :: result_len        !< The length of the result string
   end function get_string_option_c
 
