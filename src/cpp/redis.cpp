@@ -332,7 +332,7 @@ void Redis::set_model_multigpu(const std::string& name,
         std::string device = "GPU:" + std::to_string(i);
         std::string model_key = name + "." + device;
         result = set_model(
-            name, model_key, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
+            model_key, model, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
         if (result.has_error() > 0) {
             throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
         }
