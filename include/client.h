@@ -1424,7 +1424,8 @@ class Client : public SRObject
         *              to the dataset
         *   \param data Result of a get_tensor command containing tensor data
         *   \throw SmartRedis::Exception if addition of tensor fails
-        */        inline void Client::_add_dataset_tensor(
+        */
+       inline void _add_dataset_tensor(
             DataSet& dataset,
             const std::string& name,
             CommandReply data);

@@ -112,6 +112,8 @@ DataSet Client::get_dataset(const std::string& name)
 
     // Build the tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    if (tensor_names.size() == 0)
+        return dataset;
     std::vector<std::string> tensor_keys;
     std::transform(
         tensor_names.cbegin(),
@@ -122,7 +124,7 @@ DataSet Client::get_dataset(const std::string& name)
         });
 
     // Retrieve DataSet tensors
-    PipelineReply tensors = _redis_server->_get_tensors(tensor_keys);
+    PipelineReply tensors = _redis_server->get_tensors(tensor_keys);
 
     // Put them into the dataset
     for (size_t i = 0; i < tensor_names.size(); i++) {
@@ -1668,9 +1670,9 @@ inline void Client::_add_dataset_tensor(
     CommandReply data)
 {
     // Extract tensor properties from command reply
-    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
-    std::string_view blob = GetTensorCommand::get_data_blob(reply);
-    SRTensorType type = GetTensorCommand::get_data_type(reply);
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(data);
+    std::string_view blob = GetTensorCommand::get_data_blob(data);
+    SRTensorType type = GetTensorCommand::get_data_type(data);
 
     // Add tensor to the dataset
     dataset._add_to_tensorpack(name, (void*)blob.data(), reply_dims,

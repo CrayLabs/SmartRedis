@@ -386,6 +386,26 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
     return run(cmd);
 }
 
+// Get a list of Tensor from the server
+PipelineReply RedisCluster::get_tensors(const std::vector<std::string>& keys)
+{
+    // Build up the commands to get the tensors
+    CommandList cmdlist; // This just holds the memory
+    std::vector<Command*> cmds;
+    for (auto it = keys.begin(); it != keys.end(); ++it) {
+        GetTensorCommand* cmd = cmdlist.add_command<GetTensorCommand>();
+        (*cmd) << "AI.TENSORGET" << Keyfield(*it) << "META" << "BLOB";
+        cmds.push_back(cmd);
+    }
+
+    // Get the shard index for the first key
+    size_t db_index = _get_db_node_index(keys[0]);
+    std::string shard_prefix = _db_nodes[db_index].prefix;
+
+    // Run them via pipeline
+    return _run_pipeline(cmds, shard_prefix);
+}
+
 // Rename a tensor in the database
 CommandReply RedisCluster::rename_tensor(const std::string& key,
                                          const std::string& new_key)
