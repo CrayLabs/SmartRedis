@@ -34,7 +34,8 @@
 #endif
 
 #ifdef __cplusplus
-#include <stdlib.h>
+#include <cstdlib>
+#include <memory>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -119,7 +120,7 @@ class ConfigOptions
         *   \throw SmartRedis::Exception if db_prefix contains invalid
         *          characters
         */
-        static ConfigOptions* create_from_environment(
+        static std::unique_ptr<ConfigOptions> create_from_environment(
             const std::string& db_prefix);
 
         /*!
@@ -131,7 +132,7 @@ class ConfigOptions
         *   \throw SmartRedis::Exception if the file cannot be found or
         *          the data within it cannot be parsed
         */
-        static ConfigOptions* create_from_file(
+        static std::unique_ptr<ConfigOptions> create_from_file(
             const std::string& filename);
 
         /*!
@@ -141,7 +142,7 @@ class ConfigOptions
         *   \returns The constructed ConfigOptions object
         *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
         */
-        static ConfigOptions* create_from_string(
+        static std::unique_ptr<ConfigOptions> create_from_string(
             const std::string& json_blob);
 
         /////////////////////////////////////////////////////////////

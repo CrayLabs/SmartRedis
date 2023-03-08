@@ -48,24 +48,30 @@ ConfigOptions::ConfigOptions(
 }
 
 // Instantiate ConfigOptions, getting selections from environment variables
-ConfigOptions* ConfigOptions::create_from_environment(
+std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
     const std::string& db_prefix)
 {
-    return new ConfigOptions(cs_envt, db_prefix);
+    std::unique_ptr<ConfigOptions> result;
+    result.reset(new ConfigOptions(cs_envt, db_prefix));
+    return result;
 }
 
 // Instantiate ConfigOptions, getting selections from a file with JSON data
-ConfigOptions* ConfigOptions::create_from_file(
+std::unique_ptr<ConfigOptions> ConfigOptions::create_from_file(
     const std::string& filename)
 {
-    return new ConfigOptions(cs_file, filename);
+    std::unique_ptr<ConfigOptions> result;
+    result.reset(new ConfigOptions(cs_file, filename));
+    return result;
 }
 
 // Instantiate ConfigOptions, getting selections from a JSON blob
-ConfigOptions* ConfigOptions::create_from_string(
+std::unique_ptr<ConfigOptions> ConfigOptions::create_from_string(
     const std::string& json_blob)
 {
-    return new ConfigOptions(cs_blob, json_blob);
+    std::unique_ptr<ConfigOptions> result;
+    result.reset(new ConfigOptions(cs_blob, json_blob));
+    return result;
 }
 
 // Retrieve the value of a numeric configuration option

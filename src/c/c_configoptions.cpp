@@ -48,9 +48,9 @@ SRError create_configoptions_from_environment(
 
     std::string db_prefix_str(db_prefix, db_prefix_length);
 
-    ConfigOptions* cfgOpts = ConfigOptions::create_from_environment(
-        db_prefix_str);
-    *new_configoptions = reinterpret_cast<void* >(cfgOpts);
+    auto cfgOpts = ConfigOptions::create_from_environment(db_prefix_str);
+    ConfigOptions* pCfgOpts = cfgOpts.release();
+    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
   }
   catch (const std::bad_alloc& e) {
     *new_configoptions = NULL;
@@ -85,9 +85,9 @@ SRError create_configoptions_from_file(
 
     std::string filename_str(filename, filename_length);
 
-    ConfigOptions* cfgOpts = ConfigOptions::create_from_file(
-        filename_str);
-    *new_configoptions = reinterpret_cast<void* >(cfgOpts);
+    auto cfgOpts = ConfigOptions::create_from_file(filename_str);
+    ConfigOptions* pCfgOpts = cfgOpts.release();
+    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
   }
   catch (const std::bad_alloc& e) {
     *new_configoptions = NULL;
@@ -122,9 +122,9 @@ SRError create_configoptions_from_string(
 
     std::string json_blob_str(json_blob, json_blob_length);
 
-    ConfigOptions* cfgOpts = ConfigOptions::create_from_string(
-        json_blob_str);
-    *new_configoptions = reinterpret_cast<void* >(cfgOpts);
+    auto cfgOpts = ConfigOptions::create_from_string(json_blob_str);
+    ConfigOptions* pCfgOpts = cfgOpts.release();
+    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
   }
   catch (const std::bad_alloc& e) {
     *new_configoptions = NULL;

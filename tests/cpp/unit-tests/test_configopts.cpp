@@ -76,7 +76,7 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
         setenv("test_boolean_key_t1", "1", true);
         setenv("test_boolean_key_t2", "fail", true);
 
-        ConfigOptions* co = ConfigOptions::create_from_environment("");
+        auto co = ConfigOptions::create_from_environment("");
 
         THEN("Options should be configurable")
         {
@@ -196,7 +196,7 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
         setenv("prefixtest_boolean_key_t1", "1", true);
         setenv("prefixtest_boolean_key_t2", "fail", true);
 
-        ConfigOptions* co = ConfigOptions::create_from_environment("prefixtest");
+        auto co = ConfigOptions::create_from_environment("prefixtest");
 
         THEN("Prefixed options should be configurable")
         {

@@ -76,10 +76,9 @@ PyConfigOptions* PyConfigOptions::create_from_environment(
     const std::string& db_prefix)
 {
     try {
-        ConfigOptions* cfgopts = ConfigOptions::create_from_environment(
-            db_prefix);
-            PyConfigOptions* result = new PyConfigOptions(cfgopts);
-            return result;
+        auto cfgOpts = ConfigOptions::create_from_environment(db_prefix);
+        ConfigOptions* pCfgOpts = cfgOpts.release();
+        return new PyConfigOptions(pCfgOpts);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -101,8 +100,9 @@ PyConfigOptions* PyConfigOptions::create_from_file(
     const std::string& filename)
 {
     try {
-        ConfigOptions* cfgopts = ConfigOptions::create_from_file(filename);
-        return new PyConfigOptions(cfgopts);
+        auto cfgOpts = ConfigOptions::create_from_file(filename);
+        ConfigOptions* pCfgOpts = cfgOpts.release();
+        return new PyConfigOptions(pCfgOpts);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -125,9 +125,9 @@ PyConfigOptions* PyConfigOptions::create_from_string(
     const std::string& json_blob)
 {
     try {
-        ConfigOptions* cfgopts = ConfigOptions::create_from_string(
-            json_blob);
-        return new PyConfigOptions(cfgopts);
+        auto cfgOpts = ConfigOptions::create_from_string(json_blob);
+        ConfigOptions* pCfgOpts = cfgOpts.release();
+        return new PyConfigOptions(pCfgOpts);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
