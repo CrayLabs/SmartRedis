@@ -51,27 +51,30 @@ ConfigOptions::ConfigOptions(
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
     const std::string& db_prefix)
 {
-    std::unique_ptr<ConfigOptions> result;
-    result.reset(new ConfigOptions(cs_envt, db_prefix));
-    return result;
+    // NOTE: We can't use std::make_unique<> here because our constructor
+    // is private
+    return std::unique_ptr<ConfigOptions>(
+        new ConfigOptions(cs_envt, db_prefix));
 }
 
 // Instantiate ConfigOptions, getting selections from a file with JSON data
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_file(
     const std::string& filename)
 {
-    std::unique_ptr<ConfigOptions> result;
-    result.reset(new ConfigOptions(cs_file, filename));
-    return result;
+    // NOTE: We can't use std::make_unique<> here because our constructor
+    // is private
+    return std::unique_ptr<ConfigOptions>(
+        new ConfigOptions(cs_file, filename));
 }
 
 // Instantiate ConfigOptions, getting selections from a JSON blob
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_string(
     const std::string& json_blob)
 {
-    std::unique_ptr<ConfigOptions> result;
-    result.reset(new ConfigOptions(cs_blob, json_blob));
-    return result;
+    // NOTE: We can't use std::make_unique<> here because our constructor
+    // is private
+    return std::unique_ptr<ConfigOptions>(
+        new ConfigOptions(cs_blob, json_blob));
 }
 
 // Retrieve the value of a numeric configuration option
