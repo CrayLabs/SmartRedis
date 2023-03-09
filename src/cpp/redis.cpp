@@ -741,6 +741,19 @@ inline void Redis::_connect(SRAddress& db_address)
                              std::to_string(_connection_attempts) + "tries");
 }
 
+// Run a CommandList via a Pipeline
+PipelineReply Redis::run_in_pipeline(CommandList& cmdlist)
+{
+    // Convert from CommandList to vector
+    std::vector<Command*> cmds;
+    for (auto it = cmdlist.begin(); it != cmdlist.end(); ++it) {
+        cmds.push_back(*it);
+    }
+
+    // Run the commands
+    return _run_pipeline(cmds);
+}
+
 // Build and run unordered pipeline
 PipelineReply Redis::_run_pipeline(std::vector<Command*>& cmds)
 {

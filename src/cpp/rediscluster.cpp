@@ -1364,10 +1364,30 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     return db;
 }
 
+// Run a CommandList via a Pipeline
+PipelineReply RedisCluster::run_in_pipeline(CommandList& cmdlist)
+{
+    // Convert from CommandList to vector and grab the shard along
+    // the way
+    std::vector<Command*> cmds;
+    std::string shard_prefix = _db_nodes[0].prefix;
+    bool shard_found = false;
+    for (auto it = cmdlist.begin(); it != cmdlist.end(); ++it) {
+        cmds.push_back(*it);
+        if (!shard_found && (*it)->has_keys()) {
+            shard_prefix = _get_db_node_prefix(*(*it));
+            shard_found = true;
+        }
+    }
+
+    // Run the commands
+    return _run_pipeline(cmds, shard_prefix);
+}
+
 // Build and run unordered pipeline
-PipelineReply
-RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
-                            std::string& shard_prefix)
+PipelineReply RedisCluster::_run_pipeline(
+    std::vector<Command*>& cmds,
+    std::string& shard_prefix)
 {
     PipelineReply reply;
     for (int i = 1; i <= _command_attempts; i++) {

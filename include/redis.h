@@ -506,6 +506,14 @@ class Redis : public RedisServer
                                  const bool reset_stat);
 
         /*!
+        *   \brief Run a CommandList via a Pipeline
+        *   \param cmdlist The list of commands to run
+        *   \returns The PipelineReply with the result of command execution
+        *   \throw SmartRedis::Exception if execution fails
+        */
+        PipelineReply run_in_pipeline(CommandList& cmdlist);
+
+        /*!
         *   \brief Create a string representation of the Redis connection
         *   \returns A string representation of the Redis connection
         */

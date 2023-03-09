@@ -89,7 +89,7 @@ void Client::put_dataset(DataSet& dataset)
     _append_dataset_metadata_commands(cmds, dataset);
     _append_dataset_tensor_commands(cmds, dataset);
     _append_dataset_ack_command(cmds, dataset);
-    _run(cmds);
+    _redis_server->run_in_pipeline(cmds);
 }
 
 // Retrieve a DataSet object from the database
@@ -113,7 +113,7 @@ DataSet Client::get_dataset(const std::string& name)
     // Build the tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
     if (tensor_names.size() == 0)
-        return dataset;
+        return dataset; // If no tensors, we're done
     std::vector<std::string> tensor_keys;
     std::transform(
         tensor_names.cbegin(),
@@ -178,7 +178,7 @@ void Client::copy_dataset(const std::string& src_name,
     CommandList put_meta_cmds;
     _append_dataset_metadata_commands(put_meta_cmds, dataset);
     _append_dataset_ack_command(put_meta_cmds, dataset);
-    (void)_run(put_meta_cmds);
+    (void)_redis_server->run_in_pipeline(put_meta_cmds);
 }
 
 // Delete a DataSet from the database.
@@ -1433,7 +1433,7 @@ void Client::copy_list(const std::string& src_name,
         copy_cmd.add_field_ptr(reply[i].str(), reply[i].str_len());
     }
 
-    CommandReply copy_reply = this->_run(copy_cmd);
+    CommandReply copy_reply = _run(copy_cmd);
 
     if (reply.has_error() > 0)
         throw SRRuntimeException("Dataset aggregation list copy "

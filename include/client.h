@@ -1304,7 +1304,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAtCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1314,7 +1314,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAnyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1324,7 +1324,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(SingleKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1334,7 +1334,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(MultiKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1344,7 +1344,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(CompoundCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1354,7 +1354,7 @@ class Client : public SRObject
         */
         inline std::vector<CommandReply> _run(CommandList& cmd_list)
         {
-            return this->_redis_server->run(cmd_list);
+            return _redis_server->run(cmd_list);
         }
 
         /*!

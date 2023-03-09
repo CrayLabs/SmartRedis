@@ -522,6 +522,15 @@ class RedisServer {
                                  const bool reset_stat) = 0;
 
         /*!
+        *   \brief Run a CommandList via a Pipeline. For clustered databases
+        *          all commands must go to the same shard
+        *   \param cmdlist The list of commands to run
+        *   \returns The PipelineReply with the result of command execution
+        *   \throw SmartRedis::Exception if execution fails
+        */
+        virtual PipelineReply run_in_pipeline(CommandList& cmdlist) = 0;
+
+        /*!
         *   \brief Create a string representation of the Redis connection
         *   \returns A string representation of the Redis connection
         */
