@@ -35,11 +35,13 @@ set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 99)
 
-if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(--coverage)
-    add_link_options(--coverage)
-else()
-    message(WARNING "COVERAGE was specified, but the CMAKE compiler is not GCC")
+if(COVERAGE)
+	if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+	    add_compile_options(--coverage)
+	    add_link_options(--coverage)
+	else()
+	    message(WARNING "COVERAGE was specified, but the CMAKE compiler is not GCC")
+	endif()
 endif()
 
 # Assume by default that users should link against the install directory in this repository

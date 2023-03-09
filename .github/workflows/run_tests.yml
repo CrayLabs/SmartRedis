@@ -63,7 +63,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        rai_v: [1.2.5] # versions of RedisAI
+        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
     env:
@@ -74,11 +74,12 @@ jobs:
       # download a copy of SmartRedis before running CI tests
       - uses: actions/checkout@v3
 
+      # Setup python within the container
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py_v }}
 
-      # Install compilers
+      # Install compilers (Intel or GCC)
       - name: Install GCC
         if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: |
@@ -93,6 +94,8 @@ jobs:
           echo "CC=gcc" >> $GITHUB_ENV &&
           echo "CXX=g++" >> $GITHUB_ENV &&
           echo "FC=gfortran" >> $GITHUB_ENV
+        # Note CC and CXX need to be set otherwise, some Ubuntu images default to
+        # a Debian-flavored compil
 
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
@@ -109,7 +112,7 @@ jobs:
           echo "CXX=icpc" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
 
-      # Set up standalone Redis environment
+      # Install additional dependencies
       - name: Install Cmake Linux
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get -y install cmake
@@ -124,7 +127,7 @@ jobs:
             bash ../build-scripts/build-lcov.sh &&
             bash ../build-scripts/build-catch.sh
 
-      - name: Install docker and redis-server
+      - name: Install docker, redis-server, and RedisAI
         run: |
           sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
           # Add latest redis to apt sources
@@ -144,21 +147,22 @@ jobs:
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
+      # Begin running the tests using various DB deployments
       - name: Single-shard DB tests
         run: |
-          SCRATCH_DIR="single_scratch"
+          SCRATCH_DIR="single_scratch" && PORT=6380
           rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --port 6380 --daemonize yes \
+          redis-server --port $PORT --daemonize yes \
                        --logfile "single.log" \
                        --loadmodule $REDISAI_MODULES &&
-          sleep 5; cat single.log &&
           popd &&
           export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
+          utils/check_redis.sh $PORT &&
           make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
       - name: Clustered DB tests
         run: |
-          SCRATCH_DIR="cluster_scratch"
+          SCRATCH_DIR="cluster_scratch" &&
           rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
           for port in {7000..7002}; do
             redis-server --port $port --cluster-enabled yes --daemonize yes \
@@ -166,32 +170,34 @@ jobs:
                          --logfile "$port.log" \
                          --loadmodule $REDISAI_MODULES
           done &&
-          sleep 2 &&
+          popd &&
+          for port in {7000..7002}; do ../utils/check_redis.sh $port done &&
           redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
           export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
-          popd &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests
 
       - name: UDS DB tests
         run: |
+          SOCKET="/tmp/redis.sock" &&
           mkdir -p /tmp && ## Create socketfile for UDS testing
-          touch /tmp/redis.sock &&
-          chmod 777 /tmp/redis.sock &&
+          touch $SOCKET &&
+          chmod 777 $SOCKET &&
           SCRATCH_DIR="uds_scratch" &&
           rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --unixsocket /tmp/redis.sock --unixsocketperm 777 --port 0 --bind 127.0.0.1 \
+          redis-server --unixsocket $SOCKET --unixsocketperm 777 --port 0 --bind 127.0.0.1 \
                        --daemonize yes --protected-mode no --logfile "uds.log" \
                        --loadmodule $REDISAI_MODULES &&
           popd &&
+          utils/check_redis.sh $SOCKET
           export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests
 
-      - name: Collect C++ coverage
-        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/CMakeFiles -d tests -o coverage.info
+      # Process and upload code coverage
+      - name: Collect coverage from C/C++/Fortran testers
+        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/CMakeFiles -o coverage.info
 
-      # Upload final coverage reports
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Any command line arguments are assumed to be CMake arguments
+CMAKE_ARGS=$@
+
 # get the number of processors
 NPROC=$(python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
@@ -19,7 +22,7 @@ mkdir build
 cd ./build
 
 # TODO add platform dependent build step here
-$CMAKE ..
+$CMAKE .. $CMAKE_ARGS
 
 if [ $? != 0 ]; then
     echo "ERROR: cmake for CPP tests failed"

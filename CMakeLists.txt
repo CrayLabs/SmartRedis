@@ -156,7 +156,7 @@ if(BUILD_PYTHON)
 	pybind11_add_module(smartredisPy
                         src/python/src/pysrobject.cpp
                         src/python/src/pylogcontext.cpp
-	                    src/python/src/pyclient.cpp
+	                src/python/src/pyclient.cpp
                         src/python/src/pydataset.cpp
                         ${CLIENT_SRC}
                         src/python/bindings/bind.cpp)
