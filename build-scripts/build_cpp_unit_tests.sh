@@ -11,7 +11,6 @@ CMAKE=$(which cmake)
 BASEDIR=$(pwd)
 
 cd ./tests/cpp/unit-tests
-
 if [[ -d "./build" ]]; then
     echo "Removing previous cpp unit test build directory"
     rm -rf ./build

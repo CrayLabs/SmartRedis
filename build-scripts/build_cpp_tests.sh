@@ -9,7 +9,7 @@ cd ./tests/cpp/
 
 # setup build dirs
 if [[ -d "./build" ]]; then
-    echo "Removing previous cpp unit test build directory"
+    echo "Removing previous cpp test build directory"
     rm -rf ./build
 fi
 mkdir build
