@@ -162,7 +162,7 @@ jobs:
           popd &&
           export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
           utils/check_redis.sh $PORT &&
-          make test-verbose COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
+          make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
 
       - name: Clustered DB tests
         run: |
