@@ -35,6 +35,49 @@
 
 using namespace SmartRedis;
 
+// Decorator to standardize exception handling in C Client API methods
+template <class T>
+auto c_client_api(T&& client_api_func)
+{
+  // we create a closure below
+  auto decorated = [client_api_func = std::forward<T>(client_api_func)](auto&&... args)
+  {
+    SRError result = SRNoError;
+    try {
+      client_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (const Exception& e) {
+      SRSetLastError(e);
+      result = e.to_error_code();
+    }
+    catch (...) {
+      SRSetLastError(SRInternalException("Unknown exception occurred"));
+      result = SRInternalError;
+    }
+    return result;
+  };
+  return decorated;
+}
+
+#if 0 // Example of template use
+// Inner function
+void _test_function_impl(int count)
+{
+  // real stuff
+  for (int i = 0; i < count; i++)
+    std::cout << "Hello world" << std::endl;
+}
+
+// Decorated function
+extern "C" auto _test_function = c_client_api(_test_function_impl);
+
+// Public function
+extern "C" SRError test_function(int count) {
+  return _test_function(count);
+}
+#endif
+
+
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
@@ -97,6 +140,7 @@ SRError DeleteCClient(void** c_client)
   return result;
 }
 
+#if 0 // Original implementation
 // Put a dataset into the database.
 extern "C"
 SRError put_dataset(void* c_client, void* dataset)
@@ -123,6 +167,24 @@ SRError put_dataset(void* c_client, void* dataset)
 
   return result;
 }
+#else // Implementation with "decorator"
+// Put a dataset into the database
+void _put_dataset_impl(void* c_client, void* dataset)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && dataset != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  DataSet* d = reinterpret_cast<DataSet*>(dataset);
+  s->put_dataset(*d);
+}
+auto _put_dataset = c_client_api(_put_dataset_impl);
+extern "C" SRError put_dataset(void* c_client, void* dataset)
+{
+  return _put_dataset(c_client, dataset);
+}
+#endif
+
 
 // Return a pointer to a new dataset.  The user is
 // responsible for deleting the dataset via DeallocateeDataSet()
