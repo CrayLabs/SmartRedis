@@ -169,7 +169,7 @@ SRError put_dataset(void* c_client, void* dataset)
 }
 #else // Implementation with "decorator"
 // Put a dataset into the database
-void _put_dataset_impl(void* c_client, void* dataset)
+static void _put_dataset_impl(void* c_client, void* dataset)
 {
   // Sanity check params
   SR_CHECK_PARAMS(c_client != NULL && dataset != NULL);
@@ -178,9 +178,9 @@ void _put_dataset_impl(void* c_client, void* dataset)
   DataSet* d = reinterpret_cast<DataSet*>(dataset);
   s->put_dataset(*d);
 }
-auto _put_dataset = c_client_api(_put_dataset_impl);
 extern "C" SRError put_dataset(void* c_client, void* dataset)
 {
+  auto _put_dataset = c_client_api(_put_dataset_impl);
   return _put_dataset(c_client, dataset);
 }
 #endif
