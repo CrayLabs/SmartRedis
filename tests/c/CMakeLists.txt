@@ -33,6 +33,13 @@ set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
+if(COVERAGE)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+        set(CMAKE_CXX_FLAGS --coverage)
+        add_link_options(--coverage)
+    endif()
+endif()
+
 find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
 
 include_directories(SYSTEM
