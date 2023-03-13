@@ -2,9 +2,16 @@
 
 CMAKE=$(which cmake)
 
+# Any command line arguments are assumed to be CMake arguments
+CMAKE_ARGS=$@
+
 cd ./tests/fortran/
 
 # setup build dirs
+if [[ -d "./build" ]]; then
+    echo "Removing previous cpp unit test build directory"
+    rm -rf ./build
+fi
 mkdir build
 cd ./build
 
@@ -16,7 +23,7 @@ fi
 
 if [[ $DO_FORTRAN == "yes" ]]; then
     # TODO add platform dependent build step here
-    $CMAKE ..
+    $CMAKE .. $CMAKE_ARGS
 
     if [ $? != 0 ]; then
         echo "ERROR: cmake for Fortran tests failed"
