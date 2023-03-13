@@ -1422,13 +1422,14 @@ class Client : public SRObject
         *  \param dataset The dataset which will receive the tensor
         *  \param name The name by which the tensor shall be added
         *              to the dataset
-        *   \param data Result of a get_tensor command containing tensor data
+        *   \param tensor_data get_tensor command reply containing
+        *                      tensor data
         *   \throw SmartRedis::Exception if addition of tensor fails
         */
        inline void _add_dataset_tensor(
             DataSet& dataset,
             const std::string& name,
-            CommandReply data);
+            CommandReply tensor_data);
 
         /*!
         *   \brief Retrieve the tensor from the DataSet and return

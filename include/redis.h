@@ -549,7 +549,7 @@ class Redis : public RedisServer
 
         /*!
         *   \brief Pipeline execute a series of commands
-        *   \param cms The commands to execute
+        *   \param cmds The commands to execute
         *   \returns Pipeline reply from the command execution
         *   \throw SmartRedis::Exception if command execution fails
         */

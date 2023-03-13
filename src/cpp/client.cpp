@@ -1667,12 +1667,12 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
 inline void Client::_add_dataset_tensor(
     DataSet& dataset,
     const std::string& name,
-    CommandReply data)
+    CommandReply tensor_data)
 {
     // Extract tensor properties from command reply
-    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(data);
-    std::string_view blob = GetTensorCommand::get_data_blob(data);
-    SRTensorType type = GetTensorCommand::get_data_type(data);
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(tensor_data);
+    std::string_view blob = GetTensorCommand::get_data_blob(tensor_data);
+    SRTensorType type = GetTensorCommand::get_data_type(tensor_data);
 
     // Add tensor to the dataset
     dataset._add_to_tensorpack(name, (void*)blob.data(), reply_dims,
