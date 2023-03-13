@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Improved performance of get, put, and copy dataset methods
 - Fix a bug which prevented multi-GPU model set in some cases
 - Streamline pipelined execution of tasks for backend database
 - Enhance code coverage to include all 4 languages supported by SmartRedis
@@ -39,6 +40,7 @@ Description
 
 Detailed Notes
 
+- Leveraged Redis pipelining to improve performance of get, put, and copy dataset methods (PR311_)
 - Redis::set_model_multigpu() will now upload the correct model to all GPUs (PR310_)
 - RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
 - Expand code coverage to all four languages and make the CI/CD more efficent (PR308_)
@@ -68,6 +70,7 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR311: https://github.com/CrayLabs/SmartRedis/pull/311
 .. _PR310: https://github.com/CrayLabs/SmartRedis/pull/310
 .. _PR309: https://github.com/CrayLabs/SmartRedis/pull/309
 .. _PR308: https://github.com/CrayLabs/SmartRedis/pull/308
