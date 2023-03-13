@@ -30,6 +30,7 @@ cmake_minimum_required(VERSION 3.13)
 
 option(BUILD_PYTHON  "Build the python module" ON)
 option(BUILD_FORTRAN "Build the fortran client library" OFF)
+option(COVERAGE "Build the fortran client library" OFF)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
@@ -42,10 +43,19 @@ if (BUILD_FORTRAN)
 endif()
 
 if (WERROR)
-    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
         add_compile_options(-Wall -Werror)
     else()
         message(WARNING "WERROR was specified, but the CMAKE compiler is not GCC")
+    endif()
+endif()
+
+if (COVERAGE)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+        add_compile_options(--coverage)
+        add_link_options(--coverage)
+    else()
+        message(WARNING "COVERAGE was specified, but the CMAKE compiler is not GCC")
     endif()
 endif()
 

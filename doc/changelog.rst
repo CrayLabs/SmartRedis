@@ -14,6 +14,7 @@ Description
 
 - Fix a bug which prevented multi-GPU model set in some cases
 - Streamline pipelined execution of tasks for backend database
+- Enhance code coverage to include all 4 languages supported by SmartRedis
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
 - Added infrastructure for multiDB support
 - Correct assorted API documentation errors and omissions
@@ -41,6 +42,7 @@ Detailed Notes
 
 - Redis::set_model_multigpu() will now upload the correct model to all GPUs (PR310_)
 - RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
+- Expand code coverage to all four languages and make the CI/CD more efficent (PR308_)
 - An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
 - Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
@@ -68,9 +70,9 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
-
 .. _PR310: https://github.com/CrayLabs/SmartRedis/pull/310
 .. _PR309: https://github.com/CrayLabs/SmartRedis/pull/309
+.. _PR308: https://github.com/CrayLabs/SmartRedis/pull/308
 .. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
 .. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
 .. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303
