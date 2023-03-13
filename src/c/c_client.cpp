@@ -159,8 +159,8 @@ static void _get_dataset_impl(
   }
 }
 extern "C"
-SRError get_dataset(void* c_client, const char* name,
-                    const size_t name_length, void **dataset)
+SRError get_dataset(
+  void* c_client, const char* name, const size_t name_length, void **dataset)
 {
   auto _get_dataset = c_client_api(_get_dataset_impl);
   return _get_dataset(c_client, name, name_length, dataset);
@@ -182,9 +182,9 @@ static void _rename_dataset_impl(
   s->rename_dataset(name_str, new_name_str);
 }
 extern "C"
-SRError rename_dataset(void* c_client, const char* old_name,
-                       const size_t old_name_length, const char* new_name,
-                       const size_t new_name_length)
+SRError rename_dataset(
+  void* c_client, const char* old_name, const size_t old_name_length,
+  const char* new_name, const size_t new_name_length)
 {
   auto _rename_dataset = c_client_api(_rename_dataset_impl);
   return _rename_dataset(
@@ -259,14 +259,10 @@ static void _put_tensor_impl(
   s->put_tensor(name_str, data, dims_vec, type, mem_layout);
 }
 extern "C"
-SRError put_tensor(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  void* data,
-                  const size_t* dims,
-                  const size_t n_dims,
-                  const SRTensorType type,
-                  const SRMemoryLayout mem_layout)
+SRError put_tensor(
+  void* c_client, const char* name, const size_t name_length,
+  void* data, const size_t* dims, const size_t n_dims,
+  const SRTensorType type, const SRMemoryLayout mem_layout)
 {
   auto _put_tensor = c_client_api(_put_tensor_impl);
   return _put_tensor(
@@ -274,19 +270,16 @@ SRError put_tensor(void* c_client,
 }
 
 // Get a tensor of a specified type from the database
-extern "C"
-SRError get_tensor(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  void** result,
-                  size_t** dims,
-                  size_t* n_dims,
-                  SRTensorType* type,
-                  const SRMemoryLayout mem_layout)
+static void _get_tensor_impl(
+  void* c_client,
+    const char* name,
+    const size_t name_length,
+    void** result,
+    size_t** dims,
+    size_t* n_dims,
+    SRTensorType* type,
+    const SRMemoryLayout mem_layout)
 {
-  SRError outcome = SRNoError;
-  try
-  {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL && n_dims != NULL);
@@ -295,21 +288,20 @@ SRError get_tensor(void* c_client,
     std::string name_str(name, name_length);
 
     s->get_tensor(name_str, *result, *dims, *n_dims, *type, mem_layout);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    outcome = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    outcome = SRInternalError;
-  }
-
-  return outcome;
+}
+extern "C"
+SRError get_tensor(
+  void* c_client, const char* name, const size_t name_length,
+  void** result, size_t** dims, size_t* n_dims, SRTensorType* type,
+  const SRMemoryLayout mem_layout)
+{
+  auto _get_tensor = c_client_api(_get_tensor_impl);
+  return _get_tensor(
+    c_client, name, name_length, result, dims, n_dims, type, mem_layout);
 }
 
 // Get a tensor of a specified type from the database
-// and put the values into the user provided memory space.
+// and put the values into the user provided memory space
 extern "C"
 SRError unpack_tensor(void* c_client,
                      const char* name,
