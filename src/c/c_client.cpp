@@ -59,25 +59,6 @@ auto c_client_api(T&& client_api_func)
   return decorated;
 }
 
-#if 0 // Example of template use
-// Inner function
-void _test_function_impl(int count)
-{
-  // real stuff
-  for (int i = 0; i < count; i++)
-    std::cout << "Hello world" << std::endl;
-}
-
-// Decorated function
-extern "C" auto _test_function = c_client_api(_test_function_impl);
-
-// Public function
-extern "C" SRError test_function(int count) {
-  return _test_function(count);
-}
-#endif
-
-
 // Return a pointer to a new Client.
 // The caller is responsible for deleting the client via DeleteClient().
 extern "C"
@@ -140,34 +121,6 @@ SRError DeleteCClient(void** c_client)
   return result;
 }
 
-#if 0 // Original implementation
-// Put a dataset into the database.
-extern "C"
-SRError put_dataset(void* c_client, void* dataset)
-{
-  SRError result = SRNoError;
-
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && dataset != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    DataSet* d = reinterpret_cast<DataSet*>(dataset);
-
-    s->put_dataset(*d);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
-}
-#else // Implementation with "decorator"
 // Put a dataset into the database
 static void _put_dataset_impl(void* c_client, void* dataset)
 {
@@ -183,133 +136,128 @@ extern "C" SRError put_dataset(void* c_client, void* dataset)
   auto _put_dataset = c_client_api(_put_dataset_impl);
   return _put_dataset(c_client, dataset);
 }
-#endif
 
 
 // Return a pointer to a new dataset.  The user is
 // responsible for deleting the dataset via DeallocateeDataSet()
+static void _get_dataset_impl(
+  void* c_client, const char* name, const size_t name_length, void **dataset)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && dataset != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string dataset_name(name, name_length);
+  DataSet* d = NULL;
+
+  try {
+    d = new DataSet(s->get_dataset(dataset_name));
+    *dataset = reinterpret_cast<void*>(d);
+  } catch (const std::bad_alloc& e) {
+    *dataset = NULL;
+    throw SRBadAllocException("dataset allocation");
+  }
+}
 extern "C"
 SRError get_dataset(void* c_client, const char* name,
                     const size_t name_length, void **dataset)
 {
-  SRError result = SRNoError;
-
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && dataset != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string dataset_name(name, name_length);
-    DataSet* d = NULL;
-
-    try {
-      d = new DataSet(s->get_dataset(dataset_name));
-      *dataset = reinterpret_cast<void*>(d);
-    } catch (const std::bad_alloc& e) {
-      *dataset = NULL;
-      throw SRBadAllocException("client allocation");
-    }
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _get_dataset = c_client_api(_get_dataset_impl);
+  return _get_dataset(c_client, name, name_length, dataset);
 }
 
-// Rename a dataset in the database.
+// Rename a dataset in the database
+static void _rename_dataset_impl(
+  void* c_client, const char* old_name,
+  const size_t old_name_length, const char* new_name,
+  const size_t new_name_length)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(old_name, old_name_length);
+  std::string new_name_str(new_name, new_name_length);
+
+  s->rename_dataset(name_str, new_name_str);
+}
 extern "C"
 SRError rename_dataset(void* c_client, const char* old_name,
                        const size_t old_name_length, const char* new_name,
                        const size_t new_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(old_name, old_name_length);
-    std::string new_name_str(new_name, new_name_length);
-
-    s->rename_dataset(name_str, new_name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _rename_dataset = c_client_api(_rename_dataset_impl);
+  return _rename_dataset(
+    c_client, old_name, old_name_length, new_name, new_name_length);
 }
 
-
 // Copy a dataset from the src_name to the dest_name
+static void _copy_dataset_impl(
+  void* c_client, const char* src_name,
+  const size_t src_name_length, const char* dest_name,
+  const size_t dest_name_length)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string src_name_str(src_name, src_name_length);
+  std::string dest_name_str(dest_name, dest_name_length);
+
+  s->copy_dataset(src_name_str, dest_name_str);
+}
 extern "C"
 SRError copy_dataset(void* c_client, const char* src_name,
                     const size_t src_name_length, const char* dest_name,
                     const size_t dest_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string src_name_str(src_name, src_name_length);
-    std::string dest_name_str(dest_name, dest_name_length);
-
-    s->copy_dataset(src_name_str, dest_name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _copy_dataset = c_client_api(_copy_dataset_impl);
+  return _copy_dataset(
+    c_client, src_name, src_name_length, dest_name, dest_name_length);
 }
 
-// Delete a dataset (all metadata and tensors) from the database.
-extern "C"
-SRError delete_dataset(void* c_client, const char* name, const size_t name_length)
+// Delete a dataset (all metadata and tensors) from the database
+static void _delete_dataset_impl(
+  void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string dataset_name(name, name_length);
-    s->delete_dataset(dataset_name);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string dataset_name(name, name_length);
+  s->delete_dataset(dataset_name);
+}
+extern "C"
+SRError delete_dataset(
+  void* c_client, const char* name, const size_t name_length)
+{
+  auto _delete_dataset = c_client_api(_delete_dataset_impl);
+  return _delete_dataset(c_client, name, name_length);
 }
 
 // Put a tensor of a specified type into the database
+static void _put_tensor_impl(
+  void* c_client,
+  const char* name,
+  const size_t name_length,
+  void* data,
+  const size_t* dims,
+  const size_t n_dims,
+  const SRTensorType type,
+  const SRMemoryLayout mem_layout)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
+                  data != NULL && dims != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+
+  std::vector<size_t> dims_vec;
+  dims_vec.assign(dims, dims + n_dims);
+
+  s->put_tensor(name_str, data, dims_vec, type, mem_layout);
+}
 extern "C"
 SRError put_tensor(void* c_client,
                   const char* name,
@@ -320,31 +268,9 @@ SRError put_tensor(void* c_client,
                   const SRTensorType type,
                   const SRMemoryLayout mem_layout)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
-                    data != NULL && dims != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-
-    std::vector<size_t> dims_vec;
-    dims_vec.assign(dims, dims + n_dims);
-
-    s->put_tensor(name_str, data, dims_vec, type, mem_layout);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _put_tensor = c_client_api(_put_tensor_impl);
+  return _put_tensor(
+    c_client, name, name_length, data, dims, n_dims, type, mem_layout);
 }
 
 // Get a tensor of a specified type from the database
