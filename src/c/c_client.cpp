@@ -59,66 +59,48 @@ auto c_client_api(T&& client_api_func)
   return decorated;
 }
 
-// Return a pointer to a new Client.
-// The caller is responsible for deleting the client via DeleteClient().
-extern "C"
-SRError SmartRedisCClient(
+// Return a pointer to a new Client
+static void _SmartRedisCClient_impl(
   bool cluster,
   const char* logger_name,
   const size_t logger_name_length,
   void** new_client)
 {
-  SRError result = SRNoError;
-  try {
     // Sanity check params
     SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
     std::string _logger_name(logger_name, logger_name_length);
-    Client* s = new Client(cluster, _logger_name);
-    *new_client = reinterpret_cast<void*>(s);
-  }
-  catch (const std::bad_alloc& e) {
-    *new_client = NULL;
-    SRSetLastError(SRBadAllocException("client allocation"));
-    result = SRBadAllocError;
-  }
-  catch (const Exception& e) {
-    *new_client = NULL;
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_client = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+    try {
+      *new_client = NULL;
+      Client* s = new Client(cluster, _logger_name);
+      *new_client = reinterpret_cast<void*>(s);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("client allocation");
+    }
+}
+// Public interface for SmartRedisCClient
+extern "C" SRError SmartRedisCClient(
+  bool cluster, const char* logger_name, const size_t logger_name_length,
+  void** new_client)
+{
+  auto _SmartRedisCClient = c_client_api(_SmartRedisCClient_impl);
+  return _SmartRedisCClient(cluster, logger_name, logger_name_length, new_client);
 }
 
-// Free the memory associated with the c client.
-extern "C"
-SRError DeleteCClient(void** c_client)
+// Free the memory associated with the c client
+static void _DeleteCClient_impl(void** c_client)
 {
-  SRError result = SRNoError;
-
-  try {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL);
 
     delete reinterpret_cast<Client*>(*c_client);
     *c_client = NULL;
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+}
+extern "C" SRError DeleteCClient(void** c_client)
+{
+  auto _DeleteCClient = c_client_api(_DeleteCClient_impl);
+  return _DeleteCClient(c_client);
 }
 
 // Put a dataset into the database
@@ -131,15 +113,14 @@ static void _put_dataset_impl(void* c_client, void* dataset)
   DataSet* d = reinterpret_cast<DataSet*>(dataset);
   s->put_dataset(*d);
 }
+// Public interface for put_dataset
 extern "C" SRError put_dataset(void* c_client, void* dataset)
 {
   auto _put_dataset = c_client_api(_put_dataset_impl);
   return _put_dataset(c_client, dataset);
 }
 
-
-// Return a pointer to a new dataset.  The user is
-// responsible for deleting the dataset via DeallocateeDataSet()
+// Return a pointer to a new dataset
 static void _get_dataset_impl(
   void* c_client, const char* name, const size_t name_length, void **dataset)
 {
@@ -158,8 +139,8 @@ static void _get_dataset_impl(
     throw SRBadAllocException("dataset allocation");
   }
 }
-extern "C"
-SRError get_dataset(
+// Public interface for get_dataset
+extern "C" SRError get_dataset(
   void* c_client, const char* name, const size_t name_length, void **dataset)
 {
   auto _get_dataset = c_client_api(_get_dataset_impl);
@@ -181,8 +162,8 @@ static void _rename_dataset_impl(
 
   s->rename_dataset(name_str, new_name_str);
 }
-extern "C"
-SRError rename_dataset(
+// Public interface for rename_dataset
+extern "C" SRError rename_dataset(
   void* c_client, const char* old_name, const size_t old_name_length,
   const char* new_name, const size_t new_name_length)
 {
@@ -206,8 +187,8 @@ static void _copy_dataset_impl(
 
   s->copy_dataset(src_name_str, dest_name_str);
 }
-extern "C"
-SRError copy_dataset(void* c_client, const char* src_name,
+// Public interface for copy_dataset
+extern "C" SRError copy_dataset(void* c_client, const char* src_name,
                     const size_t src_name_length, const char* dest_name,
                     const size_t dest_name_length)
 {
@@ -227,8 +208,8 @@ static void _delete_dataset_impl(
   std::string dataset_name(name, name_length);
   s->delete_dataset(dataset_name);
 }
-extern "C"
-SRError delete_dataset(
+// Public interface for delete_dataset
+extern "C" SRError delete_dataset(
   void* c_client, const char* name, const size_t name_length)
 {
   auto _delete_dataset = c_client_api(_delete_dataset_impl);
@@ -258,8 +239,8 @@ static void _put_tensor_impl(
 
   s->put_tensor(name_str, data, dims_vec, type, mem_layout);
 }
-extern "C"
-SRError put_tensor(
+// Public interface for put_tensor
+extern "C" SRError put_tensor(
   void* c_client, const char* name, const size_t name_length,
   void* data, const size_t* dims, const size_t n_dims,
   const SRTensorType type, const SRMemoryLayout mem_layout)
@@ -289,8 +270,8 @@ static void _get_tensor_impl(
 
     s->get_tensor(name_str, *result, *dims, *n_dims, *type, mem_layout);
 }
-extern "C"
-SRError get_tensor(
+// Public interface for get_tensor
+extern "C" SRError get_tensor(
   void* c_client, const char* name, const size_t name_length,
   void** result, size_t** dims, size_t* n_dims, SRTensorType* type,
   const SRMemoryLayout mem_layout)
@@ -302,134 +283,114 @@ SRError get_tensor(
 
 // Get a tensor of a specified type from the database
 // and put the values into the user provided memory space
-extern "C"
-SRError unpack_tensor(void* c_client,
-                     const char* name,
-                     const size_t name_length,
-                     void* result,
-                     const size_t* dims,
-                     const size_t n_dims,
-                     const SRTensorType type,
-                     const SRMemoryLayout mem_layout)
+static void _unpack_tensor_impl(
+  void* c_client,
+  const char* name,
+  const size_t name_length,
+  void* result,
+  const size_t* dims,
+  const size_t n_dims,
+  const SRTensorType type,
+  const SRMemoryLayout mem_layout)
 {
-  SRError outcome = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
-                    dims != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
+                  dims != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    std::vector<size_t> dims_vec;
-    dims_vec.assign(dims, dims + n_dims);
+  std::vector<size_t> dims_vec;
+  dims_vec.assign(dims, dims + n_dims);
 
-    s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    outcome = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    outcome = SRInternalError;
-  }
-
-  return outcome;
+  s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
+}
+// Public interface for unpack_tensor
+extern "C" SRError unpack_tensor(
+  void* c_client, const char* name, const size_t name_length, void* result,
+  const size_t* dims, const size_t n_dims, const SRTensorType type,
+  const SRMemoryLayout mem_layout)
+{
+  auto _unpack_tensor = c_client_api(_unpack_tensor_impl);
+  return _unpack_tensor(
+    c_client, name, name_length, result, dims, n_dims, type, mem_layout);
 }
 
 // Rename a tensor from old_name to new_name
-extern "C"
-SRError rename_tensor(void* c_client,
-                      const char* old_name, const size_t old_name_length,
-                      const char* new_name, const size_t new_name_length)
+static void _rename_tensor_impl(
+  void* c_client,
+  const char* old_name,
+  const size_t old_name_length,
+  const char* new_name,
+  const size_t new_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string old_name_str(old_name, old_name_length);
-    std::string new_name_str(new_name, new_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string old_name_str(old_name, old_name_length);
+  std::string new_name_str(new_name, new_name_length);
 
-    s->rename_tensor(old_name_str, new_name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->rename_tensor(old_name_str, new_name_str);
+}
+// Public interface for rename_tensor
+extern "C" SRError rename_tensor(
+  void* c_client, const char* old_name, const size_t old_name_length,
+  const char* new_name, const size_t new_name_length)
+{
+  auto _rename_tensor = c_client_api(_rename_tensor_impl);
+  return _rename_tensor(
+    c_client, old_name, old_name_length, new_name, new_name_length);
 }
 
 // Delete a tensor from the database.
-extern "C"
-SRError delete_tensor(void* c_client, const char* name,
-                      const size_t name_length)
+static void _delete_tensor_impl(
+  void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    s->delete_tensor(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->delete_tensor(name_str);
+}
+// Public interface for delete_tensor
+extern "C" SRError delete_tensor(
+  void* c_client, const char* name, const size_t name_length)
+{
+  auto _delete_tensor = c_client_api(_delete_tensor_impl);
+  return _delete_tensor(c_client, name, name_length);
 }
 
-// Copy a tensor from src_name to dest_name.
-extern "C"
-SRError copy_tensor(void* c_client,
-                   const char* src_name,
-                   const size_t src_name_length,
-                   const char* dest_name,
-                   const size_t dest_name_length)
+// Copy a tensor from src_name to dest_name
+static void _copy_tensor_impl(
+  void* c_client,
+  const char* src_name,
+  const size_t src_name_length,
+  const char* dest_name,
+  const size_t dest_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string src_str(src_name, src_name_length);
-    std::string dest_str(dest_name, dest_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string src_str(src_name, src_name_length);
+  std::string dest_str(dest_name, dest_name_length);
 
-    s->copy_tensor(src_str, dest_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->copy_tensor(src_str, dest_str);
+}
+// Public interface for copy_tensor
+extern "C" SRError copy_tensor(
+  void* c_client, const char* src_name, const size_t src_name_length,
+  const char* dest_name, const size_t dest_name_length)
+{
+  auto _copy_tensor = c_client_api(_copy_tensor_impl);
+  return _copy_tensor(
+    c_client, src_name, src_name_length, dest_name, dest_name_length);
 }
 
-bool CompareCaseInsensitive(const char* a,const char* b) {
+static bool _compareCaseInsensitive(const char* a,const char* b) {
   while (*a != '\0' && *b != '\0') {
     // Check current character
     if (toupper(*a) != toupper(*b))
@@ -447,14 +408,15 @@ bool CompareCaseInsensitive(const char* a,const char* b) {
 // Return True if the backend is TF or TFLITE
 bool _isTensorFlow(const char* backend)
 {
-  return CompareCaseInsensitive(backend, "TF") || CompareCaseInsensitive(backend, "TFLITE");
+  return _compareCaseInsensitive(backend, "TF") ||
+         _compareCaseInsensitive(backend, "TFLITE");
 }
 
 // Check the parameters common to all set_model functions
-void _check_params_set_model(void* c_client,
-                            const char* name, const char* backend,
-                            const char** inputs, const size_t* input_lengths, const size_t n_inputs,
-                            const char** outputs, const size_t* output_lengths, const size_t n_outputs)
+void _check_params_set_model(
+  void* c_client, const char* name, const char* backend,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
   // Sanity check params. Tag is strictly optional, and inputs/outputs are
   // mandatory IFF backend is TensorFlow (TF or TFLITE)
@@ -463,13 +425,14 @@ void _check_params_set_model(void* c_client,
   if (_isTensorFlow(backend)) {
     if (inputs == NULL || input_lengths == NULL ||
         outputs == NULL || output_lengths == NULL) {
-      throw SRParameterException("Inputs and outputs are required with TensorFlow");
+      throw SRParameterException(
+        "Inputs and outputs are required with TensorFlow");
     }
   }
 
   // For the inputs and outputs arrays, a single empty string is ok (this means
-  // that the array should be skipped) but if more than one entry is present, the
-  // strings must be nonzero length
+  // that the array should be skipped) but if more than one entry is present,
+  // the strings must be nonzero length
   if (_isTensorFlow(backend)) {
     if (n_inputs != 1 && input_lengths[0] != 0) {
       for (size_t i = 0; i < n_inputs; i++){
@@ -490,294 +453,301 @@ void _check_params_set_model(void* c_client,
   }
 }
 
-// Set a model stored in a binary file.
-extern "C"
-SRError set_model_from_file(void* c_client,
-                           const char* name, const size_t name_length,
-                           const char* model_file, const size_t model_file_length,
-                           const char* backend, const size_t backend_length,
-                           const char* device, const size_t device_length,
-                           const int batch_size, const int min_batch_size,
-                           const char* tag, const size_t tag_length,
-                           const char** inputs, const size_t* input_lengths,
-                           const size_t n_inputs,
-                           const char** outputs, const size_t* output_lengths,
-                           const size_t n_outputs)
+// Set a model stored in a binary file
+static void _set_model_from_file_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* model_file, const size_t model_file_length,
+  const char* backend, const size_t backend_length,
+  const char* device, const size_t device_length,
+  const int batch_size,
+  const int min_batch_size,
+  const char* tag, const size_t tag_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params. Tag is strictly optional, and inputs/outputs are
-    // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-    SR_CHECK_PARAMS(model_file != NULL && device != NULL);
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                        outputs, output_lengths, n_outputs);
+  SR_CHECK_PARAMS(model_file != NULL && device != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string model_file_str(model_file, model_file_length);
-    std::string backend_str(backend, backend_length);
-    std::string device_str(device, device_length);
-    std::string tag_str(tag, tag_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string model_file_str(model_file, model_file_length);
+  std::string backend_str(backend, backend_length);
+  std::string device_str(device, device_length);
+  std::string tag_str(tag, tag_length);
 
-    // Catch the case where an empty string was sent (default C++ client behavior)
-    std::vector<std::string> input_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_inputs != 1 || input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++) {
-          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-        }
+  // Catch the case where an empty string was sent (default C++ client behavior)
+  std::vector<std::string> input_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
       }
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_outputs != 1 || output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-        }
+  std::vector<std::string> output_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
       }
     }
-
-    s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
-                           batch_size, min_batch_size, tag_str, input_vec,
-                           output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
+                          batch_size, min_batch_size, tag_str, input_vec,
+                          output_vec);
 }
-extern "C"
-SRError set_model_from_file_multigpu(void* c_client,
-                                     const char* name, const size_t name_length,
-                                     const char* model_file, const size_t model_file_length,
-                                     const char* backend, const size_t backend_length,
-                                     const int first_gpu, const int num_gpus,
-                                     const int batch_size, const int min_batch_size,
-                                     const char* tag, const size_t tag_length,
-                                     const char** inputs, const size_t* input_lengths,
-                                     const size_t n_inputs, const char** outputs,
-                                     const size_t* output_lengths, const size_t n_outputs)
+// Public interface for set_model_from_file
+extern "C" SRError set_model_from_file(
+  void* c_client, const char* name, const size_t name_length,
+  const char* model_file, const size_t model_file_length, const char* backend,
+  const size_t backend_length, const char* device, const size_t device_length,
+  const int batch_size, const int min_batch_size, const char* tag,
+  const size_t tag_length, const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
+  const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params. Tag is strictly optional, and inputs/outputs are
-    // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-    SR_CHECK_PARAMS(model_file != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string model_file_str(model_file, model_file_length);
-    std::string backend_str(backend, backend_length);
-    std::string tag_str(tag, tag_length);
-
-    // Catch the case where an empty string was sent (default C++ client behavior)
-    std::vector<std::string> input_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_inputs != 1 || input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++) {
-          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-        }
-      }
-    }
-
-    std::vector<std::string> output_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_outputs != 1 || output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-        }
-      }
-    }
-
-    s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
-                                   num_gpus, batch_size, min_batch_size, tag_str,
-                                   input_vec, output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _set_model_from_file = c_client_api(_set_model_from_file_impl);
+  return _set_model_from_file(
+    c_client, name, name_length, model_file, model_file_length,
+    backend, backend_length, device, device_length, batch_size,
+    min_batch_size, tag, tag_length, inputs, input_lengths,
+    n_inputs, outputs, output_lengths, n_outputs);
 }
 
-// Set a model stored in a buffer c-string.
-extern "C"
-SRError set_model(void* c_client,
-                 const char* name, const size_t name_length,
-                 const char* model, const size_t model_length,
-                 const char* backend, const size_t backend_length,
-                 const char* device, const size_t device_length,
-                 const int batch_size, const int min_batch_size,
-                 const char* tag, const size_t tag_length,
-                 const char** inputs, const size_t* input_lengths,
-                 const size_t n_inputs,
-                 const char** outputs, const size_t* output_lengths,
-                 const size_t n_outputs)
+// Set a model stored in a binary file for use with multiple GPUs
+static void _set_model_from_file_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* model_file, const size_t model_file_length,
+  const char* backend, const size_t backend_length,
+  const int first_gpu, const int num_gpus,
+  const int batch_size, const int min_batch_size,
+  const char* tag, const size_t tag_length,
+  const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs, const char** outputs,
+  const size_t* output_lengths, const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params. Tag is strictly optional, and inputs/outputs are
-    // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-    SR_CHECK_PARAMS(model != NULL && device != NULL);
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                        outputs, output_lengths, n_outputs);
+  SR_CHECK_PARAMS(model_file != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string model_str(model, model_length);
-    std::string backend_str(backend, backend_length);
-    std::string device_str(device, device_length);
-    std::string tag_str(tag, tag_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string model_file_str(model_file, model_file_length);
+  std::string backend_str(backend, backend_length);
+  std::string tag_str(tag, tag_length);
 
-    // Catch the case where an empty string was sent (default C++ client behavior)
-    std::vector<std::string> input_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_inputs != 1 || input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++) {
-          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-        }
+  // Catch the case where an empty string was sent (default C++ client behavior)
+  std::vector<std::string> input_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
       }
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_outputs != 1 || output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-        }
+  std::vector<std::string> output_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
       }
     }
-
-    s->set_model(name_str, model_str, backend_str, device_str,
-                batch_size, min_batch_size, tag_str, input_vec,
-                output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
+                                  num_gpus, batch_size, min_batch_size, tag_str,
+                                  input_vec, output_vec);
+}
+// Public interface for set_model_from_file
+extern "C" SRError set_model_from_file_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char* model_file, const size_t model_file_length,
+  const char* backend, const size_t backend_length,
+  const int first_gpu, const int num_gpus,
+  const int batch_size, const int min_batch_size,
+  const char* tag, const size_t tag_length,
+  const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs, const char** outputs,
+  const size_t* output_lengths, const size_t n_outputs)
+{
+  auto _set_model_from_file_multigpu =
+    c_client_api(_set_model_from_file_multigpu_impl);
+  return _set_model_from_file_multigpu(
+    c_client, name, name_length, model_file, model_file_length,
+    backend, backend_length, first_gpu, num_gpus, batch_size,
+    min_batch_size, tag, tag_length, inputs, input_lengths,
+    n_inputs, outputs, output_lengths, n_outputs);
 }
 
 // Set a model stored in a buffer c-string.
-extern "C"
-SRError set_model_multigpu(void* c_client,
-                          const char* name, const size_t name_length,
-                          const char* model, const size_t model_length,
-                          const char* backend, const size_t backend_length,
-                          const int first_gpu, const int num_gpus,
-                          const int batch_size, const int min_batch_size,
-                          const char* tag, const size_t tag_length,
-                          const char** inputs, const size_t* input_lengths,
-                          const size_t n_inputs,
-                          const char** outputs, const size_t* output_lengths,
-                          const size_t n_outputs)
+static void _set_model_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* model, const size_t model_length,
+  const char* backend, const size_t backend_length,
+  const char* device, const size_t device_length,
+  const int batch_size, const int min_batch_size,
+  const char* tag, const size_t tag_length,
+  const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths,
+  const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params. Tag is strictly optional, and inputs/outputs are
-    // mandatory IFF backend is TensorFlow (TF or TFLITE)
-    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-    SR_CHECK_PARAMS(model != NULL);
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                        outputs, output_lengths, n_outputs);
+  SR_CHECK_PARAMS(model != NULL && device != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string model_str(model, model_length);
-    std::string backend_str(backend, backend_length);
-    std::string tag_str(tag, tag_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string model_str(model, model_length);
+  std::string backend_str(backend, backend_length);
+  std::string device_str(device, device_length);
+  std::string tag_str(tag, tag_length);
 
-    // Catch the case where an empty string was sent (default C++ client behavior)
-    std::vector<std::string> input_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_inputs != 1 || input_lengths[0] != 0) {
-        for (size_t i = 0; i < n_inputs; i++) {
-          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-        }
+  // Catch the case where an empty string was sent (default C++ client behavior)
+  std::vector<std::string> input_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
       }
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (_isTensorFlow(backend)) {
-      if (n_outputs != 1 || output_lengths[0] != 0) {
-        for (size_t i = 0; i < n_outputs; i++) {
-          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-        }
+  std::vector<std::string> output_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
       }
     }
-
-    s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
-                         batch_size, min_batch_size, tag_str, input_vec,
-                         output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  s->set_model(name_str, model_str, backend_str, device_str,
+              batch_size, min_batch_size, tag_str, input_vec,
+              output_vec);
+}
+// Public interface for set_model
+extern "C" SRError set_model(
+  void* c_client, const char* name, const size_t name_length,
+  const char* model, const size_t model_length, const char* backend,
+  const size_t backend_length, const char* device, const size_t device_length,
+  const int batch_size, const int min_batch_size, const char* tag,
+  const size_t tag_length, const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
+  const size_t n_outputs)
+{
+  auto _set_model = c_client_api(_set_model_impl);
+  return _set_model(
+    c_client, name, name_length, model, model_length,
+    backend, backend_length, device, device_length, batch_size,
+    min_batch_size, tag, tag_length, inputs, input_lengths,
+    n_inputs, outputs, output_lengths, n_outputs);
 }
 
+// Set a model stored in a buffer c-string.
+static void _set_model_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* model, const size_t model_length,
+  const char* backend, const size_t backend_length,
+  const int first_gpu, const int num_gpus,
+  const int batch_size, const int min_batch_size,
+  const char* tag, const size_t tag_length,
+  const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths,
+  const size_t n_outputs)
+{
+  // Sanity check params. Tag is strictly optional, and inputs/outputs are
+  // mandatory IFF backend is TensorFlow (TF or TFLITE)
+  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                        outputs, output_lengths, n_outputs);
+  SR_CHECK_PARAMS(model != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string model_str(model, model_length);
+  std::string backend_str(backend, backend_length);
+  std::string tag_str(tag, tag_length);
+
+  // Catch the case where an empty string was sent (default C++ client behavior)
+  std::vector<std::string> input_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
+    }
+  }
+
+  std::vector<std::string> output_vec;
+  if (_isTensorFlow(backend)) {
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
+    }
+  }
+
+  s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
+                        batch_size, min_batch_size, tag_str, input_vec,
+                        output_vec);
+}
+// Public interface for set_model_multigpu
+extern "C" SRError set_model_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char* model, const size_t model_length, const char* backend,
+  const size_t backend_length, const int first_gpu, const int num_gpus,
+  const int batch_size, const int min_batch_size, const char* tag,
+  const size_t tag_length, const char** inputs, const size_t* input_lengths,
+  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
+  const size_t n_outputs)
+{
+  auto _set_model_multigpu = c_client_api(_set_model_multigpu_impl);
+  return _set_model_multigpu(
+    c_client, name, name_length, model, model_length,
+    backend, backend_length, first_gpu, num_gpus, batch_size,
+    min_batch_size, tag, tag_length, inputs, input_lengths,
+    n_inputs, outputs, output_lengths, n_outputs);
+}
 
 // Retrieve the model and model length from the database
-extern "C"
-SRError get_model(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  size_t* model_length,
-                  const char** model)
+static void _get_model_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  size_t* model_length, const char** model)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
-                    model != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
+                  model != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string_view model_str_view(s->get_model(name_str));
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string_view model_str_view(s->get_model(name_str));
 
-    *model_length = model_str_view.size();
-    *model = model_str_view.data();
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *model_length = model_str_view.size();
+  *model = model_str_view.data();
+}
+// Public interface for set_model_multigpu
+extern "C" SRError get_model(
+  void* c_client, const char* name, const size_t name_length,
+  size_t* model_length, const char** model)
+{
+  auto _get_model = c_client_api(_get_model_impl);
+  return _get_model(c_client, name, name_length, model_length, model);
 }
 
 // Put a script in the database that is stored in a file.
