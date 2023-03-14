@@ -751,192 +751,159 @@ extern "C" SRError get_model(
 }
 
 // Put a script in the database that is stored in a file.
-extern "C"
-SRError set_script_from_file(void* c_client,
-                            const char* name,
-                            const size_t name_length,
-                            const char* device,
-                            const size_t device_length,
-                            const char* script_file,
-                            const size_t script_file_length)
+static void _set_script_from_file_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* device, const size_t device_length,
+  const char* script_file, const size_t script_file_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
-                    script_file != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
+                  script_file != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string device_str(device, device_length);
-    std::string script_file_str(script_file, script_file_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string device_str(device, device_length);
+  std::string script_file_str(script_file, script_file_length);
 
-    s->set_script_from_file(name_str, device_str, script_file_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->set_script_from_file(name_str, device_str, script_file_str);
+}
+// Public interface for set_model_multigpu
+extern "C" SRError set_script_from_file(
+  void* c_client, const char* name, const size_t name_length,
+  const char* device, const size_t device_length,
+  const char* script_file, const size_t script_file_length)
+{
+  auto _set_script_from_file = c_client_api(_set_script_from_file_impl);
+  return _set_script_from_file(
+    c_client, name, name_length, device, device_length,
+    script_file, script_file_length);
 }
 
 // Put a script in the database that is stored in a file in a multi-GPU system
-extern "C"
-SRError set_script_from_file_multigpu(void* c_client,
-                                     const char* name,
-                                     const size_t name_length,
-                                     const char* script_file,
-                                     const size_t script_file_length,
-                                     const int first_gpu,
-                                     const int num_gpus)
+static void _set_script_from_file_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* script_file, const size_t script_file_length,
+  const int first_gpu,
+  const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string script_file_str(script_file, script_file_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string script_file_str(script_file, script_file_length);
 
-    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
+}
+// Public interface for set_script_from_file_multigpu
+extern "C" SRError set_script_from_file_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char* script_file, const size_t script_file_length,
+  const int first_gpu, const int num_gpus)
+{
+  auto _set_script_from_file_multigpu
+    = c_client_api(_set_script_from_file_multigpu_impl);
+  return _set_script_from_file_multigpu(
+    c_client, name, name_length, script_file, script_file_length,
+    first_gpu, num_gpus);
 }
 
 // Put a script in the database that is stored in a string.
-extern "C"
-SRError set_script(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  const char* device,
-                  const size_t device_length,
-                  const char* script,
-                  const size_t script_length)
+static void _set_script_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* device, const size_t device_length,
+  const char* script, const size_t script_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
-                    script != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
+                  script != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
 
-    std::string name_str(name, name_length);
-    std::string device_str(device, device_length);
-    std::string script_str(script, script_length);
+  std::string name_str(name, name_length);
+  std::string device_str(device, device_length);
+  std::string script_str(script, script_length);
 
-    s->set_script(name_str, device_str, script_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->set_script(name_str, device_str, script_str);
+}
+// Public interface for set_script
+extern "C" SRError set_script(
+  void* c_client, const char* name, const size_t name_length,
+  const char* device, const size_t device_length,
+  const char* script, const size_t script_length)
+{
+  auto _set_script = c_client_api(_set_script_impl);
+  return _set_script(
+    c_client, name, name_length, device, device_length,
+    script, script_length);
 }
 
 // Put a script in the database that is stored in a string in a multi-GPU system
-extern "C"
-SRError set_script_multigpu(void* c_client,
-                           const char* name,
-                           const size_t name_length,
-                           const char* script,
-                           const size_t script_length,
-                           const int first_gpu,
-                           const int num_gpus)
+static void _set_script_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* script, const size_t script_length,
+  const int first_gpu,
+  const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
+  Client* s = reinterpret_cast<Client*>(c_client);
 
-    std::string name_str(name, name_length);
-    std::string script_str(script, script_length);
+  std::string name_str(name, name_length);
+  std::string script_str(script, script_length);
 
-    s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
 }
-
-
+// Public interface for set_script_multigpu
+extern "C"
+SRError set_script_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char* script, const size_t script_length,
+  const int first_gpu, const int num_gpus)
+{
+  auto _set_script_multigpu = c_client_api(_set_script_multigpu_impl);
+  return _set_script_multigpu(
+    c_client, name, name_length, script, script_length, first_gpu, num_gpus);
+}
 
 // Retrieve the script stored in the database
-extern "C"
-SRError get_script(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  const char** script,
-                  size_t* script_length)
+static void _get_script_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char** script, size_t* script_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
-                    script_length != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
+                  script_length != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
-    std::string_view script_str_view(s->get_script(name_str));
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
+  std::string_view script_str_view(s->get_script(name_str));
 
-    (*script) = script_str_view.data();
-    (*script_length) = script_str_view.size();
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  (*script) = script_str_view.data();
+  (*script_length) = script_str_view.size();
+}
+// Public interface for get_script
+extern "C" SRError get_script(
+  void* c_client, const char* name, const size_t name_length,
+  const char** script, size_t* script_length)
+{
+  auto _get_script = c_client_api(_get_script_impl);
+  return _get_script(c_client, name, name_length, script, script_length);
 }
 
-void _check_params_run_script(void* c_client,
-                              const char* name,
-                              const char* function,
-                              const char** inputs,
-                              const size_t* input_lengths,
-                              const size_t n_inputs,
-                              const char** outputs,
-                              const size_t* output_lengths,
-                              const size_t n_outputs)
+// Validate parameters for running scripts
+void _check_params_run_script(
+  void* c_client,
+  const char* name,
+  const char* function,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
@@ -959,121 +926,105 @@ void _check_params_run_script(void* c_client,
 }
 
 // Run  a script function in the database
-extern "C"
-SRError run_script(void* c_client,
-                  const char* name,
-                  const size_t name_length,
-                  const char* function,
-                  const size_t function_length,
-                  const char** inputs,
-                  const size_t* input_lengths,
-                  const size_t n_inputs,
-                  const char** outputs,
-                  const size_t* output_lengths,
-                  const size_t n_outputs)
+static void _run_script_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* function, const size_t function_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    _check_params_run_script(c_client, name, function,
-                             inputs, input_lengths, n_inputs,
-                             outputs, output_lengths, n_outputs);
-    std::string name_str(name, name_length);
-    std::string function_str(function, function_length);
+  _check_params_run_script(c_client, name, function,
+                            inputs, input_lengths, n_inputs,
+                            outputs, output_lengths, n_outputs);
+  std::string name_str(name, name_length);
+  std::string function_str(function, function_length);
 
-    std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-      }
+  std::vector<std::string> input_vec;
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-      }
+  std::vector<std::string> output_vec;
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_script(name_str, function_str, input_vec, output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->run_script(name_str, function_str, input_vec, output_vec);
+}
+// Public interface for run_script
+extern "C" SRError run_script(
+  void* c_client, const char* name, const size_t name_length,
+  const char* function, const size_t function_length, const char** inputs,
+  const size_t* input_lengths, const size_t n_inputs, const char** outputs,
+  const size_t* output_lengths, const size_t n_outputs)
+{
+  auto _run_script = c_client_api(_run_script_impl);
+  return _run_script(
+    c_client, name, name_length, function, function_length, inputs,
+    input_lengths, n_inputs, outputs, output_lengths, n_outputs);
 }
 
 // Run  a script function in the database in a multi-GPU system
-extern "C"
-SRError run_script_multigpu(void* c_client,
-                           const char* name,
-                           const size_t name_length,
-                           const char* function,
-                           const size_t function_length,
-                           const char** inputs,
-                           const size_t* input_lengths,
-                           const size_t n_inputs,
-                           const char** outputs,
-                           const size_t* output_lengths,
-                           const size_t n_outputs,
-                           const int offset,
-                           const int first_gpu,
-                           const int num_gpus)
+static void _run_script_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char* function, const size_t function_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs,
+  const int offset,
+  const int first_gpu,
+  const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    _check_params_run_script(c_client, name, function,
-                             inputs, input_lengths, n_inputs,
-                             outputs, output_lengths, n_outputs);
-    std::string name_str(name, name_length);
-    std::string function_str(function, function_length);
+  _check_params_run_script(c_client, name, function,
+                           inputs, input_lengths, n_inputs,
+                           outputs, output_lengths, n_outputs);
+  std::string name_str(name, name_length);
+  std::string function_str(function, function_length);
 
-    std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-      }
+  std::vector<std::string> input_vec;
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-      }
+  std::vector<std::string> output_vec;
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
-                           offset, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
+                         offset, first_gpu, num_gpus);
+}
+// Public interface for run_script_multigpu
+extern "C" SRError run_script_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char* function, const size_t function_length, const char** inputs,
+  const size_t* input_lengths, const size_t n_inputs, const char** outputs,
+  const size_t* output_lengths, const size_t n_outputs, const int offset,
+  const int first_gpu, const int num_gpus)
+{
+  auto _run_script_multigpu = c_client_api(_run_script_multigpu_impl);
+  return _run_script_multigpu(
+    c_client, name, name_length, function, function_length, inputs,
+    input_lengths, n_inputs, outputs, output_lengths, n_outputs,
+    offset, first_gpu, num_gpus);
 }
 
-void _check_params_run_model(void* c_client,
-                  const char* name,
-                  const char** inputs,
-                  const size_t* input_lengths,
-                  const size_t n_inputs,
-                  const char** outputs,
-                  const size_t* output_lengths,
-                  const size_t n_outputs)
+// Validate the parameters for running models
+void _check_params_run_model(
+  void* c_client,
+  const char* name,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
@@ -1096,134 +1047,124 @@ void _check_params_run_model(void* c_client,
 }
 
 // Run a model in the database
-extern "C"
-SRError run_model(void* c_client,
-                 const char* name,
-                 const size_t name_length,
-                 const char** inputs,
-                 const size_t* input_lengths,
-                 const size_t n_inputs,
-                 const char** outputs,
-                 const size_t* output_lengths,
-                 const size_t n_outputs)
+static void _run_model_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  SRError result = SRNoError;
-  try
-  {
-    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
-                           outputs, output_lengths, n_outputs);
-    std::string name_str(name, name_length);
+  _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+  std::string name_str(name, name_length);
 
-    std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-      }
+  std::vector<std::string> input_vec;
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-      }
+  std::vector<std::string> output_vec;
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_model(name_str, input_vec, output_vec);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->run_model(name_str, input_vec, output_vec);
+}
+// Public interface for run_model
+extern "C" SRError run_model(
+  void* c_client, const char* name, const size_t name_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
+{
+  auto _run_model = c_client_api(_run_model_impl);
+  return _run_model(
+    c_client, name, name_length, inputs, input_lengths, n_inputs, outputs,
+    output_lengths, n_outputs);
 }
 
-// Run a model in the database
-extern "C"
-SRError run_model_multigpu(void* c_client,
-                          const char* name,
-                          const size_t name_length,
-                          const char** inputs,
-                          const size_t* input_lengths,
-                          const size_t n_inputs,
-                          const char** outputs,
-                          const size_t* output_lengths,
-                          const size_t n_outputs,
-                          const int offset,
-                          const int first_gpu,
-                          const int num_gpus)
+// Run a model in the database for multiple GPUs
+static void _run_model_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs,
+  const int offset,
+  const int first_gpu,
+  const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
-                           outputs, output_lengths, n_outputs);
-    std::string name_str(name, name_length);
+  _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+  std::string name_str(name, name_length);
 
-    std::vector<std::string> input_vec;
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
-      }
+  std::vector<std::string> input_vec;
+  if (n_inputs != 1 || input_lengths[0] != 0) {
+    for (size_t i = 0; i < n_inputs; i++) {
+      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
     }
+  }
 
-    std::vector<std::string> output_vec;
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
-      }
+  std::vector<std::string> output_vec;
+  if (n_outputs != 1 || output_lengths[0] != 0) {
+    for (size_t i = 0; i < n_outputs; i++) {
+      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
     }
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->run_model_multigpu(name_str, input_vec, output_vec, offset,
-                         first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
   }
 
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->run_model_multigpu(name_str, input_vec, output_vec, offset,
+                        first_gpu, num_gpus);
+}
+// Public interface for run_model_multigpu
+extern "C" SRError run_model_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
+  const char** outputs, const size_t* output_lengths, const size_t n_outputs,
+  const int offset, const int first_gpu, const int num_gpus)
+{
+  auto _run_model_multigpu = c_client_api(_run_model_multigpu_impl);
+  return _run_model_multigpu(
+    c_client, name, name_length, inputs, input_lengths, n_inputs, outputs,
+    output_lengths, n_outputs, offset, first_gpu, num_gpus);
 }
 
 // Remove a model from the database
-extern "C"
-SRError delete_model(void* c_client,
-                     const char* name,
-                     const size_t name_length)
+static void _delete_model_impl(
+  void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
     std::string name_str(name, name_length);
     Client* s = reinterpret_cast<Client*>(c_client);
     s->delete_model(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+}
+// Public interface for delete_model
+extern "C" SRError delete_model(
+  void* c_client, const char* name, const size_t name_length)
+{
+  auto _delete_model = c_client_api(_delete_model_impl);
+  return _delete_model(c_client, name, name_length);
 }
 
 // Remove a model from the database on a system with multiple GPUs
+static void _delete_model_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const int first_gpu,
+  const int num_gpus)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+  std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+}
+// Public interface for delete_model_multigpu
 extern "C"
 SRError delete_model_multigpu(void* c_client,
                               const char* name,
@@ -1231,26 +1172,9 @@ SRError delete_model_multigpu(void* c_client,
                               const int first_gpu,
                               const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
-
-    std::string name_str(name, name_length);
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->delete_model_multigpu(name_str, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto _delete_model_multigpu = c_client_api(_delete_model_multigpu_impl);
+  return _delete_model_multigpu(
+    c_client, name, name_length, first_gpu, num_gpus);
 }
 
 // Remove a script from the database
