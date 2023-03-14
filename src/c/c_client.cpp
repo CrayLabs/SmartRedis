@@ -59,6 +59,7 @@ auto c_client_api(T&& client_api_func)
   return decorated;
 }
 
+
 // Return a pointer to a new Client
 static void _SmartRedisCClient_impl(
   bool cluster,
@@ -88,6 +89,7 @@ extern "C" SRError SmartRedisCClient(
   return _SmartRedisCClient(cluster, logger_name, logger_name_length, new_client);
 }
 
+
 // Free the memory associated with the c client
 static void _DeleteCClient_impl(void** c_client)
 {
@@ -102,6 +104,7 @@ extern "C" SRError DeleteCClient(void** c_client)
   auto _DeleteCClient = c_client_api(_DeleteCClient_impl);
   return _DeleteCClient(c_client);
 }
+
 
 // Put a dataset into the database
 static void _put_dataset_impl(void* c_client, void* dataset)
@@ -119,6 +122,7 @@ extern "C" SRError put_dataset(void* c_client, void* dataset)
   auto _put_dataset = c_client_api(_put_dataset_impl);
   return _put_dataset(c_client, dataset);
 }
+
 
 // Return a pointer to a new dataset
 static void _get_dataset_impl(
@@ -147,6 +151,7 @@ extern "C" SRError get_dataset(
   return _get_dataset(c_client, name, name_length, dataset);
 }
 
+
 // Rename a dataset in the database
 static void _rename_dataset_impl(
   void* c_client, const char* old_name,
@@ -171,6 +176,7 @@ extern "C" SRError rename_dataset(
   return _rename_dataset(
     c_client, old_name, old_name_length, new_name, new_name_length);
 }
+
 
 // Copy a dataset from the src_name to the dest_name
 static void _copy_dataset_impl(
@@ -197,6 +203,7 @@ extern "C" SRError copy_dataset(void* c_client, const char* src_name,
     c_client, src_name, src_name_length, dest_name, dest_name_length);
 }
 
+
 // Delete a dataset (all metadata and tensors) from the database
 static void _delete_dataset_impl(
   void* c_client, const char* name, const size_t name_length)
@@ -215,6 +222,7 @@ extern "C" SRError delete_dataset(
   auto _delete_dataset = c_client_api(_delete_dataset_impl);
   return _delete_dataset(c_client, name, name_length);
 }
+
 
 // Put a tensor of a specified type into the database
 static void _put_tensor_impl(
@@ -250,6 +258,7 @@ extern "C" SRError put_tensor(
     c_client, name, name_length, data, dims, n_dims, type, mem_layout);
 }
 
+
 // Get a tensor of a specified type from the database
 static void _get_tensor_impl(
   void* c_client,
@@ -280,6 +289,7 @@ extern "C" SRError get_tensor(
   return _get_tensor(
     c_client, name, name_length, result, dims, n_dims, type, mem_layout);
 }
+
 
 // Get a tensor of a specified type from the database
 // and put the values into the user provided memory space
@@ -316,6 +326,7 @@ extern "C" SRError unpack_tensor(
     c_client, name, name_length, result, dims, n_dims, type, mem_layout);
 }
 
+
 // Rename a tensor from old_name to new_name
 static void _rename_tensor_impl(
   void* c_client,
@@ -343,7 +354,8 @@ extern "C" SRError rename_tensor(
     c_client, old_name, old_name_length, new_name, new_name_length);
 }
 
-// Delete a tensor from the database.
+
+// Delete a tensor from the database
 static void _delete_tensor_impl(
   void* c_client, const char* name, const size_t name_length)
 {
@@ -362,6 +374,7 @@ extern "C" SRError delete_tensor(
   auto _delete_tensor = c_client_api(_delete_tensor_impl);
   return _delete_tensor(c_client, name, name_length);
 }
+
 
 // Copy a tensor from src_name to dest_name
 static void _copy_tensor_impl(
@@ -390,6 +403,8 @@ extern "C" SRError copy_tensor(
     c_client, src_name, src_name_length, dest_name, dest_name_length);
 }
 
+
+// Perform a case insensitive compare fo two strings
 static bool _compareCaseInsensitive(const char* a,const char* b) {
   while (*a != '\0' && *b != '\0') {
     // Check current character
@@ -405,12 +420,14 @@ static bool _compareCaseInsensitive(const char* a,const char* b) {
   return (*a == *b);
 }
 
+
 // Return True if the backend is TF or TFLITE
 bool _isTensorFlow(const char* backend)
 {
   return _compareCaseInsensitive(backend, "TF") ||
          _compareCaseInsensitive(backend, "TFLITE");
 }
+
 
 // Check the parameters common to all set_model functions
 void _check_params_set_model(
@@ -452,6 +469,7 @@ void _check_params_set_model(
     }
   }
 }
+
 
 // Set a model stored in a binary file
 static void _set_model_from_file_impl(
@@ -519,6 +537,7 @@ extern "C" SRError set_model_from_file(
     min_batch_size, tag, tag_length, inputs, input_lengths,
     n_inputs, outputs, output_lengths, n_outputs);
 }
+
 
 // Set a model stored in a binary file for use with multiple GPUs
 static void _set_model_from_file_multigpu_impl(
@@ -589,6 +608,7 @@ extern "C" SRError set_model_from_file_multigpu(
     n_inputs, outputs, output_lengths, n_outputs);
 }
 
+
 // Set a model stored in a buffer c-string.
 static void _set_model_impl(
   void* c_client,
@@ -657,7 +677,8 @@ extern "C" SRError set_model(
     n_inputs, outputs, output_lengths, n_outputs);
 }
 
-// Set a model stored in a buffer c-string.
+
+// Set a model stored in a buffer c-string
 static void _set_model_multigpu_impl(
   void* c_client,
   const char* name, const size_t name_length,
@@ -724,6 +745,7 @@ extern "C" SRError set_model_multigpu(
     n_inputs, outputs, output_lengths, n_outputs);
 }
 
+
 // Retrieve the model and model length from the database
 static void _get_model_impl(
   void* c_client,
@@ -749,6 +771,7 @@ extern "C" SRError get_model(
   auto _get_model = c_client_api(_get_model_impl);
   return _get_model(c_client, name, name_length, model_length, model);
 }
+
 
 // Put a script in the database that is stored in a file.
 static void _set_script_from_file_impl(
@@ -780,6 +803,7 @@ extern "C" SRError set_script_from_file(
     script_file, script_file_length);
 }
 
+
 // Put a script in the database that is stored in a file in a multi-GPU system
 static void _set_script_from_file_multigpu_impl(
   void* c_client,
@@ -809,6 +833,7 @@ extern "C" SRError set_script_from_file_multigpu(
     c_client, name, name_length, script_file, script_file_length,
     first_gpu, num_gpus);
 }
+
 
 // Put a script in the database that is stored in a string.
 static void _set_script_impl(
@@ -841,6 +866,7 @@ extern "C" SRError set_script(
     script, script_length);
 }
 
+
 // Put a script in the database that is stored in a string in a multi-GPU system
 static void _set_script_multigpu_impl(
   void* c_client,
@@ -871,6 +897,7 @@ SRError set_script_multigpu(
     c_client, name, name_length, script, script_length, first_gpu, num_gpus);
 }
 
+
 // Retrieve the script stored in the database
 static void _get_script_impl(
   void* c_client,
@@ -896,6 +923,7 @@ extern "C" SRError get_script(
   auto _get_script = c_client_api(_get_script_impl);
   return _get_script(c_client, name, name_length, script, script_length);
 }
+
 
 // Validate parameters for running scripts
 void _check_params_run_script(
@@ -924,6 +952,7 @@ void _check_params_run_script(
       }
     }
 }
+
 
 // Run  a script function in the database
 static void _run_script_impl(
@@ -968,6 +997,7 @@ extern "C" SRError run_script(
     c_client, name, name_length, function, function_length, inputs,
     input_lengths, n_inputs, outputs, output_lengths, n_outputs);
 }
+
 
 // Run  a script function in the database in a multi-GPU system
 static void _run_script_multigpu_impl(
@@ -1019,6 +1049,7 @@ extern "C" SRError run_script_multigpu(
     offset, first_gpu, num_gpus);
 }
 
+
 // Validate the parameters for running models
 void _check_params_run_model(
   void* c_client,
@@ -1045,6 +1076,7 @@ void _check_params_run_model(
       }
     }
 }
+
 
 // Run a model in the database
 static void _run_model_impl(
@@ -1085,6 +1117,7 @@ extern "C" SRError run_model(
     c_client, name, name_length, inputs, input_lengths, n_inputs, outputs,
     output_lengths, n_outputs);
 }
+
 
 // Run a model in the database for multiple GPUs
 static void _run_model_multigpu_impl(
@@ -1131,6 +1164,7 @@ extern "C" SRError run_model_multigpu(
     output_lengths, n_outputs, offset, first_gpu, num_gpus);
 }
 
+
 // Remove a model from the database
 static void _delete_model_impl(
   void* c_client, const char* name, const size_t name_length)
@@ -1149,6 +1183,7 @@ extern "C" SRError delete_model(
   auto _delete_model = c_client_api(_delete_model_impl);
   return _delete_model(c_client, name, name_length);
 }
+
 
 // Remove a model from the database on a system with multiple GPUs
 static void _delete_model_multigpu_impl(
@@ -1177,499 +1212,389 @@ SRError delete_model_multigpu(void* c_client,
     c_client, name, name_length, first_gpu, num_gpus);
 }
 
+
 // Remove a script from the database
-extern "C"
-SRError delete_script(void* c_client,
-                      const char* name,
-                      const size_t name_length)
+static void _delete_script_impl(
+  void* c_client, const char* name, const size_t name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-    std::string name_str(name, name_length);
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->delete_script(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->delete_script(name_str);
 }
+// Public interface for delete_script
+extern "C" SRError delete_script(
+  void* c_client, const char* name, const size_t name_length)
+{
+  auto _delete_script = c_client_api(_delete_script_impl);
+  return _delete_script(c_client, name, name_length);
+}
+
 
 // Remove a script from the database in a system with multiple GPUs
-extern "C"
-SRError delete_script_multigpu(void* c_client,
-                               const char* name,
-                               const size_t name_length,
-                               const int first_gpu,
-                               const int num_gpus)
+static void _delete_script_multigpu_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const int first_gpu,
+  const int num_gpus)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-    std::string name_str(name, name_length);
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->delete_script_multigpu(name_str, first_gpu, num_gpus);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->delete_script_multigpu(name_str, first_gpu, num_gpus);
 }
+// Public interface for delete_script_multigpu
+extern "C" SRError delete_script_multigpu(
+  void* c_client, const char* name, const size_t name_length,
+  const int first_gpu, const int num_gpus)
+{
+  auto _delete_script_multigpu = c_client_api(_delete_script_multigpu_impl);
+  return _delete_script_multigpu(
+    c_client, name, name_length, first_gpu, num_gpus);
+}
+
 
 // Check whether a key exists in the database
-extern "C"
-SRError key_exists(void* c_client, const char* key, const size_t key_length,
-                   bool* exists)
+static void _key_exists_impl(
+  void* c_client, const char* key, const size_t key_length, bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string key_str(key, key_length);
 
-    *exists = s->key_exists(key_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->key_exists(key_str);
 }
+// Public interface for key_exists
+extern "C" SRError key_exists(
+  void* c_client, const char* key, const size_t key_length, bool* exists)
+{
+  auto _key_exists = c_client_api(_key_exists_impl);
+  return _key_exists(c_client, key, key_length, exists);
+}
+
 
 // Check whether a model exists in the database
-extern "C"
-SRError model_exists(void* c_client, const char* name, const size_t name_length,
-                     bool* exists)
+static void _model_exists_impl(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->model_exists(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->model_exists(name_str);
 }
+// Public interface for model_exists
+extern "C" SRError model_exists(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
+{
+  auto _model_exists = c_client_api(_model_exists_impl);
+  return _model_exists(c_client, name, name_length, exists);
+}
+
 
 // Check whether a tensor exists in the database
-extern "C"
-SRError tensor_exists(void* c_client, const char* name, const size_t name_length,
-                      bool* exists)
+static void _tensor_exists_impl(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->tensor_exists(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->tensor_exists(name_str);
+}
+// Public interface for tensor_exists
+extern "C" SRError tensor_exists(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
+{
+  auto _tensor_exists = c_client_api(_tensor_exists_impl);
+  return _tensor_exists(c_client, name, name_length, exists);
 }
 
-// Delay until a dataset exists in the database
-extern "C"
-SRError dataset_exists(void* c_client, const char* name, const size_t name_length,
-                       bool* exists)
+
+// Check whether a dataset exists in the database
+static void _dataset_exists_impl(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client *>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client *>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->dataset_exists(name_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->dataset_exists(name_str);
 }
+// Public interface for dataset_exists
+extern "C" SRError dataset_exists(
+  void* c_client, const char* name, const size_t name_length, bool* exists)
+{
+  auto _dataset_exists = c_client_api(_dataset_exists_impl);
+  return _dataset_exists(c_client, name, name_length, exists);
+}
+
 
 // Delay until a key exists in the database
-extern "C"
-SRError poll_key(void* c_client,
-                 const char* key,
-                 const size_t key_length,
-                 const int poll_frequency_ms,
-                 const int num_tries,
-                 bool* exists)
+static void _poll_key_impl(
+  void* c_client,
+  const char* key, const size_t key_length,
+  const int poll_frequency_ms,
+  const int num_tries,
+  bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string key_str(key, key_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string key_str(key, key_length);
 
-    *exists = s->poll_key(key_str, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->poll_key(key_str, poll_frequency_ms, num_tries);
 }
+// Public interface for poll_key
+extern "C" SRError poll_key(
+  void* c_client, const char* key, const size_t key_length,
+  const int poll_frequency_ms, const int num_tries, bool* exists)
+{
+  auto _poll_key = c_client_api(_poll_key_impl);
+  return _poll_key(
+    c_client, key, key_length, poll_frequency_ms, num_tries, exists);
+}
+
 
 // Delay until a model exists in the database
-extern "C"
-SRError poll_model(void* c_client,
-                   const char* name,
-                   const size_t name_length,
-                   const int poll_frequency_ms,
-                   const int num_tries,
-                   bool* exists)
+static void _poll_model_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const int poll_frequency_ms,
+  const int num_tries,
+  bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->poll_model(name_str, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->poll_model(name_str, poll_frequency_ms, num_tries);
 }
+// Public interface for poll_model
+extern "C" SRError poll_model(
+  void* c_client, const char* name, const size_t name_length,
+  const int poll_frequency_ms, const int num_tries, bool* exists)
+{
+  auto _poll_model = c_client_api(_poll_model_impl);
+  return _poll_model(
+    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
+}
+
 
 // Delay until a tensor exists in the database
-extern "C"
-SRError poll_tensor(void* c_client,
-                 const char* name,
-                 const size_t name_length,
-                 const int poll_frequency_ms,
-                 const int num_tries,
-                 bool* exists)
+static void _poll_tensor_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const int poll_frequency_ms,
+  const int num_tries,
+  bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
 }
+// Public interface for poll_tensor
+extern "C" SRError poll_tensor(
+  void* c_client, const char* name, const size_t name_length,
+  const int poll_frequency_ms, const int num_tries, bool* exists)
+{
+  auto _poll_tensor = c_client_api(_poll_tensor_impl);
+  return _poll_tensor(
+    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
+}
+
 
 // Delay until a dataset exists in the database
-extern "C"
-SRError poll_dataset(void* c_client,
-                     const char* name,
-                     const size_t name_length,
-                     const int poll_frequency_ms,
-                     const int num_tries,
-                     bool* exists)
+static void _poll_dataset_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  const int poll_frequency_ms,
+  const int num_tries,
+  bool* exists)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string name_str(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string name_str(name, name_length);
 
-    *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
+}
+// Public interface for poll_dataset
+extern "C"
+SRError poll_dataset(
+  void* c_client, const char* name, const size_t name_length,
+  const int poll_frequency_ms, const int num_tries, bool* exists)
+{
+  auto _poll_dataset = c_client_api(_poll_dataset_impl);
+  return _poll_dataset(
+    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
 }
 
+
 // Establish a data source
-extern "C"
-SRError set_data_source(void* c_client,
-                        const char* source_id,
-                        const size_t source_id_length)
+static void _set_data_source_impl(
+  void* c_client, const char* source_id, const size_t source_id_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && source_id != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && source_id != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string source_id_str(source_id, source_id_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string source_id_str(source_id, source_id_length);
 
-    s->set_data_source(source_id_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->set_data_source(source_id_str);
+}
+// Public interface for set_data_source
+extern "C" SRError set_data_source(
+  void* c_client, const char* source_id, const size_t source_id_length)
+{
+  auto _set_data_source = c_client_api(_set_data_source_impl);
+  return _set_data_source(c_client, source_id, source_id_length);
 }
 
 // Control whether a model ensemble prefix is used
-extern "C"
-SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
+static void _use_model_ensemble_prefix_impl(void* c_client, bool use_prefix)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->use_model_ensemble_prefix(use_prefix);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->use_model_ensemble_prefix(use_prefix);
 }
+// Public interface for use_model_ensemble_prefix
+extern "C" SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  auto _use_model_ensemble_prefix
+    = c_client_api(_use_model_ensemble_prefix_impl);
+  return _use_model_ensemble_prefix(c_client, use_prefix);
+}
+
 
 // Control whether a tensor ensemble prefix is used
-extern "C"
-SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
+static void _use_tensor_ensemble_prefix_impl(void* c_client, bool use_prefix)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->use_tensor_ensemble_prefix(use_prefix);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->use_tensor_ensemble_prefix(use_prefix);
 }
+// Public interface for use_tensor_ensemble_prefix
+extern "C" SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  auto _use_tensor_ensemble_prefix
+    = c_client_api(_use_tensor_ensemble_prefix_impl);
+  return _use_tensor_ensemble_prefix(c_client, use_prefix);
+}
+
 
 // Control whether a dataset ensemble prefix is used
-extern "C"
-SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix)
+static void _use_dataset_ensemble_prefix_impl(void* c_client, bool use_prefix)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->use_dataset_ensemble_prefix(use_prefix);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->use_dataset_ensemble_prefix(use_prefix);
 }
+// Public interface for use_dataset_ensemble_prefix
+extern "C" SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  auto _use_dataset_ensemble_prefix
+    = c_client_api(_use_dataset_ensemble_prefix_impl);
+  return _use_dataset_ensemble_prefix(c_client, use_prefix);
+}
+
 
 // Control whether aggregation lists are prefixed
-extern "C"
-SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
+static void _use_list_ensemble_prefix_impl(void* c_client, bool use_prefix)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    s->use_list_ensemble_prefix(use_prefix);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  Client* s = reinterpret_cast<Client*>(c_client);
+  s->use_list_ensemble_prefix(use_prefix);
 }
+// Public interface for use_list_ensemble_prefix
+extern "C" SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
+{
+  auto _use_list_ensemble_prefix
+    = c_client_api(_use_list_ensemble_prefix_impl);
+  return _use_list_ensemble_prefix(c_client, use_prefix);
+}
+
 
 // Append a dataset to the aggregation list
-extern "C"
-SRError append_to_list(void* c_client, const char* list_name,
-                       const size_t list_name_length, const void* dataset)
+static void _append_to_list_impl(
+  void* c_client,
+  const char* list_name, const size_t list_name_length,
+  const void* dataset)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
-    std::string lname(list_name, list_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
+  std::string lname(list_name, list_name_length);
 
-    s->append_to_list(lname, *d);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->append_to_list(lname, *d);
 }
+// Public interface for append_to_list
+extern "C" SRError append_to_list(
+  void* c_client, const char* list_name, const size_t list_name_length,
+  const void* dataset)
+{
+  auto _append_to_list = c_client_api(_append_to_list_impl);
+  return _append_to_list(c_client, list_name, list_name_length, dataset);
+}
+
 
 // Delete an aggregation list
-extern "C"
-SRError delete_list(void* c_client, const char* list_name,
-                    const size_t list_name_length)
+static void _delete_list_impl(
+  void* c_client, const char* list_name, const size_t list_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(list_name, list_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(list_name, list_name_length);
 
-    s->delete_list(lname);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->delete_list(lname);
+}
+// Public interface for append_to_list
+extern "C" SRError delete_list(
+  void* c_client, const char* list_name, const size_t list_name_length)
+{
+  auto _delete_list = c_client_api(_delete_list_impl);
+  return _delete_list(c_client, list_name, list_name_length);
 }
 
+
 // Copy an aggregation list
-extern "C"
-SRError copy_list(void* c_client,
-                  const char* src_name, const size_t src_name_length,
-                  const char* dest_name, const size_t dest_name_length)
+static void _copy_list_impl(
+  void* c_client,
+  const char* src_name, const size_t src_name_length,
+  const char* dest_name, const size_t dest_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
@@ -1678,295 +1603,281 @@ SRError copy_list(void* c_client,
     std::string dname(dest_name, dest_name_length);
 
     s->copy_list(sname, dname);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
 }
+// Public interface for copy_list
+extern "C" SRError copy_list(
+  void* c_client, const char* src_name, const size_t src_name_length,
+  const char* dest_name, const size_t dest_name_length)
+{
+  auto _copy_list = c_client_api(_copy_list_impl);
+  return _copy_list(
+    c_client, src_name, src_name_length, dest_name, dest_name_length);
+}
+
 
 // Rename an aggregation list
-extern "C"
-SRError rename_list(void* c_client,
-                    const char* src_name, const size_t src_name_length,
-                    const char* dest_name, const size_t dest_name_length)
+static void _rename_list_impl(
+  void* c_client,
+  const char* src_name, const size_t src_name_length,
+  const char* dest_name, const size_t dest_name_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string sname(src_name, src_name_length);
-    std::string dname(dest_name, dest_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string sname(src_name, src_name_length);
+  std::string dname(dest_name, dest_name_length);
 
-    s->rename_list(sname, dname);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  s->rename_list(sname, dname);
 }
+// Public interface for rename_list
+extern "C" SRError rename_list(
+  void* c_client, const char* src_name, const size_t src_name_length,
+  const char* dest_name, const size_t dest_name_length)
+{
+  auto _rename_list = c_client_api(_rename_list_impl);
+  return _rename_list(
+    c_client, src_name, src_name_length, dest_name, dest_name_length);
+}
+
 
 // Get the number of entries in the list
-extern "C"
-SRError get_list_length(void* c_client, const char* list_name,
-                        const size_t list_name_length, int* result_length)
+static void _get_list_length_impl(
+  void* c_client,
+  const char* list_name, const size_t list_name_length,
+  int* result_length)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(list_name, list_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(list_name, list_name_length);
 
-    *result_length = s->get_list_length(lname);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *result_length = s->get_list_length(lname);
+}
+// Public interface for get_list_length
+extern "C" SRError get_list_length(
+  void* c_client, const char* list_name, const size_t list_name_length,
+  int* result_length)
+{
+  auto _get_list_length = c_client_api(_get_list_length_impl);
+  return _get_list_length(
+    c_client, list_name, list_name_length, result_length);
 }
 
-// Poll list length until length is equal to the provided length
-extern "C"
-SRError poll_list_length(void* c_client, const char* name,
-                         const size_t name_length, int list_length,
-                         int poll_frequency_ms, int num_tries,
-                         bool* poll_result)
+
+// Poll until list length is equal to the provided length
+static void _poll_list_length_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  int list_length,
+  int poll_frequency_ms,
+  int num_tries,
+  bool* poll_result)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(name, name_length);
 
-    *poll_result = s->poll_list_length(
-      lname, list_length, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *poll_result = s->poll_list_length(
+    lname, list_length, poll_frequency_ms, num_tries);
+}
+// Public interface for poll_list_length
+extern "C" SRError poll_list_length(
+  void* c_client, const char* name, const size_t name_length, int list_length,
+  int poll_frequency_ms, int num_tries, bool* poll_result)
+{
+  auto _poll_list_length = c_client_api(_poll_list_length_impl);
+  return _poll_list_length(
+    c_client, name, name_length, list_length, poll_frequency_ms,
+    num_tries, poll_result);
 }
 
-// Poll list length until length is greater than or equal to the provided length
-extern "C"
-SRError poll_list_length_gte(void* c_client, const char* name,
-                             const size_t name_length, int list_length,
-                             int poll_frequency_ms, int num_tries,
-                             bool* poll_result)
+
+// Poll until list length is greater than or equal to the provided length
+static void _poll_list_length_gte_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  int list_length,
+  int poll_frequency_ms,
+  int num_tries,
+  bool* poll_result)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(name, name_length);
 
-    *poll_result = s->poll_list_length_gte(
-      lname, list_length, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *poll_result = s->poll_list_length_gte(
+    lname, list_length, poll_frequency_ms, num_tries);
 }
+// Public interface for poll_list_length_gte
+extern "C" SRError poll_list_length_gte(
+  void* c_client, const char* name, const size_t name_length, int list_length,
+  int poll_frequency_ms, int num_tries, bool* poll_result)
+{
+  auto _poll_list_length_gte = c_client_api(_poll_list_length_gte_impl);
+  return _poll_list_length_gte(
+    c_client, name, name_length, list_length, poll_frequency_ms,
+    num_tries, poll_result);
+}
+
 
 // Poll list length until length is less than or equal to the provided length
-extern "C"
-SRError poll_list_length_lte(void* c_client, const char* name,
-                             const size_t name_length, int list_length,
-                             int poll_frequency_ms, int num_tries,
-                             bool* poll_result)
+static void _poll_list_length_lte_impl(
+  void* c_client,
+  const char* name, const size_t name_length,
+  int list_length,
+  int poll_frequency_ms,
+  int num_tries,
+  bool* poll_result)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(name, name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(name, name_length);
 
-    *poll_result = s->poll_list_length_lte(
-      lname, list_length, poll_frequency_ms, num_tries);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *poll_result = s->poll_list_length_lte(
+    lname, list_length, poll_frequency_ms, num_tries);
 }
+// Public interface for poll_list_length_lte
+extern "C" SRError poll_list_length_lte(
+  void* c_client, const char* name, const size_t name_length, int list_length,
+  int poll_frequency_ms, int num_tries, bool* poll_result)
+{
+  auto _poll_list_length_lte = c_client_api(_poll_list_length_lte_impl);
+  return _poll_list_length_lte(
+    c_client, name, name_length, list_length, poll_frequency_ms,
+    num_tries, poll_result);
+}
+
 
 // Get datasets from an aggregation list
-extern "C"
-SRError get_datasets_from_list(void* c_client, const char* list_name,
-                               const size_t list_name_length,
-                               void*** datasets, size_t* num_datasets)
+static void _get_datasets_from_list_impl(
+  void* c_client,
+  const char* list_name, const size_t list_name_length,
+  void*** datasets,
+  size_t* num_datasets)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                    datasets != NULL && num_datasets != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                  datasets != NULL && num_datasets != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(list_name, list_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(list_name, list_name_length);
 
-    std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
-    size_t ndatasets = result_datasets.size();
-    *datasets = NULL;
-    if (ndatasets > 0) {
-      DataSet** alloc = new DataSet*[ndatasets];
-      for (size_t i = 0; i < ndatasets; i++) {
-        alloc[i] = new DataSet(std::move(result_datasets[i]));
-      }
-      *datasets = (void**)alloc;
+  std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
+  size_t ndatasets = result_datasets.size();
+  *datasets = NULL;
+  if (ndatasets > 0) {
+    DataSet** alloc = new DataSet*[ndatasets];
+    for (size_t i = 0; i < ndatasets; i++) {
+      alloc[i] = new DataSet(std::move(result_datasets[i]));
     }
-    *num_datasets = ndatasets;
+    *datasets = (void**)alloc;
   }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *num_datasets = ndatasets;
 }
+// Public interface for get_datasets_from_list
+extern "C" SRError get_datasets_from_list(
+  void* c_client, const char* list_name, const size_t list_name_length,
+  void*** datasets, size_t* num_datasets)
+{
+  auto _get_datasets_from_list = c_client_api(_get_datasets_from_list_impl);
+  return _get_datasets_from_list(
+    c_client, list_name, list_name_length, datasets, num_datasets);
+}
+
 
 // Get a range of datasets (by index) from an aggregation list
-extern "C"
-SRError get_dataset_list_range(void* c_client, const char* list_name,
-                               const size_t list_name_length,
-                               const int start_index, const int end_index,
-                               void*** datasets, size_t* num_datasets)
+static void _get_dataset_list_range_impl(
+  void* c_client,
+  const char* list_name, const size_t list_name_length,
+  const int start_index,
+  const int end_index,
+  void*** datasets,
+  size_t* num_datasets)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                    datasets != NULL && num_datasets != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                  datasets != NULL && num_datasets != NULL);
 
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(list_name, list_name_length);
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(list_name, list_name_length);
 
-    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
-      lname, start_index, end_index);
-    size_t ndatasets = result_datasets.size();
-    *datasets = NULL;
-    if (*num_datasets > 0) {
-      DataSet** alloc = new DataSet*[ndatasets];
-      for (size_t i = 0; i < ndatasets; i++) {
-        alloc[i] = new DataSet(std::move(result_datasets[i]));
-      }
-      *datasets = (void**)alloc;
+  std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+    lname, start_index, end_index);
+  size_t ndatasets = result_datasets.size();
+  *datasets = NULL;
+  if (*num_datasets > 0) {
+    DataSet** alloc = new DataSet*[ndatasets];
+    for (size_t i = 0; i < ndatasets; i++) {
+      alloc[i] = new DataSet(std::move(result_datasets[i]));
     }
-    *num_datasets = ndatasets;
+    *datasets = (void**)alloc;
   }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  *num_datasets = ndatasets;
 }
+// Public interface for get_dataset_list_range
+extern "C" SRError get_dataset_list_range(
+  void* c_client, const char* list_name, const size_t list_name_length,
+  const int start_index, const int end_index, void*** datasets,
+  size_t* num_datasets)
+{
+  auto _get_dataset_list_range = c_client_api(_get_dataset_list_range_impl);
+  return _get_dataset_list_range(
+    c_client, list_name, list_name_length, start_index, end_index, datasets,
+    num_datasets);
+}
+
+
 // Get a range of datasets (by index) from an aggregation list into an
 // already allocated vector of datasets
+static void __get_dataset_list_range_allocated_impl(
+  void* c_client,
+  const char* list_name, const size_t list_name_length,
+  const int start_index,
+  const int end_index,
+  void** datasets)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                  datasets != NULL);
+
+  Client* s = reinterpret_cast<Client*>(c_client);
+  std::string lname(list_name, list_name_length);
+
+  std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+    lname, start_index, end_index);
+  size_t num_datasets = result_datasets.size();
+  if (num_datasets != (size_t)(end_index - start_index + 1)) {
+    throw SRInternalException(
+      "Returned dataset list is not equal to the requested range");
+  }
+
+  if (num_datasets > 0) {
+    for (size_t i = 0; i < num_datasets; i++) {
+      datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+    }
+  }
+}
+// Public interface for _get_dataset_list_range_allocated
 extern "C"
 SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
                                const size_t list_name_length,
                                const int start_index, const int end_index,
                                void** datasets)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                    datasets != NULL);
-
-    Client* s = reinterpret_cast<Client*>(c_client);
-    std::string lname(list_name, list_name_length);
-
-    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
-      lname, start_index, end_index);
-    size_t num_datasets = result_datasets.size();
-    if ( num_datasets != (size_t) (end_index-start_index+1)) {
-      SRSetLastError(SRInternalException(
-        "Returned dataset list is not equal to the requested range"
-      ));
-    }
-
-    if (num_datasets > 0) {
-      for (size_t i = 0; i < num_datasets; i++) {
-        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
-      }
-    }
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  auto __get_dataset_list_range_allocated = c_client_api(
+    __get_dataset_list_range_allocated_impl);
+  return __get_dataset_list_range_allocated(
+    c_client, list_name, list_name_length, start_index, end_index, datasets);
 }
+
 
 // Retrieve a string representation of the client
 const char* client_to_string(void* c_client)
