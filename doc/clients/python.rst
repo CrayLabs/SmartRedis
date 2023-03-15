@@ -10,6 +10,7 @@ Client API
 .. autosummary::
 
     Client.__init__
+    Client.__str__
     Client.put_tensor
     Client.get_tensor
     Client.delete_tensor
@@ -85,14 +86,48 @@ DataSet API
 .. autosummary::
 
     Dataset.__init__
+    Dataset.__str__
     Dataset.add_tensor
     Dataset.get_tensor
     Dataset.add_meta_scalar
     Dataset.get_meta_scalars
     Dataset.add_meta_string
     Dataset.get_meta_strings
+    Dataset.get_metadata_field_names
+    Dataset.get_metadata_field_type
+    Dataset.get_tensor_type
+    Dataset.get_tensor_names
+    Dataset.get_tensor_dims
 
 .. autoclass:: Dataset
    :members:
    :show-inheritance:
 
+Logging API
+===========
+
+.. currentmodule::  smartredis
+
+.. autosummary::
+
+    LogContext.__init__
+    SRObject.log_data
+    SRObject.log_warning
+    SRObject.log_error
+    log_data
+    log_warning
+    log_error
+
+.. autoclass:: LogContext
+   :members:
+   :show-inheritance:
+
+.. autoclass:: SRObject
+   :members:
+   :show-inheritance:
+
+.. autofunction:: log_data
+
+.. autofunction:: log_warning
+
+.. autofunction:: log_error
