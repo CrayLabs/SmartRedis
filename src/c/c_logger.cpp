@@ -43,129 +43,174 @@
 
 using namespace SmartRedis;
 
+
+// Decorator to standardize exception handling in C Logger API methods
+template <class T>
+auto c_logger_api(T&& logger_api_func)
+{
+  // we create a closure below
+  auto decorated = [logger_api_func
+    = std::forward<T>(logger_api_func)](auto&&... args)
+  {
+    try {
+      logger_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (Exception& e) {
+        std::cout << "Logging failure: " << e.where()
+                    << ": " << e.what() << std::endl;
+    }
+    catch (...) {
+        std::cout << "Internal error: Unknown exception occurred"
+                  << std::endl;
+    }
+  };
+  return decorated;
+}
+
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
-extern "C" void log_data_noexcept(
+static void _log_data_noexcept_impl(
     const void* context,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_data(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_data(level, strData);
 }
+// Public interface for log_data_noexcept
+extern "C" void log_data_noexcept(
+    const void* context, SRLoggingLevel level,
+    const char* data, size_t data_len)
+{
+  auto _log_data_noexcept = c_logger_api(_log_data_noexcept_impl);
+  return _log_data_noexcept(context, level, data, data_len);
+}
+
 
 // Conditionally log a warning if the logging level is high enough
 // (exception-free variant)
-extern "C" void log_warning_noexcept(
+static void _log_warning_noexcept_impl(
     const void* context,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_warning(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_warning(level, strData);
 }
+// Public interface for log_warning_noexcept
+extern "C" void log_warning_noexcept(
+    const void* context, SRLoggingLevel level,
+    const char* data, size_t data_len)
+{
+  auto _log_warning_noexcept = c_logger_api(_log_warning_noexcept_impl);
+  return _log_warning_noexcept(context, level, data, data_len);
+}
+
 
 // Conditionally log an error if the logging level is high enough
 // (exception-free variant)
+static void _log_error_noexcept_impl(
+    const void* context,
+    SRLoggingLevel level,
+    const char* data,
+    size_t data_len)
+{
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    const SRObject* temp_context =
+        reinterpret_cast<const SRObject*>(context);
+    std::string strData(data, data_len);
+    temp_context->log_error(level, strData);
+}
+// Public interface for log_error_noexcept
 extern "C" void log_error_noexcept(
     const void* context,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        const SRObject* temp_context =
-            reinterpret_cast<const SRObject*>(context);
-        std::string strData(data, data_len);
-        temp_context->log_error(level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+  auto _log_error_noexcept = c_logger_api(_log_error_noexcept_impl);
+  return _log_error_noexcept(context, level, data, data_len);
 }
 
 
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
-extern "C" void log_data_noexcept_string(
-    const char* context,
-    size_t context_len,
+extern "C" void _log_data_noexcept_string_impl(
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_data(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_data(temp_context, level, strData);
 }
+// Public interface for log_data_noexcept_string
+extern "C" void log_data_noexcept_string(
+    const char* context, size_t context_len, SRLoggingLevel level,
+    const char* data, size_t data_len)
+{
+  auto _log_data_noexcept_string
+    = c_logger_api(_log_data_noexcept_string_impl);
+  return _log_data_noexcept_string(
+    context, context_len, level, data, data_len);
+}
+
 
 // Conditionally log a warning if the logging level is high enough
 // (exception-free variant)
-extern "C" void log_warning_noexcept_string(
-    const char* context,
-    size_t context_len,
+extern "C" void _log_warning_noexcept_string_impl(
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_warning(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_warning(temp_context, level, strData);
 }
+// Public interface for log_warning_noexcept_string
+extern "C" void log_warning_noexcept_string(
+    const char* context, size_t context_len, SRLoggingLevel level,
+    const char* data, size_t data_len)
+{
+  auto _log_warning_noexcept_string
+    = c_logger_api(_log_warning_noexcept_string_impl);
+  return _log_warning_noexcept_string(
+    context, context_len, level, data, data_len);
+}
+
 
 // Conditionally log an error if the logging level is high enough
 // (exception-free variant)
-extern "C" void log_error_noexcept_string(
-    const char* context,
-    size_t context_len,
+static void _log_error_noexcept_string_impl(
+    const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
     size_t data_len)
 {
-    try {
-        SR_CHECK_PARAMS(context != NULL && data != NULL);
-        std::string temp_context(context, context_len);
-        std::string strData(data, data_len);
-        log_error(temp_context, level, strData);
-    }
-    catch (Exception& e) {
-        std::cout << "Logging failure: " << e.where()
-                  << ": " << e.what() << std::endl;
-    }
+    SR_CHECK_PARAMS(context != NULL && data != NULL);
+    std::string temp_context(context, context_len);
+    std::string strData(data, data_len);
+    log_error(temp_context, level, strData);
+}
+// Public interface for log_error_noexcept_string
+extern "C" void log_error_noexcept_string(
+    const char* context, size_t context_len, SRLoggingLevel level,
+    const char* data, size_t data_len)
+{
+  auto _log_error_noexcept_string
+    = c_logger_api(_log_error_noexcept_string_impl);
+  return _log_error_noexcept_string(
+    context, context_len, level, data, data_len);
 }
