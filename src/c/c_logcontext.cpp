@@ -32,64 +32,72 @@
 
 using namespace SmartRedis;
 
-// Create a new LogContext.
-// The user is responsible for deallocating the LogContext
-// via DeallocateeLogContext()
-extern "C"
-SRError SmartRedisCLogContext(
-  const char* context,
-  const size_t context_length,
-  void** new_logcontext)
-{
-  SRError result = SRNoError;
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(context != NULL && new_logcontext != NULL);
 
+// Decorator to standardize exception handling in C LogContext API methods
+template <class T>
+auto c_logcontext_api(T&& logcontext_api_func)
+{
+  // we create a closure below
+  auto decorated = [logcontext_api_func
+    = std::forward<T>(logcontext_api_func)](auto&&... args)
+  {
+    SRError result = SRNoError;
+    try {
+      logcontext_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (const Exception& e) {
+      SRSetLastError(e);
+      result = e.to_error_code();
+    }
+    catch (...) {
+      SRSetLastError(SRInternalException("Unknown exception occurred"));
+      result = SRInternalError;
+    }
+    return result;
+  };
+  return decorated;
+}
+
+
+// Create a new LogContext
+static void _SmartRedisCLogContext_impl(
+  const char* context, const size_t context_length, void** new_logcontext)
+{
+  // Sanity check params
+  SR_CHECK_PARAMS(context != NULL && new_logcontext != NULL);
+
+  try {
     std::string context_str(context, context_length);
+    *new_logcontext = NULL;
     LogContext* logcontext = new LogContext(context_str);
     *new_logcontext = reinterpret_cast<void*>(logcontext);
   }
   catch (const std::bad_alloc& e) {
-    *new_logcontext = NULL;
     SRSetLastError(SRBadAllocException("logcontext allocation"));
-    result = SRBadAllocError;
   }
-  catch (const Exception& e) {
-    *new_logcontext = NULL;
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_logcontext = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+}
+// Public interface for SmartRedisCLogContext
+extern "C" SRError SmartRedisCLogContext(
+  const char* context, const size_t context_length, void** new_logcontext)
+{
+  auto _SmartRedisCLogContext = c_logcontext_api(_SmartRedisCLogContext_impl);
+  return _SmartRedisCLogContext(context, context_length, new_logcontext);
 }
 
+
 // Deallocate a LogContext
-extern "C"
-SRError DeallocateLogContext(void** logcontext)
+static void _DeallocateLogContext_impl(void** logcontext)
 {
-  SRError result = SRNoError;
-  try
-  {
-    // Sanity check params
-    SR_CHECK_PARAMS(logcontext != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(logcontext != NULL);
 
-    LogContext* lc = reinterpret_cast<LogContext*>(*logcontext);
-    delete lc;
-    *logcontext = NULL;
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  LogContext* lc = reinterpret_cast<LogContext*>(*logcontext);
+  delete lc;
+  *logcontext = NULL;
+}
+// Public interface for DeallocateLogContext
+extern "C" SRError DeallocateLogContext(void** logcontext)
+{
+  auto _DeallocateLogContext = c_logcontext_api(_DeallocateLogContext_impl);
+  return _DeallocateLogContext(logcontext);
 }

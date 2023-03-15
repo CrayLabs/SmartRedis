@@ -66,11 +66,11 @@ static void _CDataSet_impl(
 
   std::string name_str(name, name_length);
   try {
+    *new_dataset = NULL;
     DataSet* dataset = new DataSet(name_str);
     *new_dataset = reinterpret_cast<void*>(dataset);
   }
   catch (const std::bad_alloc& e) {
-    *new_dataset = NULL;
     SRSetLastError(SRBadAllocException("dataset allocation"));
   }
 }
