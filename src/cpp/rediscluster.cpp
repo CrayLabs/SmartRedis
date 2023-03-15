@@ -386,6 +386,26 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
     return run(cmd);
 }
 
+// Get a list of Tensor from the server
+PipelineReply RedisCluster::get_tensors(const std::vector<std::string>& keys)
+{
+    // Build up the commands to get the tensors
+    CommandList cmdlist; // This just holds the memory
+    std::vector<Command*> cmds;
+    for (auto it = keys.begin(); it != keys.end(); ++it) {
+        GetTensorCommand* cmd = cmdlist.add_command<GetTensorCommand>();
+        (*cmd) << "AI.TENSORGET" << Keyfield(*it) << "META" << "BLOB";
+        cmds.push_back(cmd);
+    }
+
+    // Get the shard index for the first key
+    size_t db_index = _get_db_node_index(keys[0]);
+    std::string shard_prefix = _db_nodes[db_index].prefix;
+
+    // Run them via pipeline
+    return _run_pipeline(cmds, shard_prefix);
+}
+
 // Rename a tensor in the database
 CommandReply RedisCluster::rename_tensor(const std::string& key,
                                          const std::string& new_key)
@@ -1344,10 +1364,30 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     return db;
 }
 
+// Run a CommandList via a Pipeline
+PipelineReply RedisCluster::run_in_pipeline(CommandList& cmdlist)
+{
+    // Convert from CommandList to vector and grab the shard along
+    // the way
+    std::vector<Command*> cmds;
+    std::string shard_prefix = _db_nodes[0].prefix;
+    bool shard_found = false;
+    for (auto it = cmdlist.begin(); it != cmdlist.end(); ++it) {
+        cmds.push_back(*it);
+        if (!shard_found && (*it)->has_keys()) {
+            shard_prefix = _get_db_node_prefix(*(*it));
+            shard_found = true;
+        }
+    }
+
+    // Run the commands
+    return _run_pipeline(cmds, shard_prefix);
+}
+
 // Build and run unordered pipeline
-PipelineReply
-RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
-                            std::string& shard_prefix)
+PipelineReply RedisCluster::_run_pipeline(
+    std::vector<Command*>& cmds,
+    std::string& shard_prefix)
 {
     PipelineReply reply;
     for (int i = 1; i <= _command_attempts; i++) {

@@ -231,6 +231,16 @@ class RedisCluster : public RedisServer
         virtual CommandReply get_tensor(const std::string& key);
 
         /*!
+        *   \brief Get a list of Tensor from the server. All tensors
+        *          must be on the same node
+        *   \param keys The keys of the tensor to retrieve
+        *   \returns The PipelineReply from executing the get tensor commands
+        *   \throw SmartRedis::Exception if tensor retrieval fails
+        */
+        virtual PipelineReply get_tensors(
+            const std::vector<std::string>& keys);
+
+    /*!
         *   \brief Rename a tensor in the database
         *   \param key The original key for the tensor
         *   \param new_key The new key for the tensor
@@ -517,6 +527,15 @@ class RedisCluster : public RedisServer
         get_model_script_ai_info(const std::string& address,
                                  const std::string& key,
                                  const bool reset_stat);
+
+        /*!
+        *   \brief Run a CommandList via a Pipeline.
+        *          All commands must go to the same shard
+        *   \param cmdlist The list of commands to run
+        *   \returns The PipelineReply with the result of command execution
+        *   \throw SmartRedis::Exception if execution fails
+        */
+        PipelineReply run_in_pipeline(CommandList& cmdlist);
 
         /*!
         *   \brief Create a string representation of the Redis connection
