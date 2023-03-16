@@ -176,7 +176,7 @@ class PyDataset : public PySRObject
         *          SmartRedis::DataSet object
         *   \returns DataSet pointer within PyDataset
         */
-        DataSet* get();
+        DataSet* get() { return _dataset; }
 
         /*!
         *   \brief Create a string representation of the DataSet

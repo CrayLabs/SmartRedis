@@ -35,7 +35,7 @@ using namespace SmartRedis;
 
 namespace py = pybind11;
 
-// Decorator to standardize exception handling in C Client API methods
+// Decorator to standardize exception handling in PyBind Client API methods
 template <class T>
 auto pb_client_api(T&& client_api_func, const char* name)
 {
@@ -74,14 +74,14 @@ auto pb_client_api(T&& client_api_func, const char* name)
 PyClient::PyClient(bool cluster, const std::string& logger_name)
     : PySRObject(logger_name)
 {
-    MAKE_CLIENT_API("PyClient", {
+    MAKE_CLIENT_API("PyClient constructor", {
         _client = new Client(cluster, logger_name);
     });
 }
 
 PyClient::~PyClient()
 {
-    MAKE_CLIENT_API("~PyClient", {
+    MAKE_CLIENT_API("PyClient destructor", {
         if (_client != NULL) {
             delete _client;
             _client = NULL;
@@ -202,8 +202,7 @@ PyDataset* PyClient::get_dataset(const std::string& name)
 {
     return MAKE_CLIENT_API("get_dataset", {
         DataSet* data = new DataSet(_client->get_dataset(name));
-        PyDataset* dataset = new PyDataset(data);
-        return dataset;
+        return new PyDataset(data);
     });
 }
 
