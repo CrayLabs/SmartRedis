@@ -12,7 +12,9 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
-- Factored the C interface into a public interface and a private implementation
+- Streamlined PyBind interface layer
+- Updated Python API documentation
+- Streamlined C interface layer
 - Improved performance of get, put, and copy dataset methods
 - Fix a bug which prevented multi-GPU model set in some cases
 - Streamline pipelined execution of tasks for backend database
@@ -41,7 +43,9 @@ Description
 
 Detailed Notes
 
-- Factored the C interface into a public interface and a private implementation, improving code coverage and consistency (PR312_)
+- Streamlined PyBind interface layer to reduce repetitive boilerplate code (PR315_)
+- Updated Python API summary table to include new methods (PR313_)
+- Streamlined C interface layer to reduce repetitive boilerplate code (PR312_)
 - Leveraged Redis pipelining to improve performance of get, put, and copy dataset methods (PR311_)
 - Redis::set_model_multigpu() will now upload the correct model to all GPUs (PR310_)
 - RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
@@ -72,6 +76,8 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR315: https://github.com/CrayLabs/SmartRedis/pull/315
+.. _PR313: https://github.com/CrayLabs/SmartRedis/pull/313
 .. _PR312: https://github.com/CrayLabs/SmartRedis/pull/312
 .. _PR311: https://github.com/CrayLabs/SmartRedis/pull/311
 .. _PR310: https://github.com/CrayLabs/SmartRedis/pull/310
