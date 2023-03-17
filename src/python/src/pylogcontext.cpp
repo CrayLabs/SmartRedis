@@ -66,15 +66,15 @@ auto pb_logcontext_api(T&& logcontext_api_func, const char* name)
 }
 
 // Macro to invoke the decorator with a lambda function
-#define MAKE_LOGCONTEXT_API(name, stuff)\
-    pb_logcontext_api([&] { stuff }, name)()
+#define MAKE_LOGCONTEXT_API(stuff)\
+    pb_logcontext_api([&] { stuff }, __func__)()
 
 
 
 PyLogContext::PyLogContext(const std::string& context)
     : PySRObject(context)
 {
-    MAKE_LOGCONTEXT_API("PyLogContext constructor", {
+    MAKE_LOGCONTEXT_API({
         _logcontext = new LogContext(context);
     });
 }
@@ -82,14 +82,14 @@ PyLogContext::PyLogContext(const std::string& context)
 PyLogContext::PyLogContext(LogContext* logcontext)
     : PySRObject(logcontext->get_context())
 {
-    MAKE_LOGCONTEXT_API("PyLogContext constructor", {
+    MAKE_LOGCONTEXT_API({
         _logcontext = logcontext;
     });
 }
 
 PyLogContext::~PyLogContext()
 {
-    MAKE_LOGCONTEXT_API("PyLogContext destructor", {
+    MAKE_LOGCONTEXT_API({
         if (_logcontext != NULL) {
             delete _logcontext;
             _logcontext = NULL;

@@ -66,14 +66,14 @@ auto pb_dataset_api(T&& dataset_api_func, const char* name)
 }
 
 // Macro to invoke the decorator with a lambda function
-#define MAKE_DATASET_API(name, stuff)\
-    pb_dataset_api([&] { stuff }, name)()
+#define MAKE_DATASET_API(stuff)\
+    pb_dataset_api([&] { stuff }, __func__)()
 
 
 PyDataset::PyDataset(const std::string& name)
     : PySRObject(name)
 {
-    MAKE_DATASET_API("PyDataset constructor", {
+    MAKE_DATASET_API({
         _dataset = new DataSet(name);
     });
 }
@@ -81,14 +81,14 @@ PyDataset::PyDataset(const std::string& name)
 PyDataset::PyDataset(DataSet* dataset)
     : PySRObject(dataset->get_context())
 {
-    MAKE_DATASET_API("PyDataset constructor", {
+    MAKE_DATASET_API({
         _dataset = dataset;
     });
 }
 
 PyDataset::~PyDataset()
 {
-    MAKE_DATASET_API("PyDataset destructor", {
+    MAKE_DATASET_API({
         if (_dataset != NULL) {
             delete _dataset;
             _dataset = NULL;
@@ -98,7 +98,7 @@ PyDataset::~PyDataset()
 
 void PyDataset::add_tensor(const std::string& name, py::array data, std::string& type)
 {
-    MAKE_DATASET_API("add_tensor", {
+    MAKE_DATASET_API({
         auto buffer = data.request();
         void* ptr = buffer.ptr;
 
@@ -115,7 +115,7 @@ void PyDataset::add_tensor(const std::string& name, py::array data, std::string&
 
 py::array PyDataset::get_tensor(const std::string& name)
 {
-    return MAKE_DATASET_API("get_tensor", {
+    return MAKE_DATASET_API({
         TensorBase* tensor = _dataset->_get_tensorbase_obj(name);
 
         // Define py::capsule lambda function for destructor
@@ -167,7 +167,7 @@ py::array PyDataset::get_tensor(const std::string& name)
             }
             default :
                 throw SRRuntimeException("Could not infer type in "\
-                                        "PyDataSet::get_tensor().");
+                                         "PyDataSet::get_tensor().");
         }
     });
 }
@@ -175,7 +175,7 @@ py::array PyDataset::get_tensor(const std::string& name)
 void PyDataset::add_meta_scalar(
     const std::string& name, py::array data, std::string& type)
 {
-    MAKE_DATASET_API("add_meta_scalar", {
+    MAKE_DATASET_API({
         auto buffer = data.request();
         void* ptr = buffer.ptr;
 
@@ -186,14 +186,14 @@ void PyDataset::add_meta_scalar(
 
 void PyDataset::add_meta_string(const std::string& name, const std::string& data)
 {
-    MAKE_DATASET_API("add_meta_string", {
+    MAKE_DATASET_API({
         _dataset->add_meta_string(name, data);
     });
 }
 
 py::array PyDataset::get_meta_scalars(const std::string& name)
 {
-    return MAKE_DATASET_API("get_meta_scalars", {
+    return MAKE_DATASET_API({
         SRMetaDataType type = SRMetadataTypeInvalid;
         size_t length = 0;
         void *ptr = NULL;
@@ -228,24 +228,25 @@ py::array PyDataset::get_meta_scalars(const std::string& name)
             }
             case SRMetadataTypeString: {
                 throw SRRuntimeException("MetaData is of type string. "\
-                                        "Use get_meta_strings method.");
+                                         "Use get_meta_strings method.");
             }
             default :
-                throw SRRuntimeException("Could not infer type");
+                throw SRRuntimeException("Could not infer type in "\
+                                         "PyDataSet::get_meta_scalars().");
         }
     });
 }
 
 std::string PyDataset::get_name()
 {
-    return MAKE_DATASET_API("get_name", {
+    return MAKE_DATASET_API({
         return _dataset->get_name();
     });
 }
 
 py::list PyDataset::get_meta_strings(const std::string& name)
 {
-    return MAKE_DATASET_API("get_meta_strings", {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_meta_strings(name));
     });
@@ -254,7 +255,7 @@ py::list PyDataset::get_meta_strings(const std::string& name)
 // Retrieve the names of all tensors in the DataSet
 py::list PyDataset::get_tensor_names()
 {
-    return MAKE_DATASET_API("get_tensor_names", {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_tensor_names());
     });
@@ -263,7 +264,7 @@ py::list PyDataset::get_tensor_names()
 // Retrieve the data type of a Tensor in the DataSet
 std::string PyDataset::get_tensor_type(const std::string& name)
 {
-    return MAKE_DATASET_API("get_tensor_type", {
+    return MAKE_DATASET_API({
         // get the type
         SRTensorType ttype = _dataset->get_tensor_type(name);
         switch (ttype) {
@@ -293,7 +294,7 @@ std::string PyDataset::get_tensor_type(const std::string& name)
 // Retrieve the dimensions of a Tensor in the DataSet
 py::list PyDataset::get_tensor_dims(const std::string& name)
 {
-    return MAKE_DATASET_API("get_tensor_dims", {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_tensor_dims(name));
     });
@@ -302,7 +303,7 @@ py::list PyDataset::get_tensor_dims(const std::string& name)
 // Retrieve the names of all metadata fields in the DataSet
 py::list PyDataset::get_metadata_field_names()
 {
-    return MAKE_DATASET_API("get_metadata_field_names", {
+    return MAKE_DATASET_API({
         // We return a copy
         return py::cast(_dataset->get_metadata_field_names());
     });
@@ -311,7 +312,7 @@ py::list PyDataset::get_metadata_field_names()
 // Retrieve the data type of a metadata field in the DataSet
 std::string PyDataset::get_metadata_field_type(const std::string& name)
 {
-    return MAKE_DATASET_API("get_metadata_field_type", {
+    return MAKE_DATASET_API({
         // get the type
         auto mdtype = _dataset->get_metadata_field_type(name);
         for (auto it = METADATA_TYPE_MAP.begin();
@@ -327,7 +328,7 @@ std::string PyDataset::get_metadata_field_type(const std::string& name)
 // Create a string representation of the DataSet
 std::string PyDataset::to_string()
 {
-    return MAKE_DATASET_API("to_string", {
+    return MAKE_DATASET_API({
         return _dataset->to_string();
     });
 }

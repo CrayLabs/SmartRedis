@@ -68,27 +68,27 @@ auto pb_srobject_api(T&& srobject_api_func, const char* name)
 }
 
 // Macro to invoke the decorator with a lambda function
-#define MAKE_SROBJECT_API(name, stuff)\
-    pb_srobject_api([&] { stuff }, name)()
+#define MAKE_SROBJECT_API(stuff)\
+    pb_srobject_api([&] { stuff }, __func__)()
 
 
 PySRObject::PySRObject(const std::string& context)
 {
-    MAKE_SROBJECT_API("PySRObject constructor", {
+    MAKE_SROBJECT_API({
         _srobject = new SRObject(context);
     });
 }
 
 PySRObject::PySRObject(SRObject* srobject)
 {
-    MAKE_SROBJECT_API("PySRObject constructor", {
+    MAKE_SROBJECT_API({
         _srobject = srobject;
     });
 }
 
 PySRObject::~PySRObject()
 {
-    MAKE_SROBJECT_API("PySRObject destructor", {
+    MAKE_SROBJECT_API({
         if (_srobject != NULL) {
             delete _srobject;
             _srobject = NULL;
@@ -99,7 +99,7 @@ PySRObject::~PySRObject()
 void PySRObject::log_data(
     SRLoggingLevel level, const std::string& data) const
 {
-    MAKE_SROBJECT_API("log_data", {
+    MAKE_SROBJECT_API({
         _srobject->log_data(level, data);
     });
 }
@@ -107,7 +107,7 @@ void PySRObject::log_data(
 void PySRObject::log_warning(
     SRLoggingLevel level, const std::string& data) const
 {
-    MAKE_SROBJECT_API("log_warning", {
+    MAKE_SROBJECT_API({
         _srobject->log_warning(level, data);
     });
 }
@@ -115,7 +115,7 @@ void PySRObject::log_warning(
 void PySRObject::log_error(
     SRLoggingLevel level, const std::string& data) const
 {
-    MAKE_SROBJECT_API("log_error", {
+    MAKE_SROBJECT_API({
         _srobject->log_error(level, data);
     });
 }
