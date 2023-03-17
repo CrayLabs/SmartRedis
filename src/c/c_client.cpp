@@ -37,10 +37,11 @@ using namespace SmartRedis;
 
 // Decorator to standardize exception handling in C Client API methods
 template <class T>
-auto c_client_api(T&& client_api_func)
+auto c_client_api(T&& client_api_func, const char* name)
 {
   // we create a closure below
-  auto decorated = [client_api_func = std::forward<T>(client_api_func)](auto&&... args)
+  auto decorated = [name, client_api_func =
+    std::forward<T>(client_api_func)](auto&&... args)
   {
     SRError result = SRNoError;
     try {
@@ -51,7 +52,10 @@ auto c_client_api(T&& client_api_func)
       result = e.to_error_code();
     }
     catch (...) {
-      SRSetLastError(SRInternalException("Unknown exception occurred"));
+      std::string msg(
+          "A non-standard exception was encountered while executing ");
+      msg += name;
+      SRSetLastError(SRInternalException(msg));
       result = SRInternalError;
     }
     return result;
@@ -59,14 +63,19 @@ auto c_client_api(T&& client_api_func)
   return decorated;
 }
 
+// Macro to invoke the decorator with a lambda function
+#define MAKE_CLIENT_API(stuff)\
+    c_client_api([&] { stuff }, __func__)()
+
 
 // Return a pointer to a new Client
-static void _SmartRedisCClient_impl(
+extern "C" SRError SmartRedisCClient(
   bool cluster,
   const char* logger_name,
   const size_t logger_name_length,
   void** new_client)
 {
+  return MAKE_CLIENT_API({
     // Sanity check params
     SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
@@ -79,153 +88,108 @@ static void _SmartRedisCClient_impl(
     catch (const std::bad_alloc& e) {
       throw SRBadAllocException("client allocation");
     }
+  });
 }
-// Public interface for SmartRedisCClient
-extern "C" SRError SmartRedisCClient(
-  bool cluster, const char* logger_name, const size_t logger_name_length,
-  void** new_client)
-{
-  auto _SmartRedisCClient = c_client_api(_SmartRedisCClient_impl);
-  return _SmartRedisCClient(cluster, logger_name, logger_name_length, new_client);
-}
-
 
 // Free the memory associated with the c client
-static void _DeleteCClient_impl(void** c_client)
+extern "C" SRError DeleteCClient(void** c_client)
 {
+  return MAKE_CLIENT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL);
 
     delete reinterpret_cast<Client*>(*c_client);
     *c_client = NULL;
+  });
 }
-extern "C" SRError DeleteCClient(void** c_client)
-{
-  auto _DeleteCClient = c_client_api(_DeleteCClient_impl);
-  return _DeleteCClient(c_client);
-}
-
 
 // Put a dataset into the database
-static void _put_dataset_impl(void* c_client, void* dataset)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && dataset != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  DataSet* d = reinterpret_cast<DataSet*>(dataset);
-  s->put_dataset(*d);
-}
-// Public interface for put_dataset
 extern "C" SRError put_dataset(void* c_client, void* dataset)
 {
-  auto _put_dataset = c_client_api(_put_dataset_impl);
-  return _put_dataset(c_client, dataset);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && dataset != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    DataSet* d = reinterpret_cast<DataSet*>(dataset);
+    s->put_dataset(*d);
+  });
+}
 
 // Return a pointer to a new dataset
-static void _get_dataset_impl(
-  void* c_client, const char* name, const size_t name_length, void **dataset)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && dataset != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string dataset_name(name, name_length);
-  DataSet* d = NULL;
-
-  try {
-    d = new DataSet(s->get_dataset(dataset_name));
-    *dataset = reinterpret_cast<void*>(d);
-  } catch (const std::bad_alloc& e) {
-    *dataset = NULL;
-    throw SRBadAllocException("dataset allocation");
-  }
-}
-// Public interface for get_dataset
 extern "C" SRError get_dataset(
   void* c_client, const char* name, const size_t name_length, void **dataset)
 {
-  auto _get_dataset = c_client_api(_get_dataset_impl);
-  return _get_dataset(c_client, name, name_length, dataset);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && dataset != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string dataset_name(name, name_length);
+    DataSet* d = NULL;
+
+    try {
+      d = new DataSet(s->get_dataset(dataset_name));
+      *dataset = reinterpret_cast<void*>(d);
+    } catch (const std::bad_alloc& e) {
+      *dataset = NULL;
+      throw SRBadAllocException("dataset allocation");
+    }
+  });
 }
 
-
 // Rename a dataset in the database
-static void _rename_dataset_impl(
+extern "C" SRError rename_dataset(
   void* c_client, const char* old_name,
   const size_t old_name_length, const char* new_name,
   const size_t new_name_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(old_name, old_name_length);
-  std::string new_name_str(new_name, new_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(old_name, old_name_length);
+    std::string new_name_str(new_name, new_name_length);
 
-  s->rename_dataset(name_str, new_name_str);
+    s->rename_dataset(name_str, new_name_str);
+  });
 }
-// Public interface for rename_dataset
-extern "C" SRError rename_dataset(
-  void* c_client, const char* old_name, const size_t old_name_length,
-  const char* new_name, const size_t new_name_length)
-{
-  auto _rename_dataset = c_client_api(_rename_dataset_impl);
-  return _rename_dataset(
-    c_client, old_name, old_name_length, new_name, new_name_length);
-}
-
 
 // Copy a dataset from the src_name to the dest_name
-static void _copy_dataset_impl(
+extern "C" SRError copy_dataset(
   void* c_client, const char* src_name,
   const size_t src_name_length, const char* dest_name,
   const size_t dest_name_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string src_name_str(src_name, src_name_length);
-  std::string dest_name_str(dest_name, dest_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string src_name_str(src_name, src_name_length);
+    std::string dest_name_str(dest_name, dest_name_length);
 
-  s->copy_dataset(src_name_str, dest_name_str);
+    s->copy_dataset(src_name_str, dest_name_str);
+  });
 }
-// Public interface for copy_dataset
-extern "C" SRError copy_dataset(void* c_client, const char* src_name,
-                    const size_t src_name_length, const char* dest_name,
-                    const size_t dest_name_length)
-{
-  auto _copy_dataset = c_client_api(_copy_dataset_impl);
-  return _copy_dataset(
-    c_client, src_name, src_name_length, dest_name, dest_name_length);
-}
-
 
 // Delete a dataset (all metadata and tensors) from the database
-static void _delete_dataset_impl(
-  void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string dataset_name(name, name_length);
-  s->delete_dataset(dataset_name);
-}
-// Public interface for delete_dataset
 extern "C" SRError delete_dataset(
   void* c_client, const char* name, const size_t name_length)
 {
-  auto _delete_dataset = c_client_api(_delete_dataset_impl);
-  return _delete_dataset(c_client, name, name_length);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string dataset_name(name, name_length);
+    s->delete_dataset(dataset_name);
+  });
 }
 
-
 // Put a tensor of a specified type into the database
-static void _put_tensor_impl(
+extern "C" SRError put_tensor(
   void* c_client,
   const char* name,
   const size_t name_length,
@@ -235,32 +199,23 @@ static void _put_tensor_impl(
   const SRTensorType type,
   const SRMemoryLayout mem_layout)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
-                  data != NULL && dims != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
+                    data != NULL && dims != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
 
-  std::vector<size_t> dims_vec;
-  dims_vec.assign(dims, dims + n_dims);
+    std::vector<size_t> dims_vec;
+    dims_vec.assign(dims, dims + n_dims);
 
-  s->put_tensor(name_str, data, dims_vec, type, mem_layout);
+    s->put_tensor(name_str, data, dims_vec, type, mem_layout);
+  });
 }
-// Public interface for put_tensor
-extern "C" SRError put_tensor(
-  void* c_client, const char* name, const size_t name_length,
-  void* data, const size_t* dims, const size_t n_dims,
-  const SRTensorType type, const SRMemoryLayout mem_layout)
-{
-  auto _put_tensor = c_client_api(_put_tensor_impl);
-  return _put_tensor(
-    c_client, name, name_length, data, dims, n_dims, type, mem_layout);
-}
-
 
 // Get a tensor of a specified type from the database
-static void _get_tensor_impl(
+extern "C" SRError get_tensor(
   void* c_client,
     const char* name,
     const size_t name_length,
@@ -270,6 +225,7 @@ static void _get_tensor_impl(
     SRTensorType* type,
     const SRMemoryLayout mem_layout)
 {
+  return MAKE_CLIENT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
                     dims != NULL && n_dims != NULL);
@@ -278,22 +234,12 @@ static void _get_tensor_impl(
     std::string name_str(name, name_length);
 
     s->get_tensor(name_str, *result, *dims, *n_dims, *type, mem_layout);
+  });
 }
-// Public interface for get_tensor
-extern "C" SRError get_tensor(
-  void* c_client, const char* name, const size_t name_length,
-  void** result, size_t** dims, size_t* n_dims, SRTensorType* type,
-  const SRMemoryLayout mem_layout)
-{
-  auto _get_tensor = c_client_api(_get_tensor_impl);
-  return _get_tensor(
-    c_client, name, name_length, result, dims, n_dims, type, mem_layout);
-}
-
 
 // Get a tensor of a specified type from the database
 // and put the values into the user provided memory space
-static void _unpack_tensor_impl(
+extern "C" SRError unpack_tensor(
   void* c_client,
   const char* name,
   const size_t name_length,
@@ -303,106 +249,75 @@ static void _unpack_tensor_impl(
   const SRTensorType type,
   const SRMemoryLayout mem_layout)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
-                  dims != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && result != NULL &&
+                    dims != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
 
-  std::vector<size_t> dims_vec;
-  dims_vec.assign(dims, dims + n_dims);
+    std::vector<size_t> dims_vec;
+    dims_vec.assign(dims, dims + n_dims);
 
-  s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
+    s->unpack_tensor(name_str, result, dims_vec, type, mem_layout);
+  });
 }
-// Public interface for unpack_tensor
-extern "C" SRError unpack_tensor(
-  void* c_client, const char* name, const size_t name_length, void* result,
-  const size_t* dims, const size_t n_dims, const SRTensorType type,
-  const SRMemoryLayout mem_layout)
-{
-  auto _unpack_tensor = c_client_api(_unpack_tensor_impl);
-  return _unpack_tensor(
-    c_client, name, name_length, result, dims, n_dims, type, mem_layout);
-}
-
 
 // Rename a tensor from old_name to new_name
-static void _rename_tensor_impl(
+extern "C" SRError rename_tensor(
   void* c_client,
   const char* old_name,
   const size_t old_name_length,
   const char* new_name,
   const size_t new_name_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && old_name != NULL && new_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string old_name_str(old_name, old_name_length);
-  std::string new_name_str(new_name, new_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string old_name_str(old_name, old_name_length);
+    std::string new_name_str(new_name, new_name_length);
 
-  s->rename_tensor(old_name_str, new_name_str);
+    s->rename_tensor(old_name_str, new_name_str);
+  });
 }
-// Public interface for rename_tensor
-extern "C" SRError rename_tensor(
-  void* c_client, const char* old_name, const size_t old_name_length,
-  const char* new_name, const size_t new_name_length)
-{
-  auto _rename_tensor = c_client_api(_rename_tensor_impl);
-  return _rename_tensor(
-    c_client, old_name, old_name_length, new_name, new_name_length);
-}
-
 
 // Delete a tensor from the database
-static void _delete_tensor_impl(
-  void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  s->delete_tensor(name_str);
-}
-// Public interface for delete_tensor
 extern "C" SRError delete_tensor(
   void* c_client, const char* name, const size_t name_length)
 {
-  auto _delete_tensor = c_client_api(_delete_tensor_impl);
-  return _delete_tensor(c_client, name, name_length);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+
+    s->delete_tensor(name_str);
+  });
 }
 
-
 // Copy a tensor from src_name to dest_name
-static void _copy_tensor_impl(
+extern "C" SRError copy_tensor(
   void* c_client,
   const char* src_name,
   const size_t src_name_length,
   const char* dest_name,
   const size_t dest_name_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string src_str(src_name, src_name_length);
-  std::string dest_str(dest_name, dest_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string src_str(src_name, src_name_length);
+    std::string dest_str(dest_name, dest_name_length);
 
-  s->copy_tensor(src_str, dest_str);
+    s->copy_tensor(src_str, dest_str);
+  });
 }
-// Public interface for copy_tensor
-extern "C" SRError copy_tensor(
-  void* c_client, const char* src_name, const size_t src_name_length,
-  const char* dest_name, const size_t dest_name_length)
-{
-  auto _copy_tensor = c_client_api(_copy_tensor_impl);
-  return _copy_tensor(
-    c_client, src_name, src_name_length, dest_name, dest_name_length);
-}
-
 
 // Perform a case insensitive compare fo two strings
 static bool _compareCaseInsensitive(const char* a,const char* b) {
@@ -420,14 +335,12 @@ static bool _compareCaseInsensitive(const char* a,const char* b) {
   return (*a == *b);
 }
 
-
 // Return True if the backend is TF or TFLITE
 bool _isTensorFlow(const char* backend)
 {
   return _compareCaseInsensitive(backend, "TF") ||
          _compareCaseInsensitive(backend, "TFLITE");
 }
-
 
 // Check the parameters common to all set_model functions
 void _check_params_set_model(
@@ -470,9 +383,8 @@ void _check_params_set_model(
   }
 }
 
-
 // Set a model stored in a binary file
-static void _set_model_from_file_impl(
+extern "C" SRError set_model_from_file(
   void* c_client,
   const char* name, const size_t name_length,
   const char* model_file, const size_t model_file_length,
@@ -484,63 +396,47 @@ static void _set_model_from_file_impl(
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  // Sanity check params. Tag is strictly optional, and inputs/outputs are
-  // mandatory IFF backend is TensorFlow (TF or TFLITE)
-  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                        outputs, output_lengths, n_outputs);
-  SR_CHECK_PARAMS(model_file != NULL && device != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL && device != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string model_file_str(model_file, model_file_length);
-  std::string backend_str(backend, backend_length);
-  std::string device_str(device, device_length);
-  std::string tag_str(tag, tag_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_file_str(model_file, model_file_length);
+    std::string backend_str(backend, backend_length);
+    std::string device_str(device, device_length);
+    std::string tag_str(tag, tag_length);
 
-  // Catch the case where an empty string was sent (default C++ client behavior)
-  std::vector<std::string> input_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
-  }
 
-  s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
-                          batch_size, min_batch_size, tag_str, input_vec,
-                          output_vec);
+    s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
+                            batch_size, min_batch_size, tag_str, input_vec,
+                            output_vec);
+  });
 }
-// Public interface for set_model_from_file
-extern "C" SRError set_model_from_file(
-  void* c_client, const char* name, const size_t name_length,
-  const char* model_file, const size_t model_file_length, const char* backend,
-  const size_t backend_length, const char* device, const size_t device_length,
-  const int batch_size, const int min_batch_size, const char* tag,
-  const size_t tag_length, const char** inputs, const size_t* input_lengths,
-  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
-  const size_t n_outputs)
-{
-  auto _set_model_from_file = c_client_api(_set_model_from_file_impl);
-  return _set_model_from_file(
-    c_client, name, name_length, model_file, model_file_length,
-    backend, backend_length, device, device_length, batch_size,
-    min_batch_size, tag, tag_length, inputs, input_lengths,
-    n_inputs, outputs, output_lengths, n_outputs);
-}
-
 
 // Set a model stored in a binary file for use with multiple GPUs
-static void _set_model_from_file_multigpu_impl(
+extern "C" SRError set_model_from_file_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char* model_file, const size_t model_file_length,
@@ -552,65 +448,46 @@ static void _set_model_from_file_multigpu_impl(
   const size_t n_inputs, const char** outputs,
   const size_t* output_lengths, const size_t n_outputs)
 {
-  // Sanity check params. Tag is strictly optional, and inputs/outputs are
-  // mandatory IFF backend is TensorFlow (TF or TFLITE)
-  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                        outputs, output_lengths, n_outputs);
-  SR_CHECK_PARAMS(model_file != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model_file != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string model_file_str(model_file, model_file_length);
-  std::string backend_str(backend, backend_length);
-  std::string tag_str(tag, tag_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_file_str(model_file, model_file_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
 
-  // Catch the case where an empty string was sent (default C++ client behavior)
-  std::vector<std::string> input_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
-  }
 
-  s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
-                                  num_gpus, batch_size, min_batch_size, tag_str,
-                                  input_vec, output_vec);
+    s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
+                                    num_gpus, batch_size, min_batch_size, tag_str,
+                                    input_vec, output_vec);
+  });
 }
-// Public interface for set_model_from_file
-extern "C" SRError set_model_from_file_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char* model_file, const size_t model_file_length,
-  const char* backend, const size_t backend_length,
-  const int first_gpu, const int num_gpus,
-  const int batch_size, const int min_batch_size,
-  const char* tag, const size_t tag_length,
-  const char** inputs, const size_t* input_lengths,
-  const size_t n_inputs, const char** outputs,
-  const size_t* output_lengths, const size_t n_outputs)
-{
-  auto _set_model_from_file_multigpu =
-    c_client_api(_set_model_from_file_multigpu_impl);
-  return _set_model_from_file_multigpu(
-    c_client, name, name_length, model_file, model_file_length,
-    backend, backend_length, first_gpu, num_gpus, batch_size,
-    min_batch_size, tag, tag_length, inputs, input_lengths,
-    n_inputs, outputs, output_lengths, n_outputs);
-}
-
 
 // Set a model stored in a buffer c-string.
-static void _set_model_impl(
+extern "C" SRError set_model(
   void* c_client,
   const char* name, const size_t name_length,
   const char* model, const size_t model_length,
@@ -623,63 +500,47 @@ static void _set_model_impl(
   const char** outputs, const size_t* output_lengths,
   const size_t n_outputs)
 {
-  // Sanity check params. Tag is strictly optional, and inputs/outputs are
-  // mandatory IFF backend is TensorFlow (TF or TFLITE)
-  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                        outputs, output_lengths, n_outputs);
-  SR_CHECK_PARAMS(model != NULL && device != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL && device != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string model_str(model, model_length);
-  std::string backend_str(backend, backend_length);
-  std::string device_str(device, device_length);
-  std::string tag_str(tag, tag_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_str(model, model_length);
+    std::string backend_str(backend, backend_length);
+    std::string device_str(device, device_length);
+    std::string tag_str(tag, tag_length);
 
-  // Catch the case where an empty string was sent (default C++ client behavior)
-  std::vector<std::string> input_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
-  }
 
-  s->set_model(name_str, model_str, backend_str, device_str,
-              batch_size, min_batch_size, tag_str, input_vec,
-              output_vec);
+    s->set_model(name_str, model_str, backend_str, device_str,
+                batch_size, min_batch_size, tag_str, input_vec,
+                output_vec);
+  });
 }
-// Public interface for set_model
-extern "C" SRError set_model(
-  void* c_client, const char* name, const size_t name_length,
-  const char* model, const size_t model_length, const char* backend,
-  const size_t backend_length, const char* device, const size_t device_length,
-  const int batch_size, const int min_batch_size, const char* tag,
-  const size_t tag_length, const char** inputs, const size_t* input_lengths,
-  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
-  const size_t n_outputs)
-{
-  auto _set_model = c_client_api(_set_model_impl);
-  return _set_model(
-    c_client, name, name_length, model, model_length,
-    backend, backend_length, device, device_length, batch_size,
-    min_batch_size, tag, tag_length, inputs, input_lengths,
-    n_inputs, outputs, output_lengths, n_outputs);
-}
-
 
 // Set a model stored in a buffer c-string
-static void _set_model_multigpu_impl(
+extern "C" SRError set_model_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char* model, const size_t model_length,
@@ -692,238 +553,167 @@ static void _set_model_multigpu_impl(
   const char** outputs, const size_t* output_lengths,
   const size_t n_outputs)
 {
-  // Sanity check params. Tag is strictly optional, and inputs/outputs are
-  // mandatory IFF backend is TensorFlow (TF or TFLITE)
-  _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
-                        outputs, output_lengths, n_outputs);
-  SR_CHECK_PARAMS(model != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params. Tag is strictly optional, and inputs/outputs are
+    // mandatory IFF backend is TensorFlow (TF or TFLITE)
+    _check_params_set_model(c_client, name, backend, inputs, input_lengths, n_inputs,
+                          outputs, output_lengths, n_outputs);
+    SR_CHECK_PARAMS(model != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string model_str(model, model_length);
-  std::string backend_str(backend, backend_length);
-  std::string tag_str(tag, tag_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string model_str(model, model_length);
+    std::string backend_str(backend, backend_length);
+    std::string tag_str(tag, tag_length);
 
-  // Catch the case where an empty string was sent (default C++ client behavior)
-  std::vector<std::string> input_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_inputs != 1 || input_lengths[0] != 0) {
-      for (size_t i = 0; i < n_inputs; i++) {
-        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    // Catch the case where an empty string was sent (default C++ client behavior)
+    std::vector<std::string> input_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_inputs != 1 || input_lengths[0] != 0) {
+        for (size_t i = 0; i < n_inputs; i++) {
+          input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+        }
       }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (_isTensorFlow(backend)) {
-    if (n_outputs != 1 || output_lengths[0] != 0) {
-      for (size_t i = 0; i < n_outputs; i++) {
-        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (_isTensorFlow(backend)) {
+      if (n_outputs != 1 || output_lengths[0] != 0) {
+        for (size_t i = 0; i < n_outputs; i++) {
+          output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+        }
       }
     }
-  }
 
-  s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
-                        batch_size, min_batch_size, tag_str, input_vec,
-                        output_vec);
+    s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
+                          batch_size, min_batch_size, tag_str, input_vec,
+                          output_vec);
+  });
 }
-// Public interface for set_model_multigpu
-extern "C" SRError set_model_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char* model, const size_t model_length, const char* backend,
-  const size_t backend_length, const int first_gpu, const int num_gpus,
-  const int batch_size, const int min_batch_size, const char* tag,
-  const size_t tag_length, const char** inputs, const size_t* input_lengths,
-  const size_t n_inputs, const char** outputs, const size_t* output_lengths,
-  const size_t n_outputs)
-{
-  auto _set_model_multigpu = c_client_api(_set_model_multigpu_impl);
-  return _set_model_multigpu(
-    c_client, name, name_length, model, model_length,
-    backend, backend_length, first_gpu, num_gpus, batch_size,
-    min_batch_size, tag, tag_length, inputs, input_lengths,
-    n_inputs, outputs, output_lengths, n_outputs);
-}
-
 
 // Retrieve the model and model length from the database
-static void _get_model_impl(
+extern "C" SRError get_model(
   void* c_client,
   const char* name, const size_t name_length,
   size_t* model_length, const char** model)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
-                  model != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && model_length != NULL &&
+                    model != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string_view model_str_view(s->get_model(name_str));
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string_view model_str_view(s->get_model(name_str));
 
-  *model_length = model_str_view.size();
-  *model = model_str_view.data();
+    *model_length = model_str_view.size();
+    *model = model_str_view.data();
+  });
 }
-// Public interface for set_model_multigpu
-extern "C" SRError get_model(
-  void* c_client, const char* name, const size_t name_length,
-  size_t* model_length, const char** model)
-{
-  auto _get_model = c_client_api(_get_model_impl);
-  return _get_model(c_client, name, name_length, model_length, model);
-}
-
 
 // Put a script in the database that is stored in a file.
-static void _set_script_from_file_impl(
+extern "C" SRError set_script_from_file(
   void* c_client,
   const char* name, const size_t name_length,
   const char* device, const size_t device_length,
   const char* script_file, const size_t script_file_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
-                  script_file != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
+                    script_file != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string device_str(device, device_length);
-  std::string script_file_str(script_file, script_file_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string device_str(device, device_length);
+    std::string script_file_str(script_file, script_file_length);
 
-  s->set_script_from_file(name_str, device_str, script_file_str);
+    s->set_script_from_file(name_str, device_str, script_file_str);
+  });
 }
-// Public interface for set_model_multigpu
-extern "C" SRError set_script_from_file(
-  void* c_client, const char* name, const size_t name_length,
-  const char* device, const size_t device_length,
-  const char* script_file, const size_t script_file_length)
-{
-  auto _set_script_from_file = c_client_api(_set_script_from_file_impl);
-  return _set_script_from_file(
-    c_client, name, name_length, device, device_length,
-    script_file, script_file_length);
-}
-
 
 // Put a script in the database that is stored in a file in a multi-GPU system
-static void _set_script_from_file_multigpu_impl(
+extern "C" SRError set_script_from_file_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char* script_file, const size_t script_file_length,
   const int first_gpu,
   const int num_gpus)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script_file != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string script_file_str(script_file, script_file_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string script_file_str(script_file, script_file_length);
 
-  s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
+    s->set_script_from_file_multigpu(name_str, script_file_str, first_gpu, num_gpus);
+  });
 }
-// Public interface for set_script_from_file_multigpu
-extern "C" SRError set_script_from_file_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char* script_file, const size_t script_file_length,
-  const int first_gpu, const int num_gpus)
-{
-  auto _set_script_from_file_multigpu
-    = c_client_api(_set_script_from_file_multigpu_impl);
-  return _set_script_from_file_multigpu(
-    c_client, name, name_length, script_file, script_file_length,
-    first_gpu, num_gpus);
-}
-
 
 // Put a script in the database that is stored in a string.
-static void _set_script_impl(
+extern "C" SRError set_script(
   void* c_client,
   const char* name, const size_t name_length,
   const char* device, const size_t device_length,
   const char* script, const size_t script_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
-                  script != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && device != NULL &&
+                    script != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
+    Client* s = reinterpret_cast<Client*>(c_client);
 
-  std::string name_str(name, name_length);
-  std::string device_str(device, device_length);
-  std::string script_str(script, script_length);
+    std::string name_str(name, name_length);
+    std::string device_str(device, device_length);
+    std::string script_str(script, script_length);
 
-  s->set_script(name_str, device_str, script_str);
+    s->set_script(name_str, device_str, script_str);
+  });
 }
-// Public interface for set_script
-extern "C" SRError set_script(
-  void* c_client, const char* name, const size_t name_length,
-  const char* device, const size_t device_length,
-  const char* script, const size_t script_length)
-{
-  auto _set_script = c_client_api(_set_script_impl);
-  return _set_script(
-    c_client, name, name_length, device, device_length,
-    script, script_length);
-}
-
 
 // Put a script in the database that is stored in a string in a multi-GPU system
-static void _set_script_multigpu_impl(
+extern "C" SRError set_script_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char* script, const size_t script_length,
   const int first_gpu,
   const int num_gpus)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
+    Client* s = reinterpret_cast<Client*>(c_client);
 
-  std::string name_str(name, name_length);
-  std::string script_str(script, script_length);
+    std::string name_str(name, name_length);
+    std::string script_str(script, script_length);
 
-  s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
+    s->set_script_multigpu(name_str, script_str, first_gpu, num_gpus);
+  });
 }
-// Public interface for set_script_multigpu
-extern "C"
-SRError set_script_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char* script, const size_t script_length,
-  const int first_gpu, const int num_gpus)
-{
-  auto _set_script_multigpu = c_client_api(_set_script_multigpu_impl);
-  return _set_script_multigpu(
-    c_client, name, name_length, script, script_length, first_gpu, num_gpus);
-}
-
 
 // Retrieve the script stored in the database
-static void _get_script_impl(
+extern "C" SRError get_script(
   void* c_client,
   const char* name, const size_t name_length,
   const char** script, size_t* script_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
-                  script_length != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && script != NULL &&
+                    script_length != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-  std::string_view script_str_view(s->get_script(name_str));
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+    std::string_view script_str_view(s->get_script(name_str));
 
-  (*script) = script_str_view.data();
-  (*script_length) = script_str_view.size();
+    (*script) = script_str_view.data();
+    (*script_length) = script_str_view.size();
+  });
 }
-// Public interface for get_script
-extern "C" SRError get_script(
-  void* c_client, const char* name, const size_t name_length,
-  const char** script, size_t* script_length)
-{
-  auto _get_script = c_client_api(_get_script_impl);
-  return _get_script(c_client, name, name_length, script, script_length);
-}
-
 
 // Validate parameters for running scripts
 void _check_params_run_script(
@@ -933,74 +723,62 @@ void _check_params_run_script(
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL && function != NULL &&
+                  inputs != NULL && input_lengths != NULL &&
+                  outputs != NULL && output_lengths != NULL);
 
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          "inputs[" + std::to_string(i) + "] is NULL or empty");
-      }
+  // Inputs and outputs are mandatory for run_script
+  for (size_t i = 0; i < n_inputs; i++){
+    if (inputs[i] == NULL || input_lengths[i] == 0) {
+      throw SRParameterException(
+        "inputs[" + std::to_string(i) + "] is NULL or empty");
     }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          "outputs[" + std::to_string(i) + "] is NULL or empty");
-      }
+  }
+  for (size_t i = 0; i < n_outputs; i++) {
+    if (outputs[i] == NULL || output_lengths[i] == 0) {
+      throw SRParameterException(
+        "outputs[" + std::to_string(i) + "] is NULL or empty");
     }
+  }
 }
 
-
 // Run  a script function in the database
-static void _run_script_impl(
+extern "C" SRError run_script(
   void* c_client,
   const char* name, const size_t name_length,
   const char* function, const size_t function_length,
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  _check_params_run_script(c_client, name, function,
-                            inputs, input_lengths, n_inputs,
-                            outputs, output_lengths, n_outputs);
-  std::string name_str(name, name_length);
-  std::string function_str(function, function_length);
+  return MAKE_CLIENT_API({
+    _check_params_run_script(c_client, name, function,
+                              inputs, input_lengths, n_inputs,
+                              outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+    std::string function_str(function, function_length);
 
-  std::vector<std::string> input_vec;
-  if (n_inputs != 1 || input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++) {
-      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (n_outputs != 1 || output_lengths[0] != 0) {
-    for (size_t i = 0; i < n_outputs; i++) {
-      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
     }
-  }
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->run_script(name_str, function_str, input_vec, output_vec);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_script(name_str, function_str, input_vec, output_vec);
+  });
 }
-// Public interface for run_script
-extern "C" SRError run_script(
-  void* c_client, const char* name, const size_t name_length,
-  const char* function, const size_t function_length, const char** inputs,
-  const size_t* input_lengths, const size_t n_inputs, const char** outputs,
-  const size_t* output_lengths, const size_t n_outputs)
-{
-  auto _run_script = c_client_api(_run_script_impl);
-  return _run_script(
-    c_client, name, name_length, function, function_length, inputs,
-    input_lengths, n_inputs, outputs, output_lengths, n_outputs);
-}
-
 
 // Run  a script function in the database in a multi-GPU system
-static void _run_script_multigpu_impl(
+extern "C" SRError run_script_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char* function, const size_t function_length,
@@ -1010,45 +788,32 @@ static void _run_script_multigpu_impl(
   const int first_gpu,
   const int num_gpus)
 {
-  _check_params_run_script(c_client, name, function,
-                           inputs, input_lengths, n_inputs,
-                           outputs, output_lengths, n_outputs);
-  std::string name_str(name, name_length);
-  std::string function_str(function, function_length);
+  return MAKE_CLIENT_API({
+    _check_params_run_script(c_client, name, function,
+                            inputs, input_lengths, n_inputs,
+                            outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
+    std::string function_str(function, function_length);
 
-  std::vector<std::string> input_vec;
-  if (n_inputs != 1 || input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++) {
-      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (n_outputs != 1 || output_lengths[0] != 0) {
-    for (size_t i = 0; i < n_outputs; i++) {
-      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
     }
-  }
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
-                         offset, first_gpu, num_gpus);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_script_multigpu(name_str, function_str, input_vec, output_vec,
+                          offset, first_gpu, num_gpus);
+  });
 }
-// Public interface for run_script_multigpu
-extern "C" SRError run_script_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char* function, const size_t function_length, const char** inputs,
-  const size_t* input_lengths, const size_t n_inputs, const char** outputs,
-  const size_t* output_lengths, const size_t n_outputs, const int offset,
-  const int first_gpu, const int num_gpus)
-{
-  auto _run_script_multigpu = c_client_api(_run_script_multigpu_impl);
-  return _run_script_multigpu(
-    c_client, name, name_length, function, function_length, inputs,
-    input_lengths, n_inputs, outputs, output_lengths, n_outputs,
-    offset, first_gpu, num_gpus);
-}
-
 
 // Validate the parameters for running models
 void _check_params_run_model(
@@ -1057,70 +822,59 @@ void _check_params_run_model(
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-    // Sanity check params
-    SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
-                    inputs != NULL && input_lengths != NULL &&
-                    outputs != NULL && output_lengths != NULL);
+  // Sanity check params
+  SR_CHECK_PARAMS(c_client != NULL && name != NULL &&
+                  inputs != NULL && input_lengths != NULL &&
+                  outputs != NULL && output_lengths != NULL);
 
-    // Inputs and outputs are mandatory for run_script
-    for (size_t i = 0; i < n_inputs; i++){
-      if (inputs[i] == NULL || input_lengths[i] == 0) {
-        throw SRParameterException(
-          "inputs[" + std::to_string(i) + "] is NULL or empty");
-      }
+  // Inputs and outputs are mandatory for run_script
+  for (size_t i = 0; i < n_inputs; i++){
+    if (inputs[i] == NULL || input_lengths[i] == 0) {
+      throw SRParameterException(
+        "inputs[" + std::to_string(i) + "] is NULL or empty");
     }
-    for (size_t i = 0; i < n_outputs; i++) {
-      if (outputs[i] == NULL || output_lengths[i] == 0) {
-        throw SRParameterException(
-          "outputs[" + std::to_string(i) + "] is NULL or empty");
-      }
+  }
+  for (size_t i = 0; i < n_outputs; i++) {
+    if (outputs[i] == NULL || output_lengths[i] == 0) {
+      throw SRParameterException(
+        "outputs[" + std::to_string(i) + "] is NULL or empty");
     }
+  }
 }
 
-
 // Run a model in the database
-static void _run_model_impl(
+extern "C" SRError run_model(
   void* c_client,
   const char* name, const size_t name_length,
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
 {
-  _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-  std::string name_str(name, name_length);
+  return MAKE_CLIENT_API({
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                            outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
 
-  std::vector<std::string> input_vec;
-  if (n_inputs != 1 || input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++) {
-      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (n_outputs != 1 || output_lengths[0] != 0) {
-    for (size_t i = 0; i < n_outputs; i++) {
-      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
     }
-  }
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->run_model(name_str, input_vec, output_vec);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_model(name_str, input_vec, output_vec);
+  });
 }
-// Public interface for run_model
-extern "C" SRError run_model(
-  void* c_client, const char* name, const size_t name_length,
-  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
-  const char** outputs, const size_t* output_lengths, const size_t n_outputs)
-{
-  auto _run_model = c_client_api(_run_model_impl);
-  return _run_model(
-    c_client, name, name_length, inputs, input_lengths, n_inputs, outputs,
-    output_lengths, n_outputs);
-}
-
 
 // Run a model in the database for multiple GPUs
-static void _run_model_multigpu_impl(
+extern "C" SRError run_model_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
@@ -1129,472 +883,332 @@ static void _run_model_multigpu_impl(
   const int first_gpu,
   const int num_gpus)
 {
-  _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
-                          outputs, output_lengths, n_outputs);
-  std::string name_str(name, name_length);
+  return MAKE_CLIENT_API({
+    _check_params_run_model(c_client, name, inputs, input_lengths, n_inputs,
+                            outputs, output_lengths, n_outputs);
+    std::string name_str(name, name_length);
 
-  std::vector<std::string> input_vec;
-  if (n_inputs != 1 || input_lengths[0] != 0) {
-    for (size_t i = 0; i < n_inputs; i++) {
-      input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+    std::vector<std::string> input_vec;
+    if (n_inputs != 1 || input_lengths[0] != 0) {
+      for (size_t i = 0; i < n_inputs; i++) {
+        input_vec.push_back(std::string(inputs[i], input_lengths[i]));
+      }
     }
-  }
 
-  std::vector<std::string> output_vec;
-  if (n_outputs != 1 || output_lengths[0] != 0) {
-    for (size_t i = 0; i < n_outputs; i++) {
-      output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+    std::vector<std::string> output_vec;
+    if (n_outputs != 1 || output_lengths[0] != 0) {
+      for (size_t i = 0; i < n_outputs; i++) {
+        output_vec.push_back(std::string(outputs[i], output_lengths[i]));
+      }
     }
-  }
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->run_model_multigpu(name_str, input_vec, output_vec, offset,
-                        first_gpu, num_gpus);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->run_model_multigpu(name_str, input_vec, output_vec, offset,
+                          first_gpu, num_gpus);
+  });
 }
-// Public interface for run_model_multigpu
-extern "C" SRError run_model_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const char** inputs, const size_t* input_lengths, const size_t n_inputs,
-  const char** outputs, const size_t* output_lengths, const size_t n_outputs,
-  const int offset, const int first_gpu, const int num_gpus)
-{
-  auto _run_model_multigpu = c_client_api(_run_model_multigpu_impl);
-  return _run_model_multigpu(
-    c_client, name, name_length, inputs, input_lengths, n_inputs, outputs,
-    output_lengths, n_outputs, offset, first_gpu, num_gpus);
-}
-
 
 // Remove a model from the database
-static void _delete_model_impl(
+extern "C" SRError delete_model(
   void* c_client, const char* name, const size_t name_length)
 {
+  return MAKE_CLIENT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
     std::string name_str(name, name_length);
     Client* s = reinterpret_cast<Client*>(c_client);
     s->delete_model(name_str);
+  });
 }
-// Public interface for delete_model
-extern "C" SRError delete_model(
-  void* c_client, const char* name, const size_t name_length)
-{
-  auto _delete_model = c_client_api(_delete_model_impl);
-  return _delete_model(c_client, name, name_length);
-}
-
 
 // Remove a model from the database on a system with multiple GPUs
-static void _delete_model_multigpu_impl(
+extern "C" SRError delete_model_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const int first_gpu,
   const int num_gpus)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-  std::string name_str(name, name_length);
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_model_multigpu(name_str, first_gpu, num_gpus);
+  });
 }
-// Public interface for delete_model_multigpu
-extern "C"
-SRError delete_model_multigpu(void* c_client,
-                              const char* name,
-                              const size_t name_length,
-                              const int first_gpu,
-                              const int num_gpus)
-{
-  auto _delete_model_multigpu = c_client_api(_delete_model_multigpu_impl);
-  return _delete_model_multigpu(
-    c_client, name, name_length, first_gpu, num_gpus);
-}
-
 
 // Remove a script from the database
-static void _delete_script_impl(
-  void* c_client, const char* name, const size_t name_length)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
-
-  std::string name_str(name, name_length);
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->delete_script(name_str);
-}
-// Public interface for delete_script
 extern "C" SRError delete_script(
   void* c_client, const char* name, const size_t name_length)
 {
-  auto _delete_script = c_client_api(_delete_script_impl);
-  return _delete_script(c_client, name, name_length);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script(name_str);
+  });
 }
 
-
 // Remove a script from the database in a system with multiple GPUs
-static void _delete_script_multigpu_impl(
+extern "C" SRError delete_script_multigpu(
   void* c_client,
   const char* name, const size_t name_length,
   const int first_gpu,
   const int num_gpus)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL);
 
-  std::string name_str(name, name_length);
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->delete_script_multigpu(name_str, first_gpu, num_gpus);
+    std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->delete_script_multigpu(name_str, first_gpu, num_gpus);
+  });
 }
-// Public interface for delete_script_multigpu
-extern "C" SRError delete_script_multigpu(
-  void* c_client, const char* name, const size_t name_length,
-  const int first_gpu, const int num_gpus)
-{
-  auto _delete_script_multigpu = c_client_api(_delete_script_multigpu_impl);
-  return _delete_script_multigpu(
-    c_client, name, name_length, first_gpu, num_gpus);
-}
-
 
 // Check whether a key exists in the database
-static void _key_exists_impl(
-  void* c_client, const char* key, const size_t key_length, bool* exists)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string key_str(key, key_length);
-
-  *exists = s->key_exists(key_str);
-}
-// Public interface for key_exists
 extern "C" SRError key_exists(
   void* c_client, const char* key, const size_t key_length, bool* exists)
 {
-  auto _key_exists = c_client_api(_key_exists_impl);
-  return _key_exists(c_client, key, key_length, exists);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string key_str(key, key_length);
+
+    *exists = s->key_exists(key_str);
+  });
+}
 
 // Check whether a model exists in the database
-static void _model_exists_impl(
-  void* c_client, const char* name, const size_t name_length, bool* exists)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  *exists = s->model_exists(name_str);
-}
-// Public interface for model_exists
 extern "C" SRError model_exists(
   void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  auto _model_exists = c_client_api(_model_exists_impl);
-  return _model_exists(c_client, name, name_length, exists);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+
+    *exists = s->model_exists(name_str);
+  });
+}
 
 // Check whether a tensor exists in the database
-static void _tensor_exists_impl(
-  void* c_client, const char* name, const size_t name_length, bool* exists)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
-
-  *exists = s->tensor_exists(name_str);
-}
-// Public interface for tensor_exists
 extern "C" SRError tensor_exists(
   void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  auto _tensor_exists = c_client_api(_tensor_exists_impl);
-  return _tensor_exists(c_client, name, name_length, exists);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
+
+    *exists = s->tensor_exists(name_str);
+  });
+}
 
 // Check whether a dataset exists in the database
-static void _dataset_exists_impl(
-  void* c_client, const char* name, const size_t name_length, bool* exists)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
-
-  Client* s = reinterpret_cast<Client *>(c_client);
-  std::string name_str(name, name_length);
-
-  *exists = s->dataset_exists(name_str);
-}
-// Public interface for dataset_exists
 extern "C" SRError dataset_exists(
   void* c_client, const char* name, const size_t name_length, bool* exists)
 {
-  auto _dataset_exists = c_client_api(_dataset_exists_impl);
-  return _dataset_exists(c_client, name, name_length, exists);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+
+    Client* s = reinterpret_cast<Client *>(c_client);
+    std::string name_str(name, name_length);
+
+    *exists = s->dataset_exists(name_str);
+  });
 }
 
-
 // Delay until a key exists in the database
-static void _poll_key_impl(
+extern "C" SRError poll_key(
   void* c_client,
   const char* key, const size_t key_length,
   const int poll_frequency_ms,
   const int num_tries,
   bool* exists)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && key != NULL && exists != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string key_str(key, key_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string key_str(key, key_length);
 
-  *exists = s->poll_key(key_str, poll_frequency_ms, num_tries);
+    *exists = s->poll_key(key_str, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_key
-extern "C" SRError poll_key(
-  void* c_client, const char* key, const size_t key_length,
-  const int poll_frequency_ms, const int num_tries, bool* exists)
-{
-  auto _poll_key = c_client_api(_poll_key_impl);
-  return _poll_key(
-    c_client, key, key_length, poll_frequency_ms, num_tries, exists);
-}
-
 
 // Delay until a model exists in the database
-static void _poll_model_impl(
+extern "C" SRError poll_model(
   void* c_client,
   const char* name, const size_t name_length,
   const int poll_frequency_ms,
   const int num_tries,
   bool* exists)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
 
-  *exists = s->poll_model(name_str, poll_frequency_ms, num_tries);
+    *exists = s->poll_model(name_str, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_model
-extern "C" SRError poll_model(
-  void* c_client, const char* name, const size_t name_length,
-  const int poll_frequency_ms, const int num_tries, bool* exists)
-{
-  auto _poll_model = c_client_api(_poll_model_impl);
-  return _poll_model(
-    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
-}
-
 
 // Delay until a tensor exists in the database
-static void _poll_tensor_impl(
+extern "C" SRError poll_tensor(
   void* c_client,
   const char* name, const size_t name_length,
   const int poll_frequency_ms,
   const int num_tries,
   bool* exists)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
 
-  *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
+    *exists = s->poll_tensor(name_str, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_tensor
-extern "C" SRError poll_tensor(
-  void* c_client, const char* name, const size_t name_length,
-  const int poll_frequency_ms, const int num_tries, bool* exists)
-{
-  auto _poll_tensor = c_client_api(_poll_tensor_impl);
-  return _poll_tensor(
-    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
-}
-
 
 // Delay until a dataset exists in the database
-static void _poll_dataset_impl(
+extern "C" SRError poll_dataset(
   void* c_client,
   const char* name, const size_t name_length,
   const int poll_frequency_ms,
   const int num_tries,
   bool* exists)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && exists != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string name_str(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string name_str(name, name_length);
 
-  *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
+    *exists = s->poll_dataset(name_str, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_dataset
-extern "C"
-SRError poll_dataset(
-  void* c_client, const char* name, const size_t name_length,
-  const int poll_frequency_ms, const int num_tries, bool* exists)
-{
-  auto _poll_dataset = c_client_api(_poll_dataset_impl);
-  return _poll_dataset(
-    c_client, name, name_length, poll_frequency_ms, num_tries, exists);
-}
-
 
 // Establish a data source
-static void _set_data_source_impl(
-  void* c_client, const char* source_id, const size_t source_id_length)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && source_id != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string source_id_str(source_id, source_id_length);
-
-  s->set_data_source(source_id_str);
-}
-// Public interface for set_data_source
 extern "C" SRError set_data_source(
   void* c_client, const char* source_id, const size_t source_id_length)
 {
-  auto _set_data_source = c_client_api(_set_data_source_impl);
-  return _set_data_source(c_client, source_id, source_id_length);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && source_id != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string source_id_str(source_id, source_id_length);
+
+    s->set_data_source(source_id_str);
+  });
 }
 
 // Control whether a model ensemble prefix is used
-static void _use_model_ensemble_prefix_impl(void* c_client, bool use_prefix)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->use_model_ensemble_prefix(use_prefix);
-}
-// Public interface for use_model_ensemble_prefix
 extern "C" SRError use_model_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  auto _use_model_ensemble_prefix
-    = c_client_api(_use_model_ensemble_prefix_impl);
-  return _use_model_ensemble_prefix(c_client, use_prefix);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_model_ensemble_prefix(use_prefix);
+  });
+}
 
 // Control whether a tensor ensemble prefix is used
-static void _use_tensor_ensemble_prefix_impl(void* c_client, bool use_prefix)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->use_tensor_ensemble_prefix(use_prefix);
-}
-// Public interface for use_tensor_ensemble_prefix
 extern "C" SRError use_tensor_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  auto _use_tensor_ensemble_prefix
-    = c_client_api(_use_tensor_ensemble_prefix_impl);
-  return _use_tensor_ensemble_prefix(c_client, use_prefix);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_tensor_ensemble_prefix(use_prefix);
+  });
+}
 
 // Control whether a dataset ensemble prefix is used
-static void _use_dataset_ensemble_prefix_impl(void* c_client, bool use_prefix)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->use_dataset_ensemble_prefix(use_prefix);
-}
-// Public interface for use_dataset_ensemble_prefix
 extern "C" SRError use_dataset_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  auto _use_dataset_ensemble_prefix
-    = c_client_api(_use_dataset_ensemble_prefix_impl);
-  return _use_dataset_ensemble_prefix(c_client, use_prefix);
-}
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
 
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_dataset_ensemble_prefix(use_prefix);
+  });
+}
 
 // Control whether aggregation lists are prefixed
-static void _use_list_ensemble_prefix_impl(void* c_client, bool use_prefix)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  s->use_list_ensemble_prefix(use_prefix);
-}
-// Public interface for use_list_ensemble_prefix
 extern "C" SRError use_list_ensemble_prefix(void* c_client, bool use_prefix)
 {
-  auto _use_list_ensemble_prefix
-    = c_client_api(_use_list_ensemble_prefix_impl);
-  return _use_list_ensemble_prefix(c_client, use_prefix);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    s->use_list_ensemble_prefix(use_prefix);
+  });
 }
 
-
 // Append a dataset to the aggregation list
-static void _append_to_list_impl(
+extern "C" SRError append_to_list(
   void* c_client,
   const char* list_name, const size_t list_name_length,
   const void* dataset)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL && dataset != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
-  std::string lname(list_name, list_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    const DataSet* d = reinterpret_cast<const DataSet*>(dataset);
+    std::string lname(list_name, list_name_length);
 
-  s->append_to_list(lname, *d);
+    s->append_to_list(lname, *d);
+  });
 }
-// Public interface for append_to_list
-extern "C" SRError append_to_list(
-  void* c_client, const char* list_name, const size_t list_name_length,
-  const void* dataset)
-{
-  auto _append_to_list = c_client_api(_append_to_list_impl);
-  return _append_to_list(c_client, list_name, list_name_length, dataset);
-}
-
 
 // Delete an aggregation list
-static void _delete_list_impl(
-  void* c_client, const char* list_name, const size_t list_name_length)
-{
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
-
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(list_name, list_name_length);
-
-  s->delete_list(lname);
-}
-// Public interface for append_to_list
 extern "C" SRError delete_list(
   void* c_client, const char* list_name, const size_t list_name_length)
 {
-  auto _delete_list = c_client_api(_delete_list_impl);
-  return _delete_list(c_client, list_name, list_name_length);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
+
+    s->delete_list(lname);
+  });
 }
 
-
 // Copy an aggregation list
-static void _copy_list_impl(
+extern "C" SRError copy_list(
   void* c_client,
   const char* src_name, const size_t src_name_length,
   const char* dest_name, const size_t dest_name_length)
 {
+  return MAKE_CLIENT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
@@ -1603,71 +1217,46 @@ static void _copy_list_impl(
     std::string dname(dest_name, dest_name_length);
 
     s->copy_list(sname, dname);
+  });
 }
-// Public interface for copy_list
-extern "C" SRError copy_list(
-  void* c_client, const char* src_name, const size_t src_name_length,
-  const char* dest_name, const size_t dest_name_length)
-{
-  auto _copy_list = c_client_api(_copy_list_impl);
-  return _copy_list(
-    c_client, src_name, src_name_length, dest_name, dest_name_length);
-}
-
 
 // Rename an aggregation list
-static void _rename_list_impl(
+extern "C" SRError rename_list(
   void* c_client,
   const char* src_name, const size_t src_name_length,
   const char* dest_name, const size_t dest_name_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && src_name != NULL && dest_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string sname(src_name, src_name_length);
-  std::string dname(dest_name, dest_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string sname(src_name, src_name_length);
+    std::string dname(dest_name, dest_name_length);
 
-  s->rename_list(sname, dname);
+    s->rename_list(sname, dname);
+  });
 }
-// Public interface for rename_list
-extern "C" SRError rename_list(
-  void* c_client, const char* src_name, const size_t src_name_length,
-  const char* dest_name, const size_t dest_name_length)
-{
-  auto _rename_list = c_client_api(_rename_list_impl);
-  return _rename_list(
-    c_client, src_name, src_name_length, dest_name, dest_name_length);
-}
-
 
 // Get the number of entries in the list
-static void _get_list_length_impl(
+extern "C" SRError get_list_length(
   void* c_client,
   const char* list_name, const size_t list_name_length,
   int* result_length)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(list_name, list_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
 
-  *result_length = s->get_list_length(lname);
+    *result_length = s->get_list_length(lname);
+  });
 }
-// Public interface for get_list_length
-extern "C" SRError get_list_length(
-  void* c_client, const char* list_name, const size_t list_name_length,
-  int* result_length)
-{
-  auto _get_list_length = c_client_api(_get_list_length_impl);
-  return _get_list_length(
-    c_client, list_name, list_name_length, result_length);
-}
-
 
 // Poll until list length is equal to the provided length
-static void _poll_list_length_impl(
+extern "C" SRError poll_list_length(
   void* c_client,
   const char* name, const size_t name_length,
   int list_length,
@@ -1675,29 +1264,20 @@ static void _poll_list_length_impl(
   int num_tries,
   bool* poll_result)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
 
-  *poll_result = s->poll_list_length(
-    lname, list_length, poll_frequency_ms, num_tries);
+    *poll_result = s->poll_list_length(
+      lname, list_length, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_list_length
-extern "C" SRError poll_list_length(
-  void* c_client, const char* name, const size_t name_length, int list_length,
-  int poll_frequency_ms, int num_tries, bool* poll_result)
-{
-  auto _poll_list_length = c_client_api(_poll_list_length_impl);
-  return _poll_list_length(
-    c_client, name, name_length, list_length, poll_frequency_ms,
-    num_tries, poll_result);
-}
-
 
 // Poll until list length is greater than or equal to the provided length
-static void _poll_list_length_gte_impl(
+extern "C" SRError poll_list_length_gte(
   void* c_client,
   const char* name, const size_t name_length,
   int list_length,
@@ -1705,29 +1285,20 @@ static void _poll_list_length_gte_impl(
   int num_tries,
   bool* poll_result)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
 
-  *poll_result = s->poll_list_length_gte(
-    lname, list_length, poll_frequency_ms, num_tries);
+    *poll_result = s->poll_list_length_gte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_list_length_gte
-extern "C" SRError poll_list_length_gte(
-  void* c_client, const char* name, const size_t name_length, int list_length,
-  int poll_frequency_ms, int num_tries, bool* poll_result)
-{
-  auto _poll_list_length_gte = c_client_api(_poll_list_length_gte_impl);
-  return _poll_list_length_gte(
-    c_client, name, name_length, list_length, poll_frequency_ms,
-    num_tries, poll_result);
-}
-
 
 // Poll list length until length is less than or equal to the provided length
-static void _poll_list_length_lte_impl(
+extern "C" SRError poll_list_length_lte(
   void* c_client,
   const char* name, const size_t name_length,
   int list_length,
@@ -1735,66 +1306,49 @@ static void _poll_list_length_lte_impl(
   int num_tries,
   bool* poll_result)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && name != NULL && poll_result != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(name, name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(name, name_length);
 
-  *poll_result = s->poll_list_length_lte(
-    lname, list_length, poll_frequency_ms, num_tries);
+    *poll_result = s->poll_list_length_lte(
+      lname, list_length, poll_frequency_ms, num_tries);
+  });
 }
-// Public interface for poll_list_length_lte
-extern "C" SRError poll_list_length_lte(
-  void* c_client, const char* name, const size_t name_length, int list_length,
-  int poll_frequency_ms, int num_tries, bool* poll_result)
-{
-  auto _poll_list_length_lte = c_client_api(_poll_list_length_lte_impl);
-  return _poll_list_length_lte(
-    c_client, name, name_length, list_length, poll_frequency_ms,
-    num_tries, poll_result);
-}
-
 
 // Get datasets from an aggregation list
-static void _get_datasets_from_list_impl(
+extern "C" SRError get_datasets_from_list(
   void* c_client,
   const char* list_name, const size_t list_name_length,
   void*** datasets,
   size_t* num_datasets)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                  datasets != NULL && num_datasets != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(list_name, list_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
 
-  std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
-  size_t ndatasets = result_datasets.size();
-  *datasets = NULL;
-  if (ndatasets > 0) {
-    DataSet** alloc = new DataSet*[ndatasets];
-    for (size_t i = 0; i < ndatasets; i++) {
-      alloc[i] = new DataSet(std::move(result_datasets[i]));
+    std::vector<DataSet> result_datasets = s->get_datasets_from_list(lname);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (ndatasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
     }
-    *datasets = (void**)alloc;
-  }
-  *num_datasets = ndatasets;
+    *num_datasets = ndatasets;
+  });
 }
-// Public interface for get_datasets_from_list
-extern "C" SRError get_datasets_from_list(
-  void* c_client, const char* list_name, const size_t list_name_length,
-  void*** datasets, size_t* num_datasets)
-{
-  auto _get_datasets_from_list = c_client_api(_get_datasets_from_list_impl);
-  return _get_datasets_from_list(
-    c_client, list_name, list_name_length, datasets, num_datasets);
-}
-
 
 // Get a range of datasets (by index) from an aggregation list
-static void _get_dataset_list_range_impl(
+extern "C" SRError get_dataset_list_range(
   void* c_client,
   const char* list_name, const size_t list_name_length,
   const int start_index,
@@ -1802,82 +1356,61 @@ static void _get_dataset_list_range_impl(
   void*** datasets,
   size_t* num_datasets)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                  datasets != NULL && num_datasets != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL && num_datasets != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(list_name, list_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
 
-  std::vector<DataSet> result_datasets = s->get_dataset_list_range(
-    lname, start_index, end_index);
-  size_t ndatasets = result_datasets.size();
-  *datasets = NULL;
-  if (*num_datasets > 0) {
-    DataSet** alloc = new DataSet*[ndatasets];
-    for (size_t i = 0; i < ndatasets; i++) {
-      alloc[i] = new DataSet(std::move(result_datasets[i]));
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t ndatasets = result_datasets.size();
+    *datasets = NULL;
+    if (*num_datasets > 0) {
+      DataSet** alloc = new DataSet*[ndatasets];
+      for (size_t i = 0; i < ndatasets; i++) {
+        alloc[i] = new DataSet(std::move(result_datasets[i]));
+      }
+      *datasets = (void**)alloc;
     }
-    *datasets = (void**)alloc;
-  }
-  *num_datasets = ndatasets;
+    *num_datasets = ndatasets;
+  });
 }
-// Public interface for get_dataset_list_range
-extern "C" SRError get_dataset_list_range(
-  void* c_client, const char* list_name, const size_t list_name_length,
-  const int start_index, const int end_index, void*** datasets,
-  size_t* num_datasets)
-{
-  auto _get_dataset_list_range = c_client_api(_get_dataset_list_range_impl);
-  return _get_dataset_list_range(
-    c_client, list_name, list_name_length, start_index, end_index, datasets,
-    num_datasets);
-}
-
 
 // Get a range of datasets (by index) from an aggregation list into an
 // already allocated vector of datasets
-static void __get_dataset_list_range_allocated_impl(
+extern "C" SRError _get_dataset_list_range_allocated(
   void* c_client,
   const char* list_name, const size_t list_name_length,
   const int start_index,
   const int end_index,
   void** datasets)
 {
-  // Sanity check params
-  SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
-                  datasets != NULL);
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(c_client != NULL && list_name != NULL &&
+                    datasets != NULL);
 
-  Client* s = reinterpret_cast<Client*>(c_client);
-  std::string lname(list_name, list_name_length);
+    Client* s = reinterpret_cast<Client*>(c_client);
+    std::string lname(list_name, list_name_length);
 
-  std::vector<DataSet> result_datasets = s->get_dataset_list_range(
-    lname, start_index, end_index);
-  size_t num_datasets = result_datasets.size();
-  if (num_datasets != (size_t)(end_index - start_index + 1)) {
-    throw SRInternalException(
-      "Returned dataset list is not equal to the requested range");
-  }
-
-  if (num_datasets > 0) {
-    for (size_t i = 0; i < num_datasets; i++) {
-      datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+    std::vector<DataSet> result_datasets = s->get_dataset_list_range(
+      lname, start_index, end_index);
+    size_t num_datasets = result_datasets.size();
+    if (num_datasets != (size_t)(end_index - start_index + 1)) {
+      throw SRInternalException(
+        "Returned dataset list is not equal to the requested range");
     }
-  }
-}
-// Public interface for _get_dataset_list_range_allocated
-extern "C"
-SRError _get_dataset_list_range_allocated(void* c_client, const char* list_name,
-                               const size_t list_name_length,
-                               const int start_index, const int end_index,
-                               void** datasets)
-{
-  auto __get_dataset_list_range_allocated = c_client_api(
-    __get_dataset_list_range_allocated_impl);
-  return __get_dataset_list_range_allocated(
-    c_client, list_name, list_name_length, start_index, end_index, datasets);
-}
 
+    if (num_datasets > 0) {
+      for (size_t i = 0; i < num_datasets; i++) {
+        datasets[i] = (void*)(new DataSet(std::move(result_datasets[i])));
+      }
+    }
+  });
+}
 
 // Retrieve a string representation of the client
 const char* client_to_string(void* c_client)
