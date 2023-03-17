@@ -5,6 +5,9 @@ Python
 Client API
 ==========
 
+Client Class Method Overview
+----------------------------
+
 .. currentmodule::  smartredis
 
 .. autosummary::
@@ -72,6 +75,8 @@ Client API
     Client.get_datasets_from_list
     Client.get_dataset_list_range
 
+Client Class Method Detailed View
+---------------------------------
 
 .. autoclass:: Client
    :members:
@@ -80,6 +85,9 @@ Client API
 
 DataSet API
 ===========
+
+Dataset Class Method Overview
+-----------------------------
 
 .. currentmodule::  smartredis
 
@@ -99,6 +107,9 @@ DataSet API
     Dataset.get_tensor_names
     Dataset.get_tensor_dims
 
+Dataset Class Method Detailed View
+----------------------------------
+
 .. autoclass:: Dataset
    :members:
    :show-inheritance:
@@ -106,25 +117,46 @@ DataSet API
 Logging API
 ===========
 
+The SmartRedis logging functionality is split across multiple classes as well
+as three standalone methods. All logging requires a context, which is the text
+that is attached to a log message so that when reading the log, one can tell
+which part of their program generated the log message. A context can be a
+Client object, a DataSet object, or a LogContext object (which only contains the
+string for identifying context); or it can be a simple text string. The three
+classes all derive from the SRObject class, which contains logging methods.
+Three standalone methods support logging against a string context.
+
+Logging Functionality Overview
+------------------------------
+
 .. currentmodule::  smartredis
 
 .. autosummary::
 
-    LogContext.__init__
     SRObject.log_data
     SRObject.log_warning
     SRObject.log_error
+    LogContext.__init__
     log_data
     log_warning
     log_error
+
+LogContext Class Method Detailed View
+-------------------------------------
 
 .. autoclass:: LogContext
    :members:
    :show-inheritance:
 
+SRObject Class Method Detailed View
+-----------------------------------
+
 .. autoclass:: SRObject
    :members:
    :show-inheritance:
+
+Standalone Logging Method Detailed View
+---------------------------------------
 
 .. autofunction:: log_data
 
