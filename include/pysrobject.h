@@ -75,7 +75,7 @@ class PySRObject
         *          SmartRedis::SRObject object
         *   \returns SRObject pointer within PySRObject
         */
-        SRObject* get();
+        SRObject* get() { return _srobject; }
 
         /*!
         *   \brief Conditionally log data if the logging level is high enough
