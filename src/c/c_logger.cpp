@@ -128,7 +128,7 @@ extern "C" void log_error_noexcept(
 
 // Conditionally log data if the logging level is high enough
 // (exception-free variant)
-extern "C" void _log_data_noexcept_string(
+extern "C" void log_data_noexcept_string(
     const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
@@ -144,7 +144,7 @@ extern "C" void _log_data_noexcept_string(
 
 // Conditionally log a warning if the logging level is high enough
 // (exception-free variant)
-extern "C" void _log_warning_noexcept_string(
+extern "C" void log_warning_noexcept_string(
     const char* context, size_t context_len,
     SRLoggingLevel level,
     const char* data,
