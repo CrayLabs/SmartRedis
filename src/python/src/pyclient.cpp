@@ -70,7 +70,6 @@ auto pb_client_api(T&& client_api_func, const char* name)
     pb_client_api([&] { stuff }, __func__)()
 
 
-
 PyClient::PyClient(bool cluster, const std::string& logger_name)
     : PySRObject(logger_name)
 {
