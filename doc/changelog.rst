@@ -12,6 +12,7 @@ This section details changes made in the development branch that have not yet be
 
 Description
 
+- Disable codecov CI tests
 - Streamlined PyBind interface layer
 - Updated Python API documentation
 - Streamlined C interface layer
@@ -43,6 +44,7 @@ Description
 
 Detailed Notes
 
+- Remove codecov thresholds to avoid commits being marked as 'failed' due to coverage variance (PR317_)
 - Streamlined PyBind interface layer to reduce repetitive boilerplate code (PR315_)
 - Updated Python API summary table to include new methods (PR313_)
 - Streamlined C interface layer to reduce repetitive boilerplate code (PR312_)
@@ -76,6 +78,7 @@ Detailed Notes
 - Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
 - A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
 
+.. _PR317: https://github.com/CrayLabs/SmartRedis/pull/317
 .. _PR315: https://github.com/CrayLabs/SmartRedis/pull/315
 .. _PR313: https://github.com/CrayLabs/SmartRedis/pull/313
 .. _PR312: https://github.com/CrayLabs/SmartRedis/pull/312
