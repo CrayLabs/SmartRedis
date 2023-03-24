@@ -351,7 +351,8 @@ const char* dataset_to_string(void* dataset)
     result = e.what();
   }
   catch (...) {
-    result = "Unknown exception occurred";
+    result = "A non-standard exception was encountered while executing ";
+    result += __func__;
     SRSetLastError(SRInternalException(result));
   }
 
