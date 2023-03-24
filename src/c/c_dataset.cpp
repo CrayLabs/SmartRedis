@@ -353,7 +353,6 @@ const char* dataset_to_string(void* dataset)
   catch (...) {
     result = "Unknown exception occurred";
     SRSetLastError(SRInternalException(result));
-    result = SRInternalError;
   }
 
   return result.c_str();

@@ -1431,7 +1431,6 @@ const char* client_to_string(void* c_client)
   catch (...) {
     result = "Unknown exception occurred";
     SRSetLastError(SRInternalException(result));
-    result = SRInternalError;
   }
 
   return result.c_str();
