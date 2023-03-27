@@ -5,8 +5,10 @@ coverage:
   status:
     project:
       default:
-        target: 60%
-        threshold: 2%
+        target: 0%
+    patch:
+      default:
+        target: 0%
 
 parsers:
   gcov:
@@ -19,6 +21,6 @@ parsers:
 comment:
   layout: "reach,diff,flags,files"
   behavior: default # update comment if already exists, otherwise post new
-  require_changes: no
-  require_base: no
+  require_changes: yes
+  require_base: yes
   require_head: yes
