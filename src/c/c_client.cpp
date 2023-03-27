@@ -1429,9 +1429,9 @@ const char* client_to_string(void* c_client)
     result = e.what();
   }
   catch (...) {
-    result = "Unknown exception occurred";
+    result = "A non-standard exception was encountered while executing ";
+    result += __func__;
     SRSetLastError(SRInternalException(result));
-    result = SRInternalError;
   }
 
   return result.c_str();
