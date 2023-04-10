@@ -56,14 +56,14 @@ Below is an example of the creation of a SmartRedis Dataset and addition of tens
 .. code-block:: python
 
     ds1 = Dataset("ds-1d")
-    dataset.add_tensor("1ddata",data1d)
-    dataset.add_tensor("x",longitude_1d)
-    dataset.add_meta_string("x_coord_units",'degrees E')
-    dataset.add_meta_string("x_coord_longname",'Longitude')
-    dataset.add_meta_string("units",'m/s')
-    dataset.add_meta_string("longname",'velocity')
-    dataset.add_meta_string("convention",'CF1.5')
-    dataset.add_meta_string("dim_data_x","x")
+    dataset.add_tensor("1ddata", data1d)
+    dataset.add_tensor("x", longitude_1d)
+    dataset.add_meta_string("x_coord_units", "degrees E")
+    dataset.add_meta_string("x_coord_longname", "Longitude")
+    dataset.add_meta_string("units", "m/s")
+    dataset.add_meta_string("longname", "velocity")
+    dataset.add_meta_string("convention", "CF1.5")
+    dataset.add_meta_string("dim_data_x", "x")
 
 Below is an example of the ``add_metadata_for_xarray()`` method calls to pass in field names of data and
 metadata of the created SmartRedis Dataset under the appropriate parameter names for the creation of
@@ -77,14 +77,14 @@ the tensor data variable for the Xarray object and the coordinate data variable 
         data_names=["1ddata"],
         dim_names=["dim_data_x"],
         coord_names=["x"],
-        attr_names=["units","longname","convention"]
+        attr_names=["units", "longname", "convention"]
     )
     # Calling method add_metadata_for_xarray for longitude coordinate
     DatasetConverter.add_metadata_for_xarray(
         ds1,
         data_names=["x"],
         dim_names=["dim_data_x"],
-        attr_names=["x_coord_units","x_coord_longname"]
+        attr_names=["x_coord_units", "x_coord_longname"]
     )
 
 The ``add_metadata_for_xarray()`` method has the ability to define the coordinates of each dimension of a tensor added to the dataset
