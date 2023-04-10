@@ -34,12 +34,12 @@ If you wish to run tests on GPU hardware, run the following command:
 
 .. note::
 
-  The tests require
+  The tests require:
    - GCC > 5
-   - CMake > 3
+   - CMake > 3.13
 
   Since these are usually system libraries, we do not install them
-  for the user
+  for the user.
 
 After installing dependencies and setting up your testing environment with
 ``setup_test_env.sh``, all tests can be built with the following command:

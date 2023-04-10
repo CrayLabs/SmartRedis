@@ -1,17 +1,17 @@
 Changelog
 =========
 
-Development branch
-------------------
+0.4.0
+-----
 
-To be released at some future date
-
-Note
-
-This section details changes made in the development branch that have not yet been applied to a released version of the SmartRedis library.
+Released on April 12, 2023
 
 Description
 
+This release provides a variety of features to improve usability and debugging
+of the SmartRedis library, notably including Unix domain socket support, logging,
+the ability to print a textual representation of a string or dataset, dataset
+inspection, documentation updates, fixes to the multi-GPU support, and much more:
 
 - Disable codecov CI tests
 - Improved error message in to_string methods in C interface
