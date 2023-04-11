@@ -221,6 +221,15 @@ class Redis : public RedisServer
         virtual CommandReply get_tensor(const std::string& key);
 
         /*!
+        *   \brief Get a list of Tensor from the server
+        *   \param keys The keys of the tensor to retrieve
+        *   \returns The PipelineReply from executing the get tensor commands
+        *   \throw SmartRedis::Exception if tensor retrieval fails
+        */
+        virtual PipelineReply get_tensors(
+            const std::vector<std::string>& keys);
+
+        /*!
         *   \brief Rename a tensor in the database
         *   \param key The original key for the tensor
         *   \param new_key The new key for the tensor
@@ -497,6 +506,14 @@ class Redis : public RedisServer
                                  const bool reset_stat);
 
         /*!
+        *   \brief Run a CommandList via a Pipeline
+        *   \param cmdlist The list of commands to run
+        *   \returns The PipelineReply with the result of command execution
+        *   \throw SmartRedis::Exception if execution fails
+        */
+        PipelineReply run_in_pipeline(CommandList& cmdlist);
+
+        /*!
         *   \brief Create a string representation of the Redis connection
         *   \returns A string representation of the Redis connection
         */
@@ -512,8 +529,7 @@ class Redis : public RedisServer
         /*!
         *   \brief Run a Command on the server
         *   \param cmd The Command to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
         *   \throw SmartRedis::Exception if command execution fails
         */
         inline CommandReply _run(const Command& cmd);
@@ -530,6 +546,15 @@ class Redis : public RedisServer
         *   \throw SmartRedis::Exception if connection fails
         */
         inline void _connect(SRAddress& db_address);
+
+        /*!
+        *   \brief Pipeline execute a series of commands
+        *   \param cmds The commands to execute
+        *   \returns Pipeline reply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
+        */
+        PipelineReply _run_pipeline(std::vector<Command*>& cmds);
+
 };
 
 } // namespace SmartRedis

@@ -1304,7 +1304,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAtCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1314,7 +1314,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(AddressAnyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1324,7 +1324,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(SingleKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1334,7 +1334,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(MultiKeyCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1344,7 +1344,7 @@ class Client : public SRObject
         */
         inline CommandReply _run(CompoundCommand& cmd)
         {
-            return this->_redis_server->run(cmd);
+            return _redis_server->run(cmd);
         }
 
         /*!
@@ -1354,7 +1354,7 @@ class Client : public SRObject
         */
         inline std::vector<CommandReply> _run(CommandList& cmd_list)
         {
-            return this->_redis_server->run(cmd_list);
+            return _redis_server->run(cmd_list);
         }
 
         /*!
@@ -1415,20 +1415,21 @@ class Client : public SRObject
                                 const int start_index,
                                 const int end_index);
 
+
+        // Add a retrieved tensor to a dataset
         /*!
-        *  \brief Retrieve a tensor and add it to the dataset object
-        *  \param dataset The dataset which will be augmented with the
-        *                 retrieved tensor
-        *  \param name The name (not key) of the tensor to retrieve and add
+        *  \brief Add a tensor retrieved via get_tensor() to a dataset
+        *  \param dataset The dataset which will receive the tensor
+        *  \param name The name by which the tensor shall be added
         *              to the dataset
-        *  \param key The key (not name) of the tensor to retrieve and add
-        *             to the dataset
-        *   \throw SmartRedis::Exception if retrieval or addition
-        *          of tensor fails
+        *   \param tensor_data get_tensor command reply containing
+        *                      tensor data
+        *   \throw SmartRedis::Exception if addition of tensor fails
         */
-        inline void _get_and_add_dataset_tensor(DataSet& dataset,
-                                                const std::string& name,
-                                                const std::string& key);
+       inline void _add_dataset_tensor(
+            DataSet& dataset,
+            const std::string& name,
+            CommandReply tensor_data);
 
         /*!
         *   \brief Retrieve the tensor from the DataSet and return

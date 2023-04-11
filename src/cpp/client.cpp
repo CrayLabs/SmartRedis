@@ -27,6 +27,7 @@
  */
 
 #include <ctype.h>
+#include <algorithm>
 #include "client.h"
 #include "srexception.h"
 #include "logger.h"
@@ -88,7 +89,7 @@ void Client::put_dataset(DataSet& dataset)
     _append_dataset_metadata_commands(cmds, dataset);
     _append_dataset_tensor_commands(cmds, dataset);
     _append_dataset_ack_command(cmds, dataset);
-    _run(cmds);
+    _redis_server->run_in_pipeline(cmds);
 }
 
 // Retrieve a DataSet object from the database
@@ -109,15 +110,25 @@ DataSet Client::get_dataset(const std::string& name)
     DataSet dataset(name);
     _unpack_dataset_metadata(dataset, reply);
 
+    // Build the tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    if (tensor_names.size() == 0)
+        return dataset; // If no tensors, we're done
+    std::vector<std::string> tensor_keys;
+    std::transform(
+        tensor_names.cbegin(),
+        tensor_names.cend(),
+        std::back_inserter(tensor_keys),
+        [this, name](std::string s){
+            return _build_dataset_tensor_key(name, s, true);
+        });
 
-    // Retrieve DataSet tensors and fill the DataSet object
+    // Retrieve DataSet tensors
+    PipelineReply tensors = _redis_server->get_tensors(tensor_keys);
+
+    // Put them into the dataset
     for (size_t i = 0; i < tensor_names.size(); i++) {
-        // Build the tensor key
-        std::string tensor_key =
-            _build_dataset_tensor_key(name, tensor_names[i], true);
-        // Retrieve tensor and add it to the dataset
-        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_key);
+        _add_dataset_tensor(dataset, tensor_names[i], tensors[i]);
     }
 
     return dataset;
@@ -167,7 +178,7 @@ void Client::copy_dataset(const std::string& src_name,
     CommandList put_meta_cmds;
     _append_dataset_metadata_commands(put_meta_cmds, dataset);
     _append_dataset_ack_command(put_meta_cmds, dataset);
-    (void)_run(put_meta_cmds);
+    (void)_redis_server->run_in_pipeline(put_meta_cmds);
 }
 
 // Delete a DataSet from the database.
@@ -1422,7 +1433,7 @@ void Client::copy_list(const std::string& src_name,
         copy_cmd.add_field_ptr(reply[i].str(), reply[i].str_len());
     }
 
-    CommandReply copy_reply = this->_run(copy_cmd);
+    CommandReply copy_reply = _run(copy_cmd);
 
     if (reply.has_error() > 0)
         throw SRRuntimeException("Dataset aggregation list copy "
@@ -1652,18 +1663,16 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     return _run(cmd);
 }
 
-// Retrieve a tensor and add it to the dataset
-inline void Client::_get_and_add_dataset_tensor(DataSet& dataset,
-                                                const std::string& name,
-                                                const std::string& key)
+// Add a retrieved tensor to a dataset
+inline void Client::_add_dataset_tensor(
+    DataSet& dataset,
+    const std::string& name,
+    CommandReply tensor_data)
 {
-    // Run tensor retrieval command
-    CommandReply reply = _redis_server->get_tensor(key);
-
     // Extract tensor properties from command reply
-    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
-    std::string_view blob = GetTensorCommand::get_data_blob(reply);
-    SRTensorType type = GetTensorCommand::get_data_type(reply);
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(tensor_data);
+    std::string_view blob = GetTensorCommand::get_data_blob(tensor_data);
+    SRTensorType type = GetTensorCommand::get_data_type(tensor_data);
 
     // Add tensor to the dataset
     dataset._add_to_tensorpack(name, (void*)blob.data(), reply_dims,
