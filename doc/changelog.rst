@@ -1,6 +1,124 @@
 Changelog
 =========
 
+0.4.0
+-----
+
+Released on April 12, 2023
+
+Description
+
+This release provides a variety of features to improve usability and debugging
+of the SmartRedis library, notably including Unix domain socket support, logging,
+the ability to print a textual representation of a string or dataset, dataset
+inspection, documentation updates, fixes to the multi-GPU support, and much more:
+
+- Prepare 0.4.0 release
+- Disable codecov CI tests
+- Improved error message in to_string methods in C interface
+- Streamlined PyBind interface layer
+- Updated Python API documentation
+- Streamlined C interface layer
+- Improved performance of get, put, and copy dataset methods
+- Fix a bug which prevented multi-GPU model set in some cases
+- Streamline pipelined execution of tasks for backend database
+- Enhance code coverage to include all 4 languages supported by SmartRedis
+- Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
+- Correct assorted API documentation errors
+- Improve documentation of exception handling in Redis server classes
+- Improve error handling for setting of scripts and models
+- Add support to inspect the dimensions of a tensor via get_tensor_dims()
+- Split dataset prefixing control from use_tensor_ensemble_prefix() to use_dataset_ensemble_prefix()
+- Update to the latest version of redis-plus-plus
+- Update to the latest version of PyBind
+- Change documentation theme to sphinx_book_theme and fix doc strings
+- Add print capability for Client and DataSet
+- Add support for inspection of tensors and metadata inside datasets
+- Add support for user-directed logging for Python clients, using Client, Dataset, or LogContext logging methods
+- Add support for user-directed logging for C and Fortran clients without a Client or Dataset context
+- Additional error reporting for connections to and commands run against Redis databases
+- Improved error reporting capabilities for Fortran clients
+- Python error messages from SmartRedis contain more information
+- Added logging functionality to the SmartRedis library
+- A bug related to thread pool initialization was fixed.
+- This version adds new functionality in the form of support for Unix Domain Sockets.
+- Fortran client can now be optionally built with the rest of the library
+- Initial support for dataset conversions, specifically Xarray.
+
+Detailed Notes
+
+- Update docs and version numbers in preparation for version 0.4.0. Clean up duplicate marking of numpy dependency (PR321_)
+- Remove codecov thresholds to avoid commits being marked as 'failed' due to coverage variance (PR317_)
+- Corrected the error message in to_string methods in C interface to not overwrite the returned error message and to name the function (PR320_)
+- Streamlined PyBind interface layer to reduce repetitive boilerplate code (PR315_)
+- Updated Python API summary table to include new methods (PR313_)
+- Streamlined C interface layer to reduce repetitive boilerplate code (PR312_)
+- Leveraged Redis pipelining to improve performance of get, put, and copy dataset methods (PR311_)
+- Redis::set_model_multigpu() will now upload the correct model to all GPUs (PR310_)
+- RedisCluster::_run_pipeline() will no longer unconditionally apply a retry wait before returning (PR309_)
+- Expand code coverage to all four languages and make the CI/CD more efficent (PR308_)
+- An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
+- Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
+- Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
+- Added error handling for a rare edge condition when setting scripts and models (PR300_)
+- Added support to inspect the dimensions of a tensor via new get_tensor_dims() method (PR299_)
+- The use_tensor_ensemble_prefix() API method no longer controls whether datasets are prefixed. A new API method, use_dataset_ensemble_prefix() now manages this. (PR298_)
+- Updated from redis-plus-plus v1.3.2 to v1.3.5 (PR296_)
+- Updated from PyBind v2.6.2 to v2.10.3 (PR295_)
+- Change documentation theme to sphinx_book_theme to match SmartSim documentation theme and fix Python API doc string errors (PR294_)
+- Added print capability for Client and DataSet to give details diagnostic information for debugging (PR293_)
+- Added support for retrieval of names and types of tensors and metadata inside datasets (PR291_)
+- Added support for user-directed logging for Python clients via {Client, Dataset, LogContext}.{log_data, log_warning, log_error} methods (PR289_)
+- Added support for user-directed logging without a Client or Dataset context to C and Fortran clients via _string() methods (PR288_)
+- Added logging to capture transient errors that arise in the _run() and _connect() methods of the Redis and RedisCluster classes (PR287_)
+- Tweak direct testing of Redis and RedisCluster classes (PR286_)
+- Resolve a disparity in the construction of Python client and database classes (PR285_)
+- Fortran clients can now access error text and source location (PR284_)
+- Add exception location information from CPP code to Python exceptions (PR283_)
+- Added client activity and manual logging for developer use (PR281_)
+- Fix thread pool error (PR280_)
+- Update library linking instructions and update Fortran tester build process (PR277_)
+- Added `add_metadata_for_xarray` and `transform_to_xarray` methods in `DatasetConverter` class for initial support with Xarray (PR262_)
+- Change Dockerfile to use Ubuntu 20.04 LTS image (PR276_)
+- Implemented support for Unix Domain Sockets, including refactorization of server address code, test cases, and check-in tests. (PR252_)
+- A new make target `make lib-with-fortran` now compiles the Fortran client and dataset into its own library which applications can link against (PR245_)
+
+.. _PR321: https://github.com/CrayLabs/SmartRedis/pull/321
+.. _PR317: https://github.com/CrayLabs/SmartRedis/pull/317
+.. _PR315: https://github.com/CrayLabs/SmartRedis/pull/320
+.. _PR315: https://github.com/CrayLabs/SmartRedis/pull/315
+.. _PR313: https://github.com/CrayLabs/SmartRedis/pull/313
+.. _PR312: https://github.com/CrayLabs/SmartRedis/pull/312
+.. _PR311: https://github.com/CrayLabs/SmartRedis/pull/311
+.. _PR310: https://github.com/CrayLabs/SmartRedis/pull/310
+.. _PR309: https://github.com/CrayLabs/SmartRedis/pull/309
+.. _PR308: https://github.com/CrayLabs/SmartRedis/pull/308
+.. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
+.. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
+.. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
+.. _PR300: https://github.com/CrayLabs/SmartRedis/pull/300
+.. _PR299: https://github.com/CrayLabs/SmartRedis/pull/299
+.. _PR298: https://github.com/CrayLabs/SmartRedis/pull/298
+.. _PR296: https://github.com/CrayLabs/SmartRedis/pull/296
+.. _PR295: https://github.com/CrayLabs/SmartRedis/pull/295
+.. _PR294: https://github.com/CrayLabs/SmartRedis/pull/294
+.. _PR293: https://github.com/CrayLabs/SmartRedis/pull/293
+.. _PR291: https://github.com/CrayLabs/SmartRedis/pull/291
+.. _PR289: https://github.com/CrayLabs/SmartRedis/pull/289
+.. _PR288: https://github.com/CrayLabs/SmartRedis/pull/288
+.. _PR287: https://github.com/CrayLabs/SmartRedis/pull/287
+.. _PR286: https://github.com/CrayLabs/SmartRedis/pull/286
+.. _PR285: https://github.com/CrayLabs/SmartRedis/pull/285
+.. _PR284: https://github.com/CrayLabs/SmartRedis/pull/284
+.. _PR283: https://github.com/CrayLabs/SmartRedis/pull/283
+.. _PR281: https://github.com/CrayLabs/SmartRedis/pull/281
+.. _PR280: https://github.com/CrayLabs/SmartRedis/pull/280
+.. _PR277: https://github.com/CrayLabs/SmartRedis/pull/277
+.. _PR262: https://github.com/CrayLabs/SmartRedis/pull/262
+.. _PR276: https://github.com/CrayLabs/SmartRedis/pull/276
+.. _PR252: https://github.com/CrayLabs/SmartRedis/pull/252
+.. _PR245: https://github.com/CrayLabs/SmartRedis/pull/245
+
 0.3.1
 -----
 

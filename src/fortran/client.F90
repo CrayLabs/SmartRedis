@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,8 @@ use iso_c_binding, only : c_loc, c_f_pointer
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
 use smartredis_dataset, only : dataset_type
-use fortran_c_interop, only : convert_char_array_to_c, enum_kind
+use fortran_c_interop, only : convert_char_array_to_c, enum_kind, C_MAX_STRING
+
 
 implicit none; private
 
@@ -47,11 +48,13 @@ implicit none; private
 #include "client/client_dataset_interfaces.inc"
 #include "client/ensemble_interfaces.inc"
 #include "client/aggregation_interfaces.inc"
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
                     !! users do not have to import the iso_c_binding module into their
                     !! programs
+
 
 !> Stores all data and methods associated with the SmartRedis client that is used to communicate with the database
 type, public :: client_type
@@ -78,6 +81,8 @@ type, public :: client_type
   procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
   procedure :: destructor
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
   !> Check the database for the existence of a specific model
   procedure :: model_exists
   !> Check the database for the existence of a specific tensor
@@ -149,6 +154,8 @@ type, public :: client_type
 
   !> If true, preprend the ensemble id for tensor-related keys
   procedure :: use_tensor_ensemble_prefix
+  !> If true, preprend the ensemble id for dataset-related keys
+  procedure :: use_dataset_ensemble_prefix
   !> If true, preprend the ensemble id for model-related keys
   procedure :: use_model_ensemble_prefix
   !> If true, preprend the ensemble id for dataset list-related keys
@@ -172,8 +179,14 @@ type, public :: client_type
   procedure :: poll_list_length_gte
   !> Repeatedly check the length of the list until it less than or equal to the given size
   procedure :: poll_list_length_lte
-  !> Retrieve vector of datasetes from the list
+  !> Retrieve vector of datasets from the list
   procedure :: get_datasets_from_list
+  !> Retrieve vector of datasets from the list over a given range
+  procedure :: get_datasets_from_list_range
+  !> Retrieve a string representation of the client
+  procedure :: to_string
+  !> Print a string representation of the client
+  procedure :: print_client
 
   ! Private procedures
   procedure, private :: put_tensor_i8
@@ -200,39 +213,56 @@ function SR_error_parser(self, response_code) result(is_error)
   logical                              :: is_error      !< Indicates whether this is an error response
 
   is_error = .true.
-  select case (response_code)
-    case(SRNoError)
-      is_error = .false.
-    case(SRBadAllocError)
-      write(stderr,*) "Memory allocation error"
-    case(SRDatabaseError)
-      write(stderr,*) "Backend database error"
-    case(SRInternalError)
-      write(stderr,*) "Internal SmartRedis error"
-    case(SRRuntimeError)
-      write(stderr,*) "Runtime error executing an operation"
-    case(SRParameterError)
-      write(stderr,*) "Bad parameter error"
-    case(SRTimeoutError)
-      write(stderr,*) "Timeout error"
-    case(SRKeyError)
-      write(stderr,*) "Key error"
-    case(SRTypeError)
-      write(stderr,*) "Type mismatch error"
-    case default
-       write(stderr,*) "Invalid or uninitialized response code"
-  end select
+  if (self%isinitialized()) then
+    select case (response_code)
+      case(SRNoError)
+        is_error = .false.
+      case(SRBadAllocError)
+        write(stderr,*) "Memory allocation error"
+      case(SRDatabaseError)
+        write(stderr,*) "Backend database error"
+      case(SRInternalError)
+        write(stderr,*) "Internal SmartRedis error"
+      case(SRRuntimeError)
+        write(stderr,*) "Runtime error executing an operation"
+      case(SRParameterError)
+        write(stderr,*) "Bad parameter error"
+      case(SRTimeoutError)
+        write(stderr,*) "Timeout error"
+      case(SRKeyError)
+        write(stderr,*) "Key error"
+      case(SRTypeError)
+        write(stderr,*) "Type mismatch error"
+      case default
+        write(stderr,*) "Invalid or uninitialized response code"
+    end select
+  else
+    write(stderr,*) "SmartRedis Client has not been initialized"
+  endif
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster)
-  integer(kind=enum_kind)           :: initialize_client
-  class(client_type), intent(inout) :: self    !< Receives the initialized client
-  logical, optional,  intent(in   ) :: cluster !< If true, client uses a database cluster (Default: .false.)
+function initialize_client(self, cluster, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client
+  class(client_type),         intent(inout)   :: self      !< Receives the initialized client
+  logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
+
+  if (present(logger_name)) then
+    c_logger_name = logger_name
+  else
+    c_logger_name = 'default'
+  endif
+  logger_name_length = len_trim(c_logger_name)
 
   if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, self%client_ptr)
+  initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
   self%is_initialized = initialize_client .eq. SRNoError
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
 end function initialize_client
 
 !> Check whether the client has been initialized
@@ -249,6 +279,13 @@ function destructor(self)
   destructor = c_destructor(self%client_ptr)
   self%client_ptr = C_NULL_PTR
 end function destructor
+
+!> Access the raw C pointer for the client
+function get_c_pointer(self)
+  type(c_ptr)                    :: get_c_pointer
+  class(client_type), intent(in) :: self
+  get_c_pointer = self%client_ptr
+end function get_c_pointer
 
 !> Check if the specified key exists in the database
 function key_exists(self, key, exists)
@@ -669,7 +706,7 @@ function get_model(self, name, model) result(code)
   integer(kind=c_size_t) :: name_length, model_length
   character(kind=c_char), dimension(:), pointer :: f_str_ptr
   type(c_ptr) :: c_str_ptr
-  integer :: i
+  integer(kind=c_size_t) :: i
 
   c_name = trim(name)
   name_length = len_trim(name)
@@ -707,7 +744,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   character(kind=c_char, len=len_trim(device)) :: c_device
   character(kind=c_char, len=:), allocatable :: c_tag
 
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
   character(kind=c_char,len=1), target, dimension(1) :: dummy_inputs, dummy_outputs
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
@@ -716,9 +753,6 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   integer(kind=c_int)    :: c_batch_size, c_min_batch_size
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   ! Set default values for the optional inputs
   c_batch_size = 0
@@ -748,21 +782,24 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
 
   dummy_inputs = ''
   if (present(inputs)) then
-    call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
-                                  n_inputs)
+    code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, &
+                                        input_lengths_ptr, n_inputs)
   else
-    call convert_char_array_to_c(dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr,&
-                                  n_inputs)
+    code = convert_char_array_to_c(dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, &
+                                 input_lengths_ptr, n_inputs)
   endif
+
+  if (code /= SRNoError) return
 
   dummy_outputs =''
   if (present(outputs)) then
-    call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, output_lengths_ptr,&
-                                  n_outputs)
+    code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                   output_lengths_ptr, n_outputs)
   else
-    call convert_char_array_to_c(dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
-                                  output_lengths_ptr, n_outputs)
+    code = convert_char_array_to_c(dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                   output_lengths_ptr, n_outputs)
   endif
+  if (code /= SRNoError) return
 
   code = set_model_from_file_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
@@ -800,7 +837,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   character(kind=c_char, len=len_trim(backend)) :: c_backend
   character(kind=c_char, len=:), allocatable :: c_tag
 
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
   character(kind=c_char,len=1), target, dimension(1) :: dummy_inputs, dummy_outputs
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
@@ -809,9 +846,6 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   ! Set default values for the optional inputs
   c_batch_size = 0
@@ -843,21 +877,23 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 
   dummy_inputs = ''
   if (present(inputs)) then
-    call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+    code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                   n_inputs)
   else
-    call convert_char_array_to_c(dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr,&
-                                  n_inputs)
+    code = convert_char_array_to_c(dummy_inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, &
+                                   input_lengths_ptr, n_inputs)
   endif
+  if (code /= SRNoError) return
 
   dummy_outputs =''
   if (present(outputs)) then
-    call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, output_lengths_ptr,&
-                                  n_outputs)
+    code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                   output_lengths_ptr, n_outputs)
   else
-    call convert_char_array_to_c(dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+    code = convert_char_array_to_c(dummy_outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                   output_lengths_ptr, n_outputs)
   endif
+  if (code /= SRNoError) return
 
   code = set_model_from_file_multigpu_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, &
@@ -894,7 +930,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   character(kind=c_char, len=len_trim(device)) :: c_device
   character(kind=c_char, len=len_trim(tag)) :: c_tag
 
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, device_length, tag_length, n_inputs, &
@@ -902,9 +938,6 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   integer(kind=c_int)    :: c_batch_size, c_min_batch_size
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   c_name = trim(name)
   c_model = trim(model)
@@ -919,10 +952,12 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   tag_length = len_trim(tag)
 
   ! Copy the input array into a c_char
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                 n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   ! Cast the batch sizes to C integers
   c_batch_size = batch_size
@@ -962,16 +997,13 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
   character(kind=c_char, len=len_trim(backend)) :: c_backend
   character(kind=c_char, len=len_trim(tag)) :: c_tag
 
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, tag_length, n_inputs, n_outputs
   integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   c_name = trim(name)
   c_model = trim(model)
@@ -984,10 +1016,12 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
   tag_length = len_trim(tag)
 
   ! Copy the input array into a c_char
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
-                                n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
-                                output_lengths_ptr, n_outputs)
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+                                 n_inputs)
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   ! Cast the batch sizes to C integers
   c_batch_size = batch_size
@@ -1017,23 +1051,22 @@ function run_model(self, name, inputs, outputs) result(code)
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, name_length
   type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
-  integer :: i
-  integer :: max_length, length
-
   c_name = trim(name)
   name_length = len_trim(name)
 
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                 n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   code = run_model_c(self%client_ptr, c_name, name_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
                           output_lengths_ptr, n_outputs)
@@ -1060,7 +1093,7 @@ function run_model_multigpu(self, name, inputs, outputs, offset, first_gpu, num_
 
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(kind=c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, name_length
@@ -1068,16 +1101,15 @@ function run_model_multigpu(self, name, inputs, outputs, offset, first_gpu, num_
   type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
-  integer :: i
-  integer :: max_length, length
-
   c_name = trim(name)
   name_length = len_trim(name)
 
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                 n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   ! Cast to c integer
   c_offset = offset
@@ -1143,7 +1175,7 @@ function get_script(self, name, script) result(code)
   integer(kind=c_size_t) :: name_length, script_length
   character(kind=c_char), dimension(:), pointer :: f_str_ptr
   type(c_ptr) :: c_str_ptr
-  integer :: i
+  integer(kind=c_size_t) :: i
 
   c_name = trim(name)
   name_length = len_trim(name)
@@ -1201,7 +1233,6 @@ function set_script_from_file_multigpu(self, name, script_file, first_gpu, num_g
 
   integer(kind=c_size_t) :: name_length
   integer(kind=c_size_t) :: script_file_length
-  integer(kind=c_size_t) :: device_length
   integer(kind=c_int)    :: c_first_gpu, c_num_gpus
 
   c_name = trim(name)
@@ -1260,7 +1291,6 @@ function set_script_multigpu(self, name, script, first_gpu, num_gpus) result(cod
 
   integer(kind=c_size_t) :: name_length
   integer(kind=c_size_t) :: script_length
-  integer(kind=c_size_t) :: device_length
   integer(kind=c_int)    :: c_first_gpu, c_num_gpus
 
   c_name = trim(name)
@@ -1286,15 +1316,12 @@ function run_script(self, name, func, inputs, outputs) result(code)
   ! Local variables
   character(kind=c_char, len=len_trim(name)) :: c_name
   character(kind=c_char, len=len_trim(func)) :: c_func
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), allocatable, target :: c_inputs(:), c_outputs(:)
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, name_length, func_length
   type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   c_name  = trim(name)
   c_func = trim(func)
@@ -1302,10 +1329,12 @@ function run_script(self, name, func, inputs, outputs) result(code)
   name_length = len_trim(name)
   func_length = len_trim(func)
 
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                 n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   code = run_script_c(self%client_ptr, c_name, name_length, c_func, func_length, inputs_ptr, input_lengths_ptr, &
                             n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
@@ -1334,26 +1363,29 @@ function run_script_multigpu(self, name, func, inputs, outputs, offset, first_gp
   character(kind=c_char, len=len_trim(name)) :: c_name
   character(kind=c_char, len=len_trim(func)) :: c_func
   integer(kind=c_int) :: c_first_gpu, c_num_gpus, c_offset
-  character(kind=c_char, len=:), allocatable, target :: c_inputs(:), c_outputs(:)
+  character(kind=c_char, len=C_MAX_STRING), dimension(:), allocatable, target :: c_inputs
+  character(kind=c_char, len=C_MAX_STRING), dimension(:), allocatable, target :: c_outputs
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: n_inputs, n_outputs, name_length, func_length
+  integer :: input_length, output_length
   type(c_ptr) :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
-
-  integer :: i
-  integer :: max_length, length
 
   c_name  = trim(name)
   c_func = trim(func)
 
   name_length = len_trim(name)
   func_length = len_trim(func)
+  input_length = len_trim(inputs(1))
+  output_length = len_trim(outputs(1))
 
-  call convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
+  code = convert_char_array_to_c(inputs, c_inputs, ptrs_to_inputs, inputs_ptr, input_lengths, input_lengths_ptr, &
                                 n_inputs)
-  call convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
+  if (code /= SRNoError) return
+  code = convert_char_array_to_c(outputs, c_outputs, ptrs_to_outputs, outputs_ptr, output_lengths, &
                                 output_lengths_ptr, n_outputs)
+  if (code /= SRNoError) return
 
   ! Cast to c integer
   c_offset = offset
@@ -1516,10 +1548,10 @@ function use_model_ensemble_prefix(self, use_prefix) result(code)
 end function use_model_ensemble_prefix
 
 
-!> Set whether names of tensor and dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!> Set whether names of tensor entities should be prefixed (e.g. in an ensemble) to form database keys.
 !! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
 !! Keys of entities created before client function is called will not be affected. By default, the client prefixes
-!! tensor and dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+!! tensor keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
 function use_tensor_ensemble_prefix(self, use_prefix) result(code)
   class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
   logical,              intent(in) :: use_prefix !< The prefix setting
@@ -1527,6 +1559,18 @@ function use_tensor_ensemble_prefix(self, use_prefix) result(code)
 
   code = use_tensor_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
 end function use_tensor_ensemble_prefix
+
+!> Set whether names of dataset entities should be prefixed (e.g. in an ensemble) to form database keys.
+!! Prefixes will only be used if they were previously set through the environment variables SSKEYOUT and SSKEYIN.
+!! Keys of entities created before client function is called will not be affected. By default, the client prefixes
+!! dataset keys with the first prefix specified with the SSKEYIN and SSKEYOUT environment variables.
+function use_dataset_ensemble_prefix(self, use_prefix) result(code)
+  class(client_type),   intent(in) :: self       !< An initialized SmartRedis client
+  logical,              intent(in) :: use_prefix !< The prefix setting
+  integer(kind=enum_kind)          :: code
+
+  code = use_dataset_ensemble_prefix_c(self%client_ptr, logical(use_prefix,kind=c_bool))
+end function use_dataset_ensemble_prefix
 
 !> Control whether aggregation lists are prefixed
 function use_list_ensemble_prefix(self, use_prefix) result(code)
@@ -1717,7 +1761,7 @@ function get_datasets_from_list(self, list_name, datasets, num_datasets) result(
 
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
-  integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length, c_num_datasets
+  integer(kind=c_int) :: c_num_datasets
 
   type(c_ptr), dimension(:), allocatable, target :: dataset_ptrs
   type(c_ptr) :: ptr_to_dataset_ptrs
@@ -1763,7 +1807,7 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
                                                                            !! in the list
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
-  integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length, c_num_datasets
+  integer(kind=c_int) :: c_num_datasets
   integer(kind=c_int) :: c_start_index, c_end_index
   integer :: num_datasets, i
   type(c_ptr), dimension(:), allocatable, target :: dataset_ptrs
@@ -1778,6 +1822,8 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   list_name_length = len_trim(list_name)
 
   c_num_datasets = num_datasets
+  c_start_index = start_index
+  c_end_index = end_index
 
   code = get_dataset_list_range_allocated_c(self%client_ptr, list_name_c, list_name_length, &
                                             c_start_index, c_end_index, ptr_to_dataset_ptrs)
@@ -1789,6 +1835,45 @@ function get_datasets_from_list_range(self, list_name, start_index, end_index, d
   enddo
   deallocate(dataset_ptrs)
 end function get_datasets_from_list_range
+
+!> Retrieve a string representation of the client
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string  !< Text version of client
+  class(client_type),   intent(in)           :: self       !< An initialized SmartRedis client
+
+  type(c_ptr)                                :: c_cli_str
+  integer(kind=c_size_t)                     :: c_cli_str_len
+
+  ! Get the string representation of the client from C
+  c_cli_str = client_to_string_c(self%client_ptr)
+  c_cli_str_len = c_strlen(c_cli_str)
+  to_string = make_str(c_cli_str, c_cli_str_len)
+end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
+
+!> Print a string representation of the client
+subroutine print_client(self, unit)
+  class(client_type), intent(in)  :: self !< An initialized SmartRedis client
+  integer, optional,  intent(in)  :: unit !< Unit to which to print the client
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) to_string(self)
+end subroutine print_client
 
 end module smartredis_client
 

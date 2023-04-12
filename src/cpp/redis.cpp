@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,22 +28,29 @@
 
 #include "redis.h"
 #include "srexception.h"
+#include "utility.h"
+#include "srobject.h"
 
 using namespace SmartRedis;
 
 // Redis constructor.
-Redis::Redis() : RedisServer()
+Redis::Redis(const SRObject* context)
+    : RedisServer(context)
 {
-    std::string address_port = _get_ssdb();
-    _add_to_address_map(address_port);
-    _connect(address_port);
+    SRAddress db_address(_get_ssdb());
+    // Remember whether it's a unix domain socket for later
+    _is_domain_socket = !db_address._is_tcp;
+    _add_to_address_map(db_address);
+    _connect(db_address);
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
-Redis::Redis(std::string address_port) : RedisServer()
+Redis::Redis(const SRObject* context, std::string addr_spec)
+    : RedisServer(context)
 {
-    _add_to_address_map(address_port);
-    _connect(address_port);
+    SRAddress db_address(addr_spec);
+    _add_to_address_map(db_address);
+    _connect(db_address);
 }
 
 // Redis destructor
@@ -72,9 +79,9 @@ CommandReply Redis::run(CompoundCommand& cmd){
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    if (not is_addressable(cmd.get_address(), cmd.get_port()))
-        throw SRRuntimeException("The provided host and port do not match "\
-                                 "the host and port used to initialize the "\
+    if (!is_addressable(cmd.get_address()))
+        throw SRRuntimeException("The provided address does not match "\
+                                 "the address used to initialize the "\
                                  "non-cluster client connection.");
     return this->_run(cmd);
 }
@@ -156,10 +163,9 @@ bool Redis::hash_field_exists(const std::string& key,
 }
 
 // Check if address is valid
-bool Redis::is_addressable(const std::string& address,
-                           const uint64_t& port)
+bool Redis::is_addressable(const SRAddress& address) const
 {
-    return _address_node_map.find(address + ":" + std::to_string(port)) !=
+    return _address_node_map.find(address.to_string()) !=
         _address_node_map.end();
 }
 
@@ -184,6 +190,22 @@ CommandReply Redis::get_tensor(const std::string& key)
 
     // Run it
     return run(cmd);
+}
+
+// Get a list of Tensor from the server
+PipelineReply Redis::get_tensors(const std::vector<std::string>& keys)
+{
+    // Build up the commands to get the tensors
+    CommandList cmdlist; // This just holds the memory
+    std::vector<Command*> cmds;
+    for (auto it = keys.begin(); it != keys.end(); ++it) {
+        GetTensorCommand* cmd = cmdlist.add_command<GetTensorCommand>();
+        (*cmd) << "AI.TENSORGET" << Keyfield(*it) << "META" << "BLOB";
+        cmds.push_back(cmd);
+    }
+
+    // Run them via pipeline
+    return _run_pipeline(cmds);
 }
 
 // Rename a tensor in the database
@@ -326,7 +348,7 @@ void Redis::set_model_multigpu(const std::string& name,
         std::string device = "GPU:" + std::to_string(i);
         std::string model_key = name + "." + device;
         result = set_model(
-            name, model_key, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
+            model_key, model, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
         if (result.has_error() > 0) {
             throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
         }
@@ -385,8 +407,8 @@ CommandReply Redis::run_model(const std::string& key,
 {
     // Check for a non-default timeout setting
     int run_timeout;
-    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           _DEFAULT_MODEL_TIMEOUT);
+    get_config_integer(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                       _DEFAULT_MODEL_TIMEOUT);
 
     // Build the command
     CompoundCommand cmd;
@@ -549,20 +571,17 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                              const bool reset_stat)
 {
     AddressAtCommand cmd;
-
-    // Parse the host and port
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    SRAddress db_address(address);
 
     // Determine the prefix we need for the model or script
-    if (!is_addressable(host, port)) {
-        throw SRRuntimeException("The provided host and port do not match "\
-                                 "the host and port used to initialize the "\
+    if (!is_addressable(db_address)) {
+        throw SRRuntimeException("The provided address does not match "\
+                                 "the address used to initialize the "\
                                  "non-cluster client connection.");
     }
 
     //Build the Command
-    cmd.set_exec_address_port(host, port);
+    cmd.set_exec_address(db_address);
     cmd << "AI.INFO" << Keyfield(key);
 
     // Optionally add RESETSTAT to the command
@@ -593,21 +612,27 @@ inline CommandReply Redis::_run(const Command& cmd)
         }
         catch (sw::redis::IoError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis IO error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis IO error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::ClosedError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis Closed error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis Closed error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::Error &e) {
             // For other errors from Redis, report them immediately
@@ -637,22 +662,17 @@ inline CommandReply Redis::_run(const Command& cmd)
     throw SRTimeoutException("Unable to execute command" + cmd.first_field());
 }
 
-inline void Redis::_add_to_address_map(std::string address_port)
+inline void Redis::_add_to_address_map(SRAddress& db_address)
 {
-    if (address_port.rfind("tcp://", 0) == 0)
-        address_port = address_port.substr(6, std::string::npos);
-    else if (address_port.rfind("unix://", 0) == 0)
-        address_port = address_port.substr(7, std::string::npos);
-
-    _address_node_map.insert({address_port, nullptr});
+    _address_node_map.insert({db_address.to_string(), nullptr});
 }
 
-inline void Redis::_connect(std::string address_port)
+inline void Redis::_connect(SRAddress& db_address)
 {
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
             // Try to create the sw::redis::Redis object
-            _redis = new sw::redis::Redis(address_port);
+            _redis = new sw::redis::Redis(db_address.to_string(true));
 
             // Attempt to have the sw::redis::Redis object
             // make a connection using the PING command
@@ -674,10 +694,14 @@ inline void Redis::_connect(std::string address_port)
                 delete _redis;
                 _redis = NULL;
             }
+            std::string message("Unable to connect to backend database: ");
+            message += e.what();
             if (i == _connection_attempts) {
-                throw SRDatabaseException(
-                    std::string("Unable to connect to backend database: ") +
-                                e.what());
+                throw SRDatabaseException(message);
+            }
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
             }
         }
         catch (std::exception& e) {
@@ -715,4 +739,99 @@ inline void Redis::_connect(std::string address_port)
     // If we get here, we've run out of retry attempts
     throw SRTimeoutException(std::string("Connection attempt failed after ") +
                              std::to_string(_connection_attempts) + "tries");
+}
+
+// Run a CommandList via a Pipeline
+PipelineReply Redis::run_in_pipeline(CommandList& cmdlist)
+{
+    // Convert from CommandList to vector
+    std::vector<Command*> cmds;
+    for (auto it = cmdlist.begin(); it != cmdlist.end(); ++it) {
+        cmds.push_back(*it);
+    }
+
+    // Run the commands
+    return _run_pipeline(cmds);
+}
+
+// Build and run unordered pipeline
+PipelineReply Redis::_run_pipeline(std::vector<Command*>& cmds)
+{
+    PipelineReply reply;
+    for (int i = 1; i <= _command_attempts; i++) {
+        try {
+            // Get pipeline object for shard (no new connection)
+            auto pipeline = _redis->pipeline(false);
+
+            // Loop over all commands and add to the pipeline
+            for (size_t i = 0; i < cmds.size(); i++) {
+                // Add the commands to the pipeline
+                pipeline.command(cmds[i]->cbegin(), cmds[i]->cend());
+            }
+
+            // Execute the pipeline
+            reply = pipeline.exec();
+
+            // Check the replies
+            if (reply.has_error()) {
+                throw SRRuntimeException("Redis failed to execute the pipeline");
+            }
+
+            // If we get here, it all worked
+            return reply;
+        }
+        catch (SmartRedis::Exception& e) {
+            // Exception is already prepared, just propagate it
+            throw;
+        }
+        catch (sw::redis::IoError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis IO error when executing the pipeline: ") +
+                    e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::ClosedError &e) {
+            // For an error from Redis, retry unless we're out of chances
+            if (i == _command_attempts) {
+                throw SRDatabaseException(
+                    std::string("Redis Closed error when executing the "\
+                                "pipeline: ") + e.what());
+            }
+            // else, Fall through for a retry
+        }
+        catch (sw::redis::Error &e) {
+            // For other errors from Redis, report them immediately
+            throw SRRuntimeException(
+                std::string("Redis error when executing the pipeline: ") +
+                    e.what());
+        }
+        catch (std::exception& e) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                std::string("Unexpected exception executing the pipeline: ") +
+                    e.what());
+        }
+        catch (...) {
+            // Should never hit this, so bail immediately if we do
+            throw SRInternalException(
+                "Non-standard exception encountered executing the pipeline");
+        }
+
+        // Sleep before the next attempt
+        std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
+    }
+
+    // If we get here, we've run out of retry attempts
+    throw SRTimeoutException("Unable to execute pipeline");
+}
+
+// Create a string representation of the Redis connection
+std::string Redis::to_string() const
+{
+    std::string result("Non-clustered Redis connection:\n");
+    result += RedisServer::to_string();
+    return result;
 }

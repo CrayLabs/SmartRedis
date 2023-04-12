@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,19 @@ module smartredis_dataset
 use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
+
+use, intrinsic :: iso_fortran_env, only: stderr => error_unit
+
 use fortran_c_interop, only : enum_kind
 
 implicit none; private
 
 include 'enum_fortran.inc'
 include 'dataset/dataset_interfaces.inc'
-include 'dataset/add_tensor_interfaces.inc'
+include 'dataset/tensor_interfaces.inc'
 include 'dataset/unpack_dataset_tensor_interfaces.inc'
 include 'dataset/metadata_interfaces.inc'
+#include "errors/errors_interfaces.inc"
 
 public :: enum_kind !< The kind of integer equivalent to a C enum. According to C an Fortran
                     !! standards this should be c_int, but is renamed here to ensure that
@@ -52,9 +56,25 @@ type, public :: dataset_type
 
   !> Initialize a new dataset with a given name
   procedure :: initialize => initialize_dataset
+  !> Access the raw C pointer for the client
+  procedure :: get_c_pointer
+
+  ! Metadata procedures
   !> Add metadata to the dataset with a given field and string
   procedure :: add_meta_string
-  ! procedure :: get_meta_strings ! Not supported currently
+  ! Retrieve the strings associated with a metadata string field
+  !> procedure :: get_meta_strings ! Not supported currently
+  !> Add metadata of type 'scalar' into a given field
+  generic :: add_meta_scalar => add_meta_scalar_double, add_meta_scalar_float, add_meta_scalar_i32, add_meta_scalar_i64
+  !> Retrieve scalar-type metadata as a vector
+  generic :: get_meta_scalars => get_meta_scalars_double, get_meta_scalars_float, get_meta_scalars_i32, &
+                                 get_meta_scalars_i64
+  ! Retrieve the names of metadata fields
+  !> procedure :: get_metadata_field_names ! Not supported currently
+  !> Retrieve the type for a metadata field
+  procedure :: get_metadata_field_type
+
+  ! Tensor procedures
   !> Add a tensor to be included as part of the dataset
   generic :: add_tensor => add_tensor_i8, add_tensor_i16, add_tensor_i32, add_tensor_i64, &
                            add_tensor_float, add_tensor_double
@@ -62,11 +82,16 @@ type, public :: dataset_type
   generic :: unpack_dataset_tensor => unpack_dataset_tensor_i8, unpack_dataset_tensor_i16, &
                                       unpack_dataset_tensor_i32, unpack_dataset_tensor_i64, &
                                       unpack_dataset_tensor_float, unpack_dataset_tensor_double
-  !> Add metadata of type 'scalar' into a given field
-  generic :: add_meta_scalar => add_meta_scalar_double, add_meta_scalar_float, add_meta_scalar_i32, add_meta_scalar_i64
-  !> Retrieve scalar-type metadata as a vector
-  generic :: get_meta_scalars => get_meta_scalars_double, get_meta_scalars_float, get_meta_scalars_i32, &
-                                 get_meta_scalars_i64
+  ! Retrieve the names of tensors
+  !> procedure :: get_tensor_names ! Not supported currently
+  !> Retrieve the type for a tensor
+  procedure :: get_tensor_type
+  !> Retrieve the dimensions for a tensor
+  procedure :: get_tensor_dims
+  !> Retrieve a string representation of the dataset
+  procedure :: to_string
+  !> Print a string representation of the dataset
+  procedure :: print_dataset
 
   ! Private procedures
   procedure, private :: add_tensor_i8
@@ -109,6 +134,13 @@ function initialize_dataset(self, name) result(code)
 
   code = dataset_constructor(c_name, name_length, self%dataset_ptr)
 end function initialize_dataset
+
+!> Access the raw C pointer for the dataset
+function get_c_pointer(self)
+  type(c_ptr)                     :: get_c_pointer
+  class(dataset_type), intent(in) :: self
+  get_c_pointer = self%dataset_ptr
+end function get_c_pointer
 
 !> Add a tensor to a dataset whose Fortran type is the equivalent 'int8' C-type
 function add_tensor_i8(self, name, data, dims) result(code)
@@ -311,8 +343,6 @@ function get_meta_scalars_i32(self, name, meta) result(code)
   integer(kind=c_int32_t), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                        :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_int32
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_i32
 
@@ -323,8 +353,6 @@ function get_meta_scalars_i64(self, name, meta) result(code)
   integer(kind=c_int64_t), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                        :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_int64
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_i64
 
@@ -335,8 +363,6 @@ function get_meta_scalars_float(self, name, meta) result(code)
   real(kind=c_float), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                   :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_flt
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_float
 
@@ -347,8 +373,6 @@ function get_meta_scalars_double(self, name, meta) result(code)
   real(kind=c_double), dimension(:), pointer :: meta !< The actual metadata
   integer(kind=enum_kind)                    :: code !< Result of the operation
 
-  ! local variables
-  integer(kind=enum_kind) :: expected_data_type = meta_dbl
   include 'dataset/get_meta_scalars_common.inc'
 end function get_meta_scalars_double
 
@@ -401,7 +425,7 @@ function add_meta_scalar_double(self, name, meta) result(code)
 end function add_meta_scalar_double
 
 !> Add string-like metadata to the dataset
-function add_meta_string( self, name, meta) result(code)
+function add_meta_string(self, name, meta) result(code)
   class(dataset_type),     intent(in) :: self !< The dataset
   character(len=*),        intent(in) :: name !< The name of the metadata field
   character(len=*),        intent(in) :: meta !< The actual metadata
@@ -421,5 +445,110 @@ function add_meta_string( self, name, meta) result(code)
 
   code = add_meta_string_c(self%dataset_ptr, c_name, name_length, c_meta, meta_length)
 end function add_meta_string
+
+!> Retrieve the type for a metadata field
+function get_metadata_field_type(self, name, mdtype) result(code)
+  class(dataset_type),     intent(in)  :: self   !< The dataset
+  character(len=*),        intent(in)  :: name   !< The name of the metadata field
+  integer(kind=enum_kind), intent(out) :: mdtype !< Receives the type
+  integer(kind=enum_kind)              :: code   !< Result of the operation
+
+  ! local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(c_name)
+
+  code = get_metadata_field_type_c(self%dataset_ptr, c_name, name_length, mdtype)
+end function get_metadata_field_type
+
+!> Retrieve the type for a tensor
+function get_tensor_type(self, name, ttype) result(code)
+  class(dataset_type),     intent(in)  :: self  !< The dataset
+  character(len=*),        intent(in)  :: name  !< The name of the tensor
+  integer(kind=enum_kind), intent(out) :: ttype !< Receives the type
+  integer(kind=enum_kind)              :: code  !< Result of the operation
+
+  ! local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+
+  c_name = trim(name)
+  name_length = len_trim(c_name)
+
+  code = get_tensor_type_c(self%dataset_ptr, c_name, name_length, ttype)
+end function get_tensor_type
+
+
+!> Retrieve the dimensions for a tensor into a supplied buffer, or receive the
+!! number of dimensions if the supplied buffer is too small
+function get_tensor_dims(self, name, dims, dims_length) result(code)
+  class(dataset_type),     intent(in)    :: self  !< The dataset
+  character(len=*),        intent(in)    :: name  !< The name of the tensor
+  integer, dimension(:), target, intent(inout) :: dims !< Receives the tensor dimensions
+  integer,  intent(inout) :: dims_length !< Receives the number of tensor dimensions
+  integer(kind=enum_kind)                :: code  !< Result of the operation
+
+  ! local variables
+  character(kind=c_char, len=len_trim(name)) :: c_name
+  integer(kind=c_size_t) :: name_length
+  type(c_ptr) :: dims_ptr
+  integer(kind=c_size_t), dimension(size(dims)), target :: c_dims
+  integer(kind=c_size_t) ::  c_dims_length
+
+  c_name = trim(name)
+  name_length = len_trim(c_name)
+
+  if (dims_length .gt. size(dims)) then
+    error stop 'dims_length .gt. size(dims) in call to get_tensor_dims'
+  end if
+  dims_ptr = c_loc(c_dims)
+  c_dims_length = dims_length
+
+  code = get_tensor_dims_c(self%dataset_ptr, c_name, name_length, dims_ptr, c_dims_length)
+  dims = int(c_dims, kind(dims))
+  dims_length = int(c_dims_length, kind(dims_length))
+end function get_tensor_dims
+
+
+!> Retrieve a string representation of the dataset
+function to_string(self)
+  character(kind=c_char, len=:), allocatable :: to_string !< Text version of dataset
+  class(dataset_type),     intent(in)        :: self      !< The dataset
+
+  type(c_ptr)                                :: c_ds_str
+  integer(kind=c_size_t)                     :: c_ds_str_len
+
+  ! Get the string representation of the dataset from C
+  c_ds_str = dataset_to_string_c(self%dataset_ptr)
+  c_ds_str_len = c_strlen(c_ds_str)
+  to_string = make_str(c_ds_str, c_ds_str_len)
+end function to_string
+
+!> Convert a pointer view of a string to a Fortran string
+function make_str(strptr, str_len)
+  character(kind=c_char, len=:), allocatable :: make_str
+  type(c_ptr), intent(in), value             :: strptr
+  integer(kind=c_size_t)                     :: str_len
+
+  character(len=str_len, kind=c_char), pointer :: ptrview
+  call c_f_pointer(strptr, ptrview)
+  make_str = ptrview
+end function make_str
+
+!> Print a string representation of the dataset
+subroutine print_dataset(self, unit)
+  class(dataset_type), intent(in)  :: self  !< The dataset
+  integer, optional,   intent(in)  :: unit !< Unit to which to print the dataset
+
+  ! Determine which unit to write to
+  integer :: target_unit
+  target_unit = STDERR
+  if (present(unit)) target_unit = unit
+
+  ! Write the error to the target unit
+  write(target_unit,*) to_string(self)
+end subroutine print_dataset
 
 end module smartredis_dataset

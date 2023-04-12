@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,9 @@
 
 #include "metadatafield.h"
 #include <iostream>
+
+///@file
+
 namespace SmartRedis {
 
 /*!
@@ -120,7 +123,7 @@ class ScalarField : public MetadataField {
         *   \brief Retrieve the number of values in the field
         *   \returns The number of values
         */
-        virtual size_t size();
+        virtual size_t size() const;
 
         /*!
         *   \brief Clear the values in the field
@@ -154,6 +157,6 @@ class ScalarField : public MetadataField {
 
 #include "scalarfield.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_SCALARFIELD_H
+#endif // SMARTREDIS_SCALARFIELD_H

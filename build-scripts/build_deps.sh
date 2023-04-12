@@ -40,7 +40,7 @@ if ls ../install/lib/libredis++.a 1>/dev/null 2>&1; then
     echo "Redis-plus-plus has already been installed"
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
-        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.3.2 --depth=1
+        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.3.5 --depth=1
 	    echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus
@@ -59,7 +59,7 @@ fi
 if [[ -d "./pybind" ]]; then
     echo "PyBind11 has already been downloaded and installed"
 else
-    git clone https://github.com/pybind/pybind11.git pybind --branch v2.6.2 --depth=1
+    git clone https://github.com/pybind/pybind11.git pybind --branch v2.10.3 --depth=1
     cd pybind
     mkdir build
     cd ..

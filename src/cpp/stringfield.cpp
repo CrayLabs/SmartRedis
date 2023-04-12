@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,7 +66,7 @@ void StringField::append(const std::string& value)
 }
 
 // Retrieve the number of values in the field
-size_t StringField::size()
+size_t StringField::size() const
 {
     return _vals.size();
 }

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -234,6 +234,68 @@ void MetaData::get_scalar_values(const std::string& name,
     }
 }
 
+// Retrieve the type of a metadata field
+SRMetaDataType MetaData::get_field_type(const std::string& name) const
+{
+    try {
+        // Return the type. If it doesn't exist, the exception below will
+        // be thrown
+        return _field_map.at(name)->type();
+    }
+    catch (std::out_of_range& e) {
+        throw SRKeyException(
+            "The metadata field " + name + " does not exist.");
+    }
+}
+
+// Retrieve a vector of metadata field names
+std::vector<std::string> MetaData::get_field_names(bool skip_internal) const
+{
+    std::vector<std::string> fieldnames;
+    fieldnames.reserve(_field_map.size());
+
+    for (auto mapping : _field_map) {
+        if (skip_internal && mapping.first == ".tensor_names")
+            continue;
+        fieldnames.push_back(mapping.first);
+    }
+    return fieldnames;
+}
+
+// Get metadata field names using a c-style interface
+void MetaData::get_field_names(char**& data,
+                               size_t& n_strings,
+                               size_t*& lengths,
+                               bool skip_internal /*= false*/)
+{
+    // Retrieve the names
+    std::vector<std::string> name_strings = get_field_names(skip_internal);
+
+    // Allocate space to copy the strings
+    n_strings = 0; // Set to zero until all data copied
+    data = _char_array_mem_mgr.allocate(name_strings.size());
+    if (data == NULL)
+        throw SRBadAllocException("name strings array");
+    lengths = _str_len_mem_mgr.allocate(name_strings.size());
+    if (lengths == NULL)
+        throw SRBadAllocException("name string lengths");
+
+    // Copy each metadata string into the string buffer
+    for (size_t i = 0; i < name_strings.size(); i++) {
+        size_t size = name_strings[i].size();
+        char* cstr = _char_mem_mgr.allocate(size + 1);
+        if (cstr == NULL)
+            throw SRBadAllocException("name string data");
+        name_strings[i].copy(cstr, size, 0);
+        cstr[size] = '\0';
+        data[i] = cstr;
+        lengths[i] = size;
+    }
+
+    // Write down the number of strings copied
+    n_strings = name_strings.size();
+}
+
 // Get metadata string field using a c-style interface.
 void MetaData::get_string_values(const std::string& name,
                                  char**& data,
@@ -271,11 +333,14 @@ void MetaData::get_string_values(const std::string& name,
 
 // Get metadata values string field
 std::vector<std::string>
-MetaData::get_string_values(const std::string& name)
+MetaData::get_string_values(const std::string& name) const
 {
     // Get the field
-    MetadataField* mdf = _field_map[name];
-    if (mdf == NULL) {
+    const MetadataField* mdf = NULL;
+    try {
+        mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
@@ -291,7 +356,7 @@ MetaData::get_string_values(const std::string& name)
 }
 
 // This function checks if the DataSet has a field
-bool MetaData::has_field(const std::string& field_name)
+bool MetaData::has_field(const std::string& field_name) const
 {
     return (_field_map.count(field_name) > 0);
 }
@@ -406,10 +471,11 @@ void MetaData::_create_string_field(const std::string& field_name)
 // Allocate new memory to hold metadata field values and return these values
 // via the c-ptr reference being pointed to the newly allocated memory
 template <typename T>
-void MetaData::_get_numeric_field_values(const std::string& name,
-                                         void*& data,
-                                         size_t& n_values,
-                                         SharedMemoryList<T>& mem_list)
+void MetaData::_get_numeric_field_values(
+    const std::string& name,
+    void*& data,
+    size_t& n_values,
+    SharedMemoryList<T>& mem_list)
 {
     // Make sure the field exists
     MetadataField* mdf = _field_map[name];

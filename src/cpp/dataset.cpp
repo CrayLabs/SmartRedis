@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,24 @@
 #include <string_view>
 #include "dataset.h"
 #include "srexception.h"
+#include "logger.h"
+#include "utility.h"
 
 using namespace SmartRedis;
 
 // DataSet constructor
 DataSet::DataSet(const std::string& name)
- : _dsname(name)
+ : SRObject(name), _dsname(name)
 {
-    // NOP
+    // Log that a new DataSet has been instantiated
+    log_data(LLDebug, "New DataSet created");
+}
+
+// DataSet Destructor
+DataSet::~DataSet()
+{
+    // Log DataSet destruction
+    log_data(LLDebug, "DataSet destroyed");
 }
 
 // Add a tensor to the DataSet.
@@ -46,6 +56,9 @@ void DataSet::add_tensor(const std::string& name,
                          const SRTensorType type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _add_to_tensorpack(name, data, dims, type, mem_layout);
     _metadata.add_string(".tensor_names", name);
 }
@@ -57,6 +70,9 @@ void DataSet::add_meta_scalar(const std::string& name,
                               const void* data,
                               const SRMetaDataType type)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.add_scalar(name, data, type);
 }
 
@@ -66,6 +82,9 @@ void DataSet::add_meta_scalar(const std::string& name,
 void DataSet::add_meta_string(const std::string& name,
                               const std::string& data)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.add_string(name, data);
 }
 
@@ -78,6 +97,9 @@ void DataSet::get_tensor(const std::string& name,
                          SRTensorType& type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Clone the tensor in the DataSet
     TensorBase* tensor = _get_tensorbase_obj(name);
     if (tensor == NULL) {
@@ -99,6 +121,9 @@ void DataSet::get_tensor(const std::string&  name,
                          SRTensorType& type,
                          SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::vector<size_t> dims_vec;
     get_tensor(name, data, dims_vec, type, mem_layout);
 
@@ -124,6 +149,9 @@ void DataSet::unpack_tensor(const std::string& name,
                             const SRTensorType type,
                             SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _enforce_tensor_exists(name);
     _tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
 }
@@ -138,6 +166,9 @@ void DataSet::get_meta_scalars(const std::string& name,
                                size_t& length,
                                SRMetaDataType& type)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.get_scalar_values(name, data, length, type);
 }
 
@@ -151,24 +182,36 @@ void DataSet::get_meta_strings(const std::string& name,
                                size_t& n_strings,
                                size_t*& lengths)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.get_string_values(name, data, n_strings, lengths);
 }
 
 // Check if the DataSet has a field
-bool DataSet::has_field(const std::string& field_name)
+bool DataSet::has_field(const std::string& field_name) const
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _metadata.has_field(field_name);
 }
 
 // Clear all entries in a DataSet field.
 void DataSet::clear_field(const std::string& field_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _metadata.clear_field(field_name);
 }
 
 // Retrieve the names of the tensors in the DataSet
-std::vector<std::string> DataSet::get_tensor_names()
+std::vector<std::string> DataSet::get_tensor_names() const
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (_metadata.has_field(".tensor_names"))
         return _metadata.get_string_values(".tensor_names");
     else
@@ -176,18 +219,104 @@ std::vector<std::string> DataSet::get_tensor_names()
 
 }
 
+// Retrieve tensor names from the DataSet
+void DataSet::get_tensor_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    if (_metadata.has_field(".tensor_names")) {
+        _metadata.get_string_values(
+            ".tensor_names", data, n_strings, lengths);
+    }
+    else {
+        data = NULL;
+        lengths = NULL;
+        n_strings = 0;
+    }
+
+}
+
 // Get the strings in a metadata string field. Because standard C++
 // containers are used, memory management is handled by the returned
-// std::vectorstd::string.
-std::vector<std::string> DataSet::get_meta_strings(const std::string& name)
+// std::vector<std::string>.
+std::vector<std::string> DataSet::get_meta_strings(
+    const std::string& name) const
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _metadata.get_string_values(name);
 }
 
 // Get the Tensor type of the Tensor
-SRTensorType DataSet::get_tensor_type(const std::string& name)
+SRTensorType DataSet::get_tensor_type(const std::string& name) const
 {
-    return _tensorpack.get_tensor(name)->type();
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its type
+    return tensor->type();
+}
+
+// Retrieve the dimensions of a Tensor in the DataSet
+const std::vector<size_t> DataSet::get_tensor_dims(
+    const std::string& name) const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Get the tensor
+    auto tensor = _tensorpack.get_tensor(name);
+    if (tensor == NULL) {
+        throw SRKeyException(
+            "No tensor named " + name + " is in the dataset");
+    }
+
+    // Return its dimensions
+    return tensor->dims();
+}
+
+// Retrieve the names of all metadata fields in the DataSet
+std::vector<std::string> DataSet::get_metadata_field_names() const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    return _metadata.get_field_names(true);
+}
+
+// Retrieve metadata field names from the DataSet
+void DataSet::get_metadata_field_names(
+    char**& data, size_t& n_strings, size_t*& lengths)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _metadata.get_field_names(data, n_strings, lengths, true);
+}
+
+// Retrieve the data type of a metadata field in the DataSet
+SRMetaDataType DataSet::get_metadata_field_type(
+    const std::string& name) const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    if (!_metadata.has_field(name)) {
+        throw SRKeyException(
+            "Dataset " + _dsname +
+            " does not contain the field " + name);
+    }
+    return _metadata.get_field_type(name);
 }
 
 // Add a Tensor (not yet allocated) to the TensorPack
@@ -259,3 +388,51 @@ TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
     _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();
 }
+
+// Create a string representation of the DataSet
+std::string DataSet::to_string() const
+{
+    std::string result;
+    result = "DataSet (" + _lname + "):\n";
+
+    // Tensors
+    result += "Tensors:\n";
+    auto it = _tensorpack.tensor_cbegin();
+    int ntensors = 0;
+    for ( ; it != _tensorpack.tensor_cend(); ++it) {
+        ntensors++;
+        result += "  " + (*it)->name() + ":\n";
+        result += "    type: " + ::to_string((*it)->type()) + "\n";
+        auto dims = (*it)->dims();
+        result += "    dimensions: [";
+        size_t ndims = dims.size();
+        for (auto itdims = dims.cbegin(); itdims != dims.cend(); ++itdims) {
+            result += std::to_string(*itdims);
+            if (--ndims > 0)
+                result += ", ";
+        }
+        result += "]\n";
+        result += "    elements: " + std::to_string((*it)->num_values()) + "\n";
+    }
+    if (ntensors == 0) {
+        result += "  none\n";
+    }
+
+    // Metadata
+    result += "Metadata:\n";
+    auto mdnames = get_metadata_field_names();
+    int nmetadata = 0;
+    for (auto itmd = mdnames.cbegin(); itmd != mdnames.cend(); ++itmd) {
+        nmetadata++;
+        result += "  " + (*itmd) + ":\n";
+        result += "    type: "
+                + ::to_string(get_metadata_field_type(*itmd)) + "\n";
+    }
+    if (nmetadata == 0) {
+        result += "  none\n";
+    }
+
+    // Done
+    return result;
+}
+

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,13 @@ set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
+if(COVERAGE)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+        set(CMAKE_CXX_FLAGS --coverage)
+        add_link_options(--coverage)
+    endif()
+endif()
+
 find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
 
 include_directories(SYSTEM
@@ -53,6 +60,14 @@ add_executable(client_test_dataset_exists
 )
 
 target_link_libraries(client_test_dataset_exists
+	${SR_LIB}
+)
+
+add_executable(client_test_logging
+	client_test_logging.c
+)
+
+target_link_libraries(client_test_logging
 	${SR_LIB}
 )
 

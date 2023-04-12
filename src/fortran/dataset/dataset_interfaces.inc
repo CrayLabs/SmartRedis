@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2023, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -33,4 +33,12 @@ interface
     integer(kind=c_size_t), value :: name_length !< How many characters in the dataset's name
     type(c_ptr)                   :: dataset !< Receives the constructed dataset
   end function dataset_constructor
+end interface
+
+interface
+  function dataset_to_string_c(client) bind(c, name="dataset_to_string")
+    use iso_c_binding, only : c_ptr, c_char
+    type(c_ptr)                   :: dataset_to_string_c
+    type(c_ptr), value            :: client
+  end function dataset_to_string_c
 end interface

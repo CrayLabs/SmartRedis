@@ -1,5 +1,6 @@
 
 MAKEFLAGS += --no-print-directory
+COV_FLAGS :=
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -22,17 +23,29 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
-# help: lib                            - Build SmartRedis clients into a dynamic library
+# help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: SHELL:=/bin/bash
 lib: deps
 	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
+
+# help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
+.PHONY: lib-with-fortran
+lib-with-fortran: SHELL:=/bin/bash
+lib-with-fortran: deps
+	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS) $(CMAKE_ARGS) -DBUILD_FORTRAN=ON
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
 test-lib: SHELL:=/bin/bash
 test-lib: LIB_BUILD_ARGS="-DWERROR=ON"
 test-lib: lib
+
+# help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
+.PHONY: test-lib-with-fortran
+test-lib-with-fortran: SHELL:=/bin/bash
+test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
@@ -49,11 +62,11 @@ test-deps-gpu:
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-lib
-	./build-scripts/build_cpp_tests.sh
-	./build-scripts/build_cpp_unit_tests.sh
-	./build-scripts/build_c_tests.sh
-	./build-scripts/build_fortran_tests.sh
+build-tests: test-lib-with-fortran
+	./build-scripts/build_cpp_tests.sh $(CMAKE_ARGS)
+	./build-scripts/build_cpp_unit_tests.sh $(CMAKE_ARGS)
+	./build-scripts/build_c_tests.sh $(CMAKE_ARGS)
+	./build-scripts/build_fortran_tests.sh $(CMAKE_ARGS)
 
 
 # help: build-test-cpp                 - build the C++ tests
@@ -75,13 +88,13 @@ build-test-c: test-lib
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran: test-lib
+build-test-fortran: test-lib-with-fortran
 	./build-scripts/build_fortran_tests.sh
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
-build-examples: lib
+build-examples: lib-with-fortran
 	./build-scripts/build_serial_examples.sh
 	./build-scripts/build_parallel_examples.sh
 
@@ -188,7 +201,14 @@ test:
 .PHONY: test-verbose
 test-verbose: build-tests
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv -s ./tests
+	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
+
+# help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
+.PHONY: test-verbose-with-coverage
+test-verbose-with-coverage: build-tests
+test-verbose-with-coverage: CMAKE_ARGS="-DCOVERAGE=on"
+test-verbose-with-coverage:
+	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
@@ -223,11 +243,6 @@ test-fortran: build-test-fortran
 .PHONY: testpy-cov
 testpy-cov:
 	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
-
-# help: testcpp-cov                    - run cpp unit tests with coverage
-.PHONY: testcpp-cov
-testcpp-cov: unit-test-cpp
-	./build-scripts/build_cpp_cov.sh
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples

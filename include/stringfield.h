@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
 
 #include "metadatafield.h"
 #include "metadatabuffer.h"
+
+///@file
 
 namespace SmartRedis {
 
@@ -115,7 +117,7 @@ class StringField : public MetadataField {
         *   \brief Retrieve the number of values in the field
         *   \returns The number of values
         */
-        virtual size_t size();
+        virtual size_t size() const;
 
         /*!
         *   \brief Clear the values in the field
@@ -146,6 +148,6 @@ class StringField : public MetadataField {
 
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_STRINGFIELD_H
+#endif // SMARTREDIS_STRINGFIELD_H

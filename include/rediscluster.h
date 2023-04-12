@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2023, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,8 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SMARTREDIS_CPP_CLUSTER_H
-#define SMARTREDIS_CPP_CLUSTER_H
+#ifndef SMARTREDIS_REDISCLUSTER_H
+#define SMARTREDIS_REDISCLUSTER_H
 
 #include <unordered_set>
 #include <mutex>
@@ -37,12 +37,13 @@
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
 #include "pipelinereply.h"
+#include "address.h"
 
 namespace SmartRedis {
 
 ///@file
 
-class RedisCluster;
+class SRObject;
 
 /*!
 *   \brief  The RedisCluster class executes RedisServer
@@ -54,17 +55,18 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief RedisCluster constructor.
+        *   \param context The owning context
         */
-        RedisCluster();
+        RedisCluster(const SRObject* context);
 
         /*!
-        *   \brief RedisCluster constructor.
-        *          Uses address provided to constructor instead
-        *          of environment variables.
-        *   \param address_port The address and port in the form of
-        *                       "tcp://address:port"
+        *   \brief RedisCluster constructor. Uses address provided to
+        *          constructor instead of environment variables.
+        *   \param context The owning context
+        *   \param address_spec The TCP or UDS address of the server
+        *   \throw SmartRedis::Exception if connection fails
         */
-        RedisCluster(std::string address_port);
+        RedisCluster(const SRObject* context, std::string address_spec);
 
         /*!
         *   \brief RedisCluster copy constructor is not allowed
@@ -97,55 +99,52 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief Run a single-key Command on the server
-        *   \param cmd The single-key Comand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The single-key Command to run
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(SingleKeyCommand& cmd);
 
         /*!
         *   \brief Run a multi-key Command on the server
-        *   \param cmd The multi-key Comand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The multi-key Command to run
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(MultiKeyCommand& cmd);
 
         /*!
         *   \brief Run a compound Command on the server
-        *   \param cmd The compound Comand to run
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The compound Command to run
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(CompoundCommand& cmd);
 
         /*!
         *   \brief Run a non-keyed Command that
         *          addresses the given db node on the server
-        *   \param cmd The non-keyed Command that
-        *              addresses the given db node
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The non-keyed Command that addresses the given db node
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAtCommand& cmd);
 
         /*!
         *   \brief Run a non-keyed Command that
         *          addresses any db node on the server
-        *   \param cmd The non-keyed Command that
-        *              addresses any db node
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The non-keyed Command that addresses any db node
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAnyCommand& cmd);
 
         /*!
         *   \brief Run a non-keyed Command that
         *          addresses every db node on the server
-        *   \param cmd The non-keyed Command that
-        *              addresses any db node
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \param cmd The non-keyed Command that addresses all db nodes
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual CommandReply run(AddressAllCommand& cmd);
 
@@ -153,11 +152,11 @@ class RedisCluster : public RedisServer
         *   \brief Run multiple single-key or single-hash slot
         *          Command on the server.  Each Command in the
         *          CommandList is run sequentially.
-        *   \param cmd The CommandList containing multiple
-        *              single-key or single-hash
-        *              slot Command to run
+        *   \param cmd The CommandList containing multiple single-key or
+        *              single-hash slot Command to run
         *   \returns A list of CommandReply for each Command
         *            in the CommandList
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual std::vector<CommandReply> run(CommandList& cmd);
 
@@ -168,23 +167,23 @@ class RedisCluster : public RedisServer
         *          by shard, and executed in groups by shard.
         *          Commands are not guaranteed to be executed
         *          in any sequence or ordering.
-        *   \param cmd The CommandList containing multiple
-        *              single-key or single-hash
-        *              slot Command to run
+        *   \param cmd_list The CommandList containing multiple single-key
+        *                   or single-hash slot Commands to run
         *   \returns A list of CommandReply for each Command
         *            in the CommandList. The order of the result
         *            matches the order of the input CommandList.
+        *   \throw SmartRedis::Exception if command execution fails
         */
         virtual PipelineReply
         run_via_unordered_pipelines(CommandList& cmd_list);
 
         /*!
-        *   \brief Check if a key exists in the database. This
-        *          function does not work for models and scripts.
-        *          For models and scripts, model_key_exists should
-        *          be used.
+        *   \brief Check if a key exists in the database. This function does
+        *          not work for models and scripts. For models and scripts,
+        *          model_key_exists should be used.
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool key_exists(const std::string& key);
 
@@ -193,6 +192,7 @@ class RedisCluster : public RedisServer
         *   \param key The key containing the field
         *   \param field The field in the key to check
         *   \returns True if the hash field exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool hash_field_exists(const std::string& key,
                                        const std::string& field);
@@ -201,22 +201,23 @@ class RedisCluster : public RedisServer
         *   \brief Check if a model or script key exists in the database
         *   \param key The key to check
         *   \returns True if the key exists, otherwise False
+        *   \throw SmartRedis::Exception if existence check fails
         */
         virtual bool model_key_exists(const std::string& key);
 
         /*!
          *  \brief Check if address is valid
-         *  \param address address of database
-         *  \param port port of database
+         *  \param address Address (TCP or UDS) of database
          *  \return True if address is valid
          */
-        virtual bool is_addressable(const std::string& address, const uint64_t& port);
+        virtual bool is_addressable(const SRAddress& address) const;
 
         /*!
         *   \brief Put a Tensor on the server
         *   \param tensor The Tensor to put on the server
         *   \returns The CommandReply from the put tensor
         *            command execution
+        *   \throw SmartRedis::Exception if tensor storage fails
         */
         virtual CommandReply put_tensor(TensorBase& tensor);
 
@@ -225,10 +226,21 @@ class RedisCluster : public RedisServer
         *   \param key The name of the tensor to retrieve
         *   \returns The CommandReply from the get tensor server
         *            command execution
+        *   \throw SmartRedis::Exception if tensor retrieval fails
         */
         virtual CommandReply get_tensor(const std::string& key);
 
         /*!
+        *   \brief Get a list of Tensor from the server. All tensors
+        *          must be on the same node
+        *   \param keys The keys of the tensor to retrieve
+        *   \returns The PipelineReply from executing the get tensor commands
+        *   \throw SmartRedis::Exception if tensor retrieval fails
+        */
+        virtual PipelineReply get_tensors(
+            const std::vector<std::string>& keys);
+
+    /*!
         *   \brief Rename a tensor in the database
         *   \param key The original key for the tensor
         *   \param new_key The new key for the tensor
@@ -236,6 +248,7 @@ class RedisCluster : public RedisServer
         *            execution in the renaming of the tensor.
         *            In the case of RedisCluster, this is
         *            the reply for the final delete_tensor call.
+        *   \throw SmartRedis::Exception if tensor rename fails
         */
         virtual CommandReply rename_tensor(const std::string& key,
                                            const std::string& new_key);
@@ -245,6 +258,7 @@ class RedisCluster : public RedisServer
         *   \param key The database key for the tensor
         *   \returns The CommandReply from delete command
         *            executed on the server
+        *   \throw SmartRedis::Exception if tensor removal fails
         */
         virtual CommandReply delete_tensor(const std::string& key);
 
@@ -257,6 +271,7 @@ class RedisCluster : public RedisServer
         *            execution in the copying of the tensor.
         *            In the case of RedisCluster, this is
         *            the CommandReply from a put_tensor commands.
+        *   \throw SmartRedis::Exception if tensor copy fails
         */
         virtual CommandReply copy_tensor(const std::string& src_key,
                                          const std::string& dest_key);
@@ -270,6 +285,7 @@ class RedisCluster : public RedisServer
         *            execution in the copying of the tensor.
         *            Different implementations may have different
         *            sequences of commands.
+        *   \throw SmartRedis::Exception if tensor copy fails
         */
         virtual CommandReply copy_tensors(const std::vector<std::string>& src,
                                           const std::vector<std::string>& dest);
@@ -293,6 +309,7 @@ class RedisCluster : public RedisServer
         *   \param outputs One or more names of model output nodes
         *                 (TF models only)
         *   \returns The CommandReply from the set_model Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_model(const std::string& key,
                                        std::string_view model,
@@ -347,6 +364,7 @@ class RedisCluster : public RedisServer
         *                 (e.g. CPU or GPU)
         *   \param script The script source in a std::string_view
         *   \returns The CommandReply from set_script Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_script(const std::string& key,
                                         const std::string& device,
@@ -370,12 +388,11 @@ class RedisCluster : public RedisServer
         *   \brief Run a model in the database using the
         *          specified input and output tensors
         *   \param key The key associated with the model
-        *   \param inputs The keys of inputs tensors to use
-        *                 in the model
+        *   \param inputs The keys of inputs tensors to use in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
-        *   \returns The CommandReply from the run model server
-        *            Command
+        *   \returns The CommandReply from the run model server Command
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply run_model(const std::string& key,
                                        std::vector<std::string> inputs,
@@ -410,8 +427,8 @@ class RedisCluster : public RedisServer
         *                 in the script
         *   \param outputs The keys of output tensors that
         *                 will be used to save script results
-        *   \returns The CommandReply from script run Command
-        *            execution
+        *   \returns The CommandReply from script run Command execution
+        *   \throw RuntimeException for all client errors
         */
         virtual CommandReply run_script(const std::string& key,
                                         const std::string& function,
@@ -452,7 +469,7 @@ class RedisCluster : public RedisServer
         *   \brief Remove a model from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the model
-        *   \param first_cpu the first GPU (zero-based) to use with the model
+        *   \param first_gpu the first GPU (zero-based) to use with the model
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw SmartRedis::Exception if model deletion fails
         */
@@ -471,7 +488,7 @@ class RedisCluster : public RedisServer
         *   \brief Remove a script from the database that was stored
         *          for use with multiple GPUs
         *   \param name The name associated with the script
-        *   \param first_cpu the first GPU (zero-based) to use with the script
+        *   \param first_gpu the first GPU (zero-based) to use with the script
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
@@ -483,6 +500,7 @@ class RedisCluster : public RedisServer
         *   \param key The key associated with the model
         *   \returns The CommandReply that contains the result
         *            of the get model execution on the server
+        *   \throw SmartRedis::Exception if model retrieval fails
         */
         virtual CommandReply get_model(const std::string& key);
 
@@ -491,6 +509,7 @@ class RedisCluster : public RedisServer
         *   \param key The key associated with the script
         *   \returns The CommandReply that contains the result
         *            of the get script execution on the server
+        *   \throw SmartRedis::Exception if script retrieval fails
         */
         virtual CommandReply get_script(const std::string& key);
 
@@ -502,11 +521,27 @@ class RedisCluster : public RedisServer
         *                     with the model or script should be reset.
         *   \returns The CommandReply that contains the result
         *            of the AI.INFO execution on the server
+        *   \throw SmartRedis::Exception if info retrieval fails
         */
         virtual CommandReply
         get_model_script_ai_info(const std::string& address,
                                  const std::string& key,
                                  const bool reset_stat);
+
+        /*!
+        *   \brief Run a CommandList via a Pipeline.
+        *          All commands must go to the same shard
+        *   \param cmdlist The list of commands to run
+        *   \returns The PipelineReply with the result of command execution
+        *   \throw SmartRedis::Exception if execution fails
+        */
+        PipelineReply run_in_pipeline(CommandList& cmdlist);
+
+        /*!
+        *   \brief Create a string representation of the Redis connection
+        *   \returns A string representation of the Redis connection
+        */
+        virtual std::string to_string() const;
 
     protected:
 
@@ -541,22 +576,21 @@ class RedisCluster : public RedisServer
         *   \param cmd The command to run on the server
         *   \param db_prefix The prefix of the db node the
         *                    command addresses
-        *   \returns The CommandReply from the
-        *            command execution
+        *   \returns The CommandReply from the command execution
+        *   \throw SmartRedis::Exception if command execution fails
         */
         inline CommandReply _run(const Command& cmd, std::string db_prefix);
 
         /*!
         *   \brief Connect to the cluster at the address and port
-        *   \param address_port A string formatted as
-        *                       tcp:://address:port
-        *                       for redis connection
+        *   \param db_address The server address
+        *   \throw SmartRedis::Exception if connection fails
         */
-        inline void _connect(std::string address_port);
+        inline void _connect(SRAddress& db_address);
 
         /*!
-        *   \brief Map the RedisCluster via the CLUSTER SLOTS
-        *          command.
+        *   \brief Map the RedisCluster via the CLUSTER SLOTS command.
+        *   \throw SmartRedis::Exception if the command fails
         */
         inline void _map_cluster();
 
@@ -677,6 +711,7 @@ class RedisCluster : public RedisServer
         *           keys use the same hash slot
         *   \param keys The keys to be deleted
         *   \returns A vector of updated names
+        *   \throw SmartRedis::Exception deletion fails
         */
         void _delete_keys(std::vector<std::string> keys);
 
@@ -687,6 +722,7 @@ class RedisCluster : public RedisServer
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
+        *   \throw SmartRedis::Exception execution fails
         */
         void __run_model_dagrun(const std::string& key,
                                 std::vector<std::string> inputs,
@@ -717,11 +753,12 @@ class RedisCluster : public RedisServer
         *   \return A PipelineReply for the provided commands.  The
         *           PipelineReply will be in the same order as the provided
         *           Command vector.
+        *   \throw SmartRedis::Exception if pipelined execution fails
         */
         PipelineReply _run_pipeline(std::vector<Command*>& cmds,
                                     std::string& shard_prefix);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_CPP_CLUSTER_H
+#endif // SMARTREDIS_REDISCLUSTER_H
