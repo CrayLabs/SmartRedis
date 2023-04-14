@@ -33,26 +33,23 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdexcept>
+#include <iostream>
+#include <fstream>
 #include "srexception.h"
 #include "utility.h"
 #include "logger.h"
 
 namespace SmartRedis {
 
-/*!
-*   \brief Initialize an integer from configuration, such as an
-*          environment variable
-*   \param value Receives the configuration value
-*   \param cfg_key The key to query for the configuration variable
-*   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
-*/
+// Initialize an integer from an environment variable
 void get_config_integer(int& value,
                         const std::string& cfg_key,
                         const int default_value,
-                        bool suppress_warning /*= false*/)
+                        int flags /* = 0 */)
 {
+    bool suppress_warning = 0 != (flags & flag_suppress_warning);
+    bool no_default = 0 != (flags & flag_no_default);
+
     value = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
@@ -61,9 +58,15 @@ void get_config_integer(int& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if (NULL == cfg_val)
+    if ((NULL == cfg_val) && !no_default)
         message += ". Using default value of " + std::to_string(default_value);
     log_data("SmartRedis Library", LLDebug, message);
+
+    if ((cfg_val == NULL) && no_default) {
+        std::string msg("No value found for key ");
+        msg += cfg_key;
+        throw SRKeyException(msg);
+    }
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0) {
         // Enforce that all characters are digits because std::stoi
@@ -107,20 +110,15 @@ void get_config_integer(int& value,
     log_data("SmartRedis Library", LLDebug, message);
 }
 
-/*!
-*   \brief Initialize an string from configuration, such as an
-*          environment variable
-*   \param value Receives the configuration value
-*   \param cfg_key The key to query for the configuration variable
-*   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
-*/
+// Initialize a string from an environment variable
 void get_config_string(std::string& value,
                        const std::string& cfg_key,
                        const std::string& default_value,
-                       bool suppress_warning /*= false*/)
+                       int flags /* = 0 */)
 {
+    bool suppress_warning = 0 != (flags & flag_suppress_warning);
+    bool no_default = 0 != (flags & flag_no_default);
+
     value = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
@@ -129,9 +127,15 @@ void get_config_string(std::string& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if (NULL == cfg_val)
-        message += ". Using default value of \"" + default_value + "\"";
+    if ((NULL == cfg_val) && !no_default)
+        message += ". Using default value of " + default_value;
     log_data("SmartRedis Library", LLDebug, message);
+
+    if ((cfg_val == NULL) && no_default) {
+        std::string msg("No value found for key ");
+        msg += cfg_key;
+        throw SRKeyException(msg);
+    }
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
         value = cfg_val;
@@ -144,47 +148,6 @@ void get_config_string(std::string& value,
     }
 
     message = "Exiting with value \"" + value + "\"";
-    log_data("SmartRedis Library", LLDebug, message);
-}
-
-// Initialize a boolean from an environment variable
-void get_config_bool(bool& value,
-                     const std::string& cfg_key,
-                     bool default_value,
-                     bool suppress_warning /*= false*/)
-{
-    value = default_value;
-    std::string message = "Getting value for " + cfg_key;
-    log_data("SmartRedis Library", LLDebug, message);
-
-    char* cfg_val = std::getenv(cfg_key.c_str());
-    message = "Retrieved value \"";
-    message += cfg_val == NULL ? "<NULL>" : cfg_val;
-    message += "\"";
-    if (NULL == cfg_val) {
-        message += ". Using default value of \"";
-        message += (default_value ? "TRUE" : "FALSE");
-        message += "\"";
-    }
-    log_data("SmartRedis Library", LLDebug, message);
-
-    if ((cfg_val == NULL || std::strlen(cfg_val) == 0) && !suppress_warning) {
-        log_warning(
-            "SmartRedis Library",
-            LLDebug,
-            "Configuration variable " + cfg_key + " not set"
-        );
-    }
-    else {
-        std::string val_read(cfg_val);
-        std::transform(val_read.begin(), val_read.end(), val_read.begin(),
-            [](unsigned char c){ return std::tolower(c); });
-        value = !(val_read == "0" || val_read == "false");
-    }
-
-    message = "Exiting with value \"";
-    message += (value ? "TRUE" : "FALSE");
-    message += "\"";
     log_data("SmartRedis Library", LLDebug, message);
 }
 

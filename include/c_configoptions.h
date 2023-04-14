@@ -59,6 +59,9 @@ SRError create_configoptions_from_environment(
     const size_t db_prefix_length,
     void** new_configoptions);
 
+// Configuration via JSON file or JSON blob is anticipated in the future
+// but not supported yet
+#ifdef FUTURE_CONFIG_SUPPORT
 /*!
 *   \brief Instantiate ConfigOptions, getting selections from
 *          a file with JSON data.
@@ -87,7 +90,7 @@ SRError create_configoptions_from_string(
     const char* json_blob,
     const size_t json_blob_length,
     void** new_configoptions);
-
+#endif
 
 /////////////////////////////////////////////////////////////
 // Option access
@@ -99,19 +102,16 @@ SRError create_configoptions_from_string(
 *   \param key The name of the configuration option to retrieve
 *   \param key_len The length of the key string,
 *                  excluding null terminating character
-*   \param default_value The baseline value of the configuration
-*          option to be returned if a value was not set in the
-*          selected source
 *   \param result Receives the selected integer option result. Returns
 *            \p default_value if the option was not set in the
 *            selected source
-*   \returns Returns SRNoError on success or an error code on failure
+*   \returns Returns SRNoError on success, SRKeyError if the configuration
+*            option is not set, or an error code on failure
 */
 SRError get_integer_option(
     void* c_cfgopts,
     const char* key,
     size_t key_len,
-    int64_t default_value,
     int64_t* result);
 
 /*!
@@ -121,48 +121,20 @@ SRError get_integer_option(
 *   \param key The name of the configuration option to retrieve
 *   \param key_len The length of the key string,
 *                  excluding null terminating character
-*   \param default_value The baseline value of the configuration
-*          option to be returned if a value was not set in the
-*          selected source
-*   \param default_value_len The length of the default_value string,
-*                            excluding null terminating character
 *   \param result Receives the selected string option result. Returns
 *            \p default_value if the option was not set in the
 *            selected source
 *   \param result_len Receives the length of the result string,
 *                     excluding null terminating character
-*   \returns Returns SRNoError on success or an error code on failure
+*   \returns Returns SRNoError on success, SRKeyError if the configuration
+*            option is not set, or an error code on failure
 */
 SRError get_string_option(
     void* c_cfgopts,
     const char* key,
     size_t key_len,
-    const char* default_value,
-    size_t default_value_len,
     char** result,
     size_t* result_len);
-
-/*!
-*   \brief Retrieve the value of a boolean configuration option
-*          from the selected source
-*   \param c_cfgopts The ConfigOptions object to use for communication
-*   \param key The name of the configuration option to retrieve
-*   \param key_len The length of the key string,
-*                  excluding null terminating character
-*   \param default_value The baseline value of the configuration
-*          option to be returned if a value was not set in the
-*          selected source
-*   \param result Receives the selected boolean option result. Returns
-*            \p default_value if the option was not set in the
-*            selected source
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError get_boolean_option(
-    void* c_cfgopts,
-    const char* key,
-    size_t key_len,
-    bool default_value,
-    bool* result);
 
 /*!
 *   \brief Check whether a configuration option is set in the
@@ -171,15 +143,15 @@ SRError get_boolean_option(
 *   \param key The name of the configuration option to check
 *   \param key_len The length of the key string,
 *                  excluding null terminating character
-*   \param result Receives true IFF the key was defined or has been
-*                 overridden; false otherwise
+*   \param cfg_result Receives true IFF the key was defined or has been
+*                     overridden; false otherwise
 *   \returns Returns SRNoError on success or an error code on failure
 */
-SRError is_defined(
+SRError is_configured(
     void* c_cfgopts,
     const char* key,
     size_t key_len,
-    bool* result);
+    bool* cfg_result);
 
 /////////////////////////////////////////////////////////////
 // Option overrides
@@ -226,27 +198,6 @@ SRError override_string_option(
     size_t key_len,
     const char* value,
     size_t value_len);
-
-/*!
-*   \brief Override the value of a boolean configuration option
-*          in the selected source
-*   \details Overrides are specific to an instance of the
-*            ConfigOptions class. An instance that references
-*            the same source will not be affected by an override to
-*            a different ConfigOptions instance
-*   \param c_cfgopts The ConfigOptions object to use for communication
-*   \param key The name of the configuration option to override
-*   \param key_len The length of the key string,
-*                  excluding null terminating character
-*   \param value The value to store for the configuration option
-*   \returns Returns SRNoError on success or an error code on failure
-*/
-SRError override_boolean_option(
-    void* c_cfgopts,
-    const char* key,
-    size_t key_len,
-    bool value);
-
 
 } // extern "C"
 

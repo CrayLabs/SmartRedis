@@ -37,29 +37,32 @@ interface
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_environment_c
 
-  function create_configoptions_from_file_c( &
-    filename, filename_len, configoptions) &
-    bind(c, name="create_configoptions_from_file")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: create_configoptions_from_file_c
-    character(kind=c_char)        :: filename(*)   !< File containing JSON data
-    integer(kind=c_size_t), value :: filename_len  !< How many characters in filename
-    type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
-  end function create_configoptions_from_file_c
+! Configuration via JSON file or JSON blob is anticipated in the future
+! but not supported yet
 
-  function create_configoptions_from_string_c( &
-    json_blob, json_blob_len, configoptions) &
-    bind(c, name="create_configoptions_from_string")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t
-    import :: enum_kind
-    integer(kind=enum_kind)       :: create_configoptions_from_string_c
-    character(kind=c_char)        :: json_blob(*)  !< String containing JSON data
-    integer(kind=c_size_t), value :: json_blob_len !< How many characters in json_blob
-    type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
-  end function create_configoptions_from_string_c
+!  function create_configoptions_from_file_c( &
+!    filename, filename_len, configoptions) &
+!    bind(c, name="create_configoptions_from_file")
+!    use iso_c_binding, only : c_ptr, c_char, c_size_t
+!    import :: enum_kind
+!    integer(kind=enum_kind)       :: create_configoptions_from_file_c
+!    character(kind=c_char)        :: filename(*)   !< File containing JSON data
+!    integer(kind=c_size_t), value :: filename_len  !< How many characters in filename
+!    type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
+!  end function create_configoptions_from_file_c
+!
+!  function create_configoptions_from_string_c( &
+!    json_blob, json_blob_len, configoptions) &
+!    bind(c, name="create_configoptions_from_string")
+!    use iso_c_binding, only : c_ptr, c_char, c_size_t
+!    import :: enum_kind
+!    integer(kind=enum_kind)       :: create_configoptions_from_string_c
+!    character(kind=c_char)        :: json_blob(*)  !< String containing JSON data
+!    integer(kind=c_size_t), value :: json_blob_len !< How many characters in json_blob
+!    type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
+!  end function create_configoptions_from_string_c
 
-  function get_integer_option_c(cfgopts, key, key_len, default_value, result) &
+  function get_integer_option_c(cfgopts, key, key_len, result) &
     bind(c, name="get_integer_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_int64_t
     import :: enum_kind
@@ -68,14 +71,10 @@ interface
     character(kind=c_char)         :: key(*)            !< The name of the configuration
                                                         !! option to retrieve
     integer(kind=c_size_t), value  :: key_len           !< The length of the key string
-    integer(kind=c_int64_t), value :: default_value     !< The baseline value of the
-                                                        !! configuration option to be returned
-                                                        !! if a value is not set
     integer(kind=c_int64_t)        :: result            !< Receives the integer result
   end function get_integer_option_c
 
-  function get_string_option_c(cfgopts, key, key_len, default_value, &
-    default_value_len, result, result_len) &
+  function get_string_option_c(cfgopts, key, key_len, result, result_len) &
     bind(c, name="get_string_option")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
@@ -84,31 +83,12 @@ interface
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to retrieve
     integer(kind=c_size_t), value :: key_len           !< The length of the key string
-    character(kind=c_char)        :: default_value(*)  !< The baseline value of the
-                                                       !! configuration option to be returned
-                                                       !! if a value is not set
-    integer(kind=c_size_t), value :: default_value_len !< The length of the key string
     type(c_ptr)                   :: result            !< Receives the string result
     integer(kind=c_size_t)        :: result_len        !< The length of the result string
   end function get_string_option_c
 
-  function get_boolean_option_c(cfgopts, key, key_len, default_value, result) &
-    bind(c, name="get_boolean_option")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
-    import :: enum_kind
-    type(c_ptr), value            :: cfgopts
-    integer(kind=enum_kind)       :: get_boolean_option_c
-    character(kind=c_char)        :: key(*)            !< The name of the configuration
-                                                       !! option to retrieve
-    integer(kind=c_size_t), value :: key_len           !< The length of the key string
-    logical(kind=c_bool), value   :: default_value     !< The baseline value of the
-                                                       !! configuration option to be returned
-                                                       !! if a value is not set
-    logical(kind=c_bool)          :: result            !< Receives the boolean result
-  end function get_boolean_option_c
-
-  function is_defined_c(cfgopts, key, key_len, result) &
-    bind(c, name="is_defined")
+  function is_configured_c(cfgopts, key, key_len, result) &
+    bind(c, name="is_configured")
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
     import :: enum_kind
     type(c_ptr), value            :: cfgopts
@@ -117,7 +97,7 @@ interface
                                                        !! option to check
     integer(kind=c_size_t), value :: key_len           !< The length of the key string
     logical(kind=c_bool)          :: result            !< Receives the boolean result
-  end function is_defined_c
+  end function is_configured_c
 
   function override_integer_option_c(cfgopts, key, key_len, value) &
     bind(c, name="override_integer_option")
@@ -143,17 +123,5 @@ interface
     character(kind=c_char)        :: value(*)          !< The value to store for the option
     integer(kind=c_size_t), value :: value_len         !< The length of the value string
   end function override_string_option_c
-
-  function override_boolean_option_c(cfgopts, key, key_len, value) &
-    bind(c, name="override_boolean_option")
-    use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
-    import :: enum_kind
-    type(c_ptr), value            :: cfgopts
-    integer(kind=enum_kind)       :: override_boolean_option_c
-    character(kind=c_char)        :: key(*)            !< The name of the configuration
-                                                       !! option to override
-    integer(kind=c_size_t), value :: key_len           !< The length of the key string
-    logical(kind=c_bool), value   :: value             !< The value to store for the option
-  end function override_boolean_option_c
 
 end interface

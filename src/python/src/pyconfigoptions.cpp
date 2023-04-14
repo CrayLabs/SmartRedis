@@ -95,6 +95,9 @@ PyConfigOptions* PyConfigOptions::create_from_environment(
     }
 }
 
+// Configuration via JSON file or JSON blob is anticipated in the future
+// but not supported yet
+#ifdef FUTURE_CONFIG_SUPPORT
 // Instantiate ConfigOptions from a file with JSON data
 PyConfigOptions* PyConfigOptions::create_from_file(
     const std::string& filename)
@@ -143,11 +146,11 @@ PyConfigOptions* PyConfigOptions::create_from_string(
                                   "while executing create_from_string.");
     }
 }
+#endif
 
 // Retrieve the value of a numeric configuration option
 // from the selected source
-int64_t PyConfigOptions::get_integer_option(
-    const std::string& key, int64_t default_value)
+int64_t PyConfigOptions::get_integer_option(const std::string& key)
 {
     try {
         if (_configoptions == NULL) {
@@ -155,7 +158,7 @@ int64_t PyConfigOptions::get_integer_option(
                 "Attempted to call get_integer_option "\
                 "from a non-factory constructed ConfigOptions");
         }
-        return _configoptions->get_integer_option(key, default_value);
+        return _configoptions->get_integer_option(key);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -174,8 +177,7 @@ int64_t PyConfigOptions::get_integer_option(
 
 // Retrieve the value of a string configuration option
 // from the selected source
-std::string PyConfigOptions::get_string_option(
-    const std::string& key, const std::string& default_value)
+std::string PyConfigOptions::get_string_option(const std::string& key)
 {
     try {
         if (_configoptions == NULL) {
@@ -183,7 +185,7 @@ std::string PyConfigOptions::get_string_option(
                 "Attempted to call get_string_option "\
                 "from a non-factory constructed ConfigOptions");
         }
-        return _configoptions->get_string_option(key, default_value);
+        return _configoptions->get_string_option(key);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -200,37 +202,9 @@ std::string PyConfigOptions::get_string_option(
     }
 }
 
-// Retrieve the value of a boolean configuration option
-// from the selected source
-bool PyConfigOptions::get_boolean_option(
-    const std::string& key, bool default_value)
-{
-    try {
-        if (_configoptions == NULL) {
-            throw SRRuntimeException(
-                "Attempted to call get_boolean_option "\
-                "from a non-factory constructed ConfigOptions");
-        }
-        return _configoptions->get_boolean_option(key, default_value);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing get_boolean_option.");
-    }
-}
-
 // Check whether a configuration option is set in the
 // selected source
-bool PyConfigOptions::is_defined(const std::string& key)
+bool PyConfigOptions::is_configured(const std::string& key)
 {
     try {
         if (_configoptions == NULL) {
@@ -238,7 +212,7 @@ bool PyConfigOptions::is_defined(const std::string& key)
                 "Attempted to call is_defined "\
                 "from a non-factory constructed ConfigOptions");
         }
-        return _configoptions->is_defined(key);
+        return _configoptions->is_configured(key);
     }
     catch (Exception& e) {
         // exception is already prepared for caller
@@ -308,34 +282,6 @@ void PyConfigOptions::override_string_option(
         // should never happen
         throw SRInternalException("A non-standard exception was encountered "\
                                   "while executing override_string_option.");
-    }
-}
-
-// Override the value of a boolean configuration option
-// in the selected source
-void PyConfigOptions::override_boolean_option(
-    const std::string& key, bool value)
-{
-    try {
-        if (_configoptions == NULL) {
-            throw SRRuntimeException(
-                "Attempted to call override_boolean_option "\
-                "from a non-factory constructed ConfigOptions");
-        }
-        return _configoptions->override_boolean_option(key, value);
-    }
-    catch (Exception& e) {
-        // exception is already prepared for caller
-        throw;
-    }
-    catch (std::exception& e) {
-        // should never happen
-        throw SRInternalException(e.what());
-    }
-    catch (...) {
-        // should never happen
-        throw SRInternalException("A non-standard exception was encountered "\
-                                  "while executing override_boolean_option.");
     }
 }
 

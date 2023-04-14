@@ -47,17 +47,8 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
         const char* keys[] = {
             "test_integer_key_that_is_not_really_present",
             "test_string_key_that_is_not_really_present",
-            "test_boolean_key_that_is_not_really_present",
             "test_integer_key",
-            "test_string_key",
-            "test_boolean_key",
-            "test_boolean_key_f0",
-            "test_boolean_key_f1",
-            "test_boolean_key_f2",
-            "test_boolean_key_f3",
-            "test_boolean_key_t0",
-            "test_boolean_key_t1",
-            "test_boolean_key_t2"
+            "test_string_key"
         };
         INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
@@ -67,90 +58,55 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
         // Set up keys for testing
         setenv("test_integer_key", "42", true);
         setenv("test_string_key", "charizard", true);
-        setenv("test_boolean_key", "False", true);
-        setenv("test_boolean_key_f0", "false", true);
-        setenv("test_boolean_key_f1", "FALSE", true);
-        setenv("test_boolean_key_f2", "0", true);
-        setenv("test_boolean_key_f3", "fAlse", true);
-        setenv("test_boolean_key_t0", "pikachu", true);
-        setenv("test_boolean_key_t1", "1", true);
-        setenv("test_boolean_key_t2", "fail", true);
+
 
         auto co = ConfigOptions::create_from_environment("");
 
         THEN("Options should be configurable")
         {
-            // Unimplemented bits
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_file("some_file.json"),
-                RuntimeException);
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
-                RuntimeException);
-
             // integer option tests
-            CHECK(co->get_integer_option("test_integer_key", 0) == 42);
-            CHECK_FALSE(co->is_defined("test_integer_key_that_is_not_really_present"));
+            CHECK(co->get_integer_option("test_integer_key") == 42);
+            CHECK_FALSE(co->is_configured("test_integer_key_that_is_not_really_present"));
+            CHECK_THROWS_AS(
+                co->get_integer_option(
+                    "test_integer_key_that_is_not_really_present"),
+                KeyException);
+            CHECK(co->_resolve_integer_option(
+                "test_integer_key_that_is_not_really_present", 11) == 11);
+            CHECK(co->is_configured("test_integer_key_that_is_not_really_present"));
             CHECK(co->get_integer_option(
-                "test_integer_key_that_is_not_really_present", 0) == 0);
-            CHECK(co->is_defined("test_integer_key_that_is_not_really_present"));
+                "test_integer_key_that_is_not_really_present") == 11);
             co->override_integer_option(
-                "test_integer_key_that_is_not_really_present", 42
-            );
+                "test_integer_key_that_is_not_really_present", 42);
             CHECK(co->get_integer_option(
-                "test_integer_key_that_is_not_really_present", 0) == 42);
+                "test_integer_key_that_is_not_really_present") == 42);
+            CHECK(co->_resolve_integer_option(
+                "test_integer_key_that_is_not_really_present", 11) == 42);
 
             // string option tests
-            CHECK(co->get_string_option("test_string_key", "missing") == "charizard");
-            CHECK_FALSE(co->is_defined("test_string_key_that_is_not_really_present"));
+            CHECK(co->get_string_option("test_string_key") == "charizard");
+            CHECK_FALSE(co->is_configured("test_string_key_that_is_not_really_present"));
+            CHECK_THROWS_AS(
+                co->get_string_option(
+                    "test_string_key_that_is_not_really_present"),
+                KeyException);
+            CHECK(co->_resolve_string_option(
+                "test_string_key_that_is_not_really_present", "pikachu") == "pikachu");
+            CHECK(co->is_configured("test_string_key_that_is_not_really_present"));
             CHECK(co->get_string_option(
-                "test_string_key_that_is_not_really_present", "missing"
-            ) == "missing");
+                "test_string_key_that_is_not_really_present") == "pikachu");
             co->override_string_option(
-                "test_string_key_that_is_not_really_present", "meowth"
-            );
+                "test_string_key_that_is_not_really_present", "meowth");
             CHECK(co->get_string_option(
-                "test_string_key_that_is_not_really_present", "missing"
-            ) == "meowth");
-            CHECK(co->is_defined("test_string_key_that_is_not_really_present"));
-
-            // boolean option tests
-            CHECK(co->get_boolean_option("test_boolean_key", true) == false);
-            CHECK_FALSE(co->is_defined("test_boolean_key_that_is_not_really_present"));
-            CHECK(co->get_boolean_option(
-                "test_boolean_key_that_is_not_really_present", true
-            ) == true);
-            co->override_boolean_option(
-                "test_boolean_key_that_is_not_really_present", true
-            );
-            CHECK(co->get_boolean_option(
-                "test_boolean_key_that_is_not_really_present", true
-            ) == true);
-            CHECK(co->is_defined("test_boolean_key_that_is_not_really_present"));
-            for (size_t i = 0; i < 4; i++) {
-                std::string test_key("test_boolean_key_f");
-                test_key += std::to_string(i);
-                CHECK(co->get_boolean_option(test_key, true) == false);
-            }
-            for (size_t i = 0; i < 3; i++) {
-                std::string test_key("test_boolean_key_t");
-                test_key += std::to_string(i);
-                CHECK(co->get_boolean_option(test_key, false) == true);
-            }
+                "test_string_key_that_is_not_really_present") == "meowth");
+            CHECK(co->_resolve_string_option(
+                "test_string_key_that_is_not_really_present", "pikachu") == "meowth");
         }
     }
 
     // Clean up test keys
     unsetenv("test_integer_key");
     unsetenv("test_string_key");
-    unsetenv("test_boolean_key");
-    unsetenv("test_boolean_key_f0");
-    unsetenv("test_boolean_key_f1");
-    unsetenv("test_boolean_key_f2");
-    unsetenv("test_boolean_key_f3");
-    unsetenv("test_boolean_key_t0");
-    unsetenv("test_boolean_key_t1");
-    unsetenv("test_boolean_key_t2");
 
     log_data(context, LLDebug, "***End ConfigOptions testing***");
 }
@@ -167,17 +123,8 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
         const char* keys[] = {
             "prefixtest_integer_key_that_is_not_really_present",
             "prefixtest_string_key_that_is_not_really_present",
-            "prefixtest_boolean_key_that_is_not_really_present",
             "prefixtest_integer_key",
-            "prefixtest_string_key",
-            "prefixtest_boolean_key",
-            "prefixtest_boolean_key_f0",
-            "prefixtest_boolean_key_f1",
-            "prefixtest_boolean_key_f2",
-            "prefixtest_boolean_key_f3",
-            "prefixtest_boolean_key_t0",
-            "prefixtest_boolean_key_t1",
-            "prefixtest_boolean_key_t2"
+            "prefixtest_string_key"
         };
         INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
@@ -187,90 +134,54 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
         // Set up keys for testing
         setenv("prefixtest_integer_key", "42", true);
         setenv("prefixtest_string_key", "charizard", true);
-        setenv("prefixtest_boolean_key", "False", true);
-        setenv("prefixtest_boolean_key_f0", "false", true);
-        setenv("prefixtest_boolean_key_f1", "FALSE", true);
-        setenv("prefixtest_boolean_key_f2", "0", true);
-        setenv("prefixtest_boolean_key_f3", "fAlse", true);
-        setenv("prefixtest_boolean_key_t0", "pikachu", true);
-        setenv("prefixtest_boolean_key_t1", "1", true);
-        setenv("prefixtest_boolean_key_t2", "fail", true);
 
         auto co = ConfigOptions::create_from_environment("prefixtest");
 
         THEN("Prefixed options should be configurable")
         {
-            // Unimplemented bits
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_file("some_file.json"),
-                RuntimeException);
-            CHECK_THROWS_AS(
-                ConfigOptions::create_from_string("{ \"key\" = \"value\" }"),
-                RuntimeException);
-
             // integer option tests
-            CHECK(co->get_integer_option("integer_key", 0) == 42);
-            CHECK_FALSE(co->is_defined("integer_key_that_is_not_really_present"));
+            CHECK(co->get_integer_option("integer_key") == 42);
+            CHECK_FALSE(co->is_configured("integer_key_that_is_not_really_present"));
+            CHECK_THROWS_AS(
+                co->get_integer_option(
+                    "integer_key_that_is_not_really_present"),
+                KeyException);
+            CHECK(co->_resolve_integer_option(
+                "integer_key_that_is_not_really_present", 11) == 11);
+            CHECK(co->is_configured("integer_key_that_is_not_really_present"));
             CHECK(co->get_integer_option(
-                "integer_key_that_is_not_really_present", 0) == 0);
-            CHECK(co->is_defined("integer_key_that_is_not_really_present"));
+                "integer_key_that_is_not_really_present") == 11);
             co->override_integer_option(
-                "integer_key_that_is_not_really_present", 42
-            );
+                "integer_key_that_is_not_really_present", 42);
             CHECK(co->get_integer_option(
-                "integer_key_that_is_not_really_present", 0) == 42);
+                "integer_key_that_is_not_really_present") == 42);
+            CHECK(co->_resolve_integer_option(
+                "integer_key_that_is_not_really_present", 11) == 42);
 
             // string option tests
-            CHECK(co->get_string_option("string_key", "missing") == "charizard");
-            CHECK_FALSE(co->is_defined("string_key_that_is_not_really_present"));
+            CHECK(co->get_string_option("string_key") == "charizard");
+            CHECK_FALSE(co->is_configured("string_key_that_is_not_really_present"));
+            CHECK_THROWS_AS(
+                co->get_string_option(
+                    "string_key_that_is_not_really_present"),
+                KeyException);
+            CHECK(co->_resolve_string_option(
+                "string_key_that_is_not_really_present", "pikachu") == "pikachu");
+            CHECK(co->is_configured("string_key_that_is_not_really_present"));
             CHECK(co->get_string_option(
-                "string_key_that_is_not_really_present", "missing"
-            ) == "missing");
+                "string_key_that_is_not_really_present") == "pikachu");
             co->override_string_option(
-                "string_key_that_is_not_really_present", "meowth"
-            );
+                "string_key_that_is_not_really_present", "meowth");
             CHECK(co->get_string_option(
-                "string_key_that_is_not_really_present", "missing"
-            ) == "meowth");
-            CHECK(co->is_defined("string_key_that_is_not_really_present"));
-
-            // boolean option tests
-            CHECK(co->get_boolean_option("boolean_key", true) == false);
-            CHECK_FALSE(co->is_defined("boolean_key_that_is_not_really_present"));
-            CHECK(co->get_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            ) == true);
-            co->override_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            );
-            CHECK(co->get_boolean_option(
-                "boolean_key_that_is_not_really_present", true
-            ) == true);
-            CHECK(co->is_defined("boolean_key_that_is_not_really_present"));
-            for (size_t i = 0; i < 4; i++) {
-                std::string test_key("boolean_key_f");
-                test_key += std::to_string(i);
-                CHECK(co->get_boolean_option(test_key, true) == false);
-            }
-            for (size_t i = 0; i < 3; i++) {
-                std::string test_key("boolean_key_t");
-                test_key += std::to_string(i);
-                CHECK(co->get_boolean_option(test_key, false) == true);
-            }
+                "string_key_that_is_not_really_present") == "meowth");
+            CHECK(co->_resolve_string_option(
+                "string_key_that_is_not_really_present", "pikachu") == "meowth");
         }
     }
 
     // Clean up test keys
     unsetenv("prefixtest_integer_key");
     unsetenv("prefixtest_string_key");
-    unsetenv("prefixtest_boolean_key");
-    unsetenv("prefixtest_boolean_key_f0");
-    unsetenv("prefixtest_boolean_key_f1");
-    unsetenv("prefixtest_boolean_key_f2");
-    unsetenv("prefixtest_boolean_key_f3");
-    unsetenv("prefixtest_boolean_key_t0");
-    unsetenv("prefixtest_boolean_key_t1");
-    unsetenv("prefixtest_boolean_key_t2");
 
     log_data(context, LLDebug, "***End ConfigOptions prefix testing***");
 }

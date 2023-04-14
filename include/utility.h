@@ -37,19 +37,24 @@
 
 namespace SmartRedis {
 
+const int flag_suppress_warning = 1;
+const int flag_no_default = 2;
+
 /*!
 *   \brief Initialize an integer from configuration, such as an
 *          environment variable
 *   \param value Receives the configuration value
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
+*   \param flags flag_suppress_warning = Do not issue a warning if the
+*                variable is not set; flag_no_default = throw KeyException
+*                if value not set
+*   \throw KeyException if value not set and flag_no_default is not set
 */
 void get_config_integer(int& value,
                         const std::string& cfg_key,
                         const int default_value,
-                        bool suppress_warning = false);
+                        int flags = 0);
 
 /*!
 *   \brief Initialize an string from configuration, such as an
@@ -57,27 +62,15 @@ void get_config_integer(int& value,
 *   \param value Receives the configuration value
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
+*   \param flags flag_suppress_warning = Do not issue a warning if the
+*                variable is not set; flag_no_default = throw KeyException
+*                if value not set
+*   \throw KeyException if value not set and flag_no_default is not set
 */
 void get_config_string(std::string& value,
                        const std::string& cfg_key,
                        const std::string& default_value,
-                       bool suppress_warning = false);
-
-/*!
-*   \brief Initialize a boolean from configuration, such as an
-*          environment variable
-*   \param value Receives the configuration value
-*   \param cfg_key The key to query for the configuration variable
-*   \param default_value Default if configuration key is not set
-*   \param suppress_warning Do not issue a warning if the variable
-*                           is not set
-*/
-void get_config_bool(bool& value,
-                     const std::string& cfg_key,
-                     bool default_value,
-                     bool suppress_warning = false);
+                       int flags = 0);
 
 /*!
 *   \brief Create a string representation of a tensor type

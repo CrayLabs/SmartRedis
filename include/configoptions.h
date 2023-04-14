@@ -51,9 +51,13 @@ namespace SmartRedis {
 *          configuration via environment variables is supported
 */
 enum cfgSrc {
-    cs_file,    // Configuration data is coming from a JSON file
     cs_envt,    // Configuration data is coming from environment variables
+// Configuration via JSON file or JSON blob is anticipated in the future
+// but not supported yet
+#ifdef FUTURE_CONFIG_SUPPORT
+    cs_file,    // Configuration data is coming from a JSON file
     cs_blob     // Configuration data is coming from a JSON blob string
+#endif
 } ;
 
 
@@ -123,6 +127,9 @@ class ConfigOptions
         static std::unique_ptr<ConfigOptions> create_from_environment(
             const std::string& db_prefix);
 
+// Configuration via JSON file or JSON blob is anticipated in the future
+// but not supported yet
+#ifdef FUTURE_CONFIG_SUPPORT
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
         *          a file with JSON data.
@@ -144,6 +151,7 @@ class ConfigOptions
         */
         static std::unique_ptr<ConfigOptions> create_from_string(
             const std::string& json_blob);
+#endif
 
         /////////////////////////////////////////////////////////////
         // Option access
@@ -152,31 +160,26 @@ class ConfigOptions
         *   \brief Retrieve the value of a numeric configuration option
         *          from the selected source
         *   \param key The name of the configuration option to retrieve
-        *   \param default_value The baseline value of the configuration
-        *          option to be returned if a value was not set in the
+        *   \returns The value of the selected option
+        *   \throw Throws SRKeyException if the option was not set in the
         *          selected source
-        *   \returns The value of the selected option. Returns
-        *            \p default_value if the option was not set in the
-        *            selected source
         */
-        int64_t get_integer_option(const std::string& key, int64_t default_value);
+        int64_t get_integer_option(const std::string& key);
 
         /*!
         *   \brief Retrieve the value of a string configuration option
         *          from the selected source
         *   \param key The name of the configuration option to retrieve
-        *   \param default_value The baseline value of the configuration
-        *          option to be returned if a value was not set in the
+        *   \returns The value of the selected option
+        *   \throw Throws SRKeyException if the option was not set in the
         *          selected source
-        *   \returns The value of the selected option. Returns
-        *            \p default_value if the option was not set in the
-        *            selected source
         */
-        std::string get_string_option(const std::string& key, const std::string& default_value);
+        std::string get_string_option(const std::string& key);
 
         /*!
-        *   \brief Retrieve the value of a boolean configuration option
-        *          from the selected source
+        *   \brief Resolve the value of a string configuration option
+        *          from the selected source, selecting a default value
+        *          if not configured
         *   \param key The name of the configuration option to retrieve
         *   \param default_value The baseline value of the configuration
         *          option to be returned if a value was not set in the
@@ -185,7 +188,23 @@ class ConfigOptions
         *            \p default_value if the option was not set in the
         *            selected source
         */
-        bool get_boolean_option(const std::string& key, bool default_value);
+        std::string _resolve_string_option(
+            const std::string& key, const std::string& default_value);
+
+        /*!
+        *   \brief Resolve the value of a numeric configuration option
+        *          from the selected source, selecting a default value
+        *          if not configured
+        *   \param key The name of the configuration option to retrieve
+        *   \param default_value The baseline value of the configuration
+        *          option to be returned if a value was not set in the
+        *          selected source
+        *   \returns The value of the selected option. Returns
+        *            \p default_value if the option was not set in the
+        *            selected source
+        */
+        int64_t _resolve_integer_option(
+            const std::string& key, int64_t default_value);
 
         /*!
         *   \brief Check whether a configuration option is set in the
@@ -194,7 +213,7 @@ class ConfigOptions
         *   \returns True IFF the target option is defined in the selected
         *            source
         */
-        bool is_defined(const std::string& key);
+        bool is_configured(const std::string& key);
 
         /*!
         *   \brief Retrieve the logging context
@@ -237,18 +256,6 @@ class ConfigOptions
         */
         void override_string_option(const std::string& key, const std::string& value);
 
-        /*!
-        *   \brief Override the value of a boolean configuration option
-        *          in the selected source
-        *   \details Overrides are specific to an instance of the
-        *            ConfigOptions class. An instance that references
-        *            the same source will not be affected by an override to
-        *            a different ConfigOptions instance
-        *   \param key The name of the configuration option to override
-        *   \param value The value to store for the configuration option
-        */
-        void override_boolean_option(const std::string& key, bool value);
-
     private:
 
         /*!
@@ -264,11 +271,6 @@ class ConfigOptions
         *   \param key The key to prefix
         */
         std::string _prefixed(const std::string& key);
-
-        /*!
-        *  \brief Boolean option map
-        */
-        std::unordered_map<std::string, bool> _bool_options;
 
         /*!
         *  \brief Integer option map
