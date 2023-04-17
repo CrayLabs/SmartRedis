@@ -92,7 +92,7 @@ interface
     use iso_c_binding, only : c_ptr, c_char, c_size_t, c_bool
     import :: enum_kind
     type(c_ptr), value            :: cfgopts
-    integer(kind=enum_kind)       :: is_defined_c
+    integer(kind=enum_kind)       :: is_configured_c
     character(kind=c_char)        :: key(*)            !< The name of the configuration
                                                        !! option to check
     integer(kind=c_size_t), value :: key_len           !< The length of the key string
