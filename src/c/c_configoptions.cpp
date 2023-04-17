@@ -34,6 +34,38 @@
 
 using namespace SmartRedis;
 
+// Decorator to standardize exception handling in C ConfigOptions API methods
+template <class T>
+auto c_cfgopt_api(T&& cfgopt_api_func, const char* name)
+{
+  // we create a closure below
+  auto decorated = [name, cfgopt_api_func =
+    std::forward<T>(cfgopt_api_func)](auto&&... args)
+  {
+    SRError result = SRNoError;
+    try {
+      cfgopt_api_func(std::forward<decltype(args)>(args)...);
+    }
+    catch (const Exception& e) {
+      SRSetLastError(e);
+      result = e.to_error_code();
+    }
+    catch (...) {
+      std::string msg(
+          "A non-standard exception was encountered while executing ");
+      msg += name;
+      SRSetLastError(SRInternalException(msg));
+      result = SRInternalError;
+    }
+    return result;
+  };
+  return decorated;
+}
+
+// Macro to invoke the decorator with a lambda function
+#define MAKE_CFGOPT_API(stuff)\
+    c_cfgopt_api([&] { stuff }, __func__)()
+
 // Instantiate ConfigOptions from environment variables
 extern "C"
 SRError create_configoptions_from_environment(
@@ -41,34 +73,21 @@ SRError create_configoptions_from_environment(
     const size_t db_prefix_length,
     void** new_configoptions)
 {
-  SRError result = SRNoError;
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(db_prefix != NULL && new_configoptions != NULL);
+  return MAKE_CFGOPT_API({
+    try {
+      // Sanity check params
+      SR_CHECK_PARAMS(db_prefix != NULL && new_configoptions != NULL);
 
-    std::string db_prefix_str(db_prefix, db_prefix_length);
+      std::string db_prefix_str(db_prefix, db_prefix_length);
 
-    auto cfgOpts = ConfigOptions::create_from_environment(db_prefix_str);
-    ConfigOptions* pCfgOpts = cfgOpts.release();
-    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
-  }
-  catch (const std::bad_alloc& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRBadAllocException("config options allocation"));
-    result = SRBadAllocError;
-  }
-  catch (const Exception& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+      auto cfgOpts = ConfigOptions::create_from_environment(db_prefix_str);
+      ConfigOptions* pCfgOpts = cfgOpts.release();
+      *new_configoptions = reinterpret_cast<void*>(pCfgOpts);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("config options allocation");
+    }
+  });
 }
 
 // Configuration via JSON file or JSON blob is anticipated in the future
@@ -81,34 +100,21 @@ SRError create_configoptions_from_file(
     const size_t filename_length,
     void** new_configoptions)
 {
-  SRError result = SRNoError;
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(filename != NULL && new_configoptions != NULL);
+  return MAKE_CFGOPT_API({
+    try {
+      // Sanity check params
+      SR_CHECK_PARAMS(filename != NULL && new_configoptions != NULL);
 
-    std::string filename_str(filename, filename_length);
+      std::string filename_str(filename, filename_length);
 
-    auto cfgOpts = ConfigOptions::create_from_file(filename_str);
-    ConfigOptions* pCfgOpts = cfgOpts.release();
-    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
-  }
-  catch (const std::bad_alloc& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRBadAllocException("config options allocation"));
-    result = SRBadAllocError;
-  }
-  catch (const Exception& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+      auto cfgOpts = ConfigOptions::create_from_file(filename_str);
+      ConfigOptions* pCfgOpts = cfgOpts.release();
+      *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("config options allocation");
+    }
+  });
 }
 
 // Instantiate ConfigOptions from a string containing a JSON blob
@@ -118,34 +124,21 @@ SRError create_configoptions_from_string(
     const size_t json_blob_length,
     void** new_configoptions)
 {
-  SRError result = SRNoError;
-  try {
-    // Sanity check params
-    SR_CHECK_PARAMS(json_blob != NULL && new_configoptions != NULL);
+  return MAKE_CFGOPT_API({
+    try {
+      // Sanity check params
+      SR_CHECK_PARAMS(json_blob != NULL && new_configoptions != NULL);
 
-    std::string json_blob_str(json_blob, json_blob_length);
+      std::string json_blob_str(json_blob, json_blob_length);
 
-    auto cfgOpts = ConfigOptions::create_from_string(json_blob_str);
-    ConfigOptions* pCfgOpts = cfgOpts.release();
-    *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
-  }
-  catch (const std::bad_alloc& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRBadAllocException("config options allocation"));
-    result = SRBadAllocError;
-  }
-  catch (const Exception& e) {
-    *new_configoptions = NULL;
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    *new_configoptions = NULL;
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+      auto cfgOpts = ConfigOptions::create_from_string(json_blob_str);
+      ConfigOptions* pCfgOpts = cfgOpts.release();
+      *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("config options allocation");
+    }
+  });
 }
 #endif
 
@@ -157,8 +150,7 @@ SRError get_integer_option(
     size_t key_len,
     int64_t* option_result)
 {
-  SRError result = SRNoError;
-  try {
+  return MAKE_CFGOPT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL &&
       option_result != NULL);
@@ -167,17 +159,7 @@ SRError get_integer_option(
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
     *option_result = co->get_integer_option(key_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }
 
 // Retrieve the value of a string configuration option
@@ -189,8 +171,7 @@ SRError get_string_option(
     char** option_result,
     size_t* option_result_len)
 {
-  SRError result = SRNoError;
-  try {
+  return MAKE_CFGOPT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL &&
       option_result != NULL && option_result_len != NULL);
@@ -205,17 +186,7 @@ SRError get_string_option(
     *option_result_len = option_result_str.length();
     *option_result = new char[*option_result_len + 1];
     strncpy(*option_result, option_result_str.c_str(), *option_result_len);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }
 
 // Check whether a configuration option is set
@@ -226,8 +197,7 @@ SRError is_configured(
     size_t key_len,
     bool* cfg_result)
 {
-  SRError result = SRNoError;
-  try {
+  return MAKE_CFGOPT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL && cfg_result != NULL);
 
@@ -235,17 +205,7 @@ SRError is_configured(
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
     *cfg_result = co->is_configured(key_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }
 
 // Override the value of a numeric configuration option
@@ -256,8 +216,7 @@ SRError override_integer_option(
     size_t key_len,
     int64_t value)
 {
-  SRError result = SRNoError;
-  try {
+  return MAKE_CFGOPT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL);
 
@@ -265,17 +224,7 @@ SRError override_integer_option(
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
     co->override_integer_option(key_str, value);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }
 
 // Override the value of a string configuration option
@@ -287,8 +236,7 @@ SRError override_string_option(
     const char* value,
     size_t value_len)
 {
-  SRError result = SRNoError;
-  try {
+  return MAKE_CFGOPT_API({
     // Sanity check params
     SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL && value != NULL);
 
@@ -297,15 +245,5 @@ SRError override_string_option(
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
     co->override_string_option(key_str, value_str);
-  }
-  catch (const Exception& e) {
-    SRSetLastError(e);
-    result = e.to_error_code();
-  }
-  catch (...) {
-    SRSetLastError(SRInternalException("Unknown exception occurred"));
-    result = SRInternalError;
-  }
-
-  return result;
+  });
 }
