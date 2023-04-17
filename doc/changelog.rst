@@ -1,6 +1,22 @@
 Changelog
 =========
 
+Development Branch
+------------------
+
+To be released at some future poll_list_length
+
+Description
+
+- Added infrastructure for multiDB support
+
+Detailed Notes
+
+- Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
+
+.. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303
+
+
 0.4.0
 -----
 
@@ -24,7 +40,6 @@ inspection, documentation updates, fixes to the multi-GPU support, and much more
 - Streamline pipelined execution of tasks for backend database
 - Enhance code coverage to include all 4 languages supported by SmartRedis
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
-- Added infrastructure for multiDB support
 - Correct assorted API documentation errors and omissions
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
@@ -60,7 +75,6 @@ Detailed Notes
 - Expand code coverage to all four languages and make the CI/CD more efficent (PR308_)
 - An internal flag was set incorrectly, it resulted in wrong key prefixing when accessing (retrieving or querying) lists created in ensembles (PR306_)
 - Corrected a variety of Doxygen errors and omissions in the API documentation (PR305_)
-- Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 - Added throw documentation for exception handling in redis.h, redisserver.h, rediscluster.h (PR301_)
 - Added error handling for a rare edge condition when setting scripts and models (PR300_)
 - Added support to inspect the dimensions of a tensor via new get_tensor_dims() method (PR299_)
@@ -97,7 +111,6 @@ Detailed Notes
 .. _PR308: https://github.com/CrayLabs/SmartRedis/pull/308
 .. _PR306: https://github.com/CrayLabs/SmartRedis/pull/306
 .. _PR305: https://github.com/CrayLabs/SmartRedis/pull/305
-.. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303
 .. _PR301: https://github.com/CrayLabs/SmartRedis/pull/301
 .. _PR300: https://github.com/CrayLabs/SmartRedis/pull/300
 .. _PR299: https://github.com/CrayLabs/SmartRedis/pull/299
