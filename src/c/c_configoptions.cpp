@@ -179,6 +179,10 @@ SRError get_string_option(
     std::string key_str(key, key_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
+    // Set up an empty string as the result in case something goes wrong
+    *option_result = NULL;
+    *option_result = 0;
+
     std::string option_result_str = co->get_string_option(key_str);
 
     // TBD FINDME: we're leaking memory here since there will

@@ -180,12 +180,16 @@ function get_string_option(self, key, result) result(code)
 
   code = get_string_option_c( &
     self%configoptions_ptr, c_key, c_key_length, c_result_ptr, c_result_length)
-  call c_f_pointer(c_result_ptr, f_result_ptr, [ c_result_length ])
 
-  ALLOCATE(character(len=c_result_length) :: result)
-  do i = 1, c_result_length
-    result(i:i) = f_result_ptr(i)
-  enddo
+  ! Translate the string result if we got a valid one
+  if (code .eq. SRNoError) then
+    call c_f_pointer(c_result_ptr, f_result_ptr, [ c_result_length ])
+
+    ALLOCATE(character(len=c_result_length) :: result)
+    do i = 1, c_result_length
+      result(i:i) = f_result_ptr(i)
+    enddo
+  endif
 end function get_string_option
 
 !> Check whether a configuration option is set
