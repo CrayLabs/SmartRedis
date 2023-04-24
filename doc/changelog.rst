@@ -1,6 +1,21 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Add pip-install target to Makefile to automate this process going forward
+
+Detailed Notes
+
+- New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
+
+.. _PR330: https://github.com/CrayLabs/SmartRedis/pull/330
+
 0.4.0
 -----
 
@@ -85,7 +100,7 @@ Detailed Notes
 
 .. _PR321: https://github.com/CrayLabs/SmartRedis/pull/321
 .. _PR317: https://github.com/CrayLabs/SmartRedis/pull/317
-.. _PR315: https://github.com/CrayLabs/SmartRedis/pull/320
+.. _PR320: https://github.com/CrayLabs/SmartRedis/pull/320
 .. _PR315: https://github.com/CrayLabs/SmartRedis/pull/315
 .. _PR313: https://github.com/CrayLabs/SmartRedis/pull/313
 .. _PR312: https://github.com/CrayLabs/SmartRedis/pull/312
