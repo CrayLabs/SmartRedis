@@ -1,6 +1,15 @@
 
 MAKEFLAGS += --no-print-directory
 COV_FLAGS :=
+SHELL:=/bin/bash
+
+# Params for third-party software
+HIREDIS_URL := https://github.com/redis/hiredis.git
+HIREDIS_VER := v1.0.0
+RPP_URL := https://github.com/sewenew/redis-plus-plus.git
+RPP_VER := 1.3.5
+PYBIND_URL := https://github.com/pybind/pybind11.git
+PYBIND_VER := v2.10.3
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -17,9 +26,52 @@ help:
 # help: Build
 # help: -------
 
+
+
+# Hiredis (hidden build target)
+.phony: hiredis
+hiredis: install/lib/libhiredis.a
+install/lib/libhiredis.a:
+	@mkdir -p ../third-party
+	@cd third-party && \
+	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
+	@cd third-party/hiredis && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	rm -f ../../install/lib/libhiredis*.so && \
+	rm -f ../../install/lib/libhiredis*.dylib && \
+	echo "Finished installing Hiredis"
+
+# Redis-plus-plus (hidden build target)
+.phony: redis-plus-plus
+redis-plus-plus: install/lib/libredis++.a
+install/lib/libredis++.a:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
+	@cd third-party/redis-plus-plus && \
+	mkdir -p compile && \
+	cd compile && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
+	CC=gcc CXX=g++ make -j && \
+	CC=gcc CXX=g++ make install && \
+	echo "Finished installing Redis-plus-plus"
+
+# Pybind11 (hidden build target)
+.phony: pybind
+pybind: third-party/pybind/include/pybind11/pybind11.h
+third-party/pybind/include/pybind11/pybind11.h:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(PYBIND_URL) pybind --branch $(PYBIND_VER) --depth=1
+	@mkdir -p third-party/pybind/build && \
+	echo "Finished installing Pybind11"
+
 # help: deps                           - Make SmartRedis dependencies
 .PHONY: deps
-deps: SHELL:=/bin/bash
+deps: hiredis
+deps: redis-plus-plus
+deps: pybind
 deps:
 	@bash ./build-scripts/build_deps.sh
 
@@ -30,37 +82,32 @@ pip-install:
 
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
-lib: SHELL:=/bin/bash
+lib: pip-install
 lib: deps
 	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
-lib-with-fortran: SHELL:=/bin/bash
 lib-with-fortran: deps
 	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS) $(CMAKE_ARGS) -DBUILD_FORTRAN=ON
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: SHELL:=/bin/bash
 test-lib: LIB_BUILD_ARGS="-DWERROR=ON"
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: SHELL:=/bin/bash
 test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON"
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
-test-deps: SHELL:=/bin/bash
 test-deps:
 	@bash ./build-scripts/build_test_deps.sh
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
 .PHONY: test-deps
-test-deps-gpu: SHELL:=/bin/bash
 test-deps-gpu:
 	@bash ./build-scripts/build_test_deps.sh gpu
 
