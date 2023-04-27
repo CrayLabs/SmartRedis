@@ -23,6 +23,11 @@ deps: SHELL:=/bin/bash
 deps:
 	@bash ./build-scripts/build_deps.sh
 
+# help: pip-install                    - Register the SmartRedis library with pip
+.PHONY: pip-install
+pip-install:
+	@if ! python -c "import smartredis" >& /dev/null; then pip install -e.; fi
+
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: SHELL:=/bin/bash
