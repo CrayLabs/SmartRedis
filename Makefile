@@ -366,7 +366,7 @@ third-party/RedisAI/install-cpu/redisai.so:
 	@mkdir -p third-party
 	@cd third-party && \
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI --branch $(REDISAI_VER) --depth=1
-	@cd third-party/RedisAI && \
+	-@cd third-party/RedisAI && \
 	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh $(SR_DEVICE) && \
 	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -j -C opt clean build && \
 	echo "Finished installing RedisAI"
