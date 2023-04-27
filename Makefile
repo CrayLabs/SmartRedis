@@ -1,7 +1,7 @@
-
 MAKEFLAGS += --no-print-directory
 COV_FLAGS :=
 SHELL:=/bin/bash
+SR_DEVICE := cpu
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -10,6 +10,14 @@ RPP_URL := https://github.com/sewenew/redis-plus-plus.git
 RPP_VER := 1.3.5
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.10.3
+REDIS_URL := https://github.com/redis/redis.git
+REDIS_VER := 6.0.8
+REDISAI_URL := https://github.com/RedisAI/RedisAI.git
+REDISAI_VER := v1.2.3
+CATCH2_URL := https://github.com/catchorg/Catch2.git
+CATCH2_VER := v2.13.6
+LCOV_URL := https://github.com/linux-test-project/lcov.git
+LCOV_VER := v1.15
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -25,47 +33,6 @@ help:
 # help:
 # help: Build
 # help: -------
-
-
-
-# Hiredis (hidden build target)
-.phony: hiredis
-hiredis: install/lib/libhiredis.a
-install/lib/libhiredis.a:
-	@mkdir -p ../third-party
-	@cd third-party && \
-	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
-	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
-	rm -f ../../install/lib/libhiredis*.so && \
-	rm -f ../../install/lib/libhiredis*.dylib && \
-	echo "Finished installing Hiredis"
-
-# Redis-plus-plus (hidden build target)
-.phony: redis-plus-plus
-redis-plus-plus: install/lib/libredis++.a
-install/lib/libredis++.a:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
-	@cd third-party/redis-plus-plus && \
-	mkdir -p compile && \
-	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
-	CC=gcc CXX=g++ make -j && \
-	CC=gcc CXX=g++ make install && \
-	echo "Finished installing Redis-plus-plus"
-
-# Pybind11 (hidden build target)
-.phony: pybind
-pybind: third-party/pybind/include/pybind11/pybind11.h
-third-party/pybind/include/pybind11/pybind11.h:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(PYBIND_URL) pybind --branch $(PYBIND_VER) --depth=1
-	@mkdir -p third-party/pybind/build && \
-	echo "Finished installing Pybind11"
 
 # help: deps                           - Make SmartRedis dependencies
 .PHONY: deps
@@ -103,7 +70,10 @@ test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
-test-deps:
+test-deps: redis
+test-deps: redisAI
+test-deps: catch2
+test-deps: lcov
 	@bash ./build-scripts/build_test_deps.sh
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
@@ -302,3 +272,117 @@ test-examples: build-examples
 test-examples:
 	@python -m pytest -vv -s ./examples
 
+
+############################################################################
+# hidden build targets for third-party software
+
+# Hiredis (hidden build target)
+.phony: hiredis
+hiredis: install/lib/libhiredis.a
+install/lib/libhiredis.a:
+	@mkdir -p ../third-party
+	@cd third-party && \
+	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
+	@cd third-party/hiredis && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	rm -f ../../install/lib/libhiredis*.so && \
+	rm -f ../../install/lib/libhiredis*.dylib && \
+	echo "Finished installing Hiredis"
+
+# Redis-plus-plus (hidden build target)
+.phony: redis-plus-plus
+redis-plus-plus: install/lib/libredis++.a
+install/lib/libredis++.a:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
+	@cd third-party/redis-plus-plus && \
+	mkdir -p compile && \
+	cd compile && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
+	CC=gcc CXX=g++ make -j && \
+	CC=gcc CXX=g++ make install && \
+	echo "Finished installing Redis-plus-plus"
+
+# Pybind11 (hidden build target)
+.phony: pybind
+pybind: third-party/pybind/include/pybind11/pybind11.h
+third-party/pybind/include/pybind11/pybind11.h:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(PYBIND_URL) pybind --branch $(PYBIND_VER) --depth=1
+	@mkdir -p third-party/pybind/build && \
+	echo "Finished installing Pybind11"
+
+# Redis (hidden test target)
+.phony: redis
+redis: third-party/redis/src/redis-server
+third-party/redis/src/redis-server:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
+	@cd third-party/redis && \
+	CC=gcc CXX=g++ make MALLOC=libc -j && \
+	echo "Finished installing redis"
+
+# cudann-check (hidden test target)
+# checks cuda dependencies for GPU build
+.phony: cudann-check
+cudann-check:
+	@if [ "$(SR_DEVICE)" != "cpu" ]; then \
+		if [ -z "$(CUDA_HOME)" ]; then \
+			echo "ERROR: CUDA_HOME is not set"; \
+			false; \
+		fi; \
+		if [ -z "$(CUDNN_INCLUDE_DIR)" ]; then \
+			echo "ERROR: CUDNN_INCLUDE_DIR is not set"; \
+			false; \
+		fi; \
+        if [ ! -f "$(CUDNN_INCLUDE_DIR)/cudnn.h" ]; then \
+            echo "ERROR: could not find cudnn.h at $(CUDNN_INCLUDE_DIR)"; \
+            false; \
+        fi; \
+		if [ -z "$(CUDNN_LIBRARY)" ]; then \
+			echo "ERROR: CUDNN_LIBRARY is not set"; \
+			false; \
+		fi; \
+        if [ ! -f "$(CUDNN_LIBRARY)/libcudnn.so" ]; then \
+            echo "ERROR: could not find libcudnn.so at $(CUDNN_LIBRARY)"; \
+            false; \
+        fi \
+	fi
+
+# RedisAI (hidden test target)
+.phony: redisAI
+redisAI: third-party/RedisAI/install-cpu/redisai.so
+third-party/RedisAI/install-cpu/redisai.so: cudann-check
+	$(eval DEVICE_IS_GPU := $(shell test $(SR_DEVICE) == "cpu"; echo $$?))
+	@mkdir -p third-party
+	@cd third-party && \
+	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI --branch $(REDISAI_VER) --depth=1
+	@cd third-party/RedisAI && \
+	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh $(SR_DEVICE) && \
+	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -j -C opt clean build && \
+	echo "Finished installing RedisAI"
+
+# Catch2 (hidden test target)
+.phony: catch2
+catch2: third-party/catch/single_include/catch2/catch.hpp
+third-party/catch/single_include/catch2/catch.hpp:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(CATCH2_URL) catch --branch $(CATCH2_VER) --depth=1
+	@echo "Finished installing Catch2"
+
+# LCOV (hidden test target)
+.phony: lcov
+lcov: third-party/lcov/install/usr/local/bin/lcov
+third-party/lcov/install/usr/local/bin/lcov:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
+	@cd third-party/lcov && \
+	mkdir -p install && \
+	CC=gcc CXX=g++ DESTDIR="install/" make install && \
+	echo "Finished installing LCOV"
