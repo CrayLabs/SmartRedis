@@ -40,7 +40,6 @@ deps: hiredis
 deps: redis-plus-plus
 deps: pybind
 deps:
-	@bash ./build-scripts/build_deps.sh
 
 # help: pip-install                    - Register the SmartRedis library with pip
 .PHONY: pip-install
@@ -74,13 +73,11 @@ test-deps: redis
 test-deps: redisAI
 test-deps: catch2
 test-deps: lcov
-	@bash ./build-scripts/build_test_deps.sh
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
-.PHONY: test-deps
+.PHONY: test-deps-gpu
 test-deps-gpu:
-	@bash ./build-scripts/build_test_deps.sh gpu
-
+	$(error To build test-deps for GPU, please execute "make test-deps SR_DEVICE=gpu")
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
@@ -135,10 +132,10 @@ build-example-parallel: lib
 # help: clean-deps                     - remove third-party deps
 .PHONY: clean-deps
 clean-deps:
-	@rm -rf ./third-party
+	@rm -rf ./third-party ./install/lib/libhiredis.a ./install/lib/libredis++.a
 
 
-# help: clean                          - remove builds, pyc files, .gitignore rules
+# help: clean                          - remove builds, pyc files
 .PHONY: clean
 clean:
 	@git clean -X -f -d
@@ -214,6 +211,7 @@ cov:
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
+test: test-deps
 test: build-tests
 test:
 	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv ./tests
@@ -221,12 +219,14 @@ test:
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
+test-verbose: test-deps
 test-verbose: build-tests
 test-verbose:
 	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
 
 # help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
+test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage: CMAKE_ARGS="-DCOVERAGE=on"
 test-verbose-with-coverage:
@@ -234,12 +234,14 @@ test-verbose-with-coverage:
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
+test-c: test-deps
 test-c: build-test-c
 test-c:
 	@python -m pytest -vv -s ./tests/c/
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
+test-cpp: test-deps
 test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp:
@@ -247,27 +249,32 @@ test-cpp:
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
+unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp:
 	@python -m pytest -vv -s ./tests/cpp/unit-tests/
 
 # help: test-py                        - run python tests
 .PHONY: test-py
+test-py: test-deps
 test-py:
 	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
+test-fortran: test-deps
 test-fortran: build-test-fortran
 	@python -m pytest -vv ./tests/fortran/
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
+testpy-cov: test-deps
 testpy-cov:
 	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
+test-examples: test-deps
 test-examples: build-examples
 test-examples:
 	@python -m pytest -vv -s ./examples
@@ -280,7 +287,8 @@ test-examples:
 .phony: hiredis
 hiredis: install/lib/libhiredis.a
 install/lib/libhiredis.a:
-	@mkdir -p ../third-party
+	@rm -rf third-party/hiredis
+	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
 	@cd third-party/hiredis && \
@@ -294,6 +302,7 @@ install/lib/libhiredis.a:
 .phony: redis-plus-plus
 redis-plus-plus: install/lib/libredis++.a
 install/lib/libredis++.a:
+	@rm -rf third-party/redis-plus-plus
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
@@ -330,33 +339,29 @@ third-party/redis/src/redis-server:
 # checks cuda dependencies for GPU build
 .phony: cudann-check
 cudann-check:
-	@if [ "$(SR_DEVICE)" != "cpu" ]; then \
-		if [ -z "$(CUDA_HOME)" ]; then \
-			echo "ERROR: CUDA_HOME is not set"; \
-			false; \
-		fi; \
-		if [ -z "$(CUDNN_INCLUDE_DIR)" ]; then \
-			echo "ERROR: CUDNN_INCLUDE_DIR is not set"; \
-			false; \
-		fi; \
-        if [ ! -f "$(CUDNN_INCLUDE_DIR)/cudnn.h" ]; then \
-            echo "ERROR: could not find cudnn.h at $(CUDNN_INCLUDE_DIR)"; \
-            false; \
-        fi; \
-		if [ -z "$(CUDNN_LIBRARY)" ]; then \
-			echo "ERROR: CUDNN_LIBRARY is not set"; \
-			false; \
-		fi; \
-        if [ ! -f "$(CUDNN_LIBRARY)/libcudnn.so" ]; then \
-            echo "ERROR: could not find libcudnn.so at $(CUDNN_LIBRARY)"; \
-            false; \
-        fi \
-	fi
+ifeq ($(SR_DEVICE),gpu)
+ifndef CUDA_HOME
+	$(error ERROR: CUDA_HOME is not set)
+endif
+ifndef CUDNN_INCLUDE_DIR
+	$(error ERROR: CUDNN_INCLUDE_DIR is not set)
+endif
+ifeq (,$(wildcard $(CUDNN_INCLUDE_DIR)/cudnn.h))
+	$(error ERROR: could not find cudnn.h at $(CUDNN_INCLUDE_DIR))
+endif
+ifndef CUDNN_LIBRARY
+	$(error ERROR: CUDNN_LIBRARY is not set)
+endif
+ifeq (,$(wildcard $(CUDNN_LIBRARY)/libcudnn.so))
+	$(error ERROR: could not find libcudnn.so at $(CUDNN_LIBRARY))
+endif
+endif
 
 # RedisAI (hidden test target)
 .phony: redisAI
+redisAI: cudann-check
 redisAI: third-party/RedisAI/install-cpu/redisai.so
-third-party/RedisAI/install-cpu/redisai.so: cudann-check
+third-party/RedisAI/install-cpu/redisai.so:
 	$(eval DEVICE_IS_GPU := $(shell test $(SR_DEVICE) == "cpu"; echo $$?))
 	@mkdir -p third-party
 	@cd third-party && \

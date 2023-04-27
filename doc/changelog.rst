@@ -8,12 +8,15 @@ To be released at some future point in time
 
 Description
 
+- Refactor third-party software dependency installation
 - Add pip-install target to Makefile to automate this process going forward
 
 Detailed Notes
 
+- Third-party software dependency installation is now handled in the Makefile instead of separate scripts
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 
+.. _PR331: https://github.com/CrayLabs/SmartRedis/pull/331
 .. _PR330: https://github.com/CrayLabs/SmartRedis/pull/330
 
 0.4.0
