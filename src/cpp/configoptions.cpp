@@ -27,7 +27,6 @@
  */
 
 #include <string_view>
-#include <memory> // for unique_ptr
 #include "configoptions.h"
 #include "srexception.h"
 #include "logger.h"

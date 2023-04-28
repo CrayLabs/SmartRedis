@@ -35,6 +35,7 @@
 
 #ifdef __cplusplus
 #include <string>
+#include <memory> // for unique_ptr
 #include <unordered_map>
 #include "srobject.h"
 #include "sr_enums.h"
