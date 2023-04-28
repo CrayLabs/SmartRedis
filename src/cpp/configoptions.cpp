@@ -71,7 +71,7 @@ int64_t ConfigOptions::get_integer_option(const std::string& option_name)
     if (_lazy) {
         int temp = 0;
         get_config_integer(
-            temp, _prefixed(option_name), default_value, flag_no_default);
+            temp, _prefixed(option_name), default_value, throw_on_absent);
         result = (int64_t)temp;
     }
 
@@ -93,7 +93,7 @@ std::string ConfigOptions::get_string_option(const std::string& option_name)
     std::string result(default_value);
     if (_lazy) {
         get_config_string(
-            result, _prefixed(option_name), default_value, flag_no_default);
+            result, _prefixed(option_name), default_value, throw_on_absent);
     }
 
     // Store the final value before we exit
@@ -191,6 +191,11 @@ void ConfigOptions::_populate_options()
 // variables and the prefix is nonempty
 std::string ConfigOptions::_prefixed(const std::string& option_name)
 {
+    // Sanity check
+    if ("" == option_name) {
+        throw SRKeyException(
+            "Invalid empty environment variable name detected");
+    }
     std::string result(option_name);
     if (_source == cs_envt && _string != "")
         result = _string + + "_" + option_name;

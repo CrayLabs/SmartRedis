@@ -34,10 +34,7 @@
 #endif
 
 #ifdef __cplusplus
-#include <cstdlib>
-#include <memory>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include "srobject.h"
 #include "sr_enums.h"
@@ -51,7 +48,7 @@ namespace SmartRedis {
 */
 enum cfgSrc {
     cs_envt,    // Configuration data is coming from environment variables
-} ;
+};
 
 
 /*!

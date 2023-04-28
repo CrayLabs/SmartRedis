@@ -37,8 +37,17 @@
 
 namespace SmartRedis {
 
+/*!
+*   \brief  Flag to skip warnings when retrieving configuration options
+*           and the requested option is not present
+*/
 const int flag_suppress_warning = 1;
-const int flag_no_default = 2;
+
+/*!
+*   \brief  Flag to emit a KeyException when retrieving configuration options
+*           and the requested option is not present
+*/
+const int throw_on_absent = 2;
 
 /*!
 *   \brief Initialize an integer from configuration, such as an
@@ -47,9 +56,9 @@ const int flag_no_default = 2;
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
 *   \param flags flag_suppress_warning = Do not issue a warning if the
-*                variable is not set; flag_no_default = throw KeyException
-*                if value not set
-*   \throw KeyException if value not set and flag_no_default is not set
+*                variable is not set; throw_on_absent = throw KeyException
+*                if value not set. The value zero means that no flags are set
+*   \throw KeyException if value not set and throw_on_absent is not set
 */
 void get_config_integer(int& value,
                         const std::string& cfg_key,
@@ -63,9 +72,9 @@ void get_config_integer(int& value,
 *   \param cfg_key The key to query for the configuration variable
 *   \param default_value Default if configuration key is not set
 *   \param flags flag_suppress_warning = Do not issue a warning if the
-*                variable is not set; flag_no_default = throw KeyException
-*                if value not set
-*   \throw KeyException if value not set and flag_no_default is not set
+*                variable is not set; throw_on_absent = throw KeyException
+*                if value not set. The value zero means that no flags are set
+*   \throw KeyException if value not set and throw_on_absent is not set
 */
 void get_config_string(std::string& value,
                        const std::string& cfg_key,

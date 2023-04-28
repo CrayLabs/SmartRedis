@@ -33,8 +33,6 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdexcept>
-#include <iostream>
-#include <fstream>
 #include "srexception.h"
 #include "utility.h"
 #include "logger.h"
@@ -48,9 +46,9 @@ void get_config_integer(int& value,
                         int flags /* = 0 */)
 {
     bool suppress_warning = 0 != (flags & flag_suppress_warning);
-    bool no_default = 0 != (flags & flag_no_default);
+    bool keyerror_on_absent = 0 != (flags & throw_on_absent);
 
-    value = default_value;
+    int result = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
 
@@ -58,11 +56,11 @@ void get_config_integer(int& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if ((NULL == cfg_val) && !no_default)
+    if ((NULL == cfg_val) && !keyerror_on_absent)
         message += ". Using default value of " + std::to_string(default_value);
     log_data("SmartRedis Library", LLDebug, message);
 
-    if ((cfg_val == NULL) && no_default) {
+    if ((cfg_val == NULL) && keyerror_on_absent) {
         std::string msg("No value found for key ");
         msg += cfg_key;
         throw SRKeyException(msg);
@@ -80,7 +78,7 @@ void get_config_integer(int& value,
         }
 
         try {
-            value = std::stoi(cfg_val);
+            result = std::stoi(cfg_val);
         }
         catch (std::invalid_argument& e) {
             throw SRParameterException("The value of " + cfg_key + " could "\
@@ -106,6 +104,7 @@ void get_config_integer(int& value,
         );
     }
 
+    value = result;
     message = "Exiting with value \"" + std::to_string(value) + "\"";
     log_data("SmartRedis Library", LLDebug, message);
 }
@@ -117,9 +116,9 @@ void get_config_string(std::string& value,
                        int flags /* = 0 */)
 {
     bool suppress_warning = 0 != (flags & flag_suppress_warning);
-    bool no_default = 0 != (flags & flag_no_default);
+    bool keyerror_on_absent = 0 != (flags & throw_on_absent);
 
-    value = default_value;
+    std::string result = default_value;
     std::string message = "Getting value for " + cfg_key;
     log_data("SmartRedis Library", LLDebug, message);
 
@@ -127,18 +126,18 @@ void get_config_string(std::string& value,
     message = "Retrieved value \"";
     message += cfg_val == NULL ? "<NULL>" : cfg_val;
     message += "\"";
-    if ((NULL == cfg_val) && !no_default)
+    if ((NULL == cfg_val) && !keyerror_on_absent)
         message += ". Using default value of " + default_value;
     log_data("SmartRedis Library", LLDebug, message);
 
-    if ((cfg_val == NULL) && no_default) {
+    if ((cfg_val == NULL) && keyerror_on_absent) {
         std::string msg("No value found for key ");
         msg += cfg_key;
         throw SRKeyException(msg);
     }
 
     if (cfg_val != NULL && std::strlen(cfg_val) > 0)
-        value = cfg_val;
+        result = cfg_val;
     else if (!suppress_warning) {
         log_warning(
             "SmartRedis Library",
@@ -147,6 +146,7 @@ void get_config_string(std::string& value,
         );
     }
 
+    value = result;
     message = "Exiting with value \"" + value + "\"";
     log_data("SmartRedis Library", LLDebug, message);
 }
