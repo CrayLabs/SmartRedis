@@ -57,129 +57,105 @@ std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
         new ConfigOptions(cs_envt, db_prefix));
 }
 
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-// Instantiate ConfigOptions, getting selections from a file with JSON data
-std::unique_ptr<ConfigOptions> ConfigOptions::create_from_file(
-    const std::string& filename)
-{
-    // NOTE: We can't use std::make_unique<> here because our constructor
-    // is private
-    return std::unique_ptr<ConfigOptions>(
-        new ConfigOptions(cs_file, filename));
-}
-
-// Instantiate ConfigOptions, getting selections from a JSON blob
-std::unique_ptr<ConfigOptions> ConfigOptions::create_from_string(
-    const std::string& json_blob)
-{
-    // NOTE: We can't use std::make_unique<> here because our constructor
-    // is private
-    return std::unique_ptr<ConfigOptions>(
-        new ConfigOptions(cs_blob, json_blob));
-}
-#endif
-
 // Retrieve the value of a numeric configuration option
-int64_t ConfigOptions::get_integer_option(const std::string& key)
+int64_t ConfigOptions::get_integer_option(const std::string& option_name)
 {
     // If we already have the value, return it
-    auto search = _int_options.find(key);
+    auto search = _int_options.find(option_name);
     if (search != _int_options.end())
-        return _int_options[key];
+        return _int_options[option_name];
 
-    // If we're doing lazy evaluation of keys, fetch the value
+    // If we're doing lazy evaluation of option names, fetch the value
     int64_t default_value = -1;
     int64_t result = default_value;
     if (_lazy) {
         int temp = 0;
         get_config_integer(
-            temp, _prefixed(key), default_value, flag_no_default);
+            temp, _prefixed(option_name), default_value, flag_no_default);
         result = (int64_t)temp;
     }
 
     // Store the final value before we exit
-    _int_options.insert({key, result});
+    _int_options.insert({option_name, result});
     return result;
 }
 
 // Retrieve the value of a string configuration option
-std::string ConfigOptions::get_string_option(const std::string& key)
+std::string ConfigOptions::get_string_option(const std::string& option_name)
 {
     // If we already have the value, return it
-    auto search = _string_options.find(key);
+    auto search = _string_options.find(option_name);
     if (search != _string_options.end())
-        return _string_options[key];
+        return _string_options[option_name];
 
-    // If we're doing lazy evaluation of keys, fetch the value
+    // If we're doing lazy evaluation of option names, fetch the value
     std::string default_value("");
     std::string result(default_value);
     if (_lazy) {
         get_config_string(
-            result, _prefixed(key), default_value, flag_no_default);
+            result, _prefixed(option_name), default_value, flag_no_default);
     }
 
     // Store the final value before we exit
-    _string_options.insert({key, result});
+    _string_options.insert({option_name, result});
     return result;
 }
 
 // Resolve the value of a numeric configuration option
 int64_t ConfigOptions::_resolve_integer_option(
-    const std::string& key, int64_t default_value)
+    const std::string& option_name, int64_t default_value)
 {
     // If we already have the value, return it
-    auto search = _int_options.find(key);
+    auto search = _int_options.find(option_name);
     if (search != _int_options.end())
-        return _int_options[key];
+        return _int_options[option_name];
 
-    // If we're doing lazy evaluation of keys, fetch the value
+    // If we're doing lazy evaluation of option names, fetch the value
     int64_t result = default_value;
     if (_lazy) {
         int temp = 0;
-        get_config_integer(temp, _prefixed(key), default_value);
+        get_config_integer(temp, _prefixed(option_name), default_value);
         result = (int64_t)temp;
     }
 
     // Store the final value before we exit
-    _int_options.insert({key, result});
+    _int_options.insert({option_name, result});
     return result;
 }
 
 // Resolve the value of a string configuration option
 std::string ConfigOptions::_resolve_string_option(
-    const std::string& key, const std::string& default_value)
+    const std::string& option_name, const std::string& default_value)
 {
     // If we already have the value, return it
-    auto search = _string_options.find(key);
+    auto search = _string_options.find(option_name);
     if (search != _string_options.end())
-        return _string_options[key];
+        return _string_options[option_name];
 
-    // If we're doing lazy evaluation of keys, fetch the value
+    // If we're doing lazy evaluation of option names, fetch the value
     std::string result(default_value);
     if (_lazy) {
-        get_config_string(result, _prefixed(key), default_value);
+        get_config_string(result, _prefixed(option_name), default_value);
     }
 
     // Store the final value before we exit
-    _string_options.insert({key, result});
+    _string_options.insert({option_name, result});
     return result;
 }
 
 // Check whether a configuration option is set in the selected source
-bool ConfigOptions::is_configured(const std::string& key)
+bool ConfigOptions::is_configured(const std::string& option_name)
 {
     // Check each map in turn
-    if (_int_options.find(key) != _int_options.end())
+    if (_int_options.find(option_name) != _int_options.end())
         return true;
-    if (_string_options.find(key) != _string_options.end())
+    if (_string_options.find(option_name) != _string_options.end())
         return true;
 
     // Check to see if the value is available and we just haven't
     // seen it yet
     if (_lazy) {
-        std::string prefixed = _prefixed(key);
+        std::string prefixed = _prefixed(option_name);
         char* environment_string = std::getenv(prefixed.c_str());
         return NULL != environment_string;
     }
@@ -190,16 +166,16 @@ bool ConfigOptions::is_configured(const std::string& key)
 
 // Override the value of a numeric configuration option
 void ConfigOptions::override_integer_option(
-    const std::string& key, int64_t value)
+    const std::string& option_name, int64_t value)
 {
-    _int_options.insert_or_assign(key, value);
+    _int_options.insert_or_assign(option_name, value);
 }
 
 // Override the value of a string configuration option
 void ConfigOptions::override_string_option(
-    const std::string& key, const std::string& value)
+    const std::string& option_name, const std::string& value)
 {
-    _string_options.insert_or_assign(key, value);
+    _string_options.insert_or_assign(option_name, value);
 }
 
 // Process option data from a fixed source
@@ -211,12 +187,12 @@ void ConfigOptions::_populate_options()
     );
 }
 
-// Apply a prefix to a key if the source is environment
+// Apply a prefix to a option_name if the source is environment
 // variables and the prefix is nonempty
-std::string ConfigOptions::_prefixed(const std::string& key)
+std::string ConfigOptions::_prefixed(const std::string& option_name)
 {
-    std::string result(key);
+    std::string result(option_name);
     if (_source == cs_envt && _string != "")
-        result = _string + + "_" + key;
+        result = _string + + "_" + option_name;
     return result;
 }

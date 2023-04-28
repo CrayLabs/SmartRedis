@@ -90,75 +90,23 @@ SRError create_configoptions_from_environment(
   });
 }
 
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-// Instantiate ConfigOptions, getting selections from a file with JSON data
-extern "C"
-SRError create_configoptions_from_file(
-    const char* filename,
-    const size_t filename_length,
-    void** new_configoptions)
-{
-  return MAKE_CFGOPT_API({
-    try {
-      // Sanity check params
-      SR_CHECK_PARAMS(filename != NULL && new_configoptions != NULL);
-
-      std::string filename_str(filename, filename_length);
-
-      auto cfgOpts = ConfigOptions::create_from_file(filename_str);
-      ConfigOptions* pCfgOpts = cfgOpts.release();
-      *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
-    }
-    catch (const std::bad_alloc& e) {
-      throw SRBadAllocException("config options allocation");
-    }
-  });
-}
-
-// Instantiate ConfigOptions from a string containing a JSON blob
-extern "C"
-SRError create_configoptions_from_string(
-    const char* json_blob,
-    const size_t json_blob_length,
-    void** new_configoptions)
-{
-  return MAKE_CFGOPT_API({
-    try {
-      // Sanity check params
-      SR_CHECK_PARAMS(json_blob != NULL && new_configoptions != NULL);
-
-      std::string json_blob_str(json_blob, json_blob_length);
-
-      auto cfgOpts = ConfigOptions::create_from_string(json_blob_str);
-      ConfigOptions* pCfgOpts = cfgOpts.release();
-      *new_configoptions = reinterpret_cast<void* >(pCfgOpts);
-    }
-    catch (const std::bad_alloc& e) {
-      throw SRBadAllocException("config options allocation");
-    }
-  });
-}
-#endif
-
 // Retrieve the value of a numeric configuration option
 extern "C"
 SRError get_integer_option(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     int64_t* option_result)
 {
   return MAKE_CFGOPT_API({
     // Sanity check params
-    SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL &&
-      option_result != NULL);
+    SR_CHECK_PARAMS(c_cfgopts != NULL && option_name != NULL &&
+      option_name_len > 0 && option_result != NULL);
 
-    std::string key_str(key, key_len);
+    std::string option_name_str(option_name, option_name_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
-    *option_result = co->get_integer_option(key_str);
+    *option_result = co->get_integer_option(option_name_str);
   });
 }
 
@@ -166,24 +114,25 @@ SRError get_integer_option(
 extern "C"
 SRError get_string_option(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     char** option_result,
     size_t* option_result_len)
 {
   return MAKE_CFGOPT_API({
     // Sanity check params
-    SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL &&
-      option_result != NULL && option_result_len != NULL);
+    SR_CHECK_PARAMS(c_cfgopts != NULL && option_name != NULL &&
+      option_name_len > 0 && option_result != NULL &&
+      option_result_len != NULL);
 
-    std::string key_str(key, key_len);
+    std::string option_name_str(option_name, option_name_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
     // Set up an empty string as the result in case something goes wrong
     *option_result = NULL;
     *option_result = 0;
 
-    std::string option_result_str = co->get_string_option(key_str);
+    std::string option_result_str = co->get_string_option(option_name_str);
 
     // TBD FINDME: we're leaking memory here since there will
     // be no way to reclaim it
@@ -197,18 +146,18 @@ SRError get_string_option(
 extern "C"
 SRError is_configured(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     bool* cfg_result)
 {
   return MAKE_CFGOPT_API({
     // Sanity check params
-    SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL && cfg_result != NULL);
+    SR_CHECK_PARAMS(c_cfgopts != NULL && option_name != NULL && cfg_result != NULL);
 
-    std::string key_str(key, key_len);
+    std::string option_name_str(option_name, option_name_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
-    *cfg_result = co->is_configured(key_str);
+    *cfg_result = co->is_configured(option_name_str);
   });
 }
 
@@ -216,18 +165,19 @@ SRError is_configured(
 extern "C"
 SRError override_integer_option(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     int64_t value)
 {
   return MAKE_CFGOPT_API({
     // Sanity check params
-    SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL);
+    SR_CHECK_PARAMS(c_cfgopts != NULL && option_name != NULL &&
+      option_name_len > 0);
 
-    std::string key_str(key, key_len);
+    std::string option_name_str(option_name, option_name_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
-    co->override_integer_option(key_str, value);
+    co->override_integer_option(option_name_str, value);
   });
 }
 
@@ -235,19 +185,20 @@ SRError override_integer_option(
 extern "C"
 SRError override_string_option(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     const char* value,
     size_t value_len)
 {
   return MAKE_CFGOPT_API({
     // Sanity check params
-    SR_CHECK_PARAMS(c_cfgopts != NULL && key != NULL && value != NULL);
+    SR_CHECK_PARAMS(c_cfgopts != NULL && option_name != NULL &&
+      option_name_len > 0 && value != NULL);
 
-    std::string key_str(key, key_len);
+    std::string option_name_str(option_name, option_name_len);
     std::string value_str(value, value_len);
     ConfigOptions* co = reinterpret_cast<ConfigOptions*>(c_cfgopts);
 
-    co->override_string_option(key_str, value_str);
+    co->override_string_option(option_name_str, value_str);
   });
 }

@@ -97,63 +97,37 @@ class PyConfigOptions
         static PyConfigOptions* create_from_environment(
             const std::string& db_prefix);
 
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          a file with JSON data.
-        *   \param filename A UTF-8 file with JSON data containing the
-        *                   configuration data
-        *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if the file cannot be found or
-        *          the data within it cannot be parsed
-        */
-        static PyConfigOptions* create_from_file(
-            const std::string& filename);
-
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          a string containing a JSON blob
-        *   \param json_blob A JSON blob containing the configuration data
-        *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
-        */
-        static PyConfigOptions* create_from_string(
-            const std::string& json_blob);
-#endif
-
         /////////////////////////////////////////////////////////////
         // Option access
 
         /*!
         *   \brief Retrieve the value of a numeric configuration option
         *          from the selected source
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \returns The value of the selected option. Returns
         *            \p default_value if the option was not set in the
         *            selected source
         */
-        int64_t get_integer_option(const std::string& DEFINE_KEY);
+        int64_t get_integer_option(const std::string& option_name);
 
         /*!
         *   \brief Retrieve the value of a string configuration option
         *          from the selected source
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \returns The value of the selected option. Returns
         *            \p default_value if the option was not set in the
         *            selected source
         */
-        std::string get_string_option(const std::string& key);
+        std::string get_string_option(const std::string& option_name);
 
         /*!
         *   \brief Check whether a configuration option is set in the
         *          selected source
-        *   \param key The name of the configuration option to check
+        *   \param option_name The name of the configuration option to check
         *   \returns True IFF the target option is defined in the selected
         *            source
         */
-        bool is_configured(const std::string& key);
+        bool is_configured(const std::string& option_name);
 
         /////////////////////////////////////////////////////////////
         // Option overrides
@@ -165,10 +139,11 @@ class PyConfigOptions
         *            ConfigOptions class. An instance that references
         *            the same source will not be affected by an override to
         *            a different ConfigOptions instance
-        *   \param key The name of the configuration option to override
+        *   \param option_name The name of the configuration option to override
         *   \param value The value to store for the configuration option
         */
-        void override_integer_option(const std::string& key, int64_t value);
+        void override_integer_option(
+            const std::string& option_name, int64_t value);
 
         /*!
         *   \brief Override the value of a string configuration option
@@ -177,10 +152,11 @@ class PyConfigOptions
         *            ConfigOptions class. An instance that references
         *            the same source will not be affected by an override to
         *            a different ConfigOptions instance
-        *   \param key The name of the configuration option to override
+        *   \param option_name The name of the configuration option to override
         *   \param value The value to store for the configuration option
         */
-        void override_string_option(const std::string& key, const std::string& value);
+        void override_string_option(
+            const std::string& option_name, const std::string& value);
 
     private:
 

@@ -145,16 +145,6 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def_static("create_from_environment",
                     static_cast<PyConfigOptions* (*)(const std::string&)>(
                         &PyConfigOptions::create_from_environment))
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-        .def_static("create_from_file",
-                    static_cast<PyConfigOptions* (*)(const std::string&)>(
-                        &PyConfigOptions::create_from_file))
-        .def_static("create_from_string",
-                    static_cast<PyConfigOptions* (*)(const std::string&)>(
-                        &PyConfigOptions::create_from_string))
-#endif
         .CONFIGOPTIONS_METHOD(get_integer_option)
         .CONFIGOPTIONS_METHOD(get_string_option)
         .CONFIGOPTIONS_METHOD(is_configured)

@@ -56,10 +56,6 @@ type, public :: configoptions_type
   ! Factory methods
   !> Instantiate ConfigOptions, getting selections from environment variables
   procedure :: create_configoptions_from_environment
-  ! Instantiate ConfigOptions, getting selections from a file with JSON data
-  !procedure :: create_configoptions_from_file
-  ! Instantiate ConfigOptions, getting selections from a string containing a JSON blob
-  !procedure :: create_configoptions_from_string
 
   ! Option access
   !> Retrieve the value of a numeric configuration option
@@ -80,7 +76,7 @@ end type configoptions_type
 contains
 
 
-!> Access the raw C pointer for the dataset
+!> Access the raw C pointer for the ConfigOptions
 function get_c_pointer(self)
   type(c_ptr)                           :: get_c_pointer
   class(configoptions_type), intent(in) :: self
@@ -105,81 +101,46 @@ function create_configoptions_from_environment(self, db_prefix) result(code)
     c_db_prefix, db_prefix_length, self%configoptions_ptr)
 end function create_configoptions_from_environment
 
-! Configuration via JSON file or JSON blob is anticipated in the future
-! but not supported yet
-! Instantiate ConfigOptions, getting selections from a file with JSON data
-!function create_configoptions_from_file(self, filename) result(code)
-!  class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
-!  character(len=*),    intent(in)          :: filename    !< File containing JSON data
-!  integer(kind=enum_kind)                  :: code !< Result of the operation
-!
-!  ! Local variables
-!  integer(kind=c_size_t) :: filename_length
-!  character(kind=c_char, len=len_trim(filename)) :: c_filename
-!
-!  filename_length = len_trim(filename)
-!  c_filename = trim(filename)
-!
-!  code = create_configoptions_from_file_c( &
-!    c_filename, filename_length, self%configoptions_ptr)
-!end function create_configoptions_from_file
-!
-! Instantiate ConfigOptions, getting selections from a string containing a JSON blob
-!function create_configoptions_from_string(self, json_blob) result(code)
-!  class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
-!  character(len=*),    intent(in)          :: json_blob   !< String containing JSON data
-!  integer(kind=enum_kind)                  :: code !< Result of the operation
-!
-!  ! Local variables
-!  integer(kind=c_size_t) :: json_blob_length
-!  character(kind=c_char, len=len_trim(json_blob)) :: c_json_blob
-!
-!  json_blob_length = len_trim(json_blob)
-!  c_json_blob = trim(json_blob)
-!
-!  code = create_configoptions_from_string_c( &
-!    c_json_blob, json_blob_length, self%configoptions_ptr)
-!end function create_configoptions_from_string
-
 !> Retrieve the value of a numeric configuration option
-function get_integer_option(self, key, result) result(code)
+function get_integer_option(self, option_name, result) result(code)
   class(configoptions_type), intent(in) :: self          !< The configoptions
-  character(len=*),          intent(in) :: key           !< The name of the configuration
+  character(len=*),          intent(in) :: option_name   !< The name of the configuration
                                                          !! option to retrieve
   integer(kind=c_int64_t),   intent(inout) :: result     !< Receives value of option
   integer(kind=enum_kind)               :: code
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  integer(kind=c_size_t) :: c_key_length
+  character(kind=c_char, len=len_trim(option_name)) :: c_option_name
+  integer(kind=c_size_t) :: c_option_name_length
 
-  c_key = trim(key)
-  c_key_length = len_trim(key)
+  c_option_name = trim(option_name)
+  c_option_name_length = len_trim(option_name)
 
   code = get_integer_option_c( &
-    self%configoptions_ptr, c_key, c_key_length, result)
+    self%configoptions_ptr, c_option_name, c_option_name_length, result)
 end function get_integer_option
 
 !> Retrieve the value of a string configuration option
-function get_string_option(self, key, result) result(code)
+function get_string_option(self, option_name, result) result(code)
   class(configoptions_type), intent(in)  :: self          !< The configoptions
-  character(len=*),          intent(in)  :: key           !< The name of the configuration
+  character(len=*),          intent(in)  :: option_name   !< The name of the configuration
                                                           !! option to retrieve
   character(len=:), allocatable, intent(out) :: result    !< Receives value of option
   integer(kind=enum_kind)                :: code
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  integer(kind=c_size_t) :: c_key_length
+  character(kind=c_char, len=len_trim(option_name)) :: c_option_name
+  integer(kind=c_size_t) :: c_option_name_length
   integer(kind=c_size_t) :: c_result_length, i
   character(kind=c_char), dimension(:), pointer :: f_result_ptr
   type(c_ptr) :: c_result_ptr
 
-  c_key = trim(key)
-  c_key_length = len_trim(key)
+  c_option_name = trim(option_name)
+  c_option_name_length = len_trim(option_name)
 
   code = get_string_option_c( &
-    self%configoptions_ptr, c_key, c_key_length, c_result_ptr, c_result_length)
+    self%configoptions_ptr, c_option_name, c_option_name_length, &
+    c_result_ptr, c_result_length)
 
   ! Translate the string result if we got a valid one
   if (code .eq. SRNoError) then
@@ -193,62 +154,64 @@ function get_string_option(self, key, result) result(code)
 end function get_string_option
 
 !> Check whether a configuration option is set
-function is_configured(self, key, result) result(code)
+function is_configured(self, option_name, result) result(code)
   class(configoptions_type), intent(in) :: self          !< The configoptions
-  character(len=*),          intent(in) :: key           !< The name of the configuration
+  character(len=*),          intent(in) :: option_name   !< The name of the configuration
                                                          !! option to check
   logical(kind=c_bool),      intent(inout) :: result     !< Receives value of option
   integer(kind=enum_kind)               :: code
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  integer(kind=c_size_t) :: c_key_length
+  character(kind=c_char, len=len_trim(option_name)) :: c_option_name
+  integer(kind=c_size_t) :: c_option_name_length
 
-  c_key = trim(key)
-  c_key_length = len_trim(key)
+  c_option_name = trim(option_name)
+  c_option_name_length = len_trim(option_name)
 
-  code = is_configured_c(self%configoptions_ptr, c_key, c_key_length, result)
+  code = is_configured_c( &
+    self%configoptions_ptr, c_option_name, c_option_name_length, result)
 end function is_configured
 
 !> Override the value of a numeric configuration option
-function override_integer_option(self, key, value) result(code)
-  class(configoptions_type), intent(in) :: self      !< The configoptions
-  character(len=*),          intent(in) :: key       !< The name of the configuration
-                                                     !! option to override
-  integer(kind=c_int64_t),   intent(in) :: value     !< The value to store for the option
+function override_integer_option(self, option_name, value) result(code)
+  class(configoptions_type), intent(in) :: self        !< The configoptions
+  character(len=*),          intent(in) :: option_name !< The name of the configuration
+                                                       !! option to override
+  integer(kind=c_int64_t),   intent(in) :: value       !< The value to store for the option
   integer(kind=enum_kind)               :: code
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
-  integer(kind=c_size_t) :: c_key_length
+  character(kind=c_char, len=len_trim(option_name)) :: c_option_name
+  integer(kind=c_size_t) :: c_option_name_length
 
-  c_key = trim(key)
-  c_key_length = len_trim(key)
+  c_option_name = trim(option_name)
+  c_option_name_length = len_trim(option_name)
 
   code = override_integer_option_c( &
-    self%configoptions_ptr, c_key, c_key_length, value)
+    self%configoptions_ptr, c_option_name, c_option_name_length, value)
 end function override_integer_option
 
 !> Override the value of a string configuration option
-function override_string_option(self, key, value) result(code)
-  class(configoptions_type), intent(in)  :: self   !< The configoptions
-  character(len=*),          intent(in)  :: key    !< The name of the configuration
-                                                   !! option to override
-  character(len=*),          intent(in)  :: value  !< The value to store for the option
+function override_string_option(self, option_name, value) result(code)
+  class(configoptions_type), intent(in)  :: self        !< The configoptions
+  character(len=*),          intent(in)  :: option_name !< The name of the configuration
+                                                        !! option to override
+  character(len=*),          intent(in)  :: value       !< The value to store for the option
   integer(kind=enum_kind)                :: code
 
   ! Local variables
-  character(kind=c_char, len=len_trim(key)) :: c_key
+  character(kind=c_char, len=len_trim(option_name)) :: c_option_name
   character(kind=c_char, len=len_trim(value)) :: c_value
-  integer(kind=c_size_t) :: c_key_length, c_value_length
+  integer(kind=c_size_t) :: c_option_name_length, c_value_length
 
-  c_key = trim(key)
-  c_key_length = len_trim(key)
+  c_option_name = trim(option_name)
+  c_option_name_length = len_trim(option_name)
   c_value = trim(value)
   c_value_length = len_trim(value)
 
   code = override_string_option_c( &
-    self%configoptions_ptr, c_key, c_key_length, c_value, c_value_length)
+    self%configoptions_ptr, c_option_name, c_option_name_length, &
+    c_value, c_value_length)
 end function override_string_option
 
 end module smartredis_configoptions

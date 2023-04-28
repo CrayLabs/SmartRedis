@@ -47,26 +47,16 @@
 namespace SmartRedis {
 
 /*!
-*   \brief Configuration source enumeration. Currently, only
-*          configuration via environment variables is supported
+*   \brief Configuration source enumeration
 */
 enum cfgSrc {
     cs_envt,    // Configuration data is coming from environment variables
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-    cs_file,    // Configuration data is coming from a JSON file
-    cs_blob     // Configuration data is coming from a JSON blob string
-#endif
 } ;
 
 
 /*!
-*   \brief The ConfigOptions class bottlenecks all configuration options
-*          used in SmartRedis and allows them to be accessed from environment
-*          variables, from a JSON file, or from a JSON blob supplied as a text
-*          string. Currently, only configuration via environment variables is
-*          supported.
+*   \brief The ConfigOptions class consolidates access to configuration options
+*          used in SmartRedis
 */
 class ConfigOptions
 {
@@ -127,60 +117,34 @@ class ConfigOptions
         static std::unique_ptr<ConfigOptions> create_from_environment(
             const std::string& db_prefix);
 
-// Configuration via JSON file or JSON blob is anticipated in the future
-// but not supported yet
-#ifdef FUTURE_CONFIG_SUPPORT
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          a file with JSON data.
-        *   \param filename A UTF-8 file with JSON data containing the
-        *                   configuration data
-        *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if the file cannot be found or
-        *          the data within it cannot be parsed
-        */
-        static std::unique_ptr<ConfigOptions> create_from_file(
-            const std::string& filename);
-
-        /*!
-        *   \brief Instantiate ConfigOptions, getting selections from
-        *          a string containing a JSON blob
-        *   \param json_blob A JSON blob containing the configuration data
-        *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if the JSON blob cannot be parsed
-        */
-        static std::unique_ptr<ConfigOptions> create_from_string(
-            const std::string& json_blob);
-#endif
-
         /////////////////////////////////////////////////////////////
         // Option access
 
         /*!
         *   \brief Retrieve the value of a numeric configuration option
         *          from the selected source
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \returns The value of the selected option
         *   \throw Throws SRKeyException if the option was not set in the
         *          selected source
         */
-        int64_t get_integer_option(const std::string& key);
+        int64_t get_integer_option(const std::string& option_name);
 
         /*!
         *   \brief Retrieve the value of a string configuration option
         *          from the selected source
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \returns The value of the selected option
         *   \throw Throws SRKeyException if the option was not set in the
         *          selected source
         */
-        std::string get_string_option(const std::string& key);
+        std::string get_string_option(const std::string& option_name);
 
         /*!
         *   \brief Resolve the value of a string configuration option
         *          from the selected source, selecting a default value
         *          if not configured
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \param default_value The baseline value of the configuration
         *          option to be returned if a value was not set in the
         *          selected source
@@ -189,13 +153,13 @@ class ConfigOptions
         *            selected source
         */
         std::string _resolve_string_option(
-            const std::string& key, const std::string& default_value);
+            const std::string& option_name, const std::string& default_value);
 
         /*!
         *   \brief Resolve the value of a numeric configuration option
         *          from the selected source, selecting a default value
         *          if not configured
-        *   \param key The name of the configuration option to retrieve
+        *   \param option_name The name of the configuration option to retrieve
         *   \param default_value The baseline value of the configuration
         *          option to be returned if a value was not set in the
         *          selected source
@@ -204,16 +168,16 @@ class ConfigOptions
         *            selected source
         */
         int64_t _resolve_integer_option(
-            const std::string& key, int64_t default_value);
+            const std::string& option_name, int64_t default_value);
 
         /*!
         *   \brief Check whether a configuration option is set in the
         *          selected source
-        *   \param key The name of the configuration option to check
+        *   \param option_name The name of the configuration option to check
         *   \returns True IFF the target option is defined in the selected
         *            source
         */
-        bool is_configured(const std::string& key);
+        bool is_configured(const std::string& option_name);
 
         /*!
         *   \brief Retrieve the logging context
@@ -239,10 +203,11 @@ class ConfigOptions
         *            ConfigOptions class. An instance that references
         *            the same source will not be affected by an override to
         *            a different ConfigOptions instance
-        *   \param key The name of the configuration option to override
+        *   \param option_name The name of the configuration option to override
         *   \param value The value to store for the configuration option
         */
-        void override_integer_option(const std::string& key, int64_t value);
+        void override_integer_option(
+            const std::string& option_name, int64_t value);
 
         /*!
         *   \brief Override the value of a string configuration option
@@ -251,10 +216,11 @@ class ConfigOptions
         *            ConfigOptions class. An instance that references
         *            the same source will not be affected by an override to
         *            a different ConfigOptions instance
-        *   \param key The name of the configuration option to override
+        *   \param option_name The name of the configuration option to override
         *   \param value The value to store for the configuration option
         */
-        void override_string_option(const std::string& key, const std::string& value);
+        void override_string_option(
+            const std::string& option_name, const std::string& value);
 
     private:
 
@@ -266,11 +232,11 @@ class ConfigOptions
         void _populate_options();
 
         /*!
-        *   \brief Apply a prefix to a key if the source is environment
+        *   \brief Apply a prefix to an option name if the source is environment
         *          variables and the prefix is nonempty
-        *   \param key The key to prefix
+        *   \param option_name The name of the option to prefix
         */
-        std::string _prefixed(const std::string& key);
+        std::string _prefixed(const std::string& option_name);
 
         /*!
         *  \brief Integer option map

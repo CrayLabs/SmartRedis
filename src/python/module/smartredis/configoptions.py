@@ -92,98 +92,57 @@ class ConfigOptions:
         result._is_created_via_factory = True
         return result
 
-    # Configuration via JSON file or JSON blob is anticipated in the future
-    # but not supported yet
-    if False:
-        @classmethod
-        @exception_handler
-        def create_from_file(cls, filename):
-            """Instantiate ConfigOptions, getting selections from
-            a file containing JSON data
-
-            :param cls: The ConfigOptions class
-            :type cls: type
-            :param filename: Path to file containing JSON data
-            :type filename: str
-            :return: An instantiated ConfigOptions object
-            :rtype: ConfigOptions
-            """
-            typecheck(filename, "filename", str)
-            factory_object = PyConfigOptions.create_from_file(filename)
-            result = cls.from_pybind(factory_object)
-            result._is_created_via_factory = True
-            return result
-
-        @classmethod
-        @exception_handler
-        def create_from_string(cls, json_blob):
-            """Instantiate ConfigOptions, getting selections from
-            a string containing a JSON blob
-
-            :param cls: The ConfigOptions class
-            :type cls: type
-            :param json_blob: JSON data
-            :type json_blob: str
-            :return: An instantiated ConfigOptions object
-            :rtype: ConfigOptions
-            """
-            typecheck(json_blob, "json_blob", str)
-            factory_object = PyConfigOptions.create_from_string(json_blob)
-            result = cls.from_pybind(factory_object)
-            result._is_created_via_factory = True
-            return result
-
     @exception_handler
-    def get_integer_option(self, key):
+    def get_integer_option(self, option_name):
         """Retrieve the value of a numeric configuration option
         from the selected source
 
-        :param key: The name of the configuration option to retrieve
-        :type key: str
+        :param option_name: The name of the configuration option to retrieve
+        :type option_name: str
         :return: The value of the selected option. Returns
                  default_value if the option was not set in the
                  selected source
         :rtype: int
         """
-        typecheck(key, "key", str)
+        typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
             raise RedisRuntimeError(_notfactory)
-        return self._config_opts.get_integer_option(key)
+        return self._config_opts.get_integer_option(option_name)
 
     @exception_handler
-    def get_string_option(self, key):
+    def get_string_option(self, option_name):
         """Retrieve the value of a string configuration option
         from the selected source
 
-        :param key: The name of the configuration option to retrieve
-        :type key: str
+        :param option_name: The name of the configuration option to retrieve
+        :type option_name: str
         :return: The value of the selected option. Returns
                  default_value if the option was not set in the
                  selected source
         :rtype: str
         """
-        typecheck(key, "key", str)
+        typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
             raise RedisRuntimeError(_notfactory)
-        return self._config_opts.get_string_option(key)
+        return self._config_opts.get_string_option(option_name)
 
     @exception_handler
-    def is_configured(self, key):
+    def is_configured(self, option_name):
         """Check whether a configuration option is set in the selected source
 
-        :param key: The name of the configuration option to check
-        :type key: str
+        :param option_name: The name of the configuration option to check
+        :type option_name: str
         :return: True IFF the target option is defined in the selected source
                  or if it has been overridden
         :rtype: bool
         """
-        typecheck(key, "key", str)
+        typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
             raise RedisRuntimeError(_notfactory)
-        return self._config_opts.is_configured(key)
+        return self._config_opts.is_configured(option_name)
 
     @exception_handler
-    def override_integer_option(self, key, value):
+    def override_integer_option(self, option_name, value):
         """Override the value of a numeric configuration option
         in the selected source
 
@@ -192,19 +151,19 @@ class ConfigOptions:
         the same source will not be affected by an override to
         a different ConfigOptions instance
 
-        :param key: The name of the configuration option to override
-        :type key: str
+        :param option_name: The name of the configuration option to override
+        :type option_name: str
         :param value: The value to store for the configuration option
         :type value: int
         """
-        typecheck(key, "key", str)
+        typecheck(option_name, "option_name", str)
         typecheck(value, "value", int)
         if not self._is_created_via_factory:
             raise RedisRuntimeError(_notfactory)
-        self._config_opts.override_integer_option(key, value)
+        self._config_opts.override_integer_option(option_name, value)
 
     @exception_handler
-    def override_string_option(self, key, value):
+    def override_string_option(self, option_name, value):
         """Override the value of a string configuration option
         in the selected source
 
@@ -213,13 +172,13 @@ class ConfigOptions:
         the same source will not be affected by an override to
         a different ConfigOptions instance
 
-        :param key: The name of the configuration option to override
-        :type key: str
+        :param option_name: The name of the configuration option to override
+        :type option_name: str
         :param value: The value to store for the configuration option
         :type value: str
         """
-        typecheck(key, "key", str)
+        typecheck(option_name, "option_name", str)
         typecheck(value, "value", str)
         if not self._is_created_via_factory:
             raise RedisRuntimeError(_notfactory)
-        self._config_opts.override_string_option(key, value)
+        self._config_opts.override_string_option(option_name, value)
