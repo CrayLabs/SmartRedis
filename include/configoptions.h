@@ -181,13 +181,13 @@ class ConfigOptions
         *   \brief Retrieve the logging context
         *   \returns The log context associated with this object
         */
-        std::string get_log_context() { return _log_context; }
+        std::string _get_log_context() { return _log_context; }
 
         /*!
         *   \brief Store the logging context
         *   \param log_context The context to associate with logging
         */
-        void set_log_context(const std::string& log_context) {
+        void _set_log_context(const std::string& log_context) {
             _log_context = log_context;
         }
 
