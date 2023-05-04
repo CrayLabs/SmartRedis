@@ -31,13 +31,19 @@ module test_utils
   implicit none; private
 
   interface
-    integer(kind=c_int) function setenv_c( env_var, env_val, replace ) bind(c,name='setenv')
+    integer(kind=c_int) function setenv_c(env_var, env_val, replace) bind(c, name='setenv')
       import c_int, c_char
       character(kind=c_char), intent(in) :: env_var(*) !< Name of the variable to set
       character(kind=c_char), intent(in) :: env_val(*) !< Value to set the variable to
       integer(kind=c_int),    intent(in) :: replace    !< If 1, overwrite the value,
     end function setenv_c
+  end interface
 
+  interface
+    integer(kind=c_int) function unsetenv_c( env_var ) bind(c, name='unsetenv')
+      import c_int, c_char
+      character(kind=c_char), intent(in) :: env_var(*) !< Name of the variable to clear
+    end function unsetenv_c
   end interface
 
 
@@ -45,6 +51,7 @@ module test_utils
   public :: use_cluster
   public :: c_str
   public :: setenv
+  public :: unsetenv
 
   contains
 
@@ -78,7 +85,7 @@ module test_utils
   end function use_cluster
 
   !> Returns a lower case version of the string. Only supports a-z
-  function to_lower( str ) result(lower_str)
+  function to_lower(str) result(lower_str)
     character(len=*),          intent(in   ) :: str !< String
     character(len = len(str)) :: lower_str
 
@@ -96,7 +103,7 @@ module test_utils
   end function to_lower
 
   !> Convert a Fortran string to a C-string (i.e. append a null character)
-  function c_str( f_str )
+  function c_str(f_str)
     character(len=*) :: f_str !< The original Fortran-style string
     character(kind=c_char,len=len_trim(f_str)+1) :: c_str !< The resultant C-style string
 
@@ -104,8 +111,8 @@ module test_utils
 
   end function c_str
 
-  !> Set an environment value to a given value
-  subroutine setenv( env_var, env_val, replace )
+  !> Set an environment variable to a given value
+  subroutine setenv(env_var, env_val, replace)
     character(len=*) :: env_var !< Environment variable to set
     character(len=*) :: env_val !< The value to set the variable
     logical, optional :: replace !< If true (default) overwrite the current value
@@ -129,5 +136,21 @@ module test_utils
     endif
 
   end subroutine setenv
+
+  !> Clear an environment variable
+  subroutine unsetenv(env_var)
+    character(len=*) :: env_var !< Environment variable to clear
+
+    integer(kind=c_int) :: err_code
+    character(kind=c_char, len=len_trim(env_var)+1) :: c_env_var
+    c_env_var = c_str(env_var)
+
+    err_code = unsetenv_c(c_env_var)
+    if (err_code /= 0) then
+      write(STDERR,*) "Error clearing", c_env_var
+      error stop
+    endif
+
+  end subroutine unsetenv
 
 end module test_utils

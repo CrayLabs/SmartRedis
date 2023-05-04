@@ -26,6 +26,7 @@
 
 __all__ = [
     "Client",
+    "ConfigOptions",
     "Dataset",
     "SRObject",
     "LogContext",
@@ -40,6 +41,7 @@ __all__ = [
 ]
 
 from .client import Client
+from .configoptions import ConfigOptions
 from .dataset import Dataset
 from .dataset_utils import DatasetConverter
 from .logger import (

@@ -67,14 +67,15 @@ def execute_cmd(cmd_list):
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:
         out, err = proc.communicate(timeout=timeout_limit)
+        print("OUTPUT:", out.decode("utf-8") if out else "None")
+        print("ERROR:", err.decode("utf-8") if err else "None")
+        if (proc.returncode != 0):
+            print("Return code:", proc.returncode)
         assert(proc.returncode == 0)
-        if out:
-            print("OUTPUT:", out.decode("utf-8"))
-        if err:
-            print("ERROR:", err.decode("utf-8"))
     except UnicodeDecodeError:
         output, errs = proc.communicate()
-        print("ERROR:", errs.decode("utf-8"))
+        print("OUTPUT:", out)
+        print("ERROR:", errs)
         assert(False)
     except TimeoutExpired:
         proc.kill()
@@ -82,10 +83,15 @@ def execute_cmd(cmd_list):
         print(f"TIMEOUT: test timed out after test timeout limit of {timeout_limit} seconds")
         print("OUTPUT:", output.decode("utf-8"))
         print("ERROR:", errs.decode("utf-8"))
+        print("OUTPUT:", out)
+        print("ERROR:", errs)
         assert(False)
-    except Exception:
+    except AssertionError:
+        assert(False)
+    except Exception as e:
+        print(e)
         proc.kill()
         output, errs = proc.communicate()
-        print("OUTPUT:", output.decode("utf-8"))
-        print("ERROR:", errs.decode("utf-8"))
+        print("OUTPUT:", out)
+        print("ERROR:", errs)
         assert(False)

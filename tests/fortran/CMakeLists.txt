@@ -81,6 +81,7 @@ list(APPEND EXECUTABLES
 	 client_test_put_get_unpack_dataset
 	 client_test_logging
 	 client_test_errors
+	 client_test_configoptions
 )
 
 foreach(EXECUTABLE ${EXECUTABLES})

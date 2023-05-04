@@ -31,6 +31,7 @@
 #include "pydataset.h"
 #include "pylogcontext.h"
 #include "srexception.h"
+#include "pyconfigoptions.h"
 #include "logger.h"
 
 using namespace SmartRedis;
@@ -38,21 +39,24 @@ namespace py = pybind11;
 
 
 PYBIND11_MODULE(smartredisPy, m) {
+#define CLASS_METHOD(class, name) def(#name, &class::name)
+
     m.doc() = "smartredis client"; // optional module docstring
 
     // Python SRObject class
+    #define SROBJECT_METHOD(name) CLASS_METHOD(PySRObject, name)
     py::class_<PySRObject>(m, "PySRObject")
         .def(py::init<std::string&>())
-        .def("log_data", &PySRObject::log_data)
-        .def("log_warning", &PySRObject::log_warning)
-        .def("log_error", &PySRObject::log_error);
+        .SROBJECT_METHOD(log_data)
+        .SROBJECT_METHOD(log_warning)
+        .SROBJECT_METHOD(log_error);
 
     // Python LogContext class
     py::class_<PyLogContext, PySRObject>(m, "PyLogContext")
         .def(py::init<std::string&>());
 
     // Python client class
-    #define CLIENT_METHOD(name)  def(#name, &PyClient::name)
+    #define CLIENT_METHOD(name) CLASS_METHOD(PyClient, name)
     py::class_<PyClient, PySRObject>(m, "PyClient")
         .def(py::init<bool, const std::string&>())
         .CLIENT_METHOD(put_tensor)
@@ -117,7 +121,7 @@ PYBIND11_MODULE(smartredisPy, m) {
     ;
 
     // Python Dataset class
-    #define DATASET_METHOD(name) def(#name, &PyDataset::name)
+    #define DATASET_METHOD(name) CLASS_METHOD(PyDataset, name)
     py::class_<PyDataset, PySRObject>(m, "PyDataset")
         .def(py::init<std::string&>())
         .DATASET_METHOD(add_tensor)
@@ -133,6 +137,19 @@ PYBIND11_MODULE(smartredisPy, m) {
         .DATASET_METHOD(get_tensor_names)
         .DATASET_METHOD(get_tensor_dims)
         .DATASET_METHOD(to_string)
+    ;
+
+    // Python ConfigOptions class
+    #define CONFIGOPTIONS_METHOD(name) CLASS_METHOD(PyConfigOptions, name)
+    py::class_<PyConfigOptions>(m, "PyConfigOptions")
+        .def_static("create_from_environment",
+                    static_cast<PyConfigOptions* (*)(const std::string&)>(
+                        &PyConfigOptions::create_from_environment))
+        .CONFIGOPTIONS_METHOD(get_integer_option)
+        .CONFIGOPTIONS_METHOD(get_string_option)
+        .CONFIGOPTIONS_METHOD(is_configured)
+        .CONFIGOPTIONS_METHOD(override_integer_option)
+        .CONFIGOPTIONS_METHOD(override_string_option)
     ;
 
     // Logging functions

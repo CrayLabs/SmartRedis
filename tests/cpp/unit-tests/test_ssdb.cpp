@@ -71,7 +71,7 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
         const char* old_ssdb = std::getenv("SSDB");
 
         INFO("SSDB must be set to a valid host and "\
-            "port before running this test.");
+             "port before running this test.");
         REQUIRE(old_ssdb != NULL);
 
         TestSSDB test_ssdb(&lc);

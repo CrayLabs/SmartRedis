@@ -67,6 +67,7 @@ set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
 set(CLIENT_SRC
     src/c/c_client.cpp
+    src/c/c_configoptions.cpp
     src/c/c_dataset.cpp
     src/c/c_error.cpp
     src/c/c_logcontext.cpp
@@ -102,6 +103,7 @@ set(CLIENT_SRC
     src/cpp/utility.cpp
     src/cpp/logger.cpp
     src/cpp/srobject.cpp
+    src/cpp/configoptions.cpp
 )
 
 include_directories(SYSTEM
@@ -113,6 +115,7 @@ if (BUILD_FORTRAN)
     set(FORTRAN_SRC
         src/fortran/errors.F90
         src/fortran/client.F90
+        src/fortran/configoptions.F90
         src/fortran/dataset.F90
         src/fortran/fortran_c_interop.F90
         src/fortran/logcontext.F90
@@ -154,10 +157,11 @@ if(BUILD_PYTHON)
     add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
-                        src/python/src/pysrobject.cpp
-                        src/python/src/pylogcontext.cpp
 	                    src/python/src/pyclient.cpp
+                        src/python/src/pyconfigoptions.cpp
                         src/python/src/pydataset.cpp
+                        src/python/src/pylogcontext.cpp
+                        src/python/src/pysrobject.cpp
                         ${CLIENT_SRC}
                         src/python/bindings/bind.cpp)
 

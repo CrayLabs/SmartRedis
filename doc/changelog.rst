@@ -10,14 +10,17 @@ Description
 
 - Refactor third-party software dependency installation
 - Add pip-install target to Makefile to automate this process going forward
+- Added infrastructure for multiDB support
 
 Detailed Notes
 
 - Third-party software dependency installation is now handled in the Makefile instead of separate scripts
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
+- Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
 .. _PR331: https://github.com/CrayLabs/SmartRedis/pull/331
 .. _PR330: https://github.com/CrayLabs/SmartRedis/pull/330
+.. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303
 
 0.4.0
 -----
@@ -42,7 +45,7 @@ inspection, documentation updates, fixes to the multi-GPU support, and much more
 - Streamline pipelined execution of tasks for backend database
 - Enhance code coverage to include all 4 languages supported by SmartRedis
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
-- Correct assorted API documentation errors
+- Correct assorted API documentation errors and omissions
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
 - Add support to inspect the dimensions of a tensor via get_tensor_dims()
