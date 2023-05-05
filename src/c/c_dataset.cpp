@@ -86,7 +86,7 @@ extern "C" SRError CDataSet(
 }
 
 // Deallocate a DataSet
-extern "C" SRError DeallocateeDataSet(void** dataset)
+extern "C" SRError DeallocateDataSet(void** dataset)
 {
   return MAKE_DATASET_API({
     // Sanity check params
