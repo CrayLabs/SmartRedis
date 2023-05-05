@@ -59,7 +59,7 @@ SRError CDataSet(const char* name,
 *                  set to NULL on completion
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError DeallocateeDataSet(void** dataset);
+SRError DeallocateDataSet(void** dataset);
 
 /*!
 *   \brief Add a tensor to the DataSet.
