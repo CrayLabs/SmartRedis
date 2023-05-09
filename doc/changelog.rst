@@ -17,14 +17,14 @@ Description
 
 Detailed Notes
 
-- Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR341_)
+- Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR339_)
 - Correct the spelling of the C DataSet destruction interface from DeallocateeDataSet to DeallocateDataSet (PR338_)
 - Updated the version of Redis++ to v1.3.8 to pull in a change that ensures the redis++.pc file properly points to the generated libraries (PR334_)
 - Third-party software dependency installation is now handled in the Makefile instead of separate scripts
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
-.. _PR341: https://github.com/CrayLabs/SmartRedis/pull/341
+.. _PR339: https://github.com/CrayLabs/SmartRedis/pull/339
 .. _PR338: https://github.com/CrayLabs/SmartRedis/pull/338
 .. _PR334: https://github.com/CrayLabs/SmartRedis/pull/334
 .. _PR331: https://github.com/CrayLabs/SmartRedis/pull/331
