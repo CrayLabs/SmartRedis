@@ -1,6 +1,14 @@
 MAKEFLAGS += --no-print-directory
 COV_FLAGS :=
 SHELL:=/bin/bash
+
+# Build variables
+SR_BUILD := Release
+SR_LINK := Shared
+SR_TEST_REDIS_MODE := Clustered
+SR_TEST_RAI_VER := 1.2.7
+SR_WLM := Local
+SR_WLM_FLAGS :=
 SR_DEVICE := cpu
 
 # Params for third-party software
@@ -76,8 +84,8 @@ test-deps: lcov
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
 .PHONY: test-deps-gpu
-test-deps-gpu:
-	$(error To build test-deps for GPU, please execute "make test-deps SR_DEVICE=gpu")
+test-deps-gpu: SR_DEVICE=gpu
+test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
