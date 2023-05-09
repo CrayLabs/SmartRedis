@@ -15,7 +15,7 @@
 !
 ! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 ! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE AR
 ! DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
 ! FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
 ! DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
@@ -155,21 +155,23 @@ end function get_string_option
 
 !> Check whether a configuration option is set
 function is_configured(self, option_name, result) result(code)
-  class(configoptions_type), intent(in) :: self          !< The configoptions
-  character(len=*),          intent(in) :: option_name   !< The name of the configuration
+  class(configoptions_type), intent(in)    :: self          !< The configoptions
+  character(len=*),          intent(in)    :: option_name   !< The name of the configuration
                                                          !! option to check
-  logical(kind=c_bool),      intent(inout) :: result     !< Receives value of option
-  integer(kind=enum_kind)               :: code
+  logical,                   intent(inout) :: result     !< Receives value of option
+  integer(kind=enum_kind)                  :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(option_name)) :: c_option_name
   integer(kind=c_size_t) :: c_option_name_length
+  logical(kind=c_bool) :: c_result
 
   c_option_name = trim(option_name)
   c_option_name_length = len_trim(option_name)
 
   code = is_configured_c( &
-    self%configoptions_ptr, c_option_name, c_option_name_length, result)
+    self%configoptions_ptr, c_option_name, c_option_name_length, c_result)
+    result = c_result
 end function is_configured
 
 !> Override the value of a numeric configuration option
