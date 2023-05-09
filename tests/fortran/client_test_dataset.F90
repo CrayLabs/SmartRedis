@@ -80,7 +80,7 @@ program main
   integer :: result
   integer :: ttype
   integer :: mdtype
-  logical(kind=c_bool) :: exists
+  logical :: exists
   character(kind=c_char, len=:), allocatable :: dumpstr
 
   call random_number(true_array_real_32)

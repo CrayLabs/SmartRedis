@@ -44,7 +44,7 @@ real, dimension(10) :: tensor
 type(client_type) :: client
 type(dataset_type) :: dataset
 integer :: result
-logical(kind=c_bool) :: exists
+logical :: exists
 
 prefix = "prefix_test"
 call setenv("SSKEYIN", prefix)
