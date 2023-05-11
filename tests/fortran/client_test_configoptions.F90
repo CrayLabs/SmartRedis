@@ -38,7 +38,7 @@ program main
   type(configoptions_type)      :: co
   integer                       :: result
   integer(kind=8)               :: ivalue, iresult ! int
-  logical(kind=c_bool)          :: bvalue, bresult ! bool
+  logical                       :: bvalue, bresult ! bool
   character(kind=c_char, len=:), allocatable :: svalue, sresult ! string
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

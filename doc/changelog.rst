@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Refactor Fortran methods to return default logical kind
 - Update CI/CD tests to use a modern version of MacOS
 - Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
 - Update Redis++ version to 1.3.8
@@ -17,6 +18,9 @@ Description
 
 Detailed Notes
 
+- Many Fortran  routines were returning logical kind = c_bool which turns out not to be
+the same default kind of most Fortran compilers. These have now been refactored so that
+users need not import `iso_c_binding` in their own applications (PR340_)
 - Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR339_)
 - Correct the spelling of the C DataSet destruction interface from DeallocateeDataSet to DeallocateDataSet (PR338_)
 - Updated the version of Redis++ to v1.3.8 to pull in a change that ensures the redis++.pc file properly points to the generated libraries (PR334_)
@@ -24,6 +28,7 @@ Detailed Notes
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR340: https://github.com/CrayLabs/SmartRedis/pull/340
 .. _PR339: https://github.com/CrayLabs/SmartRedis/pull/339
 .. _PR338: https://github.com/CrayLabs/SmartRedis/pull/338
 .. _PR334: https://github.com/CrayLabs/SmartRedis/pull/334

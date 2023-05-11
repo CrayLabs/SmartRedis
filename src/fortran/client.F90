@@ -291,67 +291,75 @@ end function get_c_pointer
 function key_exists(self, key, exists)
   class(client_type),   intent(in)  :: self   !< The client
   character(len=*),     intent(in)  :: key    !< The key to check
-  logical(kind=c_bool), intent(out) :: exists !< Receives whether the key exists
+  logical,              intent(out) :: exists !< Receives whether the key exists
   integer(kind=enum_kind)           :: key_exists
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
+  logical(kind=c_bool) :: c_exists
 
   c_key = trim(key)
   c_key_length = len_trim(key)
 
-  key_exists = key_exists_c(self%client_ptr, c_key, c_key_length, exists)
+  key_exists = key_exists_c(self%client_ptr, c_key, c_key_length, c_exists)
+  exists = c_exists
 end function key_exists
 
 !> Check if the specified model exists in the database
 function model_exists(self, model_name, exists) result(code)
   class(client_type),   intent(in)  :: self       !< The client
   character(len=*),     intent(in)  :: model_name !< The model to check
-  logical(kind=c_bool), intent(out) :: exists     !< Receives whether the model exists
+  logical,              intent(out) :: exists     !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(model_name)) :: c_model_name
   integer(kind=c_size_t) :: c_model_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_model_name = trim(model_name)
   c_model_name_length = len_trim(model_name)
 
-  code = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, exists)
+  code = model_exists_c(self%client_ptr, c_model_name, c_model_name_length, c_exists)
+  exists = c_exists
 end function model_exists
 
 !> Check if the specified tensor exists in the database
 function tensor_exists(self, tensor_name, exists) result(code)
   class(client_type),   intent(in)  :: self        !< The client
   character(len=*),     intent(in)  :: tensor_name !< The tensor to check
-  logical(kind=c_bool), intent(out) :: exists      !< Receives whether the model exists
+  logical,              intent(out) :: exists      !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(tensor_name)) :: c_tensor_name
   integer(kind=c_size_t) :: c_tensor_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_tensor_name = trim(tensor_name)
   c_tensor_name_length = len_trim(tensor_name)
 
-  code = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, exists)
+  code = tensor_exists_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_exists)
+  exists = c_exists
 end function tensor_exists
 
 !> Check if the specified dataset exists in the database
 function dataset_exists(this, dataset_name, exists) result(code)
   class(client_type),   intent(in)  :: this          !< The client
   character(len=*),     intent(in)  :: dataset_name  !< The dataset to check
-  logical(kind=c_bool), intent(out) :: exists        !< Receives whether the model exists
+  logical,              intent(out) :: exists        !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   character(kind=c_char, len=len_trim(dataset_name)) :: c_dataset_name
   integer(kind=c_size_t) :: c_dataset_name_length
+  logical(kind=c_bool) :: c_exists
 
   c_dataset_name = trim(dataset_name)
   c_dataset_name_length = len_trim(dataset_name)
 
-  code = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, exists)
+  code = dataset_exists_c(this%client_ptr, c_dataset_name, c_dataset_name_length, c_exists)
+  exists = c_exists
 end function dataset_exists
 
 !> Repeatedly poll the database until the tensor exists or the number of tries is exceeded
@@ -360,20 +368,22 @@ function poll_tensor(self, tensor_name, poll_frequency_ms, num_tries, exists) re
   character(len=*),     intent(in)  :: tensor_name       !< name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+  logical,              intent(out) :: exists            !< Receives whether the tensor exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(tensor_name)) :: c_tensor_name
   integer(kind=c_size_t) :: c_tensor_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_tensor_name = trim(tensor_name)
   c_tensor_name_length = len_trim(tensor_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_tensor_c(self%client_ptr, c_tensor_name, c_tensor_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_tensor
 
 !> Repeatedly poll the database until the dataset exists or the number of tries is exceeded
@@ -383,19 +393,21 @@ function poll_dataset(self, dataset_name, poll_frequency_ms, num_tries, exists)
   character(len=*),     intent(in)  :: dataset_name      !< Name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the tensor exists
+  logical,              intent(out) :: exists            !< Receives whether the tensor exists
 
   ! Local variables
   character(kind=c_char,len=len_trim(dataset_name)) :: c_dataset_name
   integer(kind=c_size_t) :: c_dataset_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_dataset_name = trim(dataset_name)
   c_dataset_name_length = len_trim(dataset_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  poll_dataset = poll_dataset_c(self%client_ptr, c_dataset_name, c_dataset_name_length, c_poll_frequency, c_num_tries, exists)
+  poll_dataset = poll_dataset_c(self%client_ptr, c_dataset_name, c_dataset_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_dataset
 
 !> Repeatedly poll the database until the model exists or the number of tries is exceeded
@@ -404,20 +416,22 @@ function poll_model(self, model_name, poll_frequency_ms, num_tries, exists) resu
   character(len=*),     intent(in)  :: model_name        !< Name in the database to poll
   integer,              intent(in)  :: poll_frequency_ms !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries         !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists            !< Receives whether the model exists
+  logical,              intent(out) :: exists            !< Receives whether the model exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char,len=len_trim(model_name)) :: c_model_name
   integer(kind=c_size_t) :: c_model_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_model_name = trim(model_name)
   c_model_name_length = len_trim(model_name)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_model_c(self%client_ptr, c_model_name, c_model_name_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_model
 
 !> Repeatedly poll the database until the key exists or the number of tries is exceeded
@@ -426,20 +440,22 @@ function poll_key(self, key, poll_frequency_ms, num_tries, exists) result(code)
   character(len=*),     intent(in)  :: key                !< Key in the database to poll
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: exists             !< Receives whether the key exists
+  logical,              intent(out) :: exists             !< Receives whether the key exists
   integer(kind=enum_kind)           :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(key)) :: c_key
   integer(kind=c_size_t) :: c_key_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries
+  logical(kind=c_bool) :: c_exists
 
   c_key = trim(key)
   c_key_length = len_trim(key)
   c_num_tries = num_tries
   c_poll_frequency = poll_frequency_ms
 
-  code = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, exists)
+  code = poll_key_c(self%client_ptr, c_key, c_key_length, c_poll_frequency, c_num_tries, c_exists)
+  exists = c_exists
 end function poll_key
 
 !> Put a tensor whose Fortran type is the equivalent 'int8' C-type
@@ -1679,13 +1695,14 @@ function poll_list_length(self, list_name, list_length, poll_frequency_ms, num_t
   integer,              intent(in   ) :: list_length        !< The desired length of the list
   integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)             :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1694,7 +1711,8 @@ function poll_list_length(self, list_name, list_length, poll_frequency_ms, num_t
   c_list_length = list_length
 
   code = poll_list_length_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length
 
 !> Get the length of the aggregation list
@@ -1704,13 +1722,14 @@ function poll_list_length_gte(self, list_name, list_length, poll_frequency_ms, n
   integer,              intent(in   ) :: list_length        !< The desired length of the list
   integer,              intent(in   ) :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in   ) :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(  out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1719,7 +1738,8 @@ function poll_list_length_gte(self, list_name, list_length, poll_frequency_ms, n
   c_list_length = list_length
 
   code = poll_list_length_gte_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length_gte
 
 !> Get the length of the aggregation list
@@ -1729,13 +1749,14 @@ function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, n
   integer,              intent(in)  :: list_length        !< The desired length of the list
   integer,              intent(in)  :: poll_frequency_ms  !< Frequency at which to poll the database (ms)
   integer,              intent(in)  :: num_tries          !< Number of times to poll the database before failing
-  logical(kind=c_bool), intent(out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
+  logical,              intent(out) :: poll_result        !< True if the list is the requested length, False if not after num_tries.
   integer(kind=enum_kind)          :: code
 
   ! Local variables
   character(kind=c_char, len=len_trim(list_name)) :: list_name_c
   integer(kind=c_size_t) :: list_name_length
   integer(kind=c_int) :: c_poll_frequency, c_num_tries, c_list_length
+  logical(kind=c_bool) :: c_poll_result
 
   list_name_c = trim(list_name)
   list_name_length = len_trim(list_name)
@@ -1744,7 +1765,8 @@ function poll_list_length_lte(self, list_name, list_length, poll_frequency_ms, n
   c_list_length = list_length
 
   code = poll_list_length_lte_c(self%client_ptr, list_name_c, list_name_length, &
-                            c_list_length, c_poll_frequency, c_num_tries, poll_result)
+                            c_list_length, c_poll_frequency, c_num_tries, c_poll_result)
+  poll_result = c_poll_result
 end function poll_list_length_lte
 
 !> Get datasets from an aggregation list. Note that this will deallocate an existing list.
