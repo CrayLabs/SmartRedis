@@ -25,9 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 project(FortranClientTester)
-
 cmake_minimum_required(VERSION 3.13)
-
 enable_language(Fortran)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -46,7 +44,7 @@ endif()
 
 # Assume by default that users should link against the install directory in this repository
 if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../install/")
+	set(SMARTREDIS_INSTALL_PATH "../../install/")
 endif()
 
 # Specify all pre-processor and library dependencies
@@ -85,12 +83,14 @@ list(APPEND EXECUTABLES
 )
 
 foreach(EXECUTABLE ${EXECUTABLES})
-
-	add_executable(${EXECUTABLE}
+	add_executable(${EXECUTABLE}_fortran_test
 		${EXECUTABLE}.F90
 		test_utils.F90
 	)
-	target_link_libraries(${EXECUTABLE}
+    set_target_properties(${EXECUTABLE}_fortran_test PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+	target_link_libraries(${EXECUTABLE}_fortran_test
 		${SMARTREDIS_LIBRARIES}
 	)
 endforeach()

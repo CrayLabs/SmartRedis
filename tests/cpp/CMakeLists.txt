@@ -25,18 +25,20 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 project(CppClientTester)
-
 cmake_minimum_required(VERSION 3.13)
+enable_language(CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 
+add_subdirectory(unit-tests)
+
 if(COVERAGE)
-  if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-      set(CMAKE_CXX_FLAGS --coverage)
-      add_link_options(--coverage)
-  endif()
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+        set(CMAKE_CXX_FLAGS --coverage)
+        add_link_options(--coverage)
+    endif()
 endif()
 
 find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
@@ -46,166 +48,41 @@ include_directories(SYSTEM
     ../../install/include
 )
 
-# Build executables
-
-add_executable(client_test_dataset
-  client_test_dataset.cpp
-)
-target_link_libraries(client_test_dataset
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_aggregation
-  client_test_dataset_aggregation.cpp
-)
-target_link_libraries(client_test_dataset_aggregation
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_no_tensors
-  client_test_dataset_no_tensors.cpp
-)
-target_link_libraries(client_test_dataset_no_tensors
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_no_meta
-  client_test_dataset_no_meta.cpp
-)
-target_link_libraries(client_test_dataset_no_meta
-  ${SR_LIB}
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+    client_test_dataset
+    client_test_dataset_aggregation
+    client_test_dataset_no_tensors
+    client_test_dataset_no_meta
+    client_test_dataset_empty
+    client_test_dataset_multiple_get_tensor
+    client_test_delete_dataset
+    client_test_rename_dataset
+    client_test_copy_dataset
+    client_test_dataset_copy_constructor
+    client_test_dataset_move_constructor
+    client_test_dataset_copy_assignment
+    client_test_dataset_move_assignment
+    client_test_put_get_3D
+    client_test_put_get_3D_static_values
+    client_test_put_get_contiguous_3D
+    client_test_put_get_transpose_3D
+    client_test_put_get_2D
+    client_test_put_get_1D
+    client_test_mnist
+    client_test_mnist_dataset
+    client_test_ensemble
+    client_test_ensemble_dataset
 )
 
-add_executable(client_test_dataset_empty
-  client_test_dataset_empty.cpp
-)
-target_link_libraries(client_test_dataset_empty
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_multiple_get_tensor
-  client_test_dataset_multiple_get_tensor.cpp
-)
-target_link_libraries(client_test_dataset_multiple_get_tensor
-  ${SR_LIB}
-)
-
-add_executable(client_test_delete_dataset
-  client_test_delete_dataset.cpp
-)
-target_link_libraries(client_test_delete_dataset
-  ${SR_LIB}
-)
-
-add_executable(client_test_rename_dataset
-  client_test_rename_dataset.cpp
-)
-target_link_libraries(client_test_rename_dataset
-  ${SR_LIB}
-)
-
-add_executable(client_test_copy_dataset
-  client_test_copy_dataset.cpp
-)
-target_link_libraries(client_test_copy_dataset
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_copy_constructor
-  client_test_dataset_copy_constructor.cpp
-)
-target_link_libraries(client_test_dataset_copy_constructor
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_move_constructor
-  client_test_dataset_move_constructor.cpp
-)
-target_link_libraries(client_test_dataset_move_constructor
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_copy_assignment
-  client_test_dataset_copy_assignment.cpp
-)
-target_link_libraries(client_test_dataset_copy_assignment
-  ${SR_LIB}
-)
-
-add_executable(client_test_dataset_move_assignment
-  client_test_dataset_move_assignment.cpp
-)
-target_link_libraries(client_test_dataset_move_assignment
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_3D
-  client_test_put_get_3D.cpp
-)
-target_link_libraries(client_test_put_get_3D
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_3D_static_values
-  client_test_put_get_3D_static_values.cpp
-)
-target_link_libraries(client_test_put_get_3D_static_values
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_contiguous_3D
-  client_test_put_get_contiguous_3D.cpp
-)
-target_link_libraries(client_test_put_get_contiguous_3D
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_transpose_3D
-  client_test_put_get_transpose_3D.cpp
-)
-target_link_libraries(client_test_put_get_transpose_3D
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_2D
-  client_test_put_get_2D.cpp
-)
-target_link_libraries(client_test_put_get_2D
-  ${SR_LIB}
-)
-
-add_executable(client_test_put_get_1D
-  client_test_put_get_1D.cpp
-)
-target_link_libraries(client_test_put_get_1D
-  ${SR_LIB}
-)
-
-add_executable(client_test_mnist
-  client_test_mnist.cpp
-)
-target_link_libraries(client_test_mnist
-  ${SR_LIB}
-)
-
-add_executable(client_test_mnist_dataset
-  client_test_mnist_dataset.cpp
-)
-target_link_libraries(client_test_mnist_dataset
-  ${SR_LIB}
-)
-
-add_executable(client_test_ensemble
-  client_test_ensemble.cpp
-)
-target_link_libraries(client_test_ensemble
-  ${SR_LIB}
-)
-
-add_executable(client_test_ensemble_dataset
-  client_test_ensemble_dataset.cpp
-)
-target_link_libraries(client_test_ensemble_dataset
-  ${SR_LIB}
-)
-
+foreach(EXECUTABLE ${EXECUTABLES})
+    add_executable(${EXECUTABLE}_cpp_test
+        ${EXECUTABLE}.cpp
+    )
+    set_target_properties(${EXECUTABLE}_cpp_test PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+    target_link_libraries(${EXECUTABLE}_cpp_test
+        ${SR_LIB}
+    )
+endforeach()

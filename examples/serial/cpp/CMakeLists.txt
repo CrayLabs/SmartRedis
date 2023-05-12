@@ -41,10 +41,10 @@ include_directories(SYSTEM
 
 # Define all the tests to be built
 list(APPEND EXECUTABLES
-	smartredis_put_get_3D
+    smartredis_put_get_3D
     smartredis_dataset
-	smartredis_model
-	smartredis_mnist
+    smartredis_model
+    smartredis_mnist
 )
 
 foreach(EXECUTABLE ${EXECUTABLES})

@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 project(CClientTester)
-
 cmake_minimum_required(VERSION 3.13)
+enable_language(C)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
@@ -47,58 +47,25 @@ include_directories(SYSTEM
     ../../install/include
 )
 
-add_executable(client_test_dataset_aggregation
-client_test_dataset_aggregation.c
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+    client_test_dataset_aggregation
+    client_test_dataset_exists
+    client_test_logging
+    client_test_put_unpack_1D
+    client_test_put_get_1D
+    client_test_put_get_2D
+    client_test_put_get_3D
 )
 
-target_link_libraries(client_test_dataset_aggregation
+foreach(EXECUTABLE ${EXECUTABLES})
+    add_executable(${EXECUTABLE}_c_test
+        ${EXECUTABLE}.c
+    )
+    set_target_properties(${EXECUTABLE}_c_test PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+    target_link_libraries(${EXECUTABLE}_c_test
         ${SR_LIB}
-)
-
-add_executable(client_test_dataset_exists
-	client_test_dataset_exists.c
-)
-
-target_link_libraries(client_test_dataset_exists
-	${SR_LIB}
-)
-
-add_executable(client_test_logging
-	client_test_logging.c
-)
-
-target_link_libraries(client_test_logging
-	${SR_LIB}
-)
-
-add_executable(client_test_put_unpack_1D
-	client_test_put_unpack_1D.c
-)
-
-target_link_libraries(client_test_put_unpack_1D
-	${SR_LIB}
-)
-
-add_executable(client_test_put_get_1D
-        client_test_put_get_1D.c
-)
-
-target_link_libraries(client_test_put_get_1D
-        ${SR_LIB}
-)
-
-add_executable(client_test_put_get_2D
-        client_test_put_get_2D.c
-)
-
-target_link_libraries(client_test_put_get_2D
-        ${SR_LIB}
-)
-
-add_executable(client_test_put_get_3D
-        client_test_put_get_3D.c
-)
-
-target_link_libraries(client_test_put_get_3D
-        ${SR_LIB}
-)
+    )
+endforeach()

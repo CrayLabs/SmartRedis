@@ -1,4 +1,3 @@
-#
 # BSD 2-Clause License
 #
 # Copyright (c) 2021-2023, Hewlett Packard Enterprise
@@ -24,28 +23,16 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-project(DockerTesterCpp)
+project(SmartSim-Tests-Docker)
 cmake_minimum_required(VERSION 3.13)
+
+enable_language(C)
 enable_language(CXX)
+enable_language(Fortran)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE DEBUG)
-set(CMAKE_CXX_STANDARD 17)
+set(ALLOW_DUPLICATE_CUSTOM_TARGETS true)
 
-find_library(SR_LIB smartredis)
-
-include_directories(SYSTEM
-    /usr/local/include/smartredis
-)
-
-# Build executables
-
-add_executable(docker_test_cpp
-	docker_test.cpp
-)
-set_target_properties(docker_test_cpp PROPERTIES
-    OUTPUT_NAME docker_test
-)
-target_link_libraries(docker_test_cpp ${SR_LIB} pthread)
+add_subdirectory(c)
+add_subdirectory(cpp)
+add_subdirectory(fortran)
