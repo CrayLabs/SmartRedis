@@ -24,10 +24,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(FortranClientExamples)
-
+project(FortranClientSerialExamples)
 cmake_minimum_required(VERSION 3.13)
-
 enable_language(Fortran)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -64,10 +62,13 @@ list(APPEND EXECUTABLES
 
 foreach(EXECUTABLE ${EXECUTABLES})
 
-	add_executable(${EXECUTABLE}
+	add_executable(${EXECUTABLE}_fortran_serial
 		${EXECUTABLE}.F90
 	)
-	target_link_libraries(${EXECUTABLE}
+    set_target_properties(${EXECUTABLE}_fortran_serial PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+	target_link_libraries(${EXECUTABLE}_fortran_serial
 		${SMARTREDIS_LIBRARIES}
 	)
 endforeach()

@@ -26,8 +26,8 @@
 
 import pytest
 from os import path as osp
+from os import getcwd
 from glob import glob
-from shutil import which
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
@@ -38,18 +38,25 @@ def get_test_names():
     """Obtain test names by globbing for client_test
     Add tests manually if necessary
     """
-    glob_path_1 = osp.join(TEST_PATH, "*/*/build/example*")
-    glob_path_2 = osp.join(TEST_PATH, "*/*/build/smartredis*")
+    glob_path_1 = osp.join(TEST_PATH, "*/*/example*")
+    glob_path_2 = osp.join(TEST_PATH, "*/*/smartredis*")
     test_names = glob(glob_path_1) + glob(glob_path_2)
-    test_names = list(filter(lambda test: test.find('.mod') == -1, test_names))
+    test_names = list(filter(lambda test: test.find('example_utils') == -1, test_names))
+    test_names = list(filter(lambda test: test.find('.py') == -1, test_names))
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_cpp_client(test, use_cluster):
+def test_example(test, use_cluster, build):
+    # Build the path to the test executable from the source file name
+    # . keep only the last three parts of the path (parallel/serial, language, basename)
+    test = "/".join(test.split("/")[-3:])
+    # . drop the file extension
+    test = ".".join(test.split(".")[:-1])
+    # . prepend the path to the built test executable
+    test = f"{getcwd()}/build/{build}/examples/{test}"
     cmd = []
     cmd.append(test)
     print(f"Running test: {osp.basename(test)}")
-    print(f"Test command {' '.join(cmd)}")
     print(f"Using cluster: {use_cluster}")
     execute_cmd(cmd)
     time.sleep(1)
@@ -71,8 +78,6 @@ def execute_cmd(cmd_list):
 
     # spawning the subprocess and connecting to its output
     run_path = find_path(cmd_list[0])
-    print("cmd_list", cmd_list)
-    print("cwd", run_path)
     proc = Popen(
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:

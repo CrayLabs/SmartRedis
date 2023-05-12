@@ -24,45 +24,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CppClientParallelExamples)
+project(SerialExamples)
 cmake_minimum_required(VERSION 3.13)
+
+enable_language(C)
 enable_language(CXX)
+enable_language(Fortran)
 
-set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_STANDARD 17)
-
-find_package(MPI)
-
-find_library(SR_LIB smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-
-include_directories(SYSTEM
-    /usr/local/include
-    ${MPI_INCLUDE_PATH}
-    ../../../install/include
-)
-
-set(ftn_client_src
-    ../../../src/fortran/fortran_c_interop.F90
-    ../../../src/fortran/dataset.F90
-    ../../../src/fortran/client.F90
-)
-
-# Define all the tests to be built
-list(APPEND EXECUTABLES
-	smartredis_put_get_3D
-	smartredis_mnist
-)
-
-foreach(EXECUTABLE ${EXECUTABLES})
-    add_executable(${EXECUTABLE}_cpp_parallel
-        ${EXECUTABLE}.cpp
-        ${ftn_client_src}
-    )
-    set_target_properties(${EXECUTABLE}_cpp_parallel PROPERTIES
-        OUTPUT_NAME ${EXECUTABLE}
-    )
-    target_link_libraries(${EXECUTABLE}_cpp_parallel
-    	MPI::MPI_CXX
-        ${SR_LIB}
-    )
-endforeach()
+add_subdirectory(c)
+add_subdirectory(cpp)
+add_subdirectory(fortran)

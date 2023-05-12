@@ -90,51 +90,55 @@ test-deps-gpu: test-deps
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
 build-tests: test-lib-with-fortran
-	./build-scripts/build_cpp_tests.sh $(CMAKE_ARGS)
-	./build-scripts/build_cpp_unit_tests.sh $(CMAKE_ARGS)
-	./build-scripts/build_c_tests.sh $(CMAKE_ARGS)
-	./build-scripts/build_fortran_tests.sh $(CMAKE_ARGS)
+	cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/tests
 
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
 build-test-cpp: test-lib
-	./build-scripts/build_cpp_tests.sh
-	./build-scripts/build_cpp_unit_tests.sh
+	cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/tests/cpp
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
 build-unit-test-cpp: test-lib
-	./build-scripts/build_cpp_unit_tests.sh
+	cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c: test-lib
-	./build-scripts/build_c_tests.sh
+	cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/tests/c
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
 build-test-fortran: test-lib-with-fortran
-	./build-scripts/build_fortran_tests.sh
+	cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/tests/fortran
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
 build-examples: lib-with-fortran
-	./build-scripts/build_serial_examples.sh
-	./build-scripts/build_parallel_examples.sh
+	cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/examples
+
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
-build-example-serial: lib
-	./build-scripts/build_serial_examples.sh
+build-example-serial: lib-with-fortran
+	cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/examples/serial
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
-build-example-parallel: lib
-	./build-scripts/build_parallel_examples.sh
+build-example-parallel: lib-with-fortran
+	cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	cmake --build build/$(SR_BUILD)/examples/parellel
 
 
 # help: clean-deps                     - remove third-party deps
@@ -222,7 +226,7 @@ cov:
 test: test-deps
 test: build-tests
 test:
-	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv ./tests
+	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker -vv ./tests --build $(SR_BUILD)
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
@@ -230,7 +234,7 @@ test:
 test-verbose: test-deps
 test-verbose: build-tests
 test-verbose:
-	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
+	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
 
 # help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
@@ -238,14 +242,14 @@ test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage: CMAKE_ARGS="-DCOVERAGE=on"
 test-verbose-with-coverage:
-	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests
+	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
 test-c: test-deps
 test-c: build-test-c
 test-c:
-	@python -m pytest -vv -s ./tests/c/
+	@python -m pytest -vv -s ./tests/c/ --build $(SR_BUILD)
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
@@ -253,39 +257,39 @@ test-cpp: test-deps
 test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/
+	@python -m pytest -vv -s ./tests/cpp/ --build $(SR_BUILD)
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
 unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/unit-tests/
+	@python -m pytest -vv -s ./tests/cpp/unit-tests/ --build $(SR_BUILD)
 
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py: test-deps
 test-py:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/
+	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/ --build $(SR_BUILD)
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
 test-fortran: test-deps
 test-fortran: build-test-fortran
-	@python -m pytest -vv ./tests/fortran/
+	@python -m pytest -vv ./tests/fortran/ --build $(SR_BUILD)
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov: test-deps
 testpy-cov:
-	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/
+	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ -vv ./tests/python/ --build $(SR_BUILD)
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
 test-examples: test-deps
 test-examples: build-examples
 test-examples:
-	@python -m pytest -vv -s ./examples
+	@python -m pytest -vv -s ./examples --build $(SR_BUILD)
 
 
 ############################################################################

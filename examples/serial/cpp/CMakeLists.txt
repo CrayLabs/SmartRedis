@@ -24,9 +24,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CppClientExamples)
-
+project(CppClientSerialExamples)
 cmake_minimum_required(VERSION 3.13)
+enable_language(CXX)
 
 set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
@@ -39,32 +39,22 @@ include_directories(SYSTEM
     ../../../install/include
 )
 
-# Build executables
-
-add_executable(smartredis_put_get_3D
-	smartredis_put_get_3D.cpp
-)
-target_link_libraries(smartredis_put_get_3D
-	${SR_LIB}
-)
-
-add_executable(smartredis_dataset
-	smartredis_dataset.cpp
-)
-target_link_libraries(smartredis_dataset
-	${SR_LIB}
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+	smartredis_put_get_3D
+    smartredis_dataset
+	smartredis_model
+	smartredis_mnist
 )
 
-add_executable(smartredis_model
-	smartredis_model.cpp
-)
-target_link_libraries(smartredis_model
-	${SR_LIB}
-)
-
-add_executable(smartredis_mnist
-	smartredis_mnist.cpp
-)
-target_link_libraries(smartredis_mnist
-	${SR_LIB}
-)
+foreach(EXECUTABLE ${EXECUTABLES})
+    add_executable(${EXECUTABLE}_cpp_serial
+        ${EXECUTABLE}.cpp
+    )
+    set_target_properties(${EXECUTABLE}_cpp_serial PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+    target_link_libraries(${EXECUTABLE}_cpp_serial
+        ${SR_LIB}
+    )
+endforeach()
