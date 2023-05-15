@@ -43,35 +43,29 @@ def get_test_names():
     test_names = glob(glob_path_1) + glob(glob_path_2)
     test_names = list(filter(lambda test: test.find('example_utils') == -1, test_names))
     test_names = list(filter(lambda test: test.find('.py') == -1, test_names))
+    test_names = [(pytest.param(test,
+                                id=osp.basename(test))) for test in test_names]
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
 def test_example(test, use_cluster, build):
     # Build the path to the test executable from the source file name
-    # . keep only the last three parts of the path (parallel/serial, language, basename)
+    # . keep only the last three parts of the path: (parallel/serial, language, basename)
     test = "/".join(test.split("/")[-3:])
     # . drop the file extension
     test = ".".join(test.split(".")[:-1])
     # . prepend the path to the built test executable
     test = f"{getcwd()}/build/{build}/examples/{test}"
-    cmd = []
-    cmd.append(test)
+    cmd = [test]
     print(f"Running test: {osp.basename(test)}")
     print(f"Using cluster: {use_cluster}")
     execute_cmd(cmd)
     time.sleep(1)
 
 def find_path(executable_path):
-    if(executable_path.find('/') == -1):
+    if executable_path.find('/') == -1:
         return '.'
-
-    start = 0
-    while True:
-        slash = executable_path.find('/', start)
-        if (slash == -1):
-            return executable_path[0:start]
-        else:
-            start = slash + 1
+    return "/".join(executable_path.split("/")[:-1])
 
 def execute_cmd(cmd_list):
     """Execute a command """
