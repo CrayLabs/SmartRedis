@@ -572,7 +572,7 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
             {
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
                 std::string model_key = "ai_info_model";
-                std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+                std::string model_file = "../mnist_data/mnist_cnn.pt";
                 std::string backend = "TORCH";
                 std::string device = "CPU";
                 parsed_reply_map reply;
@@ -867,9 +867,9 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
     {
         Client client(use_cluster(), "test_client");
         std::string model_key = "a_model";
-        std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+        std::string model_file = "../mnist_data/mnist_cnn.pt";
         std::string script_key = "a_script";
-        std::string script_file = "./../../mnist_data/data_processing_script.txt";
+        std::string script_file = "../mnist_data/data_processing_script.txt";
         std::string backend = "TORCH";
 
         WHEN("set_model_multigpu() called with invalid first gpu")

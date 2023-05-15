@@ -74,7 +74,7 @@ if (.not. exists) then
 endif
 
 script_key = "ensemble_script"
-script_file = "../../cpp/mnist_data/data_processing_script.txt"
+script_file = "../cpp/mnist_data/data_processing_script.txt"
 result = client%set_script_from_file(script_key, "CPU", script_file)
 if (result .ne. SRNoError) error stop
 result = client%model_exists(script_key, exists)
@@ -85,7 +85,7 @@ if (.not. exists) then
 endif
 
 model_key = "ensemble_model"
-model_file = "../../cpp/mnist_data/mnist_cnn.pt"
+model_file = "../cpp/mnist_data/mnist_cnn.pt"
 result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")
 if (result .ne. SRNoError) error stop 'set_model_from_file failed'
 result = client%model_exists(model_key, exists)

@@ -63,9 +63,8 @@ def execute_cmd(cmd_list):
     """Execute a command """
 
     # spawning the subprocess and connecting to its output
-    run_path = osp.join(TEST_PATH, "build/")
     proc = Popen(
-        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
+        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=TEST_PATH)
     try:
         out, err = proc.communicate(timeout=timeout_limit)
         print("OUTPUT:", out.decode("utf-8") if out else "None")
