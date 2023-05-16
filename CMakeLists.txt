@@ -24,29 +24,37 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(SmartRedis)
+# Enable setting version in the project statement
+if (POLICY CMP0048)
+    cmake_policy(SET CMP0048 NEW)
+endif (POLICY CMP0048)
+
+project(SmartRedis VERSION "0.4.0")
 
 cmake_minimum_required(VERSION 3.13)
 
 option(BUILD_PYTHON  "Build the python module" ON)
-option(BUILD_FORTRAN "Build the fortran client library" OFF)
+option(SR_FORTRAN "Build the fortran client library" OFF)
 option(COVERAGE "Build the fortran client library" OFF)
+option(SR_PEDANTIC "Build with pickiest compiler settings" OFF)
 
-set(CMAKE_BUILD_TYPE RELEASE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-if (BUILD_FORTRAN)
+#include(smartredis_defs)
+set(CMAKE_BUILD_TYPE RELEASE)
+
+if (SR_FORTRAN)
     enable_language(Fortran)
 endif()
 
-if (WERROR)
+if (SR_PEDANTIC)
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
         add_compile_options(-Wall -Werror)
     else()
-        message(WARNING "WERROR was specified, but the CMAKE compiler is not GCC")
+        message(WARNING "SR_PEDANTIC was specified, but the CMAKE compiler is not GCC")
     endif()
 endif()
 
@@ -111,7 +119,8 @@ include_directories(SYSTEM
     install/include
 )
 
-if (BUILD_FORTRAN)
+# Build the Fortran library
+if (SR_FORTRAN)
     set(FORTRAN_SRC
         src/fortran/errors.F90
         src/fortran/client.F90
@@ -166,8 +175,8 @@ if(BUILD_PYTHON)
                         src/python/bindings/bind.cpp)
 
 	target_link_libraries(smartredisPy PUBLIC ${EXT_CLIENT_LIBRARIES})
-	install(TARGETS smartredisPy
-	        LIBRARY DESTINATION lib)
+	install(TARGETS smartredisPy LIBRARY DESTINATION lib)
+    install(TARGETS smartredisPy LIBRARY DESTINATION ../src/python/module/smartredis)
 else()
 	message("-- Skipping Python client build")
 endif()

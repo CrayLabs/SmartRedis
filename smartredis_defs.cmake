@@ -24,47 +24,29 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(FortranClientSerialExamples)
-cmake_minimum_required(VERSION 3.13)
-enable_language(Fortran)
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
-
-# Assume by default that users should link against the install directory in this repository
-if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+# Select CMake build type based on SR_BUILD variable
+if(SR_BUILD == Release)
+    set(CMAKE_BUILD_TYPE RELEASE)
+    set(SRLIB_NAME_SUFFIX "")
+elseif(SR_BUILD == Debug)
+    set(CMAKE_BUILD_TYPE DEBUG)
+    set(SRLIB_NAME_SUFFIX "-debug")
+elseif(SR_BUILD == Coverage)
+    set(CMAKE_BUILD_TYPE DEBUG)
+    set(SRLIB_NAME_SUFFIX "-coverage")
+    set(COVERAGE ON)
+else()
+    message(ERROR "Unrecognized build type specified in SR_BUILD")
 endif()
 
-# Specify all pre-processor and library dependencies
-find_library(SMARTREDIS_LIBRARY smartredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-set(SMARTREDIS_LIBRARIES
-	${SMARTREDIS_LIBRARY}
-	${SMARTREDIS_FORTRAN_LIBRARY}
-)
-include_directories(SYSTEM
-    /usr/local/include
-    ${SMARTREDIS_INSTALL_PATH}/include
-)
+# Select CMake linkage based of SR_LINK variable
+if(SR_LINK == Static)
+    set(CMAKE_LINK_LIBRARY_SUFFIX .a)
+elseif(SR_LINK == Shared)
+    set(CMAKE_LINK_LIBRARY_SUFFIX .so)
+else()
+    message(ERROR "Unrecognized link type specified in SR_LINK")
+endif()
 
-# Define all the tests to be built
-list(APPEND EXECUTABLES
-     smartredis_dataset
-     smartredis_put_get_3D
-)
-
-foreach(EXECUTABLE ${EXECUTABLES})
-
-	add_executable(${EXECUTABLE}_fortran_serial
-		${EXECUTABLE}.F90
-	)
-    set_target_properties(${EXECUTABLE}_fortran_serial PROPERTIES
-        OUTPUT_NAME ${EXECUTABLE}
-    )
-	target_link_libraries(${EXECUTABLE}_fortran_serial
-		${SMARTREDIS_LIBRARIES}
-	)
-endforeach()
+# Identify the SmartRedis library name based on the build and link
+set(SMARTREDIS_LIB smartredis${SRLIB_NAME_SUFFIX})

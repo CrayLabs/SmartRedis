@@ -10,6 +10,8 @@ SR_TEST_RAI_VER := 1.2.7
 SR_WLM := Local
 SR_WLM_FLAGS :=
 SR_DEVICE := cpu
+SR_PEDANTIC := OFF
+SR_FORTRAN := OFF
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -52,27 +54,29 @@ deps:
 # help: pip-install                    - Register the SmartRedis library with pip
 .PHONY: pip-install
 pip-install:
-	@if ! python -c "import smartredis" >& /dev/null; then pip install -e.; fi
+	@python -c "import smartredis" >& /dev/null || pip install -e.
 
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: pip-install
 lib: deps
-	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS)
+	cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
+	cmake --build build/$(SR_BUILD)
+	cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
-lib-with-fortran: deps
-	@bash ./build-scripts/build_lib.sh $(LIB_BUILD_ARGS) $(CMAKE_ARGS) -DBUILD_FORTRAN=ON
+lib-with-fortran: SR_FORTRAN=ON
+lib-with-fortran: lib
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib: SR_PEDANTIC=ON
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: LIB_BUILD_ARGS="-DWERROR=ON"
+test-lib-with-fortran: SR_PEDANTIC=ON
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
@@ -238,9 +242,9 @@ test-verbose:
 
 # help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
+test-verbose-with-coverage: SR_BUILD=Coverage
 test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
-test-verbose-with-coverage: CMAKE_ARGS="-DCOVERAGE=on"
 test-verbose-with-coverage:
 	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
 
