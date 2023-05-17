@@ -25,13 +25,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Configure the CMake build based on the SR_BUILD selection
-if(SR_BUILD == Release)
+if(SR_BUILD STREQUAL "Release")
     set(CMAKE_BUILD_TYPE RELEASE)
     set(SRLIB_NAME_SUFFIX "")
-elseif(SR_BUILD == Debug)
+elseif(SR_BUILD STREQUAL "Debug")
     set(CMAKE_BUILD_TYPE DEBUG)
     set(SRLIB_NAME_SUFFIX "-debug")
-elseif(SR_BUILD == Coverage)
+elseif(SR_BUILD STREQUAL "Coverage")
     set(CMAKE_BUILD_TYPE DEBUG)
     set(SRLIB_NAME_SUFFIX "-coverage")
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
@@ -45,10 +45,11 @@ else()
 endif()
 
 # Configure CMake linkage on the SR_LINK selection
-if(SR_LINK == Static)
-set(SMARTREDIS_LINK_MODE STATIC)
-set(SMARTREDIS_LINK_LIBRARY_SUFFIX .a)
-elseif(SR_LINK == Shared)
+if(SR_LINK STREQUAL "Static")
+    set(SMARTREDIS_LINK_MODE STATIC)
+    set(SMARTREDIS_LINK_LIBRARY_SUFFIX .a)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+elseif(SR_LINK STREQUAL "Shared")
     set(SMARTREDIS_LINK_MODE SHARED)
     set(SMARTREDIS_LINK_LIBRARY_SUFFIX .so)
 else()

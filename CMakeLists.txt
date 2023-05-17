@@ -29,9 +29,11 @@ if (POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
 endif (POLICY CMP0048)
 
+# Project definition for the SmartRedis project
 project(SmartRedis VERSION "0.4.0")
 cmake_minimum_required(VERSION 3.13)
 
+# Configure options for the SmartRedis project
 option(BUILD_PYTHON  "Build the python module" ON)
 option(SR_FORTRAN "Build the fortran client library" OFF)
 option(SR_PEDANTIC "Build with pickiest compiler settings" OFF)
@@ -40,14 +42,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+set(CMAKE_MODULE_PATH .)
+include(smartredis_defs)
 
-#include(smartredis_defs)
-set(CMAKE_BUILD_TYPE RELEASE)
-
+# If we want to use Fortran, we have to tell CMake to use it
 if (SR_FORTRAN)
     enable_language(Fortran)
 endif()
 
+# For now, we only support Pedantic on the main library build.
+# If/when we fine-tune the examples and test cases, move this block
+# to smartredis_defs.cmake
 if (SR_PEDANTIC)
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
         add_compile_options(-Wall -Werror)
@@ -56,22 +61,13 @@ if (SR_PEDANTIC)
     endif()
 endif()
 
-if (COVERAGE)
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-        add_compile_options(--coverage)
-        add_link_options(--coverage)
-    else()
-        message(WARNING "COVERAGE was specified, but the CMAKE compiler is not GCC")
-    endif()
-endif()
-
-# Bring in third-party libaries
+# Bring in third-party libaries needed for the SmartRedis library
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_package(Threads REQUIRED)
-
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
+# Define source code that goes into the SmartRedis library
 set(CLIENT_SRC
     src/c/c_client.cpp
     src/c/c_configoptions.cpp
@@ -80,39 +76,40 @@ set(CLIENT_SRC
     src/c/c_logcontext.cpp
     src/c/c_logger.cpp
     src/cpp/address.cpp
-    src/cpp/client.cpp
-    src/cpp/dataset.cpp
-    src/cpp/command.cpp
-    src/cpp/keyedcommand.cpp
-    src/cpp/nonkeyedcommand.cpp
-    src/cpp/multikeycommand.cpp
-    src/cpp/singlekeycommand.cpp
-    src/cpp/compoundcommand.cpp
-    src/cpp/addressatcommand.cpp
-    src/cpp/addressanycommand.cpp
     src/cpp/addressallcommand.cpp
+    src/cpp/addressanycommand.cpp
+    src/cpp/addressatcommand.cpp
+    src/cpp/client.cpp
     src/cpp/clusterinfocommand.cpp
-    src/cpp/dbinfocommand.cpp
-    src/cpp/gettensorcommand.cpp
+    src/cpp/command.cpp
     src/cpp/commandlist.cpp
+    src/cpp/commandreply.cpp
+    src/cpp/compoundcommand.cpp
+    src/cpp/configoptions.cpp
+    src/cpp/dataset.cpp
+    src/cpp/dbinfocommand.cpp
+    src/cpp/dbnode.cpp
+    src/cpp/gettensorcommand.cpp
+    src/cpp/keyedcommand.cpp
+    src/cpp/logger.cpp
     src/cpp/metadata.cpp
+    src/cpp/metadatafield.cpp
+    src/cpp/multikeycommand.cpp
+    src/cpp/nonkeyedcommand.cpp
+    src/cpp/pipelinereply.cpp
+    src/cpp/redis.cpp
+    src/cpp/rediscluster.cpp
+    src/cpp/redisserver.cpp
+    src/cpp/singlekeycommand.cpp
+    src/cpp/srobject.cpp
+    src/cpp/stringfield.cpp
     src/cpp/tensorbase.cpp
     src/cpp/tensorpack.cpp
-    src/cpp/dbnode.cpp
-    src/cpp/commandreply.cpp
-    src/cpp/redisserver.cpp
-    src/cpp/rediscluster.cpp
-    src/cpp/redis.cpp
-    src/cpp/metadatafield.cpp
-    src/cpp/stringfield.cpp
-    src/cpp/pipelinereply.cpp
     src/cpp/threadpool.cpp
     src/cpp/utility.cpp
-    src/cpp/logger.cpp
-    src/cpp/srobject.cpp
-    src/cpp/configoptions.cpp
 )
 
+# Define include directories for header files
 include_directories(SYSTEM
     include
     install/include
@@ -134,11 +131,13 @@ if (SR_FORTRAN)
     # Note the following has to be before ANY add_library command)
     set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
     # Fortran library
-    add_library(smartredis-fortran SHARED ${FORTRAN_SRC})
-    set_target_properties(smartredis-fortran PROPERTIES SUFFIX ".so")
-#	set_target_properties(smartredis-fortran PROPERTIES
-#		OUTPUT_NAME ${SMARTREDIS_FORTRAN_LIB}
-#	)
+    add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} ${FORTRAN_SRC})
+    set_target_properties(smartredis-fortran PROPERTIES
+        SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
+    )
+	set_target_properties(smartredis-fortran PROPERTIES
+		OUTPUT_NAME ${SMARTREDIS_FORTRAN_LIB}
+	)
     target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
     # Install dynamic library and headers
     install(TARGETS smartredis-fortran
@@ -146,14 +145,17 @@ if (SR_FORTRAN)
 endif()
 
 
-# Build dynamic library
-add_library(smartredis SHARED ${CLIENT_SRC})
-set_target_properties(smartredis PROPERTIES SUFFIX ".so")
-#	set_target_properties(smartredis-fortran PROPERTIES
-#		OUTPUT_NAME ${SMARTREDIS_LIB}
-#	)
+# Build the main SmartRedis library
+add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+set_target_properties(smartredis PROPERTIES
+    SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
+)
+set_target_properties(smartredis PROPERTIES
+    OUTPUT_NAME ${SMARTREDIS_LIB}
+)
 target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
+# Install SmartRedis header files
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         DESTINATION "include"
         FILES_MATCHING
@@ -164,11 +166,13 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
 install(TARGETS smartredis
      	LIBRARY DESTINATION lib)
 
+# Build the Python library for SmartRedis
 if(BUILD_PYTHON)
 	message("-- Python client build enabled")
 	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind
                      ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
 
+    # Note that this library is always static
     add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
