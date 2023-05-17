@@ -24,7 +24,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Select CMake build type based on SR_BUILD variable
+# Configure the CMake build based on the SR_BUILD selection
 if(SR_BUILD == Release)
     set(CMAKE_BUILD_TYPE RELEASE)
     set(SRLIB_NAME_SUFFIX "")
@@ -34,19 +34,27 @@ elseif(SR_BUILD == Debug)
 elseif(SR_BUILD == Coverage)
     set(CMAKE_BUILD_TYPE DEBUG)
     set(SRLIB_NAME_SUFFIX "-coverage")
-    set(COVERAGE ON)
+    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
+        add_compile_options(--coverage)
+        add_link_options(--coverage)
+    else()
+        message(WARNING "A coverage build was specified, but the CMAKE compiler is not GCC")
+    endif()
 else()
-    message(ERROR "Unrecognized build type specified in SR_BUILD")
+    message(FATAL_ERROR "Unrecognized build type (${SR_BUILD}) specified in SR_BUILD")
 endif()
 
-# Select CMake linkage based of SR_LINK variable
+# Configure CMake linkage on the SR_LINK selection
 if(SR_LINK == Static)
-    set(CMAKE_LINK_LIBRARY_SUFFIX .a)
+set(SMARTREDIS_LINK_MODE STATIC)
+set(SMARTREDIS_LINK_LIBRARY_SUFFIX .a)
 elseif(SR_LINK == Shared)
-    set(CMAKE_LINK_LIBRARY_SUFFIX .so)
+    set(SMARTREDIS_LINK_MODE SHARED)
+    set(SMARTREDIS_LINK_LIBRARY_SUFFIX .so)
 else()
-    message(ERROR "Unrecognized link type specified in SR_LINK")
+    message(FATAL_ERROR "Unrecognized link type (${SR_LINK}) specified in SR_LINK")
 endif()
 
-# Identify the SmartRedis library name based on the build and link
+# Identify the SmartRedis library names based on the build and link
 set(SMARTREDIS_LIB smartredis${SRLIB_NAME_SUFFIX})
+set(SMARTREDIS_FORTRAN_LIB smartredis-fortran${SRLIB_NAME_SUFFIX})

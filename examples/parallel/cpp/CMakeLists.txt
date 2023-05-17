@@ -41,12 +41,6 @@ include_directories(SYSTEM
     ../../../install/include
 )
 
-set(ftn_client_src
-    ../../../src/fortran/fortran_c_interop.F90
-    ../../../src/fortran/dataset.F90
-    ../../../src/fortran/client.F90
-)
-
 # Define all the tests to be built
 list(APPEND EXECUTABLES
 	smartredis_put_get_3D
@@ -56,7 +50,6 @@ list(APPEND EXECUTABLES
 foreach(EXECUTABLE ${EXECUTABLES})
     add_executable(${EXECUTABLE}_cpp_parallel
         ${EXECUTABLE}.cpp
-        ${ftn_client_src}
     )
     set_target_properties(${EXECUTABLE}_cpp_parallel PROPERTIES
         OUTPUT_NAME ${EXECUTABLE}

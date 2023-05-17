@@ -40,12 +40,8 @@ if(COVERAGE)
 endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_library(REDISPP redis++    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(SRLIB   smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SRLIB_FORTRAN   smartredis-fortran PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
 find_package(Threads REQUIRED)
-set(EXT_LIBRARIES ${REDISPP} ${HIREDIS} ${SRLIB} ${SRLIB_FORTRAN})
 
 include_directories(SYSTEM
     /usr/local/include
@@ -57,4 +53,4 @@ file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
 add_executable(cpp_unit_tests ${UNIT_TESTS})
 
-target_link_libraries(cpp_unit_tests PUBLIC ${EXT_LIBRARIES} PRIVATE Threads::Threads)
+target_link_libraries(cpp_unit_tests PUBLIC ${SRLIB} PRIVATE Threads::Threads)

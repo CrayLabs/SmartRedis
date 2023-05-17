@@ -30,12 +30,10 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 
 project(SmartRedis VERSION "0.4.0")
-
 cmake_minimum_required(VERSION 3.13)
 
 option(BUILD_PYTHON  "Build the python module" ON)
 option(SR_FORTRAN "Build the fortran client library" OFF)
-option(COVERAGE "Build the fortran client library" OFF)
 option(SR_PEDANTIC "Build with pickiest compiler settings" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -67,6 +65,7 @@ if (COVERAGE)
     endif()
 endif()
 
+# Bring in third-party libaries
 find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
 find_package(Threads REQUIRED)
@@ -117,6 +116,7 @@ set(CLIENT_SRC
 include_directories(SYSTEM
     include
     install/include
+    third-party/install/include
 )
 
 # Build the Fortran library
@@ -136,6 +136,9 @@ if (SR_FORTRAN)
     # Fortran library
     add_library(smartredis-fortran SHARED ${FORTRAN_SRC})
     set_target_properties(smartredis-fortran PROPERTIES SUFFIX ".so")
+#	set_target_properties(smartredis-fortran PROPERTIES
+#		OUTPUT_NAME ${SMARTREDIS_FORTRAN_LIB}
+#	)
     target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
     # Install dynamic library and headers
     install(TARGETS smartredis-fortran
@@ -146,6 +149,9 @@ endif()
 # Build dynamic library
 add_library(smartredis SHARED ${CLIENT_SRC})
 set_target_properties(smartredis PROPERTIES SUFFIX ".so")
+#	set_target_properties(smartredis-fortran PROPERTIES
+#		OUTPUT_NAME ${SMARTREDIS_LIB}
+#	)
 target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
