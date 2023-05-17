@@ -24,40 +24,55 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(FortranClientSerialExamples)
+# Project definition for the SmartRedis-Examples-Serial-Fortran project
+project(SmartRedis-Examples-Serial-Fortran)
 cmake_minimum_required(VERSION 3.13)
+
+# Enable language support for the examples
 enable_language(Fortran)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE Debug)
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
+SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
+include(smartredis_defs)
 
-# Assume by default that users should link against the install directory in this repository
+# Assume by default that users should link against the
+# install directory in this repository
 if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
   set(SMARTREDIS_INSTALL_PATH "../../../install/")
 endif()
 
-# Specify all pre-processor and library dependencies
-find_library(SMARTREDIS_LIBRARY smartredis PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SMARTREDIS_FORTRAN_LIBRARY smartredis-fortran PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH REQUIRED)
+# Locate dependencies
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+find_library(SR_FTN_LIB SMARTREDIS_FORTRAN_LIB
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
 set(SMARTREDIS_LIBRARIES
 	${SMARTREDIS_LIBRARY}
 	${SMARTREDIS_FORTRAN_LIBRARY}
 )
+
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
     ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-# Define all the tests to be built
+# Define all the examples to be built
 list(APPEND EXECUTABLES
      smartredis_dataset
      smartredis_put_get_3D
 )
 
+# Build the examples
 foreach(EXECUTABLE ${EXECUTABLES})
-
 	add_executable(${EXECUTABLE}_fortran_serial
 		${EXECUTABLE}.F90
 	)

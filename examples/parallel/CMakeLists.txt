@@ -24,11 +24,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(ParallelExamples)
+# Project definition for the SmartRedis-Examples-Parallel project
+project(SmartRedis-Examples-Parallel)
 cmake_minimum_required(VERSION 3.13)
 
+# Enable language support for the examples
 enable_language(CXX)
 enable_language(Fortran)
 
+# Bring in subdirectories
 add_subdirectory(cpp)
 add_subdirectory(fortran)

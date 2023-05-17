@@ -24,28 +24,45 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CClientSerialExamples)
+# Project definition for the SmartRedis-Examples-Serial-C project
+project(SmartRedis-Examples-Serial-C)
 cmake_minimum_required(VERSION 3.13)
+
+# Enable language support for the examples
 enable_language(C)
 
-set(CMAKE_BUILD_TYPE RELEASE)
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
+include(smartredis_defs)
 
-find_library(SR_LIB smartredis PATHS ../../../install/lib
-    NO_DEFAULT_PATH REQUIRED)
+# Assume by default that users should link against the
+# install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+endif()
 
-include_directories(SYSTEM
-    /usr/local/include
-    ../../../install/include
+# Locate dependencies
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
 )
 
-# Define all the tests to be built
+# Define include directories for header files
+include_directories(SYSTEM
+    /usr/local/include
+    ${SMARTREDIS_INSTALL_PATH}/include
+)
+
+# Define all the examples to be built
 list(APPEND EXECUTABLES
     example_put_unpack_1D
     example_put_get_3D
 )
 
+# Build the examples
 foreach(EXECUTABLE ${EXECUTABLES})
     add_executable(${EXECUTABLE}_c_serial
         ${EXECUTABLE}.c
