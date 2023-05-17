@@ -24,19 +24,21 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Project definition for the SmartRedis-Tests project
 project(SmartSim-Tests)
 cmake_minimum_required(VERSION 3.13)
 
+# Enable language support for the examples
 enable_language(C)
 enable_language(CXX)
 enable_language(Fortran)
 
-set(ALLOW_DUPLICATE_CUSTOM_TARGETS true)
-
+# Bring in subdirectories
 add_subdirectory(c)
 add_subdirectory(cpp)
 add_subdirectory(fortran)
 
-# The docker subdirectory is designed to be built within a container, not as part
-# of the normal test build. We therefore do not include it in a test build
+# NOTE: The docker subdirectory is designed to be built within a container,
+# not as part of the normal test build. We therefore do not include it in a
+# test build
 #add_subdirectory(docker)
