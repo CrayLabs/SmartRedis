@@ -78,6 +78,12 @@ class CMakeBuild(build_ext):
         if not build_directory.is_dir():
             os.makedirs(self.build_temp)
 
+        # make install dir
+        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
+        install_directory = setup_path.joinpath("install")
+        if not install_directory.is_dir():
+            os.makedirs(install_directory)
+
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
         setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()

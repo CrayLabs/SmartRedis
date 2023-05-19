@@ -12,6 +12,7 @@ SR_WLM_FLAGS :=
 SR_DEVICE := cpu
 SR_PEDANTIC := OFF
 SR_FORTRAN := OFF
+SR_PIPINSTALL := ON
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -54,15 +55,17 @@ deps:
 # help: pip-install                    - Register the SmartRedis library with pip
 .PHONY: pip-install
 pip-install:
+ifeq ($(SR_PIPINSTALL),ON)
 	@python -c "import smartredis" >& /dev/null || pip install -e.
+endif
 
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
 lib: pip-install
 lib: deps
-	cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
-	cmake --build build/$(SR_BUILD)
-	cmake --install build/$(SR_BUILD)
+	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
+	@cmake --build build/$(SR_BUILD)
+	@cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
@@ -94,55 +97,55 @@ test-deps-gpu: test-deps
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
 build-tests: test-lib-with-fortran
-	cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/tests
+	@cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests
 
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
 build-test-cpp: test-lib
-	cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/tests/cpp
+	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/cpp
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
 build-unit-test-cpp: test-lib
-	cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests
+	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c: test-lib
-	cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/tests/c
+	@cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/c
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
 build-test-fortran: test-lib-with-fortran
-	cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/tests/fortran
+	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/fortran
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
 build-examples: lib-with-fortran
-	cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/examples
+	@cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/examples
 
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
 build-example-serial: lib-with-fortran
-	cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/examples/serial
+	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/examples/serial
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
 build-example-parallel: lib-with-fortran
-	cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	cmake --build build/$(SR_BUILD)/examples/parellel
+	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/examples/parellel
 
 
 # help: clean-deps                     - remove third-party deps
@@ -238,7 +241,7 @@ test:
 test-verbose: test-deps
 test-verbose: build-tests
 test-verbose:
-	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
+	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
 
 # help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
@@ -246,7 +249,7 @@ test-verbose-with-coverage: SR_BUILD=Coverage
 test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage:
-	PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
+	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker -vv -s ./tests --build $(SR_BUILD)
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
@@ -273,6 +276,7 @@ unit-test-cpp:
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py: test-deps
+test-py: lib
 test-py:
 	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/ --build $(SR_BUILD)
 
@@ -301,23 +305,23 @@ test-examples:
 
 # Hiredis (hidden build target)
 .phony: hiredis
-hiredis: install/lib/libhiredis.a
-install/lib/libhiredis.a:
+hiredis: third-party/install/lib/libhiredis.a
+third-party/install/lib/libhiredis.a:
 	@rm -rf third-party/hiredis
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
-	rm -f ../../install/lib/libhiredis*.so && \
-	rm -f ../../install/lib/libhiredis*.dylib && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../install" static -j && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../install" install && \
+	rm -f ../install/lib/libhiredis*.so && \
+	rm -f ../install/lib/libhiredis*.dylib && \
 	echo "Finished installing Hiredis"
 
 # Redis-plus-plus (hidden build target)
 .phony: redis-plus-plus
-redis-plus-plus: install/lib/libredis++.a
-install/lib/libredis++.a:
+redis-plus-plus: third-party/install/lib/libredis++.a
+third-party/install/lib/libredis++.a:
 	@rm -rf third-party/redis-plus-plus
 	@mkdir -p third-party
 	@cd third-party && \
@@ -325,7 +329,7 @@ install/lib/libredis++.a:
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../install" -DCMAKE_CXX_STANDARD=17 .. && \
 	CC=gcc CXX=g++ make -j && \
 	CC=gcc CXX=g++ make install && \
 	echo "Finished installing Redis-plus-plus"

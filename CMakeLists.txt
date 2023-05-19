@@ -42,7 +42,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-set(CMAKE_MODULE_PATH .)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 include(smartredis_defs)
 
 # If we want to use Fortran, we have to tell CMake to use it
@@ -62,8 +62,14 @@ if (SR_PEDANTIC)
 endif()
 
 # Bring in third-party libaries needed for the SmartRedis library
-find_library(REDISPP redis++ PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH REQUIRED)
+find_library(REDISPP redis++
+    PATHS ${CMAKE_SOURCE_DIR}/third-party/install/lib NO_DEFAULT_PATH
+    REQUIRED
+)
+find_library(HIREDIS hiredis
+    PATHS ${CMAKE_SOURCE_DIR}/third-party/install/lib NO_DEFAULT_PATH
+    REQUIRED
+)
 find_package(Threads REQUIRED)
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
@@ -171,9 +177,6 @@ if(BUILD_PYTHON)
 	message("-- Python client build enabled")
 	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind
                      ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
-
-    # Note that this library is always static
-    add_library(smartredis_static STATIC ${CLIENT_SRC})
 
 	pybind11_add_module(smartredisPy
 	                    src/python/src/pyclient.cpp

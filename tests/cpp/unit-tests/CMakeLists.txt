@@ -56,9 +56,9 @@ find_package(Threads REQUIRED)
 # Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../../include
-	../../../install/include
-)
+    ${SMARTREDIS_INSTALL_PATH}/include
+    ${SMARTREDIS_INSTALL_PATH}/../third-party/install/include
+  )
 
 # Identify source files to be built into the CPP Catch2 unit tests
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)

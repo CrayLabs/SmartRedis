@@ -24,6 +24,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Set defaults if variables are undefined
+if(NOT DEFINED SR_BUILD)
+    set(SR_BUILD "Release")
+endif()
+if(NOT DEFINED SR_LINK)
+    set(SR_LINK "Shared")
+endif()
+
 # Configure the CMake build based on the SR_BUILD selection
 if(SR_BUILD STREQUAL "Release")
     set(CMAKE_BUILD_TYPE RELEASE)
