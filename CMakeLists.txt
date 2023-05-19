@@ -59,6 +59,9 @@ if (SR_PEDANTIC)
     else()
         message(WARNING "SR_PEDANTIC was specified, but the CMAKE compiler is not GCC")
     endif()
+    if((CMAKE_Fortran_COMPILER_ID STREQUAL "GNU") AND (SR_BUILD STREQUAL "Release"))
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-maybe-uninitialized")
+    endif()
 endif()
 
 # Bring in third-party libaries needed for the SmartRedis library
