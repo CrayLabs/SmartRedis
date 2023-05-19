@@ -65,4 +65,4 @@ file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
 # Build the CPP Catch2 unit tests
 add_executable(cpp_unit_tests ${UNIT_TESTS})
-target_link_libraries(cpp_unit_tests PUBLIC ${SRLIB} PRIVATE Threads::Threads)
+target_link_libraries(cpp_unit_tests PUBLIC ${SR_LIB} PRIVATE Threads::Threads)
