@@ -26,7 +26,7 @@
 
 module smartredis_dataset
 
-use iso_c_binding,   only : c_ptr, c_bool, c_null_ptr, c_char, c_int
+use iso_c_binding,   only : c_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
 use iso_c_binding,   only : c_loc, c_f_pointer
 

@@ -44,7 +44,7 @@ program main
 
   integer :: err_code
   integer :: result
-  logical(kind=c_bool) :: exists
+  logical :: exists
 
   result = client%initialize(use_cluster(), "client_test_misc_tensor")
   if (result .ne. SRNoError) error stop
