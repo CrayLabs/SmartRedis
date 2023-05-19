@@ -64,7 +64,7 @@ endif
 lib: pip-install
 lib: deps
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)
+	@cmake --build build/$(SR_BUILD) -- -j
 	@cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
@@ -95,6 +95,7 @@ test-deps-gpu: SR_DEVICE=gpu
 test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
+# NOTE: Fortran tests cannot be built in parallel
 .PHONY: build-tests
 build-tests: test-lib-with-fortran
 	@cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
@@ -105,22 +106,23 @@ build-tests: test-lib-with-fortran
 .PHONY: build-test-cpp
 build-test-cpp: test-lib
 	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp
+	@cmake --build build/$(SR_BUILD)/tests/cpp -- -j
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
 build-unit-test-cpp: test-lib
 	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests
+	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests -- -j
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c: test-lib
 	@cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/c
+	@cmake --build build/$(SR_BUILD)/tests/c -- -j
 
 
 # help: build-test-fortran             - build the Fortran tests
+# NOTE: Fortran tests cannot be built in parallel
 .PHONY: build-test-fortran
 build-test-fortran: test-lib-with-fortran
 	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
