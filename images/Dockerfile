@@ -49,7 +49,7 @@ COPY . /usr/local/src/SmartRedis
 
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
-RUN pip3 install --upgrade -i
+RUN pip3 install --upgrade
 RUN make clobber && make lib && pip install . && rm -rf ~/.cache/pip \
     && rm -rf build tests examples images utils third-party doc images
 
