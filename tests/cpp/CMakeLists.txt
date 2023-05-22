@@ -57,7 +57,6 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
 include_directories(SYSTEM
     /usr/local/include
     ${SMARTREDIS_INSTALL_PATH}/include
-#    ${SMARTREDIS_INSTALL_PATH}/../third-party/install/include
 )
 
 
