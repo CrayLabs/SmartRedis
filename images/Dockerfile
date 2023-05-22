@@ -57,4 +57,6 @@ RUN make clobber && make lib && pip install . && rm -rf ~/.cache/pip \
 # usr/local/include and delete unnecessary build files
 RUN cp -r /usr/local/src/SmartRedis/install/lib/* /usr/local/lib/ && \
     mkdir /usr/local/include/smartredis && \
-    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/
+    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/ && \
+    mkdir /usr/local/include/smartredis/third-party && \
+    cp -r /usr/local/src/SmartRedis/third-party/install/include/* /usr/local/include/smartredis/third-party/
