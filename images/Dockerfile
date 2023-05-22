@@ -51,7 +51,7 @@ COPY . /usr/local/src/SmartRedis
 WORKDIR /usr/local/src/SmartRedis
 RUN pip3 install --upgrade pip
 RUN make clobber && make lib && pip install . && rm -rf ~/.cache/pip \
-    && rm -rf build tests examples images utils third-party doc images
+    && rm -rf build tests examples images utils doc images
 
 # Copy install files and directories to /usr/local/lib and
 # usr/local/include and delete unnecessary build files
