@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project definition for the SmartRedis-Examples-Serial-C project
-project(SmartRedis-Examples-Serial-C)
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Examples-Serial-C)
 
 # Enable language support for the examples
 enable_language(C)

@@ -24,8 +24,8 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(SmartSim-Tests-Docker)
 cmake_minimum_required(VERSION 3.13)
+project(SmartSim-Tests-Docker)
 
 enable_language(C)
 enable_language(CXX)

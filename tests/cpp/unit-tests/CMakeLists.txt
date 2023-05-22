@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project definition for the SmartRedis-Tests-Cpp-UnitTests project
-project(SmartSim-Tests-Cpp-UnitTests)
 cmake_minimum_required(VERSION 3.13)
+project(SmartSim-Tests-Cpp-UnitTests)
 
 
 # Enable language support for the tests

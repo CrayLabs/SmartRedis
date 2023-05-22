@@ -26,8 +26,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-project(DockerTesterC)
 cmake_minimum_required(VERSION 3.13)
+project(DockerTesterC)
 enable_language(C)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)

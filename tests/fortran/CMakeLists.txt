@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project definition for the SmartRedis-Tests-Fortran project
-project(SmartRedis-Tests-Fortran)
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Tests-Fortran)
 
 # Enable language support for the tests
 enable_language(Fortran)

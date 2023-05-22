@@ -26,8 +26,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-project(DockerTesterFortran)
 cmake_minimum_required(VERSION 3.13)
+project(DockerTesterFortran)
 enable_language(Fortran)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)

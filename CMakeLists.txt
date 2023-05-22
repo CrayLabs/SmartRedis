@@ -30,8 +30,8 @@ if (POLICY CMP0048)
 endif (POLICY CMP0048)
 
 # Project definition for the SmartRedis project
-project(SmartRedis VERSION "0.4.0")
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis VERSION "0.4.0")
 
 # Configure options for the SmartRedis project
 option(BUILD_PYTHON  "Build the python module" ON)

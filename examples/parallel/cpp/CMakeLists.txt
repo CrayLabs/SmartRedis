@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project definition for the SmartRedis-Examples-Parallel-Cpp project
-project(SmartRedis-Examples-Parallel-Cpp)
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Examples-Parallel-Cpp)
 
 # Enable language support for the examples
 enable_language(CXX)

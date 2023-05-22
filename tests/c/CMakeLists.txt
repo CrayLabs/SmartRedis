@@ -25,8 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # Project definition for the SmartRedis-Tests-C project
-project(SmartSim-Tests-C)
 cmake_minimum_required(VERSION 3.13)
+project(SmartSim-Tests-C)
 
 # Enable language support for the tests
 enable_language(C)
