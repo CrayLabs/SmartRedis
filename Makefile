@@ -59,13 +59,21 @@ ifeq ($(SR_PIPINSTALL),ON)
 	@python -c "import smartredis" >& /dev/null || pip install -e.
 endif
 
-# help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
-.PHONY: lib
-lib: pip-install
-lib: deps
+# build-lib: hidden make target to build the library (needed so we can pip install AFTER building)
+.PHONY: build-lib
+build-lib: deps
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD) -- -j
 	@cmake --install build/$(SR_BUILD)
+
+# help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
+.PHONY: lib
+lib: build-lib
+lib: pip-install
+#lib: deps
+#	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
+#	@cmake --build build/$(SR_BUILD) -- -j
+#	@cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
