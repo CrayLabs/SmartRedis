@@ -66,12 +66,12 @@ endif()
 
 # Bring in third-party libaries needed for the SmartRedis library
 find_library(REDISPP redis++
-    PATHS ${CMAKE_SOURCE_DIR}/third-party/install/lib NO_DEFAULT_PATH
-    REQUIRED
+    PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH
+    REQUIRED STATIC
 )
 find_library(HIREDIS hiredis
-    PATHS ${CMAKE_SOURCE_DIR}/third-party/install/lib NO_DEFAULT_PATH
-    REQUIRED
+    PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH
+    REQUIRED STATIC
 )
 find_package(Threads REQUIRED)
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
@@ -122,7 +122,6 @@ set(CLIENT_SRC
 include_directories(SYSTEM
     include
     install/include
-    third-party/install/include
 )
 
 # Build the Fortran library

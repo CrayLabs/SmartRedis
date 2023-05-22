@@ -53,7 +53,7 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
 # Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
 # Define all the examples to be built

@@ -59,6 +59,8 @@ find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
 set(SMARTREDIS_LIBRARIES
 	${SR_LIB}
 	${SR_FTN_LIB}
+	${HIREDIS}
+	${REDISPP}
 )
 
 # Define include directories for header files

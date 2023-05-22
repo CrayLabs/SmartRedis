@@ -38,7 +38,6 @@ find_library(SR_LIB smartredis)
 
 include_directories(SYSTEM
     /usr/local/include/smartredis
-    /usr/local/include/smartredis/third-party
 )
 
 # Build executables

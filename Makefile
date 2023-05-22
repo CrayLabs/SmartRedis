@@ -307,23 +307,23 @@ test-examples:
 
 # Hiredis (hidden build target)
 .phony: hiredis
-hiredis: third-party/install/lib/libhiredis.a
-third-party/install/lib/libhiredis.a:
+hiredis: install/lib/libhiredis.a
+install/lib/libhiredis.a:
 	@rm -rf third-party/hiredis
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../install" static -j && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../install" install && \
-	rm -f ../install/lib/libhiredis*.so && \
-	rm -f ../install/lib/libhiredis*.dylib && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	rm -f ../../install/lib/libhiredis*.so && \
+	rm -f ../../install/lib/libhiredis*.dylib && \
 	echo "Finished installing Hiredis"
 
 # Redis-plus-plus (hidden build target)
 .phony: redis-plus-plus
-redis-plus-plus: third-party/install/lib/libredis++.a
-third-party/install/lib/libredis++.a:
+redis-plus-plus: install/lib/libredis++.a
+install/lib/libredis++.a:
 	@rm -rf third-party/redis-plus-plus
 	@mkdir -p third-party
 	@cd third-party && \
@@ -331,7 +331,7 @@ third-party/install/lib/libredis++.a:
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../install" -DCMAKE_CXX_STANDARD=17 .. && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
 	CC=gcc CXX=g++ make -j && \
 	CC=gcc CXX=g++ make install && \
 	echo "Finished installing Redis-plus-plus"
