@@ -91,7 +91,6 @@ list(APPEND EXECUTABLES
 foreach(EXECUTABLE ${EXECUTABLES})
 	add_executable(${EXECUTABLE}_fortran_test
 		${EXECUTABLE}.F90
-		test_utils.F90
 	)
     set_target_properties(${EXECUTABLE}_fortran_test PROPERTIES
         OUTPUT_NAME ${EXECUTABLE}
