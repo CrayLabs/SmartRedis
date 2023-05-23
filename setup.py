@@ -125,7 +125,7 @@ class CMakeBuild(build_ext):
 # TODO: Check versions for compatible versions
 def check_prereq(command):
     try:
-        _ = subprocess.check_output([command, '--version'])
+        out = subprocess.check_output([command, '--version'])
     except OSError:
         raise RuntimeError(
             f"{command} must be installed to build SmartRedis")
