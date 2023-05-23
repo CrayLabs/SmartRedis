@@ -44,9 +44,9 @@ Linked statically, the SmartRedis library will have a ``.a`` file extension.  Wh
 linked dynamically, the SmartRedis library will have a ``.so`` file extension.
 
 It is also possible to adjust compilation settings for the SmartRedis libary.
-By default, the library compiles in an optimized build (Release), but debug builds
-with full symbols (Debug) can be created as can debug builds with extensions enabled
-for code coverage metrics (Coverage; this build type is only available with GNU
+By default, the library compiles in an optimized build (``Release``), but debug builds
+with full symbols (``Debug``) can be created as can debug builds with extensions enabled
+for code coverage metrics (``Coverage``; this build type is only available with GNU
 compilers). Similar to configuring a link type, selecting the build mode can be done
 via a variable supplied to make:
 
@@ -74,8 +74,8 @@ the following command:
     cd SmartRedis
     make lib SR_LINK=Static SR_BUILD=Debug
 
-The SR_LINK and SR_BUILD variables are supported for all test and build targets in
-the Makefile.
+The SR_LINK and SR_BUILD variables are fully supported for all test and build targets
+in the Makefile.
 
 Linking instructions using compiler flags
 -----------------------------------------
