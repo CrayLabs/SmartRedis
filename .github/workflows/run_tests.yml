@@ -108,8 +108,8 @@ jobs:
           sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh &&
           printenv >> $GITHUB_ENV &&
-          echo "CC=icc" >> $GITHUB_ENV &&
-          echo "CXX=icpc" >> $GITHUB_ENV &&
+          echo "CC=icx" >> $GITHUB_ENV &&
+          echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
 
       # Install additional dependencies
