@@ -100,11 +100,10 @@ test-deps-gpu: SR_DEVICE=gpu
 test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
-# NOTE: Fortran tests cannot be built in parallel
 .PHONY: build-tests
 build-tests: test-lib-with-fortran
 	@cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests
+	@cmake --build build/$(SR_BUILD)/tests -- -j $(NPROC)
 
 
 # help: build-test-cpp                 - build the C++ tests
@@ -131,7 +130,7 @@ build-test-c: test-lib
 .PHONY: build-test-fortran
 build-test-fortran: test-lib-with-fortran
 	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/fortran
+	@cmake --build build/$(SR_BUILD)/tests/fortran -- -j $(NPROC)
 
 
 # help: build-examples                 - build all examples (serial, parallel)
