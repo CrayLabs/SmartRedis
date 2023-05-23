@@ -71,10 +71,6 @@ build-lib: deps
 .PHONY: lib
 lib: build-lib
 lib: pip-install
-#lib: deps
-#	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
-#	@cmake --build build/$(SR_BUILD) -- -j
-#	@cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
