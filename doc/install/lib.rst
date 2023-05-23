@@ -25,6 +25,58 @@ installed in ``SmartRedis/install/include/``.  The library installation can be
 used to easily include SmartRedis capabilities in C++, C, and Fortran
 applications.
 
+Customizing the library build
+-----------------------------
+
+By default, the SmartRedis library is built as a shared library. For some
+applications, however, it is preferable to link to a statically compiled
+library. This can be done easily with the command:
+
+.. code-block:: bash
+
+    cd SmartRedis
+    # Static build
+    make lib SR_LINK=Static
+    # Release build
+    make lib SR_LINK=Shared #or skip the SR_LINK variable as this is the default
+
+Linked statically, the SmartRedis library will have a ``.a`` file extension.  When
+linked dynamically, the SmartRedis library will have a ``.so`` file extension.
+
+It is also possible to adjust compilation settings for the SmartRedis libary.
+By default, the library compiles in an optimized build (Release), but debug builds
+with full symbols (Debug) can be created as can debug builds with extensions enabled
+for code coverage metrics (Coverage; this build type is only available with GNU
+compilers). Similar to configuring a link type, selecting the build mode can be done
+via a variable supplied to make:
+
+.. code-block:: bash
+
+    cd SmartRedis
+    # Release build
+    make lib SR_BUILD=Release #or skip the SR_BUILD variable as this is the default
+    # Debug build
+    make lib SR_BUILD=Debug
+    # Code coverage build
+    make lib SR_BUILD=Coverage
+
+The name of the library produced for a Debug mode build is ``smartredis-debug``.
+The name of the library produced for a Coverage mode build is ``smartredis-debug``.
+The name of the library  produced for a Release mode build is ``smartredis``.
+In each case, the file extension is dependent on the link type, ``.so`` or ``.a``.
+
+The build mode and link type settings are fully orthogonal; any combination of the
+two is supported. For example, a statically linked debug build may be achieved via
+the following command:
+
+.. code-block:: bash
+
+    cd SmartRedis
+    make lib SR_LINK=Static SR_BUILD=Debug
+
+The SR_LINK and SR_BUILD variables are supported for all test and build targets in
+the Makefile.
+
 Linking instructions using compiler flags
 -----------------------------------------
 
