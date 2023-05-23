@@ -88,24 +88,25 @@ class CMakeBuild(build_ext):
         make_cmd = shutil.which("make")
         setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
 
-        # build library and dependencies
-        subprocess.check_call([f"{make_cmd} lib"],
+        # build dependencies
+        subprocess.check_call([f"{make_cmd} deps"],
                               cwd=setup_path,
                               shell=True)
 
-#        # run cmake prep step
-#        print('-'*10, 'Running CMake prepare', '-'*40)
-#        subprocess.check_call([self.cmake, setup_path] + cmake_args,
-#                              cwd=build_directory,
-#                              env=env)
-#
-#
-#        print('-'*10, 'Building extensions', '-'*40)
-#        cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
-#        subprocess.check_call(cmake_cmd, cwd=build_directory)
-#
-#        shutil.copytree(setup_path.joinpath("install"),
-#        build_directory.joinpath("install"))
+        # run cmake prep step
+        print('-'*10, 'Running CMake prepare', '-'*40)
+        subprocess.check_call([self.cmake, setup_path] + cmake_args,
+                              cwd=build_directory,
+                              env=env)
+
+
+        print('-'*10, 'Building extensions', '-'*40)
+        cmake_cmd = [self.cmake, '--build', '.'] + self.build_args
+        subprocess.check_call(cmake_cmd,
+                              cwd=build_directory)
+
+        shutil.copytree(setup_path.joinpath("install"),
+                        build_directory.joinpath("install"))
 
         # Move from build temp to final position
         for ext in self.extensions:
