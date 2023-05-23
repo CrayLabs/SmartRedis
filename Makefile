@@ -1,6 +1,7 @@
 MAKEFLAGS += --no-print-directory
 COV_FLAGS :=
 SHELL:=/bin/bash
+NPROC:=$(shell python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
 # Build variables
 SR_BUILD := Release
@@ -63,7 +64,7 @@ endif
 .PHONY: build-lib
 build-lib: deps
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD) -- -j
+	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
 	@cmake --install build/$(SR_BUILD)
 
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
@@ -114,19 +115,19 @@ build-tests: test-lib-with-fortran
 .PHONY: build-test-cpp
 build-test-cpp: test-lib
 	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp -- -j
+	@cmake --build build/$(SR_BUILD)/tests/cpp -- -j $(NPROC)
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
 build-unit-test-cpp: test-lib
 	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests -- -j
+	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests -- -j $(NPROC)
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c: test-lib
 	@cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/c -- -j
+	@cmake --build build/$(SR_BUILD)/tests/c -- -j $(NPROC)
 
 
 # help: build-test-fortran             - build the Fortran tests
@@ -340,7 +341,7 @@ install/lib/libredis++.a:
 	mkdir -p compile && \
 	cd compile && \
 	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
-	CC=gcc CXX=g++ make -j && \
+	CC=gcc CXX=g++ make -j $(NPROC) && \
 	CC=gcc CXX=g++ make install && \
 	echo "Finished installing Redis-plus-plus"
 
@@ -362,7 +363,7 @@ third-party/redis/src/redis-server:
 	@cd third-party && \
 	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
 	@cd third-party/redis && \
-	CC=gcc CXX=g++ make MALLOC=libc -j && \
+	CC=gcc CXX=g++ make MALLOC=libc -j $(NPROC) && \
 	echo "Finished installing redis"
 
 # cudann-check (hidden test target)
@@ -398,7 +399,7 @@ third-party/RedisAI/install-cpu/redisai.so:
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI --branch $(REDISAI_VER) --depth=1
 	-@cd third-party/RedisAI && \
 	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh $(SR_DEVICE) && \
-	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -j -C opt clean build && \
+	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -j $(NPROC) -C opt clean build && \
 	echo "Finished installing RedisAI"
 
 # Catch2 (hidden test target)
