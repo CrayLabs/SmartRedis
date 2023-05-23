@@ -65,6 +65,9 @@ include_directories(SYSTEM
     ${SMARTREDIS_INSTALL_PATH}/include
 )
 
+# Stuff the test_utils into a library to enable parallel builds
+add_library(test-utils STATIC test_utils.F90)
+
 # Define all the tests to be built
 list(APPEND EXECUTABLES
 	 client_test_dataset_aggregation
@@ -88,12 +91,11 @@ list(APPEND EXECUTABLES
 foreach(EXECUTABLE ${EXECUTABLES})
 	add_executable(${EXECUTABLE}_fortran_test
 		${EXECUTABLE}.F90
-		test_utils.F90
 	)
     set_target_properties(${EXECUTABLE}_fortran_test PROPERTIES
         OUTPUT_NAME ${EXECUTABLE}
     )
 	target_link_libraries(${EXECUTABLE}_fortran_test
-		${SMARTREDIS_LIBRARIES}
+		${SMARTREDIS_LIBRARIES} test-utils
 	)
 endforeach()
