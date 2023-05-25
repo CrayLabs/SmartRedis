@@ -54,4 +54,4 @@ below summarizes the language standards for each client.
    * - C
      - C99
    * - Fortran
-     - Fortran 2018
+     - Fortran 2003
