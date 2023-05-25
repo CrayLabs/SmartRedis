@@ -63,11 +63,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        # rai_v: [1.2.4, 1.2.5] # versions of RedisAI
-        # py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
-        rai_v: [1.2.5]
-        py_v: ['3.9.x']
-        compiler: [nvhpc-23-5] # nvidia, intel compiler, and versions of GNU compiler
+        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
+        py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
+        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
     env:
       FC: gfortran-${{ matrix.compiler }}
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
@@ -83,7 +81,7 @@ jobs:
 
       # Install compilers (Intel or GCC)
       - name: Install GCC
-        if: "!contains( matrix.compiler, 'intel' ) && !contains( matrix.compiler, 'nvidia')" # if using GNU compiler
+        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: |
           sudo apt-get -y update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
@@ -113,25 +111,6 @@ jobs:
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
-
-      - name: Install nvidia compiler
-        if: "contains( matrix.compiler, 'nvhpc-23-5' )" # if using intel compiler
-        uses:
-        run: |
-          curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' | sudo tee /etc/apt/sources.list.d/nvhpc.list
-          sudo apt-get update -y
-          sudo apt-get install -y nvhpc-23-5-cuda-multi
-          echo "NVARCH=`uname -s`_`uname -m`" >> $GITHUB_ENV &&
-          echo "NVCOMPILERS=/opt/nvidia/hpc_sdk" >> $GITHUB_ENV &&
-          echo "MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/23.5/compilers/man" >> $GITHUB_ENV &&
-          echo "PATH=$NVCOMPILERS/$NVARCH/23.5/compilers/bin:$PATH" >> $GITHUB_ENV &&
-          echo "PATH=$NVCOMPILERS/$NVARCH/23.5/comm_libs/mpi/bin:$PATH" >> $GITHUB_ENV &&
-          echo "MANPATH=$MANPATH:$NVCOMPILERS/$NVARCH/23.5/comm_libs/mpi/man" >> $GITHUB_ENV &&
-          echo "CC=nvc" >> $GITHUB_ENV &&
-          echo "CXX=nvcc" >> $GITHUB_ENV &&
-          echo "FC=nvfortran" >> $GITHUB_ENV
-
 
       # Install additional dependencies
       - name: Install Cmake Linux
