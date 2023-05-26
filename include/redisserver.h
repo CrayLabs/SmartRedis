@@ -59,7 +59,7 @@
 
 namespace SmartRedis {
 
-class SRObject;
+class ConfigOptions;
 
 /*!
 *   \brief Abstract class that defines interface for
@@ -71,10 +71,10 @@ class RedisServer {
 
         /*!
         *   \brief Default constructor
-        *   \param context The owning context
+        *   \param cfgopts Our source for configuration options
         *   \throw SmartRedis::Exception if connection fails
         */
-        RedisServer(const SRObject* context);
+        RedisServer(ConfigOptions* cfgopts);
 
         /*!
         *   \brief Destructor
@@ -600,9 +600,14 @@ class RedisServer {
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
-        *   \brief The owning context
+        *   \brief Our logging context
         */
         const SRObject* _context;
+
+        /*!
+        *   \brief Our source for configuration options
+        */
+        ConfigOptions* _cfgopts;
 
         /*!
         *   \brief Seeding for the random number engine

@@ -56,6 +56,9 @@
 
 namespace SmartRedis {
 
+// class declarations
+class ConfigOptions;
+
 /*!
 *  \brief The database response to a command
 */
@@ -1511,6 +1514,11 @@ class Client : public SRObject
         *        for model and script keys.
         */
         bool _use_list_prefix;
+
+        /*!
+        * \brief Our configuration options, used to access runtime settings
+        */
+        ConfigOptions* _cfgopts;
 
         /*!
         * \brief Build full formatted key of a tensor, based on

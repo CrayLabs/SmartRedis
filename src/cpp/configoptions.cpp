@@ -39,7 +39,7 @@ ConfigOptions::ConfigOptions(
     cfgSrc source,
     const std::string& string)
     : _source(source), _string(string), _lazy(source == cs_envt),
-      _log_context("")
+      _log_context(NULL)
 {
     // Read in options if needed
     if (!_lazy) {

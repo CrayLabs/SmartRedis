@@ -55,18 +55,18 @@ class RedisCluster : public RedisServer
 
         /*!
         *   \brief RedisCluster constructor.
-        *   \param context The owning context
+        *   \param cfgopts Our source for configuration options
         */
-        RedisCluster(const SRObject* context);
+        RedisCluster(ConfigOptions* cfgopts);
 
         /*!
         *   \brief RedisCluster constructor. Uses address provided to
         *          constructor instead of environment variables.
-        *   \param context The owning context
+        *   \param cfgopts Our source for configuration options
         *   \param address_spec The TCP or UDS address of the server
         *   \throw SmartRedis::Exception if connection fails
         */
-        RedisCluster(const SRObject* context, std::string address_spec);
+        RedisCluster(ConfigOptions* cfgopts, std::string address_spec);
 
         /*!
         *   \brief RedisCluster copy constructor is not allowed

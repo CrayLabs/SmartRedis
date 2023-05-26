@@ -35,7 +35,7 @@
 
 namespace SmartRedis {
 
-class SRObject;
+class ConfigOptions;
 
 /*!
 *   \brief  The Redis class executes RedisServer
@@ -46,19 +46,19 @@ class Redis : public RedisServer
     public:
         /*!
         *   \brief Redis constructor.
-        *   \param context The owning context
+        *   \param cfgopts Our source for configuration options
         */
-        Redis(const SRObject* context);
+        Redis(ConfigOptions* cfgopts);
 
         /*!
         *   \brief Redis constructor.
         *          Uses address provided to constructor instead
         *          of environment variables.
-        *   \param context The owning context
+        *   \param cfgopts Our source for configuration options
         *   \param addr_spec The TCP or UDS server address
         *   \throw SmartRedis::Exception if connection fails
         */
-        Redis(const SRObject* context, std::string addr_spec);
+        Redis(ConfigOptions* cfgopts, std::string addr_spec);
 
         /*!
         *   \brief Redis copy constructor is not allowed

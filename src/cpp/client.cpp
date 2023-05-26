@@ -32,6 +32,7 @@
 #include "srexception.h"
 #include "logger.h"
 #include "utility.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
@@ -42,11 +43,17 @@ Client::Client(bool cluster, const std::string& logger_name)
     // Log that a new client has been instantiated
     log_data(LLDebug, "New client created");
 
+    // Create our ConfigOptions object (default = no suffixing)
+    std::string empty("");
+    auto cfgopts = ConfigOptions::create_from_environment(empty);
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
-    _redis_cluster = (cluster ? new RedisCluster(this) : NULL);
-    _redis = (cluster ? NULL : new Redis(this));
+    _redis_cluster = (cluster ? new RedisCluster(_cfgopts) : NULL);
+    _redis = (cluster ? NULL : new Redis(_cfgopts));
     if (cluster)
         _redis_server =  _redis_cluster;
     else
@@ -74,6 +81,8 @@ Client::~Client()
         _redis = NULL;
     }
     _redis_server = NULL;
+    delete _cfgopts;
+    _cfgopts = NULL;
 
     // Log Client destruction
     log_data(LLDebug, "Client destroyed");

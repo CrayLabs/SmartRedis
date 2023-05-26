@@ -31,23 +31,25 @@
 #include "srexception.h"
 #include "utility.h"
 #include "srobject.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
 // RedisServer constructor
-RedisServer::RedisServer(const SRObject* context)
-    : _context(context), _gen(_rd())
+RedisServer::RedisServer(ConfigOptions* cfgopts)
+    : _cfgopts(cfgopts), _context(cfgopts->_get_log_context()),
+      _gen(_rd())
 {
-    get_config_integer(_connection_timeout, _CONN_TIMEOUT_ENV_VAR,
-                         _DEFAULT_CONN_TIMEOUT);
-    get_config_integer(_connection_interval, _CONN_INTERVAL_ENV_VAR,
-                         _DEFAULT_CONN_INTERVAL);
-    get_config_integer(_command_timeout, _CMD_TIMEOUT_ENV_VAR,
-                         _DEFAULT_CMD_TIMEOUT);
-    get_config_integer(_command_interval, _CMD_INTERVAL_ENV_VAR,
-                         _DEFAULT_CMD_INTERVAL);
-    get_config_integer(_thread_count, _TP_THREAD_COUNT,
-                         _DEFAULT_THREAD_COUNT);
+    _connection_timeout = _cfgopts->_resolve_integer_option(
+        _CONN_TIMEOUT_ENV_VAR, _DEFAULT_CONN_TIMEOUT);
+    _connection_interval = _cfgopts->_resolve_integer_option(
+        _CONN_INTERVAL_ENV_VAR, _DEFAULT_CONN_INTERVAL);
+    _command_timeout = _cfgopts->_resolve_integer_option(
+        _CMD_TIMEOUT_ENV_VAR, _DEFAULT_CMD_TIMEOUT);
+    _command_interval = _cfgopts->_resolve_integer_option(
+        _CMD_INTERVAL_ENV_VAR, _DEFAULT_CMD_INTERVAL);
+    _thread_count = _cfgopts->_resolve_integer_option(
+        _TP_THREAD_COUNT, _DEFAULT_THREAD_COUNT);
 
     _check_runtime_variables();
 

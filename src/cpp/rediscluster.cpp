@@ -36,8 +36,8 @@
 using namespace SmartRedis;
 
 // RedisCluster constructor
-RedisCluster::RedisCluster(const SRObject* context)
-    : RedisServer(context)
+RedisCluster::RedisCluster(ConfigOptions* cfgopts)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(_get_ssdb());
     if (!db_address._is_tcp) {
@@ -56,8 +56,8 @@ RedisCluster::RedisCluster(const SRObject* context)
 
 // RedisCluster constructor. Uses address provided to constructor instead of
 // environment variables
-RedisCluster::RedisCluster(const SRObject* context, std::string address_spec)
-    : RedisServer(context)
+RedisCluster::RedisCluster(ConfigOptions* cfgopts, std::string address_spec)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(address_spec);
     _connect(db_address);

@@ -825,8 +825,11 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 
     GIVEN("A test RedisCluster test object")
     {
+        std::string empty("");
+        ConfigOptions* cfgopts = ConfigOptions::create_from_environment(empty).release();
         LogContext context("test_client");
-        RedisClusterTestObject redis_cluster(&context);
+        cfgopts->_set_log_context(&context);
+        RedisClusterTestObject redis_cluster(cfgopts);
 
         WHEN("A prefix is requested for a hash slot between 0 and 16384")
         {

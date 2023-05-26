@@ -34,14 +34,15 @@
 
 #include "rediscluster.h"
 #include "srobject.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
 class RedisClusterTestObject : public RedisCluster
 {
     public:
-        RedisClusterTestObject(const SRObject* context)
-         : RedisCluster(context) {};
+        RedisClusterTestObject(ConfigOptions* cfgopts)
+         : RedisCluster(cfgopts) {};
 
         std::string get_crc16_prefix(uint64_t hash_slot) {
             return _get_crc16_prefix(hash_slot);

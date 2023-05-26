@@ -34,8 +34,8 @@
 using namespace SmartRedis;
 
 // Redis constructor.
-Redis::Redis(const SRObject* context)
-    : RedisServer(context)
+Redis::Redis(ConfigOptions* cfgopts)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(_get_ssdb());
     // Remember whether it's a unix domain socket for later
@@ -45,8 +45,8 @@ Redis::Redis(const SRObject* context)
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
-Redis::Redis(const SRObject* context, std::string addr_spec)
-    : RedisServer(context)
+Redis::Redis(ConfigOptions* cfgopts, std::string addr_spec)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(addr_spec);
     _add_to_address_map(db_address);

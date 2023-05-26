@@ -33,6 +33,7 @@
 #include "logger.h"
 #include "logcontext.h"
 #include "srobject.h"
+#include "configoptions.h"
 
 unsigned long get_time_offset();
 
@@ -42,7 +43,7 @@ using namespace SmartRedis;
 class TestSSDB : public Redis
 {
     public:
-        TestSSDB(const SRObject* c) : Redis(c) {}
+        TestSSDB(ConfigOptions* c) : Redis(c) {}
 
         SRAddress get_ssdb()
         {
@@ -64,7 +65,10 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
     std::string context("test_ssdb");
     log_data(context, LLDebug, "***Beginning SSDB testing***");
+    std::string empty("");
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment(empty).release();
     LogContext lc("test_ssdb");
+    cfgopts->_set_log_context(&lc);
 
     GIVEN("A TestSSDB object")
     {
@@ -74,7 +78,7 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
              "port before running this test.");
         REQUIRE(old_ssdb != NULL);
 
-        TestSSDB test_ssdb(&lc);
+        TestSSDB test_ssdb(cfgopts);
         Client* c = NULL;
 
         THEN("SSDB environment variable must exist "
