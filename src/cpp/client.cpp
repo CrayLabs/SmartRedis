@@ -43,6 +43,14 @@ Client::Client(bool cluster, const std::string& logger_name)
     // Log that a new client has been instantiated
     log_data(LLDebug, "New client created");
 
+    // Log deprecation warning for this method
+    log_data(
+        LLInfo,
+        "Deprecation Notice: Client::Client(bool, std::string) constructor "
+        "should not be used. Please migrate your code to use the "
+        "Client::Client(ConfigOptions*) constructor and set the server type "
+        "in the SR_SERVER_TYPE environment variable.");
+
     // Create our ConfigOptions object (default = no suffixing)
     std::string empty("");
     auto cfgopts = ConfigOptions::create_from_environment(empty);
