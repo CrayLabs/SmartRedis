@@ -76,6 +76,15 @@ class Client : public SRObject
 
         /*!
         *   \brief Client constructor
+        *   \param cfgopts source from which to access runtime settings
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(ConfigOptions* cfgopts, const std::string& logger_name = "default");
+
+        /*!
+        *   \brief Client constructor (deprecated)
         *   \param cluster Flag for if a database cluster is being used
         *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
@@ -1690,6 +1699,12 @@ class Client : public SRObject
         bool _poll_list_length(const std::string& name, int list_length,
                                int poll_frequency_ms, int num_tries,
                                std::function<bool(int,int)> comp_func);
+
+        /*!
+        *   \brief Initialize a connection to the back-end database
+        *   \throw SmartRedis::Exception if the connection fails
+        */
+       void _establish_server_connection();
 
 };
 

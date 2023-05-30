@@ -37,6 +37,49 @@
 using namespace SmartRedis;
 
 // Constructor
+Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
+    : SRObject(logger_name), _cfgopts(cfgopts->clone())
+{
+    // Log that a new client has been instantiated
+    _cfgopts->_set_log_context(this);
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+
+    // Initialize key prefixing
+    _set_prefixes_from_env();
+    _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
+    _use_model_prefix = false;
+    _use_list_prefix = true;
+}
+
+// Initialize a connection to the back-end database
+void Client::_establish_server_connection()
+{
+    // See what type of connection the user wants
+    std::string str_servertype("SR_SERVER_TYPE");
+    std::string str_servertype_default("Clustered");
+    std::string servertype = _cfgopts->_resolve_string_option(
+        str_servertype, str_servertype_default);
+
+    // Set up Redis server connection
+    // A std::bad_alloc exception on the initializer will be caught
+    // by the call to new for the client
+    if (servertype == "Clustered") {
+        _redis_cluster = new RedisCluster(_cfgopts);
+        _redis = NULL;
+        _redis_server =  _redis_cluster;
+    }
+    else { // Standalone or Colocated
+        _redis_cluster = NULL;
+        _redis = new Redis(_cfgopts);
+        _redis_server =  _redis;
+    }
+}
+
+// Constructor (deprecated)
 Client::Client(bool cluster, const std::string& logger_name)
     : SRObject(logger_name)
 {

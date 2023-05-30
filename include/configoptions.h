@@ -98,6 +98,13 @@ class ConfigOptions
         */
         virtual ~ConfigOptions() = default;
 
+        /*!
+        *   \brief Deep copy a ConfigOptions object
+        *   \returns The cloned object
+        *   \throw std::bad_alloc on allocation failure
+        */
+       ConfigOptions* clone();
+
         /////////////////////////////////////////////////////////////
         // Factory construction methods
 

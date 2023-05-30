@@ -47,6 +47,16 @@ ConfigOptions::ConfigOptions(
     }
 }
 
+// Deep copy a ConfigOptions object
+ConfigOptions* ConfigOptions::clone()
+{
+    ConfigOptions* result = new ConfigOptions(_source, _string);
+    result->_log_context = _log_context;
+    result->_int_options = _int_options;
+    result->_string_options = _string_options;
+    return result;
+}
+
 // Instantiate ConfigOptions, getting selections from environment variables
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
     const std::string& db_prefix)
