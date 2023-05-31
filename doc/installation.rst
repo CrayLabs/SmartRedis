@@ -31,7 +31,7 @@ SmartRedis is tested with the following compilers on a daily basis:
 
     * - Compilers (tested daily)
     * - GNU (GCC/GFortran)
-    * - Intel LLVM (icx/icpx/ifort)
+    * - Intel oneAPI (icx/icpx/ifort)
     * - Apple Clang
 
 SmartRedis has been tested with the following compiler in the past, but on a less regular basis as the compilers listed above:

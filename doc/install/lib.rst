@@ -65,9 +65,16 @@ The name of the library produced for a Coverage mode build is ``smartredis-debug
 The name of the library  produced for a Release mode build is ``smartredis``.
 In each case, the file extension is dependent on the link type, ``.so`` or ``.a``.
 
-The build mode and link type settings are fully orthogonal; any combination of the
-two is supported. For example, a statically linked debug build may be achieved via
-the following command:
+Finally, it is possible to build SmartRedis without including Python support:
+
+.. code-block:: bash
+
+    cd SmartRedis
+    make lib SR_PYTHON=OFF
+
+The build mode, link type, and Python support settings are fully orthogonal; any
+combination of them is supported. For example, a statically linked debug build
+may be achieved via the following command:
 
 .. code-block:: bash
 
@@ -76,6 +83,13 @@ the following command:
 
 The SR_LINK and SR_BUILD variables are fully supported for all test and build targets
 in the Makefile.
+
+Additional make variables may be seen in the ``help`` make target:
+
+.. code-block:: bash
+
+    cd SmartRedis
+    make help
 
 Linking instructions using compiler flags
 -----------------------------------------

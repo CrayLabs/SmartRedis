@@ -1,19 +1,48 @@
+# BSD 2-Clause License
+#
+# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# General settings
 MAKEFLAGS += --no-print-directory
-COV_FLAGS :=
 SHELL:=/bin/bash
-NPROC:=$(shell python -c "import multiprocessing as mp; print(mp.cpu_count())")
 
 # Build variables
+NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
 SR_BUILD := Release
 SR_LINK := Shared
-SR_TEST_REDIS_MODE := Clustered
-SR_TEST_RAI_VER := 1.2.7
-SR_WLM := Local
-SR_WLM_FLAGS :=
-SR_DEVICE := cpu
 SR_PEDANTIC := OFF
 SR_FORTRAN := OFF
-SR_PIPINSTALL := ON
+SR_PYTHON := ON
+
+# Test variables
+COV_FLAGS :=
+SR_TEST_REDIS_MODE := Clustered
+SR_TEST_RAI_VER := 1.2.7
+SR_TEST_WLM := Local
+SR_TEST_WLM_FLAGS :=
+SR_TEST_DEVICE := cpu
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -43,8 +72,44 @@ help:
 	@grep "^# help\:" Makefile | grep -v grep | sed 's/\# help\: //' | sed 's/\# help\://'
 
 # help:
-# help: Build
-# help: -------
+# help: Build variables
+# help: ---------------
+# help:
+# help: These variables affect the way that the SmartRedis library is built. Each
+# help: has several options; the first listed is the default. Use by appending
+# help: the variable name and setting after the make target, e.g.
+# help:    make lib SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# help:
+# help: SR_BUILD {Release, Debug, Coverage} -- optimization level for the build
+# help: SR_LINK {Shared, Static} -- linkage for the SmartRedis library
+# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings
+# help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
+# help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
+
+# (NOTE: Test variables are not yet implemented. The following interface
+# is planned for an upcoming version of the SmartRedis test system.)
+# halp:
+# halp: Test variables
+# halp: --------------
+# halp:
+# halp: These variables affect the way that the SmartRedis library is tested. Each
+# halp: has several options; the first listed is the default. Use by appending
+# halp: the variable name and setting after the make target, e.g.
+# halp:    make test SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# halp:
+# halp: SR_TEST_REDIS_MODE {Clustered, Standalone, Colocated} -- type of Redis backend launched for tests
+# halp: SR_TEST_RAI_VER {1.2.7, 1.2.5} -- version of RedisAI to use for tests
+# halp: SR_TEST_WLM {Local, Slurm, PBS} -- workload manager to use for launching tests
+# halp: SR_TEST_WLM_ALLOC_COMMAND {default is none} -- command to use to request an allocation
+# halp: SR_TEST_WLM_ALLOC_FLAGS {default is none} -- flags to use when requesting an allocation from the WLM
+# halp: SR_TEST_WLM_LAUNCH_COMMAND {default is none} -- command to use to launch a test process
+# halp: SR_TEST_WLM_LAUNCH_FLAGS {default is none} -- flags to use when launching a test process
+# halp: SR_TEST_DEVICE {cpu, gpu} -- device type to test on
+
+
+# help:
+# help: Build targets
+# help: -------------
 
 # help: deps                           - Make SmartRedis dependencies
 .PHONY: deps
@@ -53,24 +118,13 @@ deps: redis-plus-plus
 deps: pybind
 deps:
 
-# help: pip-install                    - Register the SmartRedis library with pip
-.PHONY: pip-install
-pip-install:
-ifeq ($(SR_PIPINSTALL),ON)
-	@python -c "import smartredis" >& /dev/null || pip install -e.
-endif
-
-# build-lib: hidden make target to build the library (needed so we can pip install AFTER building)
-.PHONY: build-lib
-build-lib: deps
-	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
-	@cmake --install build/$(SR_BUILD)
-
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
-lib: build-lib
-lib: pip-install
+lib: deps
+lib:
+	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
+	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
+	@cmake --install build/$(SR_BUILD)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
@@ -96,7 +150,7 @@ test-deps: lcov
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
 .PHONY: test-deps-gpu
-test-deps-gpu: SR_DEVICE=gpu
+test-deps-gpu: SR_TEST_DEVICE=gpu
 test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
@@ -126,7 +180,6 @@ build-test-c: test-lib
 
 
 # help: build-test-fortran             - build the Fortran tests
-# NOTE: Fortran tests cannot be built in parallel
 .PHONY: build-test-fortran
 build-test-fortran: test-lib-with-fortran
 	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
@@ -172,8 +225,8 @@ clobber: clean clean-deps
 
 
 # help:
-# help: Style
-# help: -------
+# help: Style targets
+# help: -------------
 
 # help: style                          - Sort imports and format with black
 .PHONY: style
@@ -216,8 +269,8 @@ check-lint:
 
 
 # help:
-# help: Documentation
-# help: -------
+# help: Documentation targets
+# help: ---------------------
 
 # help: docs                           - generate project documentation
 .PHONY: docs
@@ -231,8 +284,8 @@ cov:
 	@echo if data was present, coverage report is in htmlcov/index.html
 
 # help:
-# help: Test
-# help: -------
+# help: Test targets
+# help: ------------
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
@@ -318,7 +371,7 @@ install/lib/libhiredis.a:
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j && \
+	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
 	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
 	rm -f ../../install/lib/libhiredis*.so && \
 	rm -f ../../install/lib/libhiredis*.dylib && \
@@ -365,7 +418,7 @@ third-party/redis/src/redis-server:
 # checks cuda dependencies for GPU build
 .phony: cudann-check
 cudann-check:
-ifeq ($(SR_DEVICE),gpu)
+ifeq ($(SR_TEST_DEVICE),gpu)
 ifndef CUDA_HOME
 	$(error ERROR: CUDA_HOME is not set)
 endif
@@ -388,12 +441,12 @@ endif
 redisAI: cudann-check
 redisAI: third-party/RedisAI/install-cpu/redisai.so
 third-party/RedisAI/install-cpu/redisai.so:
-	$(eval DEVICE_IS_GPU := $(shell test $(SR_DEVICE) == "cpu"; echo $$?))
+	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
 	@mkdir -p third-party
 	@cd third-party && \
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI --branch $(REDISAI_VER) --depth=1
 	-@cd third-party/RedisAI && \
-	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh $(SR_DEVICE) && \
+	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh $(SR_TEST_DEVICE) && \
 	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 WITH_UNIT_TESTS=0 make -j $(NPROC) -C opt clean build && \
 	echo "Finished installing RedisAI"
 

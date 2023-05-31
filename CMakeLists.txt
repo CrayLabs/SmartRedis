@@ -34,7 +34,7 @@ cmake_minimum_required(VERSION 3.13)
 project(SmartRedis VERSION "0.4.0")
 
 # Configure options for the SmartRedis project
-option(BUILD_PYTHON  "Build the python module" ON)
+option(SR_PYTHON  "Build the python module" OFF)
 option(SR_FORTRAN "Build the fortran client library" OFF)
 option(SR_PEDANTIC "Build with pickiest compiler settings" OFF)
 
@@ -175,7 +175,7 @@ install(TARGETS smartredis
      	LIBRARY DESTINATION lib)
 
 # Build the Python library for SmartRedis
-if(BUILD_PYTHON)
+if(SR_PYTHON)
 	message("-- Python client build enabled")
 	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind
                      ${CMAKE_SOURCE_DIR}/third-party/pybind/build)

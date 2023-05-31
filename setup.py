@@ -86,7 +86,6 @@ class CMakeBuild(build_ext):
 
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
-        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
 
         # build dependencies
         subprocess.check_call([f"{make_cmd} deps"],
