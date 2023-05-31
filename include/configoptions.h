@@ -110,17 +110,31 @@ class ConfigOptions
 
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
-        *          environment variables. If \p db_prefix is non-empty,
-        *          then "{db_prefix}_" will be prepended to the name of
+        *          environment variables. If \p db_suffix is non-empty,
+        *          then "{db_suffix}_" will be prepended to the name of
         *          each environment variable that is read.
-        *   \param db_prefix The prefix to use with environment variables,
-        *                    or an empty string to disable prefixing
+        *   \param db_suffix The suffix to use with environment variables,
+        *                    or an empty string to disable suffixing
         *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if db_prefix contains invalid
+        *   \throw SmartRedis::Exception if db_suffix contains invalid
         *          characters
         */
         static std::unique_ptr<ConfigOptions> create_from_environment(
-            const std::string& db_prefix);
+            const std::string& db_suffix);
+
+        /*!
+        *   \brief Instantiate ConfigOptions, getting selections from
+        *          environment variables. If \p db_suffix is non-empty,
+        *          then "{db_suffix}_" will be prepended to the name of
+        *          each environment variable that is read.
+        *   \param db_suffix The suffix to use with environment variables,
+        *                    or an empty string to disable suffixing
+        *   \returns The constructed ConfigOptions object
+        *   \throw SmartRedis::Exception if db_suffix contains invalid
+        *          characters
+        */
+        static std::unique_ptr<ConfigOptions> create_from_environment(
+            const char* db_suffix);
 
         /////////////////////////////////////////////////////////////
         // Option access
@@ -237,11 +251,11 @@ class ConfigOptions
         void _populate_options();
 
         /*!
-        *   \brief Apply a prefix to an option name if the source is environment
-        *          variables and the prefix is nonempty
-        *   \param option_name The name of the option to prefix
+        *   \brief Apply a suffix to an option name if the source is environment
+        *          variables and the suffix is nonempty
+        *   \param option_name The name of the option to suffix
         */
-        std::string _prefixed(const std::string& option_name);
+        std::string _suffixed(const std::string& option_name);
 
         /*!
         *  \brief Integer option map

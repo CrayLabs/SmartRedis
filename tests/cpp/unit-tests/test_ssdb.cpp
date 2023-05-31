@@ -65,8 +65,7 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
     std::cout << std::to_string(get_time_offset()) << ": Additional Testing for various SSDBs" << std::endl;
     std::string context("test_ssdb");
     log_data(context, LLDebug, "***Beginning SSDB testing***");
-    std::string empty("");
-    ConfigOptions* cfgopts = ConfigOptions::create_from_environment(empty).release();
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
     LogContext lc("test_ssdb");
     cfgopts->_set_log_context(&lc);
 

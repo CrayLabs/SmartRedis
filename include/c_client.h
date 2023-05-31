@@ -43,7 +43,51 @@ extern "C" {
 #endif
 
 /*!
+*   \brief C-client simple constructor that uses default environment variables
+*          to locate configuration settings
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError CreateSimpleClient(
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
+*   \brief C-client constructor that uses a ConfigOptions object
+*          to locate configuration settings
+*   \param config_options The ConfigOptions object to use
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError CreateClient(
+    void* config_options,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
 *   \brief C-client constructor
+*   \param cluster Flag to indicate if a database cluster is being used
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError SmartRedisCClient(
+    bool cluster,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void **new_client);
+
+
+
+/*!
+*   \brief C-client constructor (deprecated)
 *   \param cluster Flag to indicate if a database cluster is being used
 *   \param logger_name Identifier for the current client
 *   \param logger_name_length Length in characters of the logger_name string

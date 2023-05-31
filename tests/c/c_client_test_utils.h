@@ -53,9 +53,9 @@ void to_lower(char* s, int maxchars) {
 
 bool use_cluster()
 {
-    /* This function determines if a cluster
-    configuration should be used in the test
-    when creating a Client.
+    /* This function determines if a cluster configuration should be used in
+    the test when creating a Client.
+    (deprecated)
     */
     char* smartredis_test_cluster = getenv("SMARTREDIS_TEST_CLUSTER");
     to_lower(smartredis_test_cluster, 256);

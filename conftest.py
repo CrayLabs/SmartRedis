@@ -55,7 +55,11 @@ metadata_scalar_dtypes = [
 
 @pytest.fixture
 def use_cluster():
-    return os.getenv('SMARTREDIS_TEST_CLUSTER', "").lower() == 'true'
+    if os.getenv('SR_SERVER_TYPE', "") == "":
+        if os.getenv('SMARTREDIS_TEST_CLUSTER', "").lower() == 'true':
+            os.environ['SR_SERVER_TYPE'] = "Clustered"
+        else:
+            os.setenv('SR_SERVER_TYPE', "Standalone")
 
 @pytest.fixture
 def mock_data():

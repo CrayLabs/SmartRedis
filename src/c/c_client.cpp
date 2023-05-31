@@ -67,8 +67,55 @@ auto c_client_api(T&& client_api_func, const char* name)
 #define MAKE_CLIENT_API(stuff)\
     c_client_api([&] { stuff }, __func__)()
 
+// Create a simple Client
+SRError CreateSimpleClient(
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client)
+{
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
-// Return a pointer to a new Client
+    std::string _logger_name(logger_name, logger_name_length);
+    try {
+      *new_client = NULL;
+      Client* s = new Client(_logger_name);
+      *new_client = reinterpret_cast<void*>(s);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("client allocation");
+    }
+  });
+}
+
+// Create a Client that uses a ConfigOptions object
+SRError CreateClient(
+    void* config_options,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client)
+{
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(
+      config_options != NULL && new_client != NULL && logger_name != NULL);
+
+    ConfigOptions* cfgopts = reinterpret_cast<ConfigOptions*>(config_options);
+
+    std::string _logger_name(logger_name, logger_name_length);
+    try {
+      *new_client = NULL;
+      Client* s = new Client(cfgopts, _logger_name);
+      *new_client = reinterpret_cast<void*>(s);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("client allocation");
+    }
+  });
+}
+
+// Return a pointer to a new Client (deprecated)
 extern "C" SRError SmartRedisCClient(
   bool cluster,
   const char* logger_name,

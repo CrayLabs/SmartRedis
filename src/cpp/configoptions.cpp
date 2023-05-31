@@ -59,12 +59,20 @@ ConfigOptions* ConfigOptions::clone()
 
 // Instantiate ConfigOptions, getting selections from environment variables
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
-    const std::string& db_prefix)
+    const std::string& db_suffix)
 {
     // NOTE: We can't use std::make_unique<> here because our constructor
     // is private
     return std::unique_ptr<ConfigOptions>(
-        new ConfigOptions(cs_envt, db_prefix));
+        new ConfigOptions(cs_envt, db_suffix));
+}
+
+// Instantiate ConfigOptions, getting selections from environment variables
+std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
+    const char* db_suffix)
+{
+    std::string str_suffix(db_suffix != NULL ? db_suffix : "");
+    return create_from_environment(str_suffix);
 }
 
 // Retrieve the value of a numeric configuration option
@@ -81,7 +89,7 @@ int64_t ConfigOptions::get_integer_option(const std::string& option_name)
     if (_lazy) {
         int temp = 0;
         get_config_integer(
-            temp, _prefixed(option_name), default_value, throw_on_absent);
+            temp, _suffixed(option_name), default_value, throw_on_absent);
         result = (int64_t)temp;
     }
 
@@ -103,7 +111,7 @@ std::string ConfigOptions::get_string_option(const std::string& option_name)
     std::string result(default_value);
     if (_lazy) {
         get_config_string(
-            result, _prefixed(option_name), default_value, throw_on_absent);
+            result, _suffixed(option_name), default_value, throw_on_absent);
     }
 
     // Store the final value before we exit
@@ -124,7 +132,7 @@ int64_t ConfigOptions::_resolve_integer_option(
     int64_t result = default_value;
     if (_lazy) {
         int temp = 0;
-        get_config_integer(temp, _prefixed(option_name), default_value);
+        get_config_integer(temp, _suffixed(option_name), default_value);
         result = (int64_t)temp;
     }
 
@@ -145,7 +153,7 @@ std::string ConfigOptions::_resolve_string_option(
     // If we're doing lazy evaluation of option names, fetch the value
     std::string result(default_value);
     if (_lazy) {
-        get_config_string(result, _prefixed(option_name), default_value);
+        get_config_string(result, _suffixed(option_name), default_value);
     }
 
     // Store the final value before we exit
@@ -165,8 +173,8 @@ bool ConfigOptions::is_configured(const std::string& option_name)
     // Check to see if the value is available and we just haven't
     // seen it yet
     if (_lazy) {
-        std::string prefixed = _prefixed(option_name);
-        char* environment_string = std::getenv(prefixed.c_str());
+        std::string suffixed = _suffixed(option_name);
+        char* environment_string = std::getenv(suffixed.c_str());
         return NULL != environment_string;
     }
 
@@ -197,9 +205,9 @@ void ConfigOptions::_populate_options()
     );
 }
 
-// Apply a prefix to a option_name if the source is environment
-// variables and the prefix is nonempty
-std::string ConfigOptions::_prefixed(const std::string& option_name)
+// Apply a suffix to a option_name if the source is environment
+// variables and the suffix is nonempty
+std::string ConfigOptions::_suffixed(const std::string& option_name)
 {
     // Sanity check
     if ("" == option_name) {

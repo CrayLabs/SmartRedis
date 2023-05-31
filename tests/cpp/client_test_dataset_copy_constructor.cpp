@@ -52,7 +52,7 @@ void copy_constructor(
     fill_array(t_send_3, dims[0], dims[1], dims[2]);
 
     //Create Client and DataSet
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_dataset_copy_constructor");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_dataset_copy_constructor");
     SmartRedis::DataSet* dataset = new SmartRedis::DataSet(dataset_name);
 
     //Add tensors to the DataSet

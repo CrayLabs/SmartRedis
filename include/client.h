@@ -75,6 +75,15 @@ class Client : public SRObject
     public:
 
         /*!
+        *   \brief Client constructor with default configuration: environment
+        *          variables, no suffix
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(const std::string& logger_name = "default");
+
+        /*!
         *   \brief Client constructor
         *   \param cfgopts source from which to access runtime settings
         *   \param logger_name Name to use for this client when logging

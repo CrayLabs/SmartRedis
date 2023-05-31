@@ -36,7 +36,30 @@
 
 using namespace SmartRedis;
 
-// Constructor
+// Simple Constructor
+Client::Client(const std::string& logger_name)
+    : SRObject(logger_name)
+{
+    // Create our ConfigOptions object (default = no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+
+    // Initialize key prefixing
+    _set_prefixes_from_env();
+    _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
+    _use_model_prefix = false;
+    _use_list_prefix = true;
+}
+
+// Constructor with config options
 Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
     : SRObject(logger_name), _cfgopts(cfgopts->clone())
 {
@@ -95,8 +118,7 @@ Client::Client(bool cluster, const std::string& logger_name)
         "in the SR_SERVER_TYPE environment variable.");
 
     // Create our ConfigOptions object (default = no suffixing)
-    std::string empty("");
-    auto cfgopts = ConfigOptions::create_from_environment(empty);
+    auto cfgopts = ConfigOptions::create_from_environment("");
     _cfgopts = cfgopts.release();
     _cfgopts->_set_log_context(this);
 

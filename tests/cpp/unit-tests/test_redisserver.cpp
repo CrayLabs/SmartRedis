@@ -97,8 +97,7 @@ const char* CMD_INTERVAL_ENV_VAR = "SR_CMD_INTERVAL";
 // error to be thrown
 void invoke_constructor()
 {
-    std::string empty("");
-    ConfigOptions* cfgopts = ConfigOptions::create_from_environment(empty).release();
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
     LogContext context("test_redisserver");
     cfgopts->_set_log_context(&context);
     if (use_cluster()) {
@@ -180,8 +179,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     std::string context("test_redisserver");
     log_data(context, LLDebug, "***Beginning RedisServer testing***");
     LogContext lc("test_redisserver");
-    std::string empty("");
-    ConfigOptions* cfgopts = ConfigOptions::create_from_environment(empty).release();
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
     cfgopts->_set_log_context(&lc);
 
     char* __conn_timeout;
