@@ -31,9 +31,13 @@ project(SmartRedis-Examples-Serial)
 # Enable language support for the examples
 enable_language(C)
 enable_language(CXX)
-enable_language(Fortran)
+if (SR_FORTRAN)
+    enable_language(Fortran)
+endif()
 
 # Bring in subdirectories
 add_subdirectory(c)
 add_subdirectory(cpp)
-add_subdirectory(fortran)
+if (SR_FORTRAN)
+    add_subdirectory(fortran)
+endif()
