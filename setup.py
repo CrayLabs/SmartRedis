@@ -58,7 +58,8 @@ class CMakeBuild(build_ext):
         build_directory = Path(self.build_temp).resolve()
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
-            '-DPYTHON_EXECUTABLE=' + sys.executable
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DSR_PYTHON=ON'
         ]
 
         cfg = 'Debug' if self.debug else 'Release'
