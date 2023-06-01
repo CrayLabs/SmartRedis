@@ -203,7 +203,7 @@ build-examples: lib
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
-build-example-serial: lib-with-fortran
+build-example-serial: lib
 	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/examples/serial
@@ -211,7 +211,7 @@ build-example-serial: lib-with-fortran
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
-build-example-parallel: lib-with-fortran
+build-example-parallel: lib
 	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/examples/parellel
@@ -413,11 +413,10 @@ install/lib/libredis++.a:
 	cd compile && \
 	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
-		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 .. && \
+		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
+		-DCMAKE_INSTALL_LIBDIR="lib" .. && \
 	CC=gcc CXX=g++ make -j $(NPROC) && \
 	CC=gcc CXX=g++ make install && \
-	cd ../../../ && \
-	cp install/lib64/libredis++.a install/lib 2&> /dev/null || true && \
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
