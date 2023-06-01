@@ -104,7 +104,7 @@ help:
 # halp: SR_TEST_WLM_ALLOC_FLAGS {default is none} -- flags to use when requesting an allocation from the WLM
 # halp: SR_TEST_WLM_LAUNCH_COMMAND {default is none} -- command to use to launch a test process
 # halp: SR_TEST_WLM_LAUNCH_FLAGS {default is none} -- flags to use when launching a test process
-# halp: SR_TEST_DEVICE {cpu, gpu} -- device type to test on
+# halp: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
 
 
 # help:
