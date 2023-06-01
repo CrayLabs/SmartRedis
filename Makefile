@@ -156,9 +156,9 @@ test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-lib-with-fortran
+build-tests: test-lib
 	@cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) \
-	-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/tests -- -j $(NPROC)
 
 
@@ -166,37 +166,38 @@ build-tests: test-lib-with-fortran
 .PHONY: build-test-cpp
 build-test-cpp: test-lib
 	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) \
-	-DSR_LINK=$(SR_LINK)
+		-DSR_LINK=$(SR_LINK)
 	@cmake --build build/$(SR_BUILD)/tests/cpp -- -j $(NPROC)
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
 build-unit-test-cpp: test-lib
 	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests \
-	-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
 	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests -- -j $(NPROC)
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
 build-test-c: test-lib
 	@cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) \
-	-DSR_LINK=$(SR_LINK)
+		-DSR_LINK=$(SR_LINK)
 	@cmake --build build/$(SR_BUILD)/tests/c -- -j $(NPROC)
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran: test-lib-with-fortran
+build-test-fortran: SR_FORTRAN=ON
+build-test-fortran: test-lib
 	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) \
-	-DSR_LINK=$(SR_LINK)
+		-DSR_LINK=$(SR_LINK)
 	@cmake --build build/$(SR_BUILD)/tests/fortran -- -j $(NPROC)
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
-build-examples: lib-with-fortran
+build-examples: lib
 	@cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) \
-	-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/examples
 
 
@@ -204,7 +205,7 @@ build-examples: lib-with-fortran
 .PHONY: build-example-serial
 build-example-serial: lib-with-fortran
 	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial \
-	-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/examples/serial
 
 
@@ -212,7 +213,7 @@ build-example-serial: lib-with-fortran
 .PHONY: build-example-parallel
 build-example-parallel: lib-with-fortran
 	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel \
-	-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
 	@cmake --build build/$(SR_BUILD)/examples/parellel
 
 
