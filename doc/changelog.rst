@@ -8,7 +8,7 @@ To be released at some future point in time
 
 Description
 
-- Revamp build and test systems for SmartRedis
+- Major revamo of build and test systems for SmartRedis
 - Refactor Fortran methods to return default logical kind
 - Update CI/CD tests to use a modern version of MacOS
 - Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
@@ -19,7 +19,7 @@ Description
 
 Detailed Notes
 
-- Rework the build and test system to improve maintainability of the library (PR341_)
+- Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
 - Many Fortran  routines were returning logical kind = c_bool which turns out not to be
 the same default kind of most Fortran compilers. These have now been refactored so that
 users need not import `iso_c_binding` in their own applications (PR340_)

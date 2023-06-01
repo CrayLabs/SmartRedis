@@ -9,10 +9,10 @@ The release tarball can also be used instead of cloning the git repository, but
 the preferred method is a repository clone.
 
 The ```Makefile`` included in the top level of the SmartRedis repository has two
-main targets: ``lib`` which will create a dynamic library for C, C++, and Python
-clients and ``lib-with-fortran`` which will also additionally build a library
-for Fortran applications. ``make help`` will list additional targets that are
-used for SmartRedis development.
+main targets: ``lib`` which will create a dynamic library for C, C++, and
+(optionally) Fortran and Python clients; and ``lib-with-fortran`` which will also
+unconditionally builds a library for Fortran applications. ``make help`` will list
+additional targets that are used for SmartRedis development.
 
 .. code-block:: bash
 
@@ -61,30 +61,37 @@ via a variable supplied to make:
     make lib SR_BUILD=Coverage
 
 The name of the library produced for a Debug mode build is ``smartredis-debug``.
-The name of the library produced for a Coverage mode build is ``smartredis-debug``.
+The name of the library produced for a Coverage mode build is ``smartredis-coverage``.
 The name of the library  produced for a Release mode build is ``smartredis``.
 In each case, the file extension is dependent on the link type, ``.so`` or ``.a``.
+All libraries will be located in the ``install/lib`` folder.
 
-Finally, it is possible to build SmartRedis without including Python support:
-
-.. code-block:: bash
-
-    cd SmartRedis
-    make lib SR_PYTHON=OFF
-
-The build mode, link type, and Python support settings are fully orthogonal; any
-combination of them is supported. For example, a statically linked debug build
-may be achieved via the following command:
+Finally, it is possible to build SmartRedis to include Python and/or Fortran support
+(both are omitted by default):
 
 .. code-block:: bash
 
     cd SmartRedis
-    make lib SR_LINK=Static SR_BUILD=Debug
+    # Build support for Python
+    make lib SR_PYTHON=ON
+    # Build support for Fortran
+    make lib SR_FORTRAN=ON # equivalent to make lib-with-fortran
+    # Build support for Python and Fortran
+    make lib SR_PYTHON=ON SR_FORTRAN=ON # or make lib-with-fortran SR_PYTHON=ON
 
-The SR_LINK and SR_BUILD variables are fully supported for all test and build targets
-in the Makefile.
+The build mode, link type, and Fortran/Python support settings are fully orthogonal;
+any combination of them is supported. For example, a statically linked debug build
+with Python support may be achieved via the following command:
 
-Additional make variables may be seen in the ``help`` make target:
+.. code-block:: bash
+
+    cd SmartRedis
+    make lib SR_LINK=Static SR_BUILD=Debug SR_PYTHON=ON
+
+The SR_LINK, SR_BUILD, SR_PYTHON, and SR_FORTRAN variables are fully supported for all
+test and build targets in the Makefile.
+
+Additional make variables are described in the ``help`` make target:
 
 .. code-block:: bash
 

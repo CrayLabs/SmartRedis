@@ -38,10 +38,6 @@ SR_PYTHON := OFF
 
 # Test variables
 COV_FLAGS :=
-SR_TEST_REDIS_MODE := Clustered
-SR_TEST_RAI_VER := 1.2.7
-SR_TEST_WLM := Local
-SR_TEST_WLM_FLAGS :=
 SR_TEST_DEVICE := cpu
 
 # Params for third-party software
@@ -85,27 +81,6 @@ help:
 # help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings
 # help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
 # help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
-
-# (NOTE: Test variables are not yet implemented. The following interface
-# is planned for an upcoming version of the SmartRedis test system.)
-# halp:
-# halp: Test variables
-# halp: --------------
-# halp:
-# halp: These variables affect the way that the SmartRedis library is tested. Each
-# halp: has several options; the first listed is the default. Use by appending
-# halp: the variable name and setting after the make target, e.g.
-# halp:    make test SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
-# halp:
-# halp: SR_TEST_REDIS_MODE {Clustered, Standalone, Colocated} -- type of Redis backend launched for tests
-# halp: SR_TEST_RAI_VER {1.2.7, 1.2.5} -- version of RedisAI to use for tests
-# halp: SR_TEST_WLM {Local, Slurm, PBS} -- workload manager to use for launching tests
-# halp: SR_TEST_WLM_ALLOC_COMMAND {default is none} -- command to use to request an allocation
-# halp: SR_TEST_WLM_ALLOC_FLAGS {default is none} -- flags to use when requesting an allocation from the WLM
-# halp: SR_TEST_WLM_LAUNCH_COMMAND {default is none} -- command to use to launch a test process
-# halp: SR_TEST_WLM_LAUNCH_FLAGS {default is none} -- flags to use when launching a test process
-# halp: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
-
 
 # help:
 # help: Build targets
@@ -321,7 +296,7 @@ test-verbose:
 	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker \
 		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv -s ./tests --build $(SR_BUILD)
 
-# help: test-verbose-with-coverage                   - Build and run all tests [verbose-with-coverage]
+# help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
 test-verbose-with-coverage: SR_BUILD=Coverage
 test-verbose-with-coverage: test-deps
