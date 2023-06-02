@@ -98,7 +98,7 @@ deps:
 lib: deps
 lib:
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
-	-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
+		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
 	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
 	@cmake --install build/$(SR_BUILD)
 
@@ -173,7 +173,7 @@ build-test-fortran: test-lib
 build-examples: lib
 	@cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) \
 		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples
+	@cmake --build build/$(SR_BUILD)/examples -- -j $(NPROC)
 
 
 # help: build-example-serial           - buld serial examples

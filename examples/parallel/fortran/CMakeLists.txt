@@ -68,6 +68,9 @@ include_directories(SYSTEM
     ${SMARTREDIS_INSTALL_PATH}/include
 )
 
+# Stuff the example_utils into a library to enable parallel builds
+add_library(example_utils STATIC example_utils.F90)
+
 # Define all the examples to be built
 list(APPEND EXECUTABLES
 	 smartredis_dataset
@@ -79,7 +82,6 @@ list(APPEND EXECUTABLES
 foreach(EXECUTABLE ${EXECUTABLES})
 	add_executable(${EXECUTABLE}_fortran_parallel
 		${EXECUTABLE}.F90
-		example_utils.F90
 	)
 	set_target_properties(${EXECUTABLE}_fortran_parallel PROPERTIES
 		OUTPUT_NAME ${EXECUTABLE}
@@ -87,5 +89,6 @@ foreach(EXECUTABLE ${EXECUTABLES})
 	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
 		MPI::MPI_Fortran
+		example_utils
 	)
 endforeach()
