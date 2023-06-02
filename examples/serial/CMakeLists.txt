@@ -24,58 +24,20 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-# Project definition for the SmartRedis-Tests-C project
+# Project definition for the SmartRedis-Examples-Serial project
 cmake_minimum_required(VERSION 3.13)
-project(SmartSim-Tests-C)
+project(SmartRedis-Examples-Serial)
 
-# Enable language support for the tests
+# Enable language support for the examples
 enable_language(C)
-
-# Configure the build
-set(CMAKE_CXX_STANDARD 17)
-SET(CMAKE_C_STANDARD 99)
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../..")
-include(smartredis_defs)
-
-# Assume by default that users should link against the
-# install directory in this repository
-if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../install/")
+enable_language(CXX)
+if (SR_FORTRAN)
+    enable_language(Fortran)
 endif()
 
-# Locate dependencies
-find_library(SR_LIB ${SMARTREDIS_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
-)
-
-# Define include directories for header files
-include_directories(SYSTEM
-    /usr/local/include
-    ${SMARTREDIS_INSTALL_PATH}/include
-)
-
-# Define all the tests to be built
-list(APPEND EXECUTABLES
-    client_test_dataset_aggregation
-    client_test_dataset_exists
-    client_test_logging
-    client_test_put_unpack_1D
-    client_test_put_get_1D
-    client_test_put_get_2D
-    client_test_put_get_3D
-)
-
-# Build the tests
-foreach(EXECUTABLE ${EXECUTABLES})
-    add_executable(${EXECUTABLE}_c_test
-        ${EXECUTABLE}.c
-    )
-    set_target_properties(${EXECUTABLE}_c_test PROPERTIES
-        OUTPUT_NAME ${EXECUTABLE}
-    )
-    target_link_libraries(${EXECUTABLE}_c_test
-        ${SR_LIB}
-    )
-endforeach()
+# Bring in subdirectories
+add_subdirectory(c)
+add_subdirectory(cpp)
+if (SR_FORTRAN)
+    add_subdirectory(fortran)
+endif()

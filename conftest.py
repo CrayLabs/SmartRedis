@@ -136,3 +136,18 @@ class MockTestModel:
             torch.jit.save(module, buffer)
             str_model = buffer.getvalue()
             return str_model
+
+# Add a build type option to pytest command lines
+def pytest_addoption(parser):
+    parser.addoption("--build", action="store", default="Release")
+    parser.addoption("--sr_fortran", action="store", default="OFF")
+
+# Fixture to retrieve the build type setting
+@pytest.fixture(scope="session")
+def build(request):
+    return request.config.getoption("--build")
+
+# Fixture to retrieve the Fortran enablement setting
+@pytest.fixture(scope="session")
+def sr_fortran(request):
+    return request.config.getoption("--sr_fortran")

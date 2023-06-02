@@ -57,7 +57,7 @@ void reset_env_vars(const char* old_keyin, const char* old_keyout)
 // helper function for loading mnist
 void load_mnist_image_to_array(float**** img)
 {
-    std::string image_file = "../../mnist_data/one.raw";
+    std::string image_file = "../mnist_data/one.raw";
     std::ifstream fin(image_file, std::ios::binary);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -100,11 +100,11 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         std::string tensor_key = "ensemble_test";
         // for model
         std::string model_key = "mnist_model";
-        std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+        std::string model_file = "./../mnist_data/mnist_cnn.pt";
         // for script
         std::string script_key = "mnist_script";
         std::string script_file =
-            "./../../mnist_data/data_processing_script.txt";
+            "./../mnist_data/data_processing_script.txt";
         // for setup mnist
         std::string in_key = "mnist_input";
         std::string out_key = "mnist_output";

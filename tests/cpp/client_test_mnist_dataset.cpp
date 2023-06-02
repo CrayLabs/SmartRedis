@@ -31,7 +31,7 @@
 
 void load_mnist_image_to_array(float**** img)
 {
-  std::string image_file = "../mnist_data/one.raw";
+  std::string image_file = "mnist_data/one.raw";
   std::ifstream fin(image_file, std::ios::binary);
   std::ostringstream ostream;
   ostream << fin.rdbuf();
@@ -84,11 +84,11 @@ int main(int argc, char* argv[]) {
 
   SmartRedis::Client client(use_cluster(), "client_test_mnist_dataset");
   std::string model_key = "mnist_model";
-  std::string model_file = "./../mnist_data/mnist_cnn.pt";
+  std::string model_file = "mnist_data/mnist_cnn.pt";
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
 
   std::string script_key = "mnist_script";
-  std::string script_file = "./../mnist_data/data_processing_script.txt";
+  std::string script_file = "mnist_data/data_processing_script.txt";
   client.set_script_from_file(script_key, "CPU", script_file);
 
   std::string_view model = client.get_model(model_key);

@@ -27,6 +27,7 @@
  */
 
 #include <ctype.h>
+#include <sw/redis++/redis++.h>
 #include "redisserver.h"
 #include "srexception.h"
 #include "utility.h"
