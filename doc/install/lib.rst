@@ -11,7 +11,7 @@ the preferred method is a repository clone.
 The ```Makefile`` included in the top level of the SmartRedis repository has two
 main targets: ``lib`` which will create a dynamic library for C, C++, and
 (optionally) Fortran and Python clients; and ``lib-with-fortran`` which will also
-unconditionally builds a library for Fortran applications. ``make help`` will list
+unconditionally build a library for Fortran applications. ``make help`` will list
 additional targets that are used for SmartRedis development.
 
 .. code-block:: bash
