@@ -33,7 +33,6 @@
 #include <iostream>
 #include <random>
 #include <limits.h>
-#include <sw/redis++/redis++.h>
 
 #include "command.h"
 #include "commandreply.h"

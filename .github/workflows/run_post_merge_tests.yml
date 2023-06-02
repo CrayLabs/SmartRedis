@@ -170,5 +170,5 @@ jobs:
           export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib &&
           export SR_LOG_FILE=smartredis_examples_log.txt &&
           export SR_LOG_LEVEL=INFO &&
-          make test-examples
+          make test-examples SR_FORTRAN=ON SR_PYTHON=ON
 

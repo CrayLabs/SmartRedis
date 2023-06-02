@@ -24,37 +24,44 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CppClientUnitTester)
-
+# Project definition for the SmartRedis-Tests-Cpp-UnitTests project
 cmake_minimum_required(VERSION 3.13)
+project(SmartSim-Tests-Cpp-UnitTests)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE DEBUG)
+
+# Enable language support for the tests
+enable_language(CXX)
+
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
-
-if(COVERAGE)
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-        set(CMAKE_CXX_FLAGS --coverage)
-        add_link_options(--coverage)
-    endif()
-endif()
+SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
+include(smartredis_defs)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_library(REDISPP redis++    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(HIREDIS hiredis    PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SRLIB   smartredis PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SRLIB_FORTRAN   smartredis-fortran PATHS ../../../install/lib NO_DEFAULT_PATH REQUIRED)
-find_package(Threads REQUIRED)
-set(EXT_LIBRARIES ${REDISPP} ${HIREDIS} ${SRLIB} ${SRLIB_FORTRAN})
+# Assume by default that users should link against the
+# install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+endif()
 
+# Locate dependencies
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+find_package(Threads REQUIRED)
+
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../../include
-	../../../install/include
-)
+    ${SMARTREDIS_INSTALL_PATH}/include
+  )
 
+# Identify source files to be built into the CPP Catch2 unit tests
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
+# Build the CPP Catch2 unit tests
 add_executable(cpp_unit_tests ${UNIT_TESTS})
-
-target_link_libraries(cpp_unit_tests PUBLIC ${EXT_LIBRARIES} PRIVATE Threads::Threads)
+target_link_libraries(cpp_unit_tests PUBLIC ${SR_LIB} PRIVATE Threads::Threads)

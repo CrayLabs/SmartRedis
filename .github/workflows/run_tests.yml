@@ -108,8 +108,8 @@ jobs:
           sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh &&
           printenv >> $GITHUB_ENV &&
-          echo "CC=icc" >> $GITHUB_ENV &&
-          echo "CXX=icpc" >> $GITHUB_ENV &&
+          echo "CC=icx" >> $GITHUB_ENV &&
+          echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
 
       # Install additional dependencies
@@ -120,29 +120,25 @@ jobs:
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev,xarray]
 
-      - name: Build and install dependencies
-        run: |
-            mkdir -p ./third-party &&
-            cd ./third-party &&
-            bash ../build-scripts/build-lcov.sh &&
-            bash ../build-scripts/build-catch.sh
+      - name: Build and install test dependencies
+        run: make lcov && make catch2
 
       - name: Install docker, redis-server, and RedisAI
         run: |
           sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
           # Add latest redis to apt sources
-          echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
-          curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
+          sudo echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
+          sudo curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
           # Add latest docker to apt sources
           sudo mkdir -m 0755 -p /etc/apt/keyrings &&
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&
+          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
                 $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
           # Install and update
           sudo apt-get -y update && \
           sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools=6:6.2.5-1rl1~focal1 redis-server=6:6.2.5-1rl1~focal1 &&
           CONTAINER_NAME="redisai_$RANDOM" &&
-          docker create --name $CONTAINER_NAME --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
+          sudo docker create --name $CONTAINER_NAME --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
           sudo mkdir -p /usr/lib/redis/modules/ &&
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
@@ -162,7 +158,7 @@ jobs:
           popd &&
           export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
           utils/check_redis.sh $PORT &&
-          make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append"
+          make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" SR_FORTRAN=ON SR_PYTHON=ON
 
       - name: Clustered DB tests
         run: |
@@ -181,7 +177,7 @@ jobs:
           redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
           export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests
+                 --ignore ./tests/docker -vv -s ./tests --build Coverage
 
       - name: UDS DB tests
         run: |
@@ -198,11 +194,11 @@ jobs:
           utils/check_redis.sh $SOCKET
           export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests
+                 --ignore ./tests/docker -vv -s ./tests --build Coverage
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
-        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/CMakeFiles -o coverage.info
+        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/Coverage/CMakeFiles -o coverage.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

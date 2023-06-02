@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sw/redis++/redis++.h>
 #include "rediscluster.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"

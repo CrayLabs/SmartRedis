@@ -26,6 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sw/redis++/redis++.h>
 #include "redis.h"
 #include "srexception.h"
 #include "utility.h"

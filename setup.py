@@ -58,7 +58,8 @@ class CMakeBuild(build_ext):
         build_directory = Path(self.build_temp).resolve()
         cmake_args = [
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
-            '-DPYTHON_EXECUTABLE=' + sys.executable
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DSR_PYTHON=ON'
         ]
 
         cfg = 'Debug' if self.debug else 'Release'
@@ -78,9 +79,14 @@ class CMakeBuild(build_ext):
         if not build_directory.is_dir():
             os.makedirs(self.build_temp)
 
+        # make install dir
+        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
+        install_directory = setup_path.joinpath("install")
+        if not install_directory.is_dir():
+            os.makedirs(install_directory)
+
         print('-'*10, 'Building C dependencies', '-'*40)
         make_cmd = shutil.which("make")
-        setup_path = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
 
         # build dependencies
         subprocess.check_call([f"{make_cmd} deps"],

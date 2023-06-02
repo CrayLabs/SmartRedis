@@ -114,7 +114,7 @@ int put_get_2D_tensor(void* client,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_double(size_t* dims, int n_dims,
+int put_get_2D_tensor_double(size_t* dims, size_t n_dims,
                              char* key_suffix, int key_suffix_length)
 {
   void* client = NULL;
@@ -162,7 +162,7 @@ int put_get_2D_tensor_double(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_float(size_t* dims, int n_dims,
+int put_get_2D_tensor_float(size_t* dims, size_t n_dims,
                             char* key_suffix,
                             int key_suffix_length)
 {
@@ -211,7 +211,7 @@ int put_get_2D_tensor_float(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_i8(size_t* dims, int n_dims,
+int put_get_2D_tensor_i8(size_t* dims, size_t n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -264,7 +264,7 @@ for(int i=0; i<dims[0]; i++) {
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_i16(size_t* dims, int n_dims,
+int put_get_2D_tensor_i16(size_t* dims, size_t n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -317,7 +317,7 @@ int put_get_2D_tensor_i16(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_i32(size_t* dims, int n_dims,
+int put_get_2D_tensor_i32(size_t* dims, size_t n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -370,7 +370,7 @@ int put_get_2D_tensor_i32(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_i64(size_t* dims, int n_dims,
+int put_get_2D_tensor_i64(size_t* dims, size_t n_dims,
                          char* key_suffix,
                          int key_suffix_length)
 {
@@ -423,7 +423,7 @@ int put_get_2D_tensor_i64(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
+int put_get_2D_tensor_ui8(size_t* dims, size_t n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
@@ -474,7 +474,7 @@ int put_get_2D_tensor_ui8(size_t* dims, int n_dims,
 values.  If the sent and received tensors do not match,
 a non-zero value is returned.
 */
-int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
+int put_get_2D_tensor_ui16(size_t* dims, size_t n_dims,
                           char* key_suffix,
                           int key_suffix_length)
 {
@@ -522,10 +522,10 @@ int put_get_2D_tensor_ui16(size_t* dims, int n_dims,
 }
 
 int main(int argc, char* argv[]) {
-  size_t* dims = malloc(2*sizeof(int));
+  size_t* dims = malloc(2*sizeof(size_t));
   dims[0] = 10;
   dims[1] = 26;
-  int n_dims = 2;
+  size_t n_dims = 2;
 
   int result = 0;
   //2D double tensor
