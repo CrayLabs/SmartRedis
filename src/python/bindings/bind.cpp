@@ -59,6 +59,8 @@ PYBIND11_MODULE(smartredisPy, m) {
     #define CLIENT_METHOD(name) CLASS_METHOD(PyClient, name)
     py::class_<PyClient, PySRObject>(m, "PyClient")
         .def(py::init<bool, const std::string&>())
+//        .def(py::init<const std::string&>())
+//        .def(py::init<ConfigOptions*, const std::string&>())
         .CLIENT_METHOD(put_tensor)
         .CLIENT_METHOD(get_tensor)
         .CLIENT_METHOD(delete_tensor)

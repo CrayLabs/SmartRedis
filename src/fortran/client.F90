@@ -66,6 +66,8 @@ type, public :: client_type
   contains
 
   ! Public procedures
+  !> Initializes a new instance of the SmartRedis client
+  generic :: initialize_client => initialize_client_deprecated, initialize_client_simple, initialize_client_cfgobj
   !> Puts a tensor into the database (overloaded)
   generic :: put_tensor => put_tensor_i8, put_tensor_i16, put_tensor_i32, put_tensor_i64, &
                            put_tensor_float, put_tensor_double
@@ -75,8 +77,6 @@ type, public :: client_type
 
   !> Decode a response code from an API function
   procedure :: SR_error_parser
-  !> Initializes a new instance of the SmartRedis client
-  procedure :: initialize => initialize_client
   !> Check if a SmartRedis client has been initialized
   procedure :: isinitialized
   !> Destructs a new instance of the SmartRedis client
@@ -189,6 +189,9 @@ type, public :: client_type
   procedure :: print_client
 
   ! Private procedures
+  procedure, private :: initialize_client_deprecated
+  procedure, private :: initialize_client_simple
+  procedure, private :: initialize_client_cfgobj
   procedure, private :: put_tensor_i8
   procedure, private :: put_tensor_i16
   procedure, private :: put_tensor_i32
@@ -242,8 +245,32 @@ function SR_error_parser(self, response_code) result(is_error)
 end function SR_error_parser
 
 !> Initializes a new instance of a SmartRedis client
-function initialize_client(self, cluster, logger_name)
-  integer(kind=enum_kind)                     :: initialize_client
+function initialize_client_simple(self, cluster, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client_simple
+  class(client_type),         intent(inout)   :: self        !< Receives the initialized client
+  character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
+
+  ! Local variables
+  character(kind=c_char, len=:), allocatable :: c_logger_name
+  integer(kind=c_size_t) :: logger_name_length
+
+  if (present(logger_name)) then
+    c_logger_name = logger_name
+  else
+    c_logger_name = 'default'
+  endif
+  logger_name_length = len_trim(c_logger_name)
+
+  if (present(cluster)) self%cluster = cluster
+  initialize_client_simple = c_simple_constructor( &
+    self%cluster, c_logger_name, logger_name_length, self%client_ptr)
+  self%is_initialized = initialize_client_simple .eq. SRNoError
+  if (allocated(c_logger_name)) deallocate(c_logger_name)
+end function initialize_client_simple
+
+!> Initializes a new instance of a SmartRedis client (deprecated)
+function initialize_client_deprecated(self, cluster, logger_name)
+  integer(kind=enum_kind)                     :: initialize_client_deprecated
   class(client_type),         intent(inout)   :: self      !< Receives the initialized client
   logical, optional,          intent(in   )   :: cluster   !< If true, client uses a database cluster (Default: .false.)
   character(len=*), optional, intent(in   )   :: logger_name !< Identifier for the current client
@@ -260,10 +287,10 @@ function initialize_client(self, cluster, logger_name)
   logger_name_length = len_trim(c_logger_name)
 
   if (present(cluster)) self%cluster = cluster
-  initialize_client = c_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
+  initialize_client = c_old_constructor(self%cluster, c_logger_name, logger_name_length, self%client_ptr)
   self%is_initialized = initialize_client .eq. SRNoError
   if (allocated(c_logger_name)) deallocate(c_logger_name)
-end function initialize_client
+end function initialize_client_deprecated
 
 !> Check whether the client has been initialized
 logical function isinitialized(this)
