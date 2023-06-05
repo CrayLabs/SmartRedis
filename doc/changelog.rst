@@ -8,7 +8,8 @@ To be released at some future point in time
 
 Description
 
-- Major revamo of build and test systems for SmartRedis
+- Major revamp of build and test systems for SmartRedis
+- Downgrade requirement for F2018 to F2003 (experimental support for Nvidia toolchain)
 - Refactor Fortran methods to return default logical kind
 - Update CI/CD tests to use a modern version of MacOS
 - Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
@@ -20,6 +21,11 @@ Description
 Detailed Notes
 
 - Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
+- Replaces the assumed rank feature of F2018 used in the Fortran client with assumed
+shape arrays. Compilers need only be compliant with the F2003 standard now. While
+this means that it is possible to compile SmartRedis with the Nvidia toolchain,
+users should consider this only experimental support until we can incorporate
+Nvidia compilers into our CI. (PR346_)
 - Many Fortran  routines were returning logical kind = c_bool which turns out not to be
 the same default kind of most Fortran compilers. These have now been refactored so that
 users need not import `iso_c_binding` in their own applications (PR340_)
@@ -31,6 +37,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
 .. _PR341: https://github.com/CrayLabs/SmartRedis/pull/341
+.. _PR346: https://github.com/CrayLabs/SmartRedis/pull/346
 .. _PR340: https://github.com/CrayLabs/SmartRedis/pull/340
 .. _PR339: https://github.com/CrayLabs/SmartRedis/pull/339
 .. _PR338: https://github.com/CrayLabs/SmartRedis/pull/338

@@ -105,9 +105,9 @@ Fortran compilers need to support the following features
 
 * Object-oriented programming support (Fortran 2003)
 * Fortran-C interoperability, ``iso_c_binding`` (Fortran 2003)
-* Assumed rank (``dimension(..)``) arrays (Fortran 2018)
 
-These language features are supported by Intel 19, GNU 9, and Cray 8.6 and later versions.
+These language features are supported by Intel 19, GNU 9, and Cray 8.6 and later versions. Nvidia compilers
+have been shown to work, but should be considered a fragile feature for now
 
 .. _unsupported_smartredis_features:
 
