@@ -98,7 +98,7 @@ deps:
 lib: deps
 lib:
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
-	-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
+		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
 	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
 	@cmake --install build/$(SR_BUILD)
 
@@ -173,7 +173,7 @@ build-test-fortran: test-lib
 build-examples: lib
 	@cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) \
 		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples
+	@cmake --build build/$(SR_BUILD)/examples -- -j $(NPROC)
 
 
 # help: build-example-serial           - buld serial examples
@@ -386,10 +386,10 @@ install/lib/libredis++.a:
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
+	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
 		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" .. && \
+		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. )&& \
 	CC=gcc CXX=g++ make -j $(NPROC) && \
 	CC=gcc CXX=g++ make install && \
 	echo "Finished installing Redis-plus-plus"
