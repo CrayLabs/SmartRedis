@@ -22,7 +22,7 @@ Description
 
 Detailed Notes
 
-- Updated to the latest version of Hiredis (1.1.0)
+- Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code
 into a small static library (PR349_)
 - For the NVidia toolchain only: Replaces the assumed rank feature of F2018 used
@@ -42,7 +42,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
-.. _PR350: https://github.com/CrayLabs/SmartRedis/pull/350
+.. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349
 .. _PR346: https://github.com/CrayLabs/SmartRedis/pull/346
 .. _PR341: https://github.com/CrayLabs/SmartRedis/pull/341
