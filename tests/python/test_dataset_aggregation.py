@@ -24,17 +24,15 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import numpy as np
-import pytest
 from smartredis import Client, Dataset
 from smartredis.error import *
 from smartredis import *
 
 
-def test_aggregation(use_cluster, context):
+def test_aggregation(context):
     num_datasets = 4
-    client = Client(None, use_cluster, logger_name=context)
+    client = Client(None, logger_name=context)
     log_data(context, LLDebug, "Initialization complete")
 
     # Build datasets

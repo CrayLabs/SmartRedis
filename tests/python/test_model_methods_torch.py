@@ -30,18 +30,18 @@ import torch
 from smartredis import Client
 
 
-def test_set_model(mock_model, use_cluster, context):
+def test_set_model(mock_model, context):
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.set_model("simple_cnn", model, "TORCH", "CPU")
     returned_model = c.get_model("simple_cnn")
     assert model == returned_model
 
 
-def test_set_model_from_file(mock_model, use_cluster, context):
+def test_set_model_from_file(mock_model, context):
     try:
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")
-        c = Client(None, use_cluster, logger_name=context)
+        c = Client(None, logger_name=context)
         c.set_model_from_file("file_cnn", "./torch_cnn.pt", "TORCH", "CPU")
         assert c.model_exists("file_cnn")
         returned_model = c.get_model("file_cnn")
@@ -54,10 +54,10 @@ def test_set_model_from_file(mock_model, use_cluster, context):
         os.remove("torch_cnn.pt")
 
 
-def test_torch_inference(mock_model, use_cluster, context):
+def test_torch_inference(mock_model, context):
     # get model and set into database
     model = mock_model.create_torch_cnn()
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.set_model("torch_cnn", model, "TORCH")
 
     # setup input tensor

@@ -28,20 +28,20 @@ import os
 
 from smartredis import Client
 
-def test_serialization(use_cluster, context):
+def test_serialization(context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    c = Client(address=ssdb, logger_name=context)
     assert str(c) != repr(c)
 
 
-def test_address(use_cluster, context):
+def test_address(context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    c = Client(address=ssdb, logger_name=context)
 
     # check if SSDB was set anyway
     assert os.environ["SSDB"] == ssdb

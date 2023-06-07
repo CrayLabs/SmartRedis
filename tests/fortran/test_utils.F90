@@ -65,7 +65,6 @@ module test_utils
   end function irand
 
   logical function use_cluster()
-
     character(len=16) :: smartredis_test_cluster
 
     call get_environment_variable('SMARTREDIS_TEST_CLUSTER', smartredis_test_cluster)
@@ -81,7 +80,6 @@ module test_utils
           use_cluster = .false.
       end select
     endif
-
   end function use_cluster
 
   !> Returns a lower case version of the string. Only supports a-z
@@ -99,7 +97,6 @@ module test_utils
       i_low = index(caps,str(i:i))
       if (i_low > 0) lower_str(i:i) = lows(i_low:i_low)
     enddo
-
   end function to_lower
 
   !> Convert a Fortran string to a C-string (i.e. append a null character)
@@ -108,7 +105,6 @@ module test_utils
     character(kind=c_char,len=len_trim(f_str)+1) :: c_str !< The resultant C-style string
 
     c_str = trim(f_str)//C_NULL_CHAR
-
   end function c_str
 
   !> Set an environment variable to a given value
@@ -134,7 +130,6 @@ module test_utils
       write(STDERR,*) "Error setting", c_env_var, c_env_val
       error stop
     endif
-
   end subroutine setenv
 
   !> Clear an environment variable
@@ -150,7 +145,6 @@ module test_utils
       write(STDERR,*) "Error clearing", c_env_var
       error stop
     endif
-
   end subroutine unsetenv
 
 end module test_utils

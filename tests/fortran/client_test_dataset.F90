@@ -222,7 +222,7 @@ program main
   call dataset%print_dataset(stdout)
 
   ! test dataset_existence
-  result = client%initialize(use_cluster(), "client_test_dataset")
+  result = client%initialize("client_test_dataset")
   if (result .ne. SRNoError) error stop
   result = client%dataset_exists("nonexistent", exists)
   if (result .ne. SRNoError) error stop

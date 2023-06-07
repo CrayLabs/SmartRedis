@@ -67,7 +67,7 @@ type, public :: client_type
 
   ! Public procedures
   !> Initializes a new instance of the SmartRedis client
-  generic :: initialize_client => initialize_client_deprecated, initialize_client_simple, initialize_client_cfgopts
+  generic :: initialize => initialize_client_deprecated, initialize_client_simple, initialize_client_cfgopts
   !> Puts a tensor into the database (overloaded)
   generic :: put_tensor => put_tensor_i8, put_tensor_i16, put_tensor_i32, put_tensor_i64, &
                            put_tensor_float, put_tensor_double
