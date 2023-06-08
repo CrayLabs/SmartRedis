@@ -74,11 +74,8 @@ void run_mnist(const std::string& model_name,
 
 int main(int argc, char* argv[]) {
 
-    // Initialize a client for setting the model and script.
-    // In general, Client objects should be reused, but for this
-    // small example, Client objects are not reused.
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, __FILE__);
+    // Initialize a client for setting the model and script
+    SmartRedis::Client client(__FILE__);
 
     // Build model key, file name, and then set model
     // from file using client API

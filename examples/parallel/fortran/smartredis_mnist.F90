@@ -51,7 +51,7 @@ program mnist_example
   write(key_suffix, "(A,I1.1)") "_",pe_id
 
   ! Initialize a client
-  result = client%initialize(.true., "smartredis_mnist") ! Change .false. to .true. if not using a clustered database
+  result = client%initialize("smartredis_mnist")
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Set up model and script for the computation
