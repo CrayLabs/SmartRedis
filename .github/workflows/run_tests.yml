@@ -156,7 +156,7 @@ jobs:
                        --logfile "single.log" \
                        --loadmodule $REDISAI_MODULES &&
           popd &&
-          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
+          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False SR_SERVER_TYPE=Standalone &&
           utils/check_redis.sh $PORT &&
           make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" SR_FORTRAN=ON SR_PYTHON=ON
 
@@ -175,7 +175,7 @@ jobs:
             utils/check_redis.sh $port
           done &&
           redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
-          export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
+          export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True SR_SERVER_TYPE=Clustered &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests --build Coverage
 
@@ -192,7 +192,7 @@ jobs:
                        --loadmodule $REDISAI_MODULES &&
           popd &&
           utils/check_redis.sh $SOCKET
-          export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
+          export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False SR_SERVER_TYPE=Standalone &&
           python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
                  --ignore ./tests/docker -vv -s ./tests --build Coverage
 

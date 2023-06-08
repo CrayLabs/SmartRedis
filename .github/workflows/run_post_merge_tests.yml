@@ -154,7 +154,7 @@ jobs:
       - name: Overwrite redis cluster env vars
         run: |
          echo "SSDB=127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002" >> $GITHUB_ENV &&
-         echo "SMARTREDIS_TEST_CLUSTER=True" >> $GITHUB_ENV
+         echo "SR_SERVER_TYPE=Clustered" >> $GITHUB_ENV
 
       - name: Start redis cluster
         run: redis-cli --cluster create $(echo $SSDB | tr "," " ") --cluster-yes
