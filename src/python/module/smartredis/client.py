@@ -32,6 +32,7 @@ import functools
 import numpy as np
 
 from .dataset import Dataset
+from .configoptions import ConfigOptions
 from .srobject import SRObject
 from .smartredisPy import PyClient
 from .util import Dtypes, init_default, exception_handler, typecheck
@@ -40,7 +41,8 @@ from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
 class Client(SRObject):
-    def __init__(self, address=None, cluster=False, logger_name="default"):
+    def __init__(self, *a, **kw):
+        #address=None, cluster=False, logger_name="default"):
         """Initialize a RedisAI client
 
         For clusters, the address can be a single tcp/ip address and port
@@ -57,12 +59,43 @@ class Client(SRObject):
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
+        if a:
+            if isinstance(a[0], bool):
+                pyclient = self.__deprecated_construction(*a, **kw)
+            elif isinstance(a[0], ConfigOptions) or a[0] is None:
+                pyclient = self.__new_construction(*a, **kw)
+            else:
+                raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
+        else:
+            if "cluster" in kw:
+                address = kw.get("address", None)
+                cluster = kw["cluster"]
+                logger_name = kw.get("logger_name", "default")
+                pyclient = self.__deprecated_construction(address, cluster, logger_name)
+            else:
+                config_object = kw.get("config_object", None)
+                logger_name = kw.get("logger_name", "default")
+                pyclient = self.__new_construction(config_object, logger_name)
+        super().__init__(pyclient)
+
+    def __deprecated_construction(self, cluster, address=None, logger_name="Default"):
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
-            super().__init__(PyClient(cluster, logger_name))
+            return PyClient(cluster, logger_name)
+        except PybindRedisReplyError as e:
+            raise RedisConnectionError(str(e)) from None
+        except RuntimeError as e:
+            raise RedisConnectionError(str(e)) from None
+
+    def __new_construction(self, config_options=None, logger_name="Default"):
+        try:
+            if config_options:
+                return PyClient(config_options, logger_name)
+            else:
+                return PyClient(logger_name)
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
