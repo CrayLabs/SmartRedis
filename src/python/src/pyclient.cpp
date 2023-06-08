@@ -192,7 +192,6 @@ void PyClient::rename_tensor(const std::string& old_name,
 void PyClient::put_dataset(PyDataset& dataset)
 {
     MAKE_CLIENT_API({
-        std::cout << "Got the dataset" << std::endl;
         _client->put_dataset(*(dataset.get()));
     });
 }
