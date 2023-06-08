@@ -29,6 +29,7 @@ import os
 import numpy as np
 import pytest
 from smartredis import Client
+from smartredis import ConfigOptions
 from smartredis.error import *
 
 
@@ -42,7 +43,8 @@ def test_dbnode_info_command(context):
 def test_dbcluster_info_command(mock_model, context):
     ssdb = os.environ["SSDB"]
     addresses = ssdb.split(',')
-    client = Client(None, logger_name=context)
+    co = ConfigOptions().create_from_environment("")
+    client = Client(co, logger_name=context)
 
     if os.environ["SR_SERVER_TYPE"] == "Clustered":
         info = client.get_db_cluster_info(addresses)

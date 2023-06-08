@@ -56,6 +56,18 @@ class ConfigOptions:
         return new_configoptions
 
     @exception_handler
+    def get_data(self):
+        """Return the PyConfigOptions attribute
+
+        :return: The PyConfigOptions attribute containing
+                 the ConfigOptions information
+        :rtype: PyConfigOptions
+        """
+        if not self._is_created_via_factory:
+            raise RedisRuntimeError(_notfactory)
+        return self._config_opts
+
+    @exception_handler
     def set_configoptions(self, configoptions):
         """Set the PyConfigOptions attribute
 

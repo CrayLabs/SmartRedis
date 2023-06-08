@@ -93,7 +93,8 @@ class Client(SRObject):
     def __new_construction(self, config_options=None, logger_name="Default"):
         try:
             if config_options:
-                return PyClient(config_options, logger_name)
+                pybind_config_options = config_options.get_data()
+                return PyClient(pybind_config_options, logger_name)
             else:
                 return PyClient(logger_name)
         except PybindRedisReplyError as e:
