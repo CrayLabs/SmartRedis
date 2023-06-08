@@ -42,7 +42,7 @@ SR_TEST_DEVICE := cpu
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
-HIREDIS_VER := v1.0.0
+HIREDIS_VER := v1.1.0
 RPP_URL := https://github.com/sewenew/redis-plus-plus.git
 RPP_VER := 1.3.5
 PYBIND_URL := https://github.com/pybind/pybind11.git
