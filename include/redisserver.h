@@ -599,14 +599,14 @@ class RedisServer {
         static constexpr int _DEFAULT_THREAD_COUNT = 4;
 
         /*!
-        *   \brief Our logging context
-        */
-        const SRObject* _context;
-
-        /*!
         *   \brief Our source for configuration options
         */
         ConfigOptions* _cfgopts;
+
+        /*!
+        *   \brief Our logging context
+        */
+        const SRObject* _context;
 
         /*!
         *   \brief Seeding for the random number engine

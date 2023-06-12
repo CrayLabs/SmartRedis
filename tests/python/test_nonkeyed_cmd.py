@@ -76,6 +76,8 @@ def test_flushdb_command(context):
     # from within the testing framework, there is no way
     # of knowing each db node that is being used, so skip
     # if on cluster
+    ssdb = os.environ["SSDB"]
+    addresses = ssdb.split(',')
     if os.environ["SR_SERVER_TYPE"] == "Clustered":
         return
 
@@ -86,7 +88,7 @@ def test_flushdb_command(context):
     client.put_tensor("test_copy", tensor)
 
     assert client.tensor_exists("test_copy")
-    client.flush_db(address)
+    client.flush_db(addresses)
     assert not client.tensor_exists("test_copy")
 
 
