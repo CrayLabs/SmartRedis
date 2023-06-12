@@ -29,7 +29,7 @@ interface
     bind(c, name="CreateSimpleClient")
     use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)       :: c_constructor
+    integer(kind=enum_kind)       :: c_simple_constructor
     character(kind=c_char)        :: logger_name(*)
     integer(kind=c_size_t), value :: logger_name_length
     type(c_ptr)                   :: new_client !< Receives the newly constructed client
@@ -38,7 +38,7 @@ end interface
 
 interface
   function c_constructor(cfgopts, logger_name, logger_name_length, new_client) &
-    bind(c, name="SmartRedisCClient")
+    bind(c, name="CreateClient")
     use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: c_constructor
@@ -54,7 +54,7 @@ interface
     bind(c, name="SmartRedisCClient")
     use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)       :: c_constructor
+    integer(kind=enum_kind)       :: c_deprecated_constructor
     logical(kind=c_bool), value   :: cluster !< True if a database cluster is being used
     character(kind=c_char)        :: logger_name(*)
     integer(kind=c_size_t), value :: logger_name_length
