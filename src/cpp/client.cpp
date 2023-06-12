@@ -57,8 +57,6 @@ Client::Client(const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
-
-    throw SRDatabaseException("This is a test (simple)");
 }
 
 // Constructor with config options
@@ -78,8 +76,6 @@ Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
-
-    throw SRDatabaseException("This is a test (std)");
 }
 
 // Initialize a connection to the back-end database
@@ -140,8 +136,6 @@ Client::Client(bool cluster, const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
-
-    throw SRDatabaseException("This is a test (deprecated)");
 }
 
 // Destructor

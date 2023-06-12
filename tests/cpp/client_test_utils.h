@@ -68,17 +68,14 @@ inline void to_lower(char* s) {
 inline bool use_cluster()
 {
     /* This function determines if a cluster
-    configuration should be used in the test
-    when creating a Client.
+    configuration is being used
     */
-    char* smartredis_test_cluster = std::getenv("SMARTREDIS_TEST_CLUSTER");
-    to_lower(smartredis_test_cluster);
+    char* server_type = std::getenv("SR_SERVER_TYPE");
 
-    if(smartredis_test_cluster) {
-        if(std::strcmp(smartredis_test_cluster, "true")==0)
-            return true;
-    }
-    return false;
+    if (server_type == NULL)
+      return false;
+    to_lower(server_type);
+    return std::strcmp(server_type, "clustered") == 0;
 }
 
 template <typename T>
