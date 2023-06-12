@@ -33,26 +33,11 @@ enable_language(Fortran)
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
-include(smartredis_defs)
-
-# Assume by default that users should link against the
-# install directory in this repository
-if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../../install/")
-endif()
+set(CMAKE_BUILD_TYPE Debug)
 
 # Locate dependencies
-find_library(SR_LIB ${SMARTREDIS_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
-)
-find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
-)
+find_library(SR_LIB smartredis REQUIRED)
+find_library(SR_FTN_LIB smartredis-fortran REQUIRED)
 set(SMARTREDIS_LIBRARIES
 	${SR_LIB}
 	${SR_FTN_LIB}

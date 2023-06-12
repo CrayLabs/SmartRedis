@@ -1380,9 +1380,9 @@ class Client : public SRObject
 
         /*!
         *  \brief Set the prefixes that are used for set and get methods
-        *         using SSKEYIN and SSKEYOUT environment variables.
+        *         using SSKEYIN and SSKEYOUT config settings
         */
-        void _set_prefixes_from_env();
+        void _get_prefix_settings();
 
         /*!
         *  \brief Get the key prefix for placement methods

@@ -52,7 +52,7 @@ Client::Client(const std::string& logger_name)
     _establish_server_connection();
 
     // Initialize key prefixing
-    _set_prefixes_from_env();
+    _get_prefix_settings();
     _use_tensor_prefix = true;
     _use_dataset_prefix = true;
     _use_model_prefix = false;
@@ -71,7 +71,7 @@ Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
     _establish_server_connection();
 
     // Initialize key prefixing
-    _set_prefixes_from_env();
+    _get_prefix_settings();
     _use_tensor_prefix = true;
     _use_dataset_prefix = true;
     _use_model_prefix = false;
@@ -133,7 +133,7 @@ Client::Client(bool cluster, const std::string& logger_name)
         _redis_server =  _redis;
 
     // Initialize key prefixing
-    _set_prefixes_from_env();
+    _get_prefix_settings();
     _use_tensor_prefix = true;
     _use_dataset_prefix = true;
     _use_model_prefix = false;
@@ -1665,20 +1665,20 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN
-// and SSKEYOUT environment variables.
-void Client::_set_prefixes_from_env()
+// and SSKEYOUT configuration settings
+void Client::_get_prefix_settings()
 {
     // Establish set prefix
-    std::string put_key_prefix;
-    get_config_string(put_key_prefix, "SSKEYOUT", "");
+    std::string put_key_prefix = _cfgopts->_resolve_string_option(
+        "SSKEYOUT", "");
     if (put_key_prefix.length() > 0)
         _put_key_prefix = put_key_prefix;
     else
         _put_key_prefix.clear();
 
     // Establish get prefix(es)
-    std::string get_key_prefixes;
-    get_config_string(get_key_prefixes, "SSKEYIN", "");
+    std::string get_key_prefixes = _cfgopts->_resolve_string_option(
+        "SSKEYIN", "");
     if (get_key_prefixes.length() > 0) {
         const char* a = get_key_prefixes.c_str();
         const char* b = a;
