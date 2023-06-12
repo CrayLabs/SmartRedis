@@ -75,8 +75,8 @@ class Client : public SRObject
     public:
 
         /*!
-        *   \brief Client constructor with default configuration: environment
-        *          variables, no suffix
+        *   \brief Simple Client constructor with default configuration:
+        *          environment variables, no suffix
         *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
         *          object initialization fails

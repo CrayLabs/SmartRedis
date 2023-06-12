@@ -40,7 +40,7 @@ using namespace SmartRedis;
 Client::Client(const std::string& logger_name)
     : SRObject(logger_name)
 {
-    // Create our ConfigOptions object (default = no suffixing)
+    // Create our ConfigOptions object (default: no suffixing)
     auto cfgopts = ConfigOptions::create_from_environment("");
     _cfgopts = cfgopts.release();
     _cfgopts->_set_log_context(this);
@@ -57,6 +57,8 @@ Client::Client(const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
+
+    throw SRDatabaseException("This is a test (simple)");
 }
 
 // Constructor with config options
@@ -76,16 +78,16 @@ Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
+
+    throw SRDatabaseException("This is a test (std)");
 }
 
 // Initialize a connection to the back-end database
 void Client::_establish_server_connection()
 {
     // See what type of connection the user wants
-    std::string str_servertype("SR_SERVER_TYPE");
-    std::string str_servertype_default("Clustered");
     std::string servertype = _cfgopts->_resolve_string_option(
-        str_servertype, str_servertype_default);
+        "SR_SERVER_TYPE", "Clustered");
 
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
@@ -138,6 +140,8 @@ Client::Client(bool cluster, const std::string& logger_name)
     _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
+
+    throw SRDatabaseException("This is a test (deprecated)");
 }
 
 // Destructor

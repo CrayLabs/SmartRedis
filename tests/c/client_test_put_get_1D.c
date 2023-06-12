@@ -166,7 +166,7 @@ int put_get_1D_tensor_float(size_t* dims, size_t n_dims,
     tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   int r_value = 0;
-  r_value = put_get_1D_tensor(client,(void*)tensor,
+  r_value = put_get_1D_tensor(client, (void*)tensor,
                               dims, n_dims, (void**)(&result),
                               key_suffix, key_suffix_length,
                               SRTensorTypeFloat);

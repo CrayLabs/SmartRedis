@@ -48,7 +48,7 @@ def get_test_names():
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_example(test, use_cluster, build, sr_fortran):
+def test_example(test, build, sr_fortran):
     if (sr_fortran == "ON" or ".F90" not in test):
         # Build the path to the test executable from the source file name
         # . keep only the last three parts of the path: (parallel/serial, language, basename)
@@ -58,8 +58,7 @@ def test_example(test, use_cluster, build, sr_fortran):
         # . prepend the path to the built test executable
         test = f"{getcwd()}/build/{build}/examples/{test}"
         cmd = [test]
-        print(f"Running test: {osp.basename(test)}")
-        print(f"Using cluster: {use_cluster}")
+        print(f"\nRunning test: {osp.basename(test)}")
         execute_cmd(cmd)
         time.sleep(1)
     else:
