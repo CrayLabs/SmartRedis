@@ -45,8 +45,7 @@ set(SMARTREDIS_LIBRARIES
 
 # Define include directories for header files
 include_directories(SYSTEM
-    /usr/local/include
-    ${SMARTREDIS_INSTALL_PATH}/include
+    /usr/local/include/smartredis
 )
 
 # Build the test
