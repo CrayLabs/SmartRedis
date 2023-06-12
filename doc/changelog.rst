@@ -8,6 +8,8 @@ To be released at some future point in time
 
 Description
 
+- Remove debug output in pybind layer
+- Update Hiredis version to 1.1.0
 - Enable parallel build for the SmartRedis examples
 - Experimental support for Nvidia toolchain
 - Major revamp of build and test systems for SmartRedis
@@ -21,6 +23,8 @@ Description
 
 Detailed Notes
 
+- Remove debug output in pybind layer associated with put_dataset (PR352_)
+- Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code into a small static library (PR349_)
 - For the NVidia toolchain only: Replaces the assumed rank feature of F2018 used in the Fortran client with assumed shape arrays, making it possible to compile SmartRedis with the Nvidia toolchain. (PR346_)
 - Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
@@ -32,6 +36,8 @@ Detailed Notes
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
+.. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349
 .. _PR346: https://github.com/CrayLabs/SmartRedis/pull/346
 .. _PR341: https://github.com/CrayLabs/SmartRedis/pull/341
