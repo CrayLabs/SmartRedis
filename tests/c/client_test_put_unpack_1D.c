@@ -121,7 +121,7 @@ int put_unpack_1D_tensor_float(size_t* dims, size_t n_dims,
   float* result = (float*)malloc(dims[0]*sizeof(float));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((float)rand())/RAND_MAX;
+    tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                                      SRTensorTypeFloat, key_suffix, key_suffix_length);
