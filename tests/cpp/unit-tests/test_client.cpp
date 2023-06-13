@@ -111,7 +111,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 KeyException);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-               KeyException);
+                KeyException);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
                 KeyException);
