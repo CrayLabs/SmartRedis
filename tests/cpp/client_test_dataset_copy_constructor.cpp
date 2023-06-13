@@ -189,8 +189,6 @@ void copy_constructor(
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(full_dataset);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {

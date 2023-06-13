@@ -36,8 +36,8 @@
 
 using namespace SmartRedis;
 
-// Simple Constructor
-Client::Client(const std::string& logger_name)
+// Simple Client constructor
+Client::Client(const char* logger_name)
     : SRObject(logger_name)
 {
     // Create our ConfigOptions object (default: no suffixing)
@@ -59,6 +59,23 @@ Client::Client(const std::string& logger_name)
     _use_list_prefix = true;
 }
 
+
+// Simple Constructor
+Client::Client(const std::string& logger_name)
+    : SRObject(logger_name)
+{
+    // Create our ConfigOptions object (default: no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+}
+
 // Constructor with config options
 Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
     : SRObject(logger_name), _cfgopts(cfgopts->clone())
@@ -69,13 +86,6 @@ Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
 
     // Establish our server connection
     _establish_server_connection();
-
-    // Initialize key prefixing
-    _get_prefix_settings();
-    _use_tensor_prefix = true;
-    _use_dataset_prefix = true;
-    _use_model_prefix = false;
-    _use_list_prefix = true;
 }
 
 // Initialize a connection to the back-end database
@@ -98,6 +108,13 @@ void Client::_establish_server_connection()
         _redis = new Redis(_cfgopts);
         _redis_server =  _redis;
     }
+
+    // Initialize key prefixing
+    _get_prefix_settings();
+    _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
+    _use_model_prefix = false;
+    _use_list_prefix = true;
 }
 
 // Constructor (deprecated)

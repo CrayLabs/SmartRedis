@@ -130,8 +130,6 @@ void rename_dataset(std::string keyout)
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(retrieved_dataset);
-
-    return;
 }
 
 void add_to_aggregation_list(std::string keyout)
@@ -237,8 +235,6 @@ void add_to_aggregation_list(std::string keyout)
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(retrieved_dataset);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {
