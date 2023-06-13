@@ -80,10 +80,13 @@ CommandReply Redis::run(CompoundCommand& cmd){
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    if (!is_addressable(cmd.get_address()))
-        throw SRRuntimeException("The provided address does not match "\
-                                 "the address used to initialize the "\
-                                 "non-cluster client connection.");
+    if (!is_addressable(cmd.get_address())) {
+        std::string msg("The provided address does not match "\
+                        "the address used to initialize the "\
+                        "non-cluster client connection.");
+        msg += " Received: " + cmd.get_address().to_string();
+        throw SRRuntimeException(msg);
+    }
     return this->_run(cmd);
 }
 
