@@ -33,6 +33,7 @@
 #include "srexception.h"
 #include "utility.h"
 #include "srobject.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
@@ -1018,7 +1019,12 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
 // Connect to the cluster at the address and port
 inline void RedisCluster::_connect(SRAddress& db_address)
 {
+    std::string msg;
     for (int i = 1; i <= _connection_attempts; i++) {
+        msg = "Connection attempt " + std::to_string(i) + " of " +
+            std::to_string(_connection_attempts);
+        _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
+
         try {
             // Attempt the connection
             _redis_cluster = new sw::redis::RedisCluster(db_address.to_string(true));
@@ -1027,10 +1033,13 @@ inline void RedisCluster::_connect(SRAddress& db_address)
         catch (std::bad_alloc& e) {
             // On a memory error, bail immediately
             _redis_cluster = NULL;
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, "Memory error");
             throw SRBadAllocException("RedisCluster connection");
         }
         catch (sw::redis::Error& e) {
             // For an error from Redis, retry unless we're out of chances
+            msg = "redis error: "; msg += e.what();
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
             _redis_cluster = NULL;
             std::string message("Unable to connect to backend database: ");
             message += e.what();
@@ -1044,6 +1053,8 @@ inline void RedisCluster::_connect(SRAddress& db_address)
         }
         catch (std::exception& e) {
             // Should never hit this, so bail immediately if we do
+            msg = "std::exception: "; msg += e.what();
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
             _redis_cluster = NULL;
             throw SRInternalException(
                 std::string("Unexpected exception while connecting: ") +
@@ -1051,6 +1062,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
         }
         catch (...) {
             // Should never hit this, so bail immediately if we do
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, "unknown exception");
             _redis_cluster = NULL;
             throw SRInternalException(
                 "A non-standard exception was encountered during client "\

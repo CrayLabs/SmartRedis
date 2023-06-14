@@ -71,16 +71,23 @@ int put_get_2D_tensor(void* client,
   size_t* g_dims;
   size_t g_n_dims;
 
+  printf("Calling put_tensor\n");
+
   SRMemoryLayout layout = SRMemLayoutNested;
   if (SRNoError != put_tensor(client, key, key_length,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
   }
+
+  printf("Calling get_tensor\n");
+
   if (SRNoError != get_tensor(client, key, key_length,
                           result, &g_dims, &g_n_dims,
                           &g_type, layout)) {
     return -1;
   }
+
+  printf("Comparing tensors\n");
 
   int r_value = 0;
   if(g_n_dims!=n_dims) {
@@ -106,6 +113,8 @@ int put_get_2D_tensor(void* client,
     r_value = -1;
   }
 
+  printf("Done\n");
+
   free(key);
   return r_value;
 }
@@ -123,6 +132,8 @@ int put_get_2D_tensor_double(size_t* dims, size_t n_dims,
   if (SRNoError != CreateSimpleClient(logger_name, cid_len, &client))
     return -1;
 
+  printf("Client created\n");
+
   double** tensor = (double**)malloc(dims[0]*sizeof(double*));
   double** result = 0;
 
@@ -133,6 +144,8 @@ int put_get_2D_tensor_double(size_t* dims, size_t n_dims,
   for(int i=0; i<dims[0]; i++)
     for(int j=0; j<dims[1]; j++)
       tensor[i][j] = ((double)rand())/RAND_MAX;
+
+  printf("Tensor established\n");
 
   int r_value = 0;
   r_value = put_get_2D_tensor(client, (void*)tensor,

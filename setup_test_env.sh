@@ -33,8 +33,8 @@
 
 echo "Setting up SmartRedis environment for testing"
 
-export SMARTREDIS_TEST_CLUSTER=True
-echo SMARTREDIS_TEST_CLUSTER set to $SMARTREDIS_TEST_CLUSTER
+export SR_SERVER_TYPE=Clustered
+echo SR_SERVER_TYPE set to $SR_SERVER_TYPE
 
 export SMARTREDIS_TEST_DEVICE=cpu
 echo SMARTREDIS_TEST_DEVICE set to $SMARTREDIS_TEST_DEVICE

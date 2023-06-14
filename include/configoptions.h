@@ -212,6 +212,12 @@ class ConfigOptions
             _log_context = log_context;
         }
 
+        /*!
+        *   \brief Clear a configuration option from the cache
+        *   \param option_name The name of the option to clear
+        */
+        void _clearOptionFromCache(const std::string& option_name);
+
         /////////////////////////////////////////////////////////////
         // Option overrides
 

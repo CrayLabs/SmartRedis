@@ -219,3 +219,10 @@ std::string ConfigOptions::_suffixed(const std::string& option_name)
         result = _string + + "_" + option_name;
     return result;
 }
+
+// Clear a configuration option from the cache
+void ConfigOptions::_clearOptionFromCache(const std::string& option_name)
+{
+    _int_options.erase(option_name);
+    _string_options.erase(option_name);
+}

@@ -49,6 +49,11 @@ class TestSSDB : public Redis
         {
             return _get_ssdb();
         }
+
+        void clear_cached_SSDB()
+        {
+            _cfgopts->_clearOptionFromCache("SSDB");
+        }
 };
 
 // helper function for putting the SSDB environment
@@ -85,17 +90,21 @@ SCENARIO("Additional Testing for various SSDBs", "[SSDB]")
         {
             // SSDB is nullptr
             unsetenv("SSDB");
+            test_ssdb.clear_cached_SSDB();
             CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
 
             // SSDB contains invalid characters
             setenv_ssdb ("127.0.0.1:*&^9");
+            test_ssdb.clear_cached_SSDB();
             CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
 
             // Valid SSDB. Ensure one of 127 or 128 is chosen
             setenv_ssdb("127,128");
+            test_ssdb.clear_cached_SSDB();
             CHECK_THROWS_AS(test_ssdb.get_ssdb(), SmartRedis::RuntimeException);
 
             // SSDB points to a unix domain socket and we're using clustered Redis
+            // FINDME: This test uses a deprecated constructor and will need to be rewritten
             setenv_ssdb ("unix://127.0.0.1:6349");
             CHECK_THROWS_AS(c = new Client(true, "test_ssdb"), SmartRedis::RuntimeException);
 

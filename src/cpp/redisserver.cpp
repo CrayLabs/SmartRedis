@@ -77,8 +77,7 @@ RedisServer::~RedisServer()
 SRAddress RedisServer::_get_ssdb()
 {
     // Retrieve the environment variable
-    std::string db_spec;
-    get_config_string(db_spec, "SSDB", "");
+    std::string db_spec = _cfgopts->_resolve_string_option("SSDB", "");
     if (db_spec.length() == 0)
         throw SRRuntimeException("The environment variable SSDB "\
                                  "must be set to use the client.");
@@ -104,9 +103,19 @@ SRAddress RedisServer::_get_ssdb()
         address_choices.push_back(addr_spec);
     }
 
+    std::string msg = "Found " + std::to_string(address_choices.size()) + " addresses:";
+    _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
+    for (int ii = 0; ii < address_choices.size(); ii++) {
+        _cfgopts->_get_log_context()->log_data(
+            LLDeveloper, "\t" + address_choices[ii].to_string());
+    }
+
     // Pick an entry from the list at random
     std::uniform_int_distribution<> distrib(0, address_choices.size() - 1);
-    return address_choices[distrib(_gen)];
+    auto choice = address_choices[distrib(_gen)];
+    _cfgopts->_get_log_context()->log_data(
+        LLDeveloper, "Picked: " + choice.to_string());
+    return choice;
 }
 
 // Check that the SSDB environment variable value does not have any errors

@@ -43,8 +43,6 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB: "127.0.0.1:6379"
-  SMARTREDIS_TEST_CLUSTER: False
 
 jobs:
 

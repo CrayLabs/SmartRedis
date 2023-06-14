@@ -30,6 +30,7 @@
 #define SMARTREDIS_TEST_UTILS_H
 
 #include <typeinfo>
+#include <cctype>
 #include <random>
 
 #include "rediscluster.h"
@@ -73,8 +74,15 @@ inline bool use_cluster()
     if (server_type == NULL)
       return false;
 
-    to_lower(server_type);
-    return std::strcmp(server_type, "clustered") == 0;
+    // lower-case a copy of the environment variable
+    // not the value in memory
+    char copy[256];
+    for (int i = 0; i < 256; i++) {
+      copy[i] = std::tolower(server_type[i]);
+      if (copy[i] == '\0')
+        break;
+    }
+    return std::strcmp(copy, "clustered") == 0;
 }
 
 template <typename T>

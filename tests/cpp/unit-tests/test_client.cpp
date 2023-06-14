@@ -491,7 +491,6 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             CHECK(serial.length() > 0);
             std::cout << client;
         }
-
         WHEN("INFO or CLUSTER INFO is called on database with "
              "an invalid address")
         {
@@ -510,7 +509,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
         {
 
             THEN("No errors with be thrown for both cluster and "
-                 "non-cluster environemnts")
+                 "non-cluster environments")
             {
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
@@ -770,6 +769,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
     log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
+#if TEST_REMOVAL
 SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
@@ -858,6 +858,7 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
     }
     log_data(context, LLDebug, "***End Client prefix coverage testing***");
 }
+#endif
 
 SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 {

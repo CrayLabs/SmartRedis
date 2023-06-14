@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include <algorithm>
+#include <cctype>
 #include "client.h"
 #include "srexception.h"
 #include "logger.h"
@@ -92,24 +93,27 @@ Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
 void Client::_establish_server_connection()
 {
     // See what type of connection the user wants
-    std::string servertype = _cfgopts->_resolve_string_option(
+    std::string server_type = _cfgopts->_resolve_string_option(
         "SR_SERVER_TYPE", "Clustered");
+    std::transform(server_type.begin(), server_type.end(), server_type.begin(),
+        [](unsigned char c){ return std::tolower(c); });
 
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
-    if (servertype == "Clustered") {
-        std::cout << "Instantiating clustered Redis connection" << std::endl;
+    if (server_type == "clustered") {
+        log_data(LLDeveloper, "Instantiating clustered Redis connection");
         _redis_cluster = new RedisCluster(_cfgopts);
         _redis = NULL;
         _redis_server =  _redis_cluster;
     }
     else { // Standalone or Colocated
-        std::cout << "Instantiating standalone Redis connection" << std::endl;
+        log_data(LLDeveloper, "Instantiating standalone Redis connection");
         _redis_cluster = NULL;
         _redis = new Redis(_cfgopts);
         _redis_server =  _redis;
     }
+    log_data(LLDeveloper, "Redis connection established");
 
     // Initialize key prefixing
     _get_prefix_settings();
