@@ -105,7 +105,7 @@ SRAddress RedisServer::_get_ssdb()
 
     std::string msg = "Found " + std::to_string(address_choices.size()) + " addresses:";
     _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
-    for (int ii = 0; ii < address_choices.size(); ii++) {
+    for (size_t ii = 0; ii < address_choices.size(); ii++) {
         _cfgopts->_get_log_context()->log_data(
             LLDeveloper, "\t" + address_choices[ii].to_string());
     }
