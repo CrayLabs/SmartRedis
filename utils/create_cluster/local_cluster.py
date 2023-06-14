@@ -80,17 +80,20 @@ def create_cluster(n_nodes, port):
         pids.append(pid)
     sleep(2)
     # Create cluster
-    redis_cli = os.getenv('REDIS_INSTALL_PATH') + '/redis-cli'
-    cluster_str=' '
-    for i in range(n_nodes):
-        cluster_str += '127.0.0.1:' + str(port+i) + ' '
-    cmd = " ".join((redis_cli, "--cluster create", cluster_str, "--cluster-replicas 0"))
-    print(cmd)
-    proc = run([cmd], input="yes", encoding="utf-8", shell=True)
-    if proc.returncode != 0:
-        raise SubprocessError("Cluster could not be created!")
+    if n_nodes > 1:
+        redis_cli = os.getenv('REDIS_INSTALL_PATH') + '/redis-cli'
+        cluster_str=' '
+        for i in range(n_nodes):
+            cluster_str += '127.0.0.1:' + str(port+i) + ' '
+        cmd = " ".join((redis_cli, "--cluster create", cluster_str, "--cluster-replicas 0"))
+        print(cmd)
+        proc = run([cmd], input="yes", encoding="utf-8", shell=True)
+        if proc.returncode != 0:
+            raise SubprocessError("Cluster could not be created!")
+        else:
+            print("Cluster has been setup!")
     else:
-        print("Cluster has been setup!")
+        print("Server has been setup!")
 
     return pids
 

@@ -99,11 +99,13 @@ void Client::_establish_server_connection()
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
     if (servertype == "Clustered") {
+        std::cout << "Instantiating clustered Redis connection" << std::endl;
         _redis_cluster = new RedisCluster(_cfgopts);
         _redis = NULL;
         _redis_server =  _redis_cluster;
     }
     else { // Standalone or Colocated
+        std::cout << "Instantiating standalone Redis connection" << std::endl;
         _redis_cluster = NULL;
         _redis = new Redis(_cfgopts);
         _redis_server =  _redis;
@@ -121,6 +123,7 @@ void Client::_establish_server_connection()
 Client::Client(bool cluster, const std::string& logger_name)
     : SRObject(logger_name)
 {
+    std::cout << "In deprecated constructor" << std::endl;
     // Log that a new client has been instantiated
     log_data(LLDebug, "New client created");
 
