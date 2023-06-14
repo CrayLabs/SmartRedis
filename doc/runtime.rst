@@ -10,8 +10,8 @@ and to retrieve the correct information from the
 database.  In the following sections,
 these requirements will be described.
 
-Setting Redis Database Location
-===============================
+Setting Redis Database Location and Type
+========================================
 
 The C++, C, and Fortran clients retrieve
 the Redis database location from the
@@ -37,10 +37,21 @@ at three different addresses, each using port ``6379``:
 
     export SSDB="10.128.0.153:6379,10.128.0.154:6379,10.128.0.155:6379"
 
-The Python client relies on ``SSDB`` to determine database
-location.  However, the Python ``Client`` constructor also allows
-for the database location to be set as an input parameter. In
-this case, it sets SSDB from the input parameter.
+
+There are two types of Redis databases that can be used by the
+SmartRedis library. A ``Clustered`` database, such as the one in
+the previous example, Is replicated across multiple shards.
+By way of comparison, a ``Standalone`` database only has a single
+shard that services all traffic; this is the form used when a
+colocated database is requested.
+
+The ``SR_SERVER_TYPE`` environment variable informs the SmartRedis
+library which form is in use. Below is an example of setting
+``SR_SERVER_TYPE`` for a Redis cluster:
+
+.. code-block:: bash
+
+    export SR_SERVER_TYPE="Clustered"
 
 Logging Environment Variables
 =============================
