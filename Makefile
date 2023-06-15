@@ -38,7 +38,12 @@ SR_PYTHON := OFF
 
 # Test variables
 COV_FLAGS :=
+SR_TEST_REDIS_MODE := Clustered
+SR_TEST_PORT := 6379
+SR_TEST_NODES := 3
+SR_TEST_RAI_VER := 1.2.7
 SR_TEST_DEVICE := cpu
+SR_TEST_PYTEST_FLAGS := -vv -s
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -81,6 +86,21 @@ help:
 # help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings
 # help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
 # help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
+# help:
+# help: Test variables
+# help: --------------
+# help:
+# help: These variables affect the way that the SmartRedis library is tested. Each
+# help: has several options; the first listed is the default. Use by appending
+# help: the variable name and setting after the make target, e.g.
+# help:    make test SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# help:
+# help: SR_TEST_REDIS_MODE {Clustered, Standalone} -- type of Redis backend launched for tests
+# help: SR_TEST_PORT (Default: 6379) -- first port for Redis server(s)
+# help: SR_TEST_NODES (Default: 3) Number of shards to intantiate for a clustered Redis database
+# help: SR_TEST_RAI_VER {1.2.7, 1.2.5} -- version of RedisAI to use for tests
+# help: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
+# help: SR_TEST_PYTEST_FLAGS (default: "-vv -s"): Verbosity flags to use with pytest
 
 # help:
 # help: Build targets
@@ -278,6 +298,46 @@ endif
 ifeq ($(SR_FORTRAN),OFF)
 SKIP_FORTRAN = --ignore ./tests/fortran
 endif
+SKIP_DOCKER := --ignore ./tests/docker
+
+# Build SSDB string for clustered database
+SSDB_STRING := 127.0.0.1:$(SR_TEST_PORT)
+PORT_RANGE := $(shell seq `expr $(SR_TEST_PORT) + 1` 1 `expr $(SR_TEST_PORT) + $(SR_TEST_NODES) - 1`)
+SSDB_STRING += $(foreach P,$(PORT_RANGE),",127.0.0.1:$(P)")
+SSDB_STRING := $(shell echo $(SSDB_STRING) | tr -d " ")
+
+# Run test cases with a freshly instantiated Redis server
+# Parameters:
+# 	1: the test directory in which to run tests
+ifeq ($(SR_TEST_REDIS_MODE),Standalone)
+define run_smartredis_tests_with_server
+	@echo "Running standalone tests" && \
+	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=$(SR_TEST_REDIS_MODE) && \
+	echo export SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
+	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 stop"
+endef
+endif
+ifeq ($(SR_TEST_REDIS_MODE),Clustered)
+define run_smartredis_tests_with_server
+	@echo "Running clustered tests" && \
+	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=$(SR_TEST_REDIS_MODE) && \
+	echo export SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	echo "export SSDB=$(SSDB_STRING)" && \
+	echo "python utils/launch_redis --nodes $(SR_TEST_NODES) --rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
+	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) stop"
+endef
+endif
+
+.PHONY: foo
+foo: SR_TEST_PYTEST_FLAGS := -vv -s
+foo:
+	$(call run_smartredis_tests_with_server,./tests)
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
