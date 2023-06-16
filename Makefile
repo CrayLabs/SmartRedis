@@ -39,6 +39,7 @@ SR_PYTHON := OFF
 # Test variables
 COV_FLAGS :=
 SR_TEST_REDIS_MODE := Clustered
+SR_TEST_UDS_FILE := /tmp/redis.sock
 SR_TEST_PORT := 6379
 SR_TEST_NODES := 3
 SR_TEST_RAI_VER := 1.2.7
@@ -313,7 +314,26 @@ define run_smartredis_tests_with_standalone_server
 	@echo "Running standalone tests" && \
 	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
 	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
-	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) \
+		--port $(SR_TEST_PORT)" && \
+	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 stop"
+endef
+
+# Run test cases with a freshly instantiated standalone Redis server
+# connected via a Unix Domain Socket
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_uds_server
+	@echo "Running standalone tests with Unix Domain Socket connection" && \
+	echo mkdir -p `basename $(SR_TEST_UDS_FILE)` && \
+	echo touch $(SR_TEST_UDS_FILE) && \
+	echo chmod 777 $(SR_TEST_UDS_FILE) && \
+	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) \
+		--port $(SR_TEST_PORT) --udsport $(SR_TEST_UDS_FILE)" && \
 	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
 	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 stop"
@@ -326,7 +346,8 @@ define run_smartredis_tests_with_clustered_server
 	@echo "Running clustered tests" && \
 	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Clustered && \
 	echo "export SSDB=$(SSDB_STRING)" && \
-	echo "python utils/launch_redis --nodes $(SR_TEST_NODES) --rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --nodes $(SR_TEST_NODES) \
+		--rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
 	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
 	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) stop"
@@ -336,14 +357,19 @@ endef
 # Parameters:
 # 	1: the test directory in which to run tests
 define run_smartredis_tests_with_server
-	$(if $(filter-out $(SR_TEST_REDIS_MODE),Clustered), $(call run_smartredis_tests_with_standalone_server $(1)))
-	$(if $(filter-out $(SR_TEST_REDIS_MODE),Standalone), $(call run_smartredis_tests_with_clustered_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),Standalone), $(call run_smartredis_tests_with_standalone_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_standalone_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),Clustered), $(call run_smartredis_tests_with_clustered_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_clustered_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),UDS), $(call run_smartredis_tests_with_uds_server $(1)))
+	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_uds_server $(1)))
 endef
 
 .PHONY: foo
 foo: SR_TEST_PYTEST_FLAGS := -vv -s
 foo:
 	$(call run_smartredis_tests_with_server,./tests)
+#	@echo third-party/redis/src/redis-server --port 6379 --daemonize yes --logfile "single.log" --loadmodule third-party/RedisAI/install-cpu/redisai.so  TF third-party/RedisAI/install-cpu/backends/redisai_tensorflow/redisai_tensorflow.so TORCH third-party/rty/RedisAI/install-cpu/backends/redisai_torch/redisai_torch.so
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
