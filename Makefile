@@ -357,12 +357,21 @@ endef
 # Parameters:
 # 	1: the test directory in which to run tests
 define run_smartredis_tests_with_server
-	$(if $(filter $(SR_TEST_REDIS_MODE),Standalone), $(call run_smartredis_tests_with_standalone_server $(1)))
-	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_standalone_server $(1)))
-	$(if $(filter $(SR_TEST_REDIS_MODE),Clustered), $(call run_smartredis_tests_with_clustered_server $(1)))
-	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_clustered_server $(1)))
-	$(if $(filter $(SR_TEST_REDIS_MODE),UDS), $(call run_smartredis_tests_with_uds_server $(1)))
-	$(if $(filter $(SR_TEST_REDIS_MODE),All), $(call run_smartredis_tests_with_uds_server $(1)))
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Standalone),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(call run_smartredis_tests_with_standalone_server $(1))
+	)
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Clustered),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(call run_smartredis_tests_with_clustered_server $(1))
+	)
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),UDS),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(if $(filter-out $(shell uname -s),Darwin),
+			$(call run_smartredis_tests_with_uds_server $(1)),
+			@echo "Skipping: Unix Domain Socket is not supported on MacOS"
+		)
+	)
 endef
 
 .PHONY: foo
