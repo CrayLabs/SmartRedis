@@ -25,6 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from subprocess import Popen, SubprocessError, run
+from time import sleep
 import argparse
 import os
 
@@ -150,8 +151,8 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         uds_clause = f"--bind 127.0.0.1 --unixsocket {udsport} --unixsocketperm 777"
     daemonize_clause = "--daemonize yes"
     cluster_clause = "--cluster-enabled yes" if is_cluster else ""
-    prot_clause = "--protected-mode no" #if is_cluster or is_uds else ""
-    save_clause = "--save \"\"" #if is_cluster else ""
+    prot_clause = "--protected-mode no" if is_cluster or is_uds else ""
+    save_clause = "--save \"\"" if is_cluster else ""
 
     # Start servers
     procs = []
@@ -175,6 +176,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
 
     # Make sure that all servers are up
     # Let exceptions propagate to the caller
+    sleep(2)
     for proc in procs:
         _,_ = proc.communicate(timeout=15)
         if proc.returncode != 0:
@@ -190,6 +192,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         proc = run([cmd], input="yes", encoding="utf-8", shell=True)
         if proc.returncode != 0:
             raise SubprocessError("Cluster could not be created!")
+        sleep(2)
         print("Cluster has been setup!")
     else:
         print("Server has been setup!")

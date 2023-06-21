@@ -311,14 +311,19 @@ SSDB_STRING := $(shell echo $(SSDB_STRING) | tr -d " ")
 # Parameters:
 # 	1: the test directory in which to run tests
 define run_smartredis_tests_with_standalone_server
-	@echo "Running standalone tests" && \
-	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
-	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
-		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE)" && \
-	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 --stop"
+	-@echo "Launching standalone Redis server" && \
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	export SMARTREDIS_TEST_CLUSTER=False && \
+	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE) && \
+	echo "Running standalone tests" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down standalone Redis server" && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
+	echo "Standalone tests complete"
 endef
 
 # Run test cases with a freshly instantiated standalone Redis server
@@ -326,33 +331,41 @@ endef
 # Parameters:
 # 	1: the test directory in which to run tests
 define run_smartredis_tests_with_uds_server
-	@echo "Running standalone tests with Unix Domain Socket connection" && \
-	echo mkdir -p `basename $(SR_TEST_UDS_FILE)` && \
-	echo touch $(SR_TEST_UDS_FILE) && \
-	echo chmod 777 $(SR_TEST_UDS_FILE) && \
-	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
-	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
+	-@echo "Launching standalone Redis server with Unix Domain Socket support"
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	export SMARTREDIS_TEST_CLUSTER=False && \
+	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE) \
-		--udsport $(SR_TEST_UDS_FILE)" && \
-	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
-		--udsport $(SR_TEST_UDS_FILE) --stop"
+		--udsport $(SR_TEST_UDS_FILE) && \
+	echo "Running standalone tests with Unix Domain Socket connection" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down standalone Redis server with Unix Domain Socket support"
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--udsport $(SR_TEST_UDS_FILE) --stop && \
+	echo "UDS tests complete"
 endef
 
 # Run test cases with a freshly instantiated clustered Redis server
 # Parameters:
 # 	1: the test directory in which to run tests
 define run_smartredis_tests_with_clustered_server
-	@echo "Running clustered tests" && \
-	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Clustered && \
-	echo "export SSDB=$(SSDB_STRING)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
-		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE)" && \
-	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) --stop"
+	-@echo "Launching clustered Redis server" && \
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Clustered && \
+	export SMARTREDIS_TEST_CLUSTER=True && \
+	export SSDB=$(SSDB_STRING) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
+		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE) && \
+	echo "Running clustered tests" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down clustered Redis server" && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) \
+		--nodes $(SR_TEST_NODES) --stop && \
+	echo "Clustered tests complete"
 endef
 
 # Run test cases with freshly instantiated Redis servers
@@ -361,16 +374,16 @@ endef
 define run_smartredis_tests_with_server
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Standalone),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_standalone_server $(1))
+		$(call run_smartredis_tests_with_standalone_server,$(1))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Clustered),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_clustered_server $(1))
+		$(call run_smartredis_tests_with_clustered_server,$(1))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),UDS),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
 		$(if $(filter-out $(shell uname -s),Darwin),
-			$(call run_smartredis_tests_with_uds_server $(1)),
+			$(call run_smartredis_tests_with_uds_server,$(1)),
 			@echo "Skipping: Unix Domain Socket is not supported on MacOS"
 		)
 	)
@@ -389,77 +402,93 @@ test: build-tests
 test: SR_TEST_PYTEST_FLAGS := -vv
 test:
 	$(call run_smartredis_tests_with_server,./tests)
-	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv ./tests --build $(SR_BUILD)
 
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
+test-verbose: RAI_VER := $(SR_TEST_RAI_VER)
 test-verbose: test-deps
 test-verbose: build-tests
+test-verbose: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv -s ./tests --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
+test-verbose-with-coverage: RAI_VER := $(SR_TEST_RAI_VER)
 test-verbose-with-coverage: SR_BUILD=Coverage
 test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
+test-verbose-with-coverage: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose-with-coverage:
-	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv -s ./tests --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
+test-c: RAI_VER := $(SR_TEST_RAI_VER)
 test-c: test-deps
 test-c: build-test-c
+test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
-	@python -m pytest -vv -s ./tests/c/ --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests/c)
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
+test-cpp: RAI_VER := $(SR_TEST_RAI_VER)
 test-cpp: test-deps
 test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
+test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/ --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests/cpp)
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
+unit-test-cpp: RAI_VER := $(SR_TEST_RAI_VER)
 unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
+unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/unit-tests/ --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
 
 # help: test-py                        - run python tests
 .PHONY: test-py
+test-py: RAI_VER := $(SR_TEST_RAI_VER)
 test-py: test-deps
 test-py: SR_PYTHON=ON
 test-py: lib
+test-py: SR_TEST_PYTEST_FLAGS := -vv
 test-py:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/ --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
+test-fortran: SR_FORTRAN := ON
+test-fortran: RAI_VER := $(SR_TEST_RAI_VER)
 test-fortran: test-deps
 test-fortran: build-test-fortran
-	@python -m pytest -vv ./tests/fortran/ --build $(SR_BUILD)
+test-fortran: SR_TEST_PYTEST_FLAGS := -vv
+test-fortran:
+	$(call run_smartredis_tests_with_server,./tests/fortran)
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
+testpy-cov: RAI_VER := $(SR_TEST_RAI_VER)
 testpy-cov: test-deps
 testpy-cov: SR_PYTHON=ON
+testpy-cov: SR_TEST_PYTEST_FLAGS := -vv
+testpy-cov: COV_FLAGS := --cov=./src/python/module/smartredis/
 testpy-cov:
-	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ \
-		-vv ./tests/python/ --build $(SR_BUILD)
+	$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
+test-examples: RAI_VER := $(SR_TEST_RAI_VER)
 test-examples: test-deps
 test-examples: build-examples
+testpy-cov: SR_TEST_PYTEST_FLAGS := -vv -s
 test-examples:
-	@python -m pytest -vv -s ./examples --build $(SR_BUILD) --sr_fortran $(SR_FORTRAN)
+	$(call run_smartredis_tests_with_server,./examples)
 
 
 ############################################################################
