@@ -32,20 +32,23 @@ def stop_db(n_nodes, port, udsport):
     """Stop a redis cluster and clear the files
     associated with it
     """
+    is_uds = udsport is not None
+    if is_uds:
+        n_nodes = 1
+
     # It's clobberin' time!
     rediscli = os.getenv('REDIS_INSTALL_PATH')
     if rediscli is not None:
         rediscli += '/redis-cli'
     else:
         rediscli = os.path.abspath(
-            os.basedir(__file__) + "/../third-party/redis/src/redis-server"
+            os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
         )
-    is_uds = udsport is not None
 
     # Clobber the server(s)
     procs = []
     for i in range(n_nodes):
-        connection = f"-s udsport" if is_uds else f"-p {str(port+1)}"
+        connection = f"-s udsport" if is_uds else f"-p {str(port + i)}"
         cmd = f"{rediscli} {connection} shutdown"
         proc = Popen(cmd, shell=True)
         procs.append(proc)
@@ -55,7 +58,7 @@ def stop_db(n_nodes, port, udsport):
     for proc in procs:
         _,_ = proc.communicate(timeout=15)
         if proc.returncode != 0:
-            raise RuntimeError("Failed to launch Redis server!")
+            raise RuntimeError("Failed to kill Redis server!")
 
     # clean up after ourselves
     for i in range(n_nodes):
@@ -81,11 +84,12 @@ def prepare_uds_socket(udsport):
     """
     if udsport is not None:
         uds_abs = os.path.abspath(udsport)
-        basedir = os.path.basedir(uds_abs)
+        basedir = os.path.dirname(uds_abs)
         if not os.path.exists(basedir):
             os.makedir(basedir)
         if not os.path.exists(uds_abs):
-            file(uds_abs, 'w+').close()
+            with open(uds_abs, 'a'):
+                pass
         os.chmod(uds_abs, 0o777)
 
 def create_db(n_nodes, port, device, rai_ver, udsport):
@@ -113,24 +117,26 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     """
 
     # Set up configuration
-    is_cluster = n_nodes > 1
     is_uds = udsport is not None
+    if is_uds:
+        n_nodes = 1
+    is_cluster = n_nodes > 1
     redisserver = os.getenv('REDIS_INSTALL_PATH') + '/redis-server'
     if redisserver is None:
         redisserver = os.path.abspath(
-            os.basedir(__file__) + "/../third-party/redis/src/redis-server"
+            os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
         )
-    rediscli = os.path.basename(redisserver) + "/redis-cli"
+    rediscli = os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
         "SMARTREDIS_TEST_DEVICE","cpu").lower()
-    if rai_ver is not None:
+    if rai_ver is not None and rai_ver != "":
         redisai_dir = os.path.abspath(
-            os.basedir(__file__) + "/../third-party/RedisAI/" + rai_ver +
-            "install-" + test_device
+            os.path.dirname(__file__) + "/../third-party/RedisAI/" + rai_ver +
+            "/install-" + test_device
         )
         redisai = redisai_dir + "/redisai.so"
-        tf_loc = redisai_dir + "backends/redisai_tensorflow/redisai_tensorflow.so"
-        torch_loc = redisai_dir + "backends/redisai_torch/redisai_torch.so"
+        tf_loc = redisai_dir + "/backends/redisai_tensorflow/redisai_tensorflow.so"
+        torch_loc = redisai_dir + "/backends/redisai_torch/redisai_torch.so"
         rai_clause = f"--loadmodule {redisai} TF {tf_loc} TORCH {torch_loc}"
     else:
         redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so'
@@ -154,7 +160,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         port_clause = f"--port {str(l_port)}" if not is_uds else "--port 0"
         if is_cluster:
             log_clause = f"--logfile {str(l_port)}.log"
-            cluster_cfg_clause = f"--cluster-config-file {{str(l_port)}.conf}"
+            cluster_cfg_clause = f"--cluster-config-file {str(l_port)}.conf"
         else:
             log_clause = "--logfile " + ("UDS.log" if is_uds else "single.log")
             cluster_cfg_clause = ""
@@ -193,8 +199,8 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--nodes', type=int, default=3)
     parser.add_argument('--rai', type=str, default=None)
-    parser.add_argument('--udsport', type=str, default=None)
     parser.add_argument('--device', type=str, default="cpu")
+    parser.add_argument('--udsport', type=str, default=None)
     parser.add_argument('--stop', action='store_true')
     args = parser.parse_args()
 

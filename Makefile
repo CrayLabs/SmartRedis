@@ -28,24 +28,6 @@
 MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
 
-# Build variables
-NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
-SR_BUILD := Release
-SR_LINK := Shared
-SR_PEDANTIC := OFF
-SR_FORTRAN := OFF
-SR_PYTHON := OFF
-
-# Test variables
-COV_FLAGS :=
-SR_TEST_REDIS_MODE := Clustered
-SR_TEST_UDS_FILE := /tmp/redis.sock
-SR_TEST_PORT := 6379
-SR_TEST_NODES := 3
-SR_TEST_RAI_VER := 1.2.7
-SR_TEST_DEVICE := cpu
-SR_TEST_PYTEST_FLAGS := -vv -s
-
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
 HIREDIS_VER := v1.1.0
@@ -61,6 +43,24 @@ CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
 LCOV_VER := v1.15
+
+# Build variables
+NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
+SR_BUILD := Release
+SR_LINK := Shared
+SR_PEDANTIC := OFF
+SR_FORTRAN := OFF
+SR_PYTHON := OFF
+
+# Test variables
+COV_FLAGS :=
+SR_TEST_REDIS_MODE := Clustered
+SR_TEST_UDS_FILE := /tmp/redis.sock
+SR_TEST_PORT := 6379
+SR_TEST_NODES := 3
+SR_TEST_RAI_VER := $(REDISAI_VER)
+SR_TEST_DEVICE := cpu
+SR_TEST_PYTEST_FLAGS := -vv -s
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -314,11 +314,11 @@ define run_smartredis_tests_with_standalone_server
 	@echo "Running standalone tests" && \
 	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
 	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
-	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) \
-		--port $(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE)" && \
 	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 stop"
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 --stop"
 endef
 
 # Run test cases with a freshly instantiated standalone Redis server
@@ -332,11 +332,13 @@ define run_smartredis_tests_with_uds_server
 	echo chmod 777 $(SR_TEST_UDS_FILE) && \
 	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
 	echo "export SSDB=127.0.0.1:$(SR_TEST_PORT)" && \
-	echo "python utils/launch_redis --nodes 1 --rai third-party/RedisAI/$(SR_TEST_RAI_VER) \
-		--port $(SR_TEST_PORT) --udsport $(SR_TEST_UDS_FILE)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE) \
+		--udsport $(SR_TEST_UDS_FILE)" && \
 	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 stop"
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes 1 \
+		--udsport $(SR_TEST_UDS_FILE) --stop"
 endef
 
 # Run test cases with a freshly instantiated clustered Redis server
@@ -346,11 +348,11 @@ define run_smartredis_tests_with_clustered_server
 	@echo "Running clustered tests" && \
 	echo export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Clustered && \
 	echo "export SSDB=$(SSDB_STRING)" && \
-	echo "python utils/launch_redis --nodes $(SR_TEST_NODES) \
-		--rai third-party/RedisAI/$(SR_TEST_RAI_VER) --port $(SR_TEST_PORT)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
+		--rai $(SR_TEST_RAI_VER) --device $(SR_TEST_DEVICE)" && \
 	echo "PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)" && \
-	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) stop"
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) $(1)  --build $(SR_BUILD)" && \
+	echo "python utils/launch_redis --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) --stop"
 endef
 
 # Run test cases with freshly instantiated Redis servers
@@ -378,13 +380,15 @@ endef
 foo: SR_TEST_PYTEST_FLAGS := -vv -s
 foo:
 	$(call run_smartredis_tests_with_server,./tests)
-#	@echo third-party/redis/src/redis-server --port 6379 --daemonize yes --logfile "single.log" --loadmodule third-party/RedisAI/install-cpu/redisai.so  TF third-party/RedisAI/install-cpu/backends/redisai_tensorflow/redisai_tensorflow.so TORCH third-party/rty/RedisAI/install-cpu/backends/redisai_torch/redisai_torch.so
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
+test: RAI_VER := $(SR_TEST_RAI_VER)
 test: test-deps
 test: build-tests
+test: SR_TEST_PYTEST_FLAGS := -vv
 test:
+	$(call run_smartredis_tests_with_server,./tests)
 	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker \
 		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv ./tests --build $(SR_BUILD)
 
@@ -541,15 +545,15 @@ endif
 # RedisAI (hidden test target)
 .phony: redisAI
 redisAI: cudann-check
-redisAI: third-party/RedisAI/install-cpu/redisai.so
-third-party/RedisAI/install-cpu/redisai.so:
+redisAI: third-party/RedisAI/$(REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
+third-party/RedisAI/$(REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
 	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
 	@mkdir -p third-party
 	@cd third-party && \
 	rm -rf RedisAI && \
-	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI \
+	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI/$(REDISAI_VER) \
 		--branch $(REDISAI_VER) --depth=1
-	-@cd third-party/RedisAI && \
+	-@cd third-party/RedisAI/$(REDISAI_VER) && \
 	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
 		$(SR_TEST_DEVICE) && \
 	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
