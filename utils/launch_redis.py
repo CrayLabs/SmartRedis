@@ -43,7 +43,7 @@ def stop_db(n_nodes, port, udsport):
         rediscli += '/redis-cli'
     else:
         rediscli = os.path.abspath(
-            os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
+            os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
         )
 
     # Clobber the server(s)
@@ -122,8 +122,10 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_uds:
         n_nodes = 1
     is_cluster = n_nodes > 1
-    redisserver = os.getenv('REDIS_INSTALL_PATH') + '/redis-server'
-    if redisserver is None:
+    redisserver = os.getenv('REDIS_INSTALL_PATH')
+    if redisserver is not None:
+        redisserver += '/redis-server'
+    else:
         redisserver = os.path.abspath(
             os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
         )
