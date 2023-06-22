@@ -147,54 +147,12 @@ jobs:
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
-      # Begin running the tests using various DB deployments
-      - name: Single-shard DB tests
+      # Run the tests using various DB deployments
+      - name: Run tests
         run: |
-          SCRATCH_DIR="single_scratch" && PORT=6380 &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --port $PORT --daemonize yes \
-                       --logfile "single.log" \
-                       --loadmodule $REDISAI_MODULES &&
-          popd &&
-          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
-          utils/check_redis.sh $PORT &&
-          make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" SR_FORTRAN=ON SR_PYTHON=ON
-
-      - name: Clustered DB tests
-        run: |
-          SCRATCH_DIR="cluster_scratch" &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          for port in {7000..7002}; do
-            redis-server --port $port --cluster-enabled yes --daemonize yes \
-                         --cluster-config-file "$port.conf" --protected-mode no --save "" \
-                         --logfile "$port.log" \
-                         --loadmodule $REDISAI_MODULES
-          done &&
-          popd &&
-          for port in {7000..7002}; do
-            utils/check_redis.sh $port
-          done &&
-          redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
-          export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
-          python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests --build Coverage
-
-      - name: UDS DB tests
-        run: |
-          SOCKET="/tmp/redis.sock" &&
-          mkdir -p /tmp && ## Create socketfile for UDS testing
-          touch $SOCKET &&
-          chmod 777 $SOCKET &&
-          SCRATCH_DIR="uds_scratch" &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --unixsocket $SOCKET --unixsocketperm 777 --port 0 --bind 127.0.0.1 \
-                       --daemonize yes --protected-mode no --logfile "uds.log" \
-                       --loadmodule $REDISAI_MODULES &&
-          popd &&
-          utils/check_redis.sh $SOCKET
-          export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
-          python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests --build Coverage
+          make test-verbose-with-coverage \
+            COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
+            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers

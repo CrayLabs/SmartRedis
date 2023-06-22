@@ -389,11 +389,6 @@ define run_smartredis_tests_with_server
 	)
 endef
 
-.PHONY: foo
-foo: SR_TEST_PYTEST_FLAGS := -vv -s
-foo:
-	$(call run_smartredis_tests_with_server,./tests)
-
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
 test: RAI_VER := $(SR_TEST_RAI_VER)
