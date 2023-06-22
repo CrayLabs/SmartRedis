@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Fixed a memory leak in the C layer
 - Remove debug output in pybind layer
 - Update Hiredis version to 1.1.0
 - Enable parallel build for the SmartRedis examples
@@ -23,6 +24,7 @@ Description
 
 Detailed Notes
 
+- Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
 - Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code
@@ -44,6 +46,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
 .. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349

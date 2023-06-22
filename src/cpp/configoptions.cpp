@@ -27,6 +27,7 @@
  */
 
 #include <string_view>
+#include <algorithm>
 #include "configoptions.h"
 #include "srexception.h"
 #include "logger.h"
@@ -45,6 +46,15 @@ ConfigOptions::ConfigOptions(
     if (!_lazy) {
         _populate_options();
     }
+}
+
+// ConfigOptions destructor
+ConfigOptions::~ConfigOptions()
+{
+    // Nuke each string from our stash
+    auto nuke = [](char* buf) { delete buf; };
+    std::for_each(_string_buffer_stash.begin(), _string_buffer_stash.end(), nuke);
+    _string_buffer_stash.clear();
 }
 
 // Instantiate ConfigOptions, getting selections from environment variables
@@ -201,3 +211,4 @@ std::string ConfigOptions::_prefixed(const std::string& option_name)
         result = _string + + "_" + option_name;
     return result;
 }
+
