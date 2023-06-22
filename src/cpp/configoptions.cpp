@@ -27,6 +27,7 @@
  */
 
 #include <string_view>
+#include <algorithm>
 #include "configoptions.h"
 #include "srexception.h"
 #include "logger.h"
