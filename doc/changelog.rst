@@ -24,7 +24,7 @@ Description
 
 Detailed Notes
 
-- Major revamp to simplify use of SmartRedis test system. See docs. (PR355_)
+- Major revamp to simplify use of SmartRedis test system. See docs. (PR356_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
 - Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code
@@ -46,7 +46,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
-.. _PR355: https://github.com/CrayLabs/SmartRedis/pull/355
+.. _PR356: https://github.com/CrayLabs/SmartRedis/pull/356
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
 .. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349
