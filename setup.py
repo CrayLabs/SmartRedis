@@ -50,7 +50,14 @@ class CMakeBuild(build_ext):
         cmake_cmd = shutil.which("cmake")
         return cmake_cmd
 
+    @property
+    def make(self):
+        """Find and use installed cmake"""
+        make_cmd = shutil.which("make")
+        return make_cmd
+
     def run(self):
+        check_prereq("cmake")
         check_prereq("make")
         check_prereq("gcc")
         check_prereq("g++")
