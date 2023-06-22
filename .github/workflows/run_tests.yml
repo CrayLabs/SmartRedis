@@ -152,7 +152,7 @@ jobs:
         run: |
           make test-verbose-with-coverage \
             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
-            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All
+            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_RAI_VER=v${{ matrix.rai_v }}
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
