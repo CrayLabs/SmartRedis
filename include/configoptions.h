@@ -96,7 +96,7 @@ class ConfigOptions
         /*!
         *   \brief ConfigOptions destructor
         */
-        virtual ~ConfigOptions() = default;
+        virtual ~ConfigOptions();
 
         /////////////////////////////////////////////////////////////
         // Factory construction methods
@@ -191,6 +191,14 @@ class ConfigOptions
             _log_context = log_context;
         }
 
+        /*!
+        *   \brief Stash a string buffer so we can delete it on cleanup
+        *   \param buf The buffer to store
+        */
+        void _add_string_buffer(char* buf) {
+            _string_buffer_stash.push_back(buf);
+        }
+
         /////////////////////////////////////////////////////////////
         // Option overrides
 
@@ -266,6 +274,11 @@ class ConfigOptions
         *  \brief Logging context
         */
         std::string _log_context;
+
+        /*!
+        *  \brief Stash of string buffers to free at cleanup time
+        */
+       std::vector<char*> _string_buffer_stash;
 };
 
 } // namespace SmartRedis
