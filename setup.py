@@ -82,7 +82,8 @@ class CMakeBuild(build_ext):
             '-DSR_BUILD=' + cfg,
             '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
             '-DPYTHON_EXECUTABLE=' + sys.executable,
-            '-DSR_PYTHON=ON'
+            '-DSR_PYTHON=ON',
+            '--trace'
         ]
         subprocess.check_call(
             [self.cmake] + config_args,
