@@ -74,6 +74,16 @@ class CMakeBuild(build_ext):
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
 
+        # Build dependencies so they'll be in place for the build
+        # This enables the build directory to not be connected to the
+        # source location
+        print('-'*10, 'Building third-party dependencies', '-'*40)
+        subprocess.check_call(
+            [f"{self.make}", "deps"],
+            cwd=source_directory,
+            shell=False
+        )
+
         # Run config step
         print('-'*10, 'Configuring build', '-'*40)
         config_args = [
@@ -89,16 +99,6 @@ class CMakeBuild(build_ext):
             [self.cmake] + config_args,
             cwd=source_directory,
             env=env
-        )
-
-        # Build dependencies so they'll be in place for the build
-        # This enables the build directory to not be connected to the
-        # source location
-        print('-'*10, 'Building third-party dependencies', '-'*40)
-        subprocess.check_call(
-            [f"{self.make}", "deps"],
-            cwd=source_directory,
-            shell=False
         )
 
         # Run build step
