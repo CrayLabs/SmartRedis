@@ -134,11 +134,12 @@ SRError get_string_option(
 
     std::string option_result_str = co->get_string_option(option_name_str);
 
-    // TBD FINDME: we're leaking memory here since there will
-    // be no way to reclaim it
     *option_result_len = option_result_str.length();
     *option_result = new char[*option_result_len + 1];
     strncpy(*option_result, option_result_str.c_str(), *option_result_len);
+
+     // Save the pointer to this buffer so we can clean it up later
+    co->_add_string_buffer(*option_result);
   });
 }
 
