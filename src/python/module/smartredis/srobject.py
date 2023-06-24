@@ -43,21 +43,6 @@ class SRObject:
         else:
             self._srobject = context
 
-    @staticmethod
-    def from_pybind(srobject):
-        """Initialize a SRObject object from
-        a PySRObject object
-
-        :param srobject: The pybind PySRObject object to use for construction
-        :type srobject: PySRObject
-        :return: The newly constructed¸ SRObject from the PySRObject
-        :rtype: SRObject
-        """
-        typecheck(srobject, "srobject", PySRObject)
-        new_srobject = SRObject(srobject._name)
-        new_srobject.set_data(srobject)
-        return new_srobject
-
     @exception_handler
     def get_srobject(self):
         """Return the PySRObject attribute
