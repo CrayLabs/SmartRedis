@@ -121,10 +121,6 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.move_output(ext)
 
-        # Move from build temp to final position
-        for ext in self.extensions:
-            self.move_output(ext)
-
     def move_output(self, ext):
         build_temp = Path(self.build_temp).resolve()
         dest = Path(self.get_ext_fullpath(ext.name)).parent.absolute()
