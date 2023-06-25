@@ -33,7 +33,6 @@ import multiprocessing as mp
 
 from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
 
 # get number of processors
 NPROC = mp.cpu_count()
@@ -82,7 +81,7 @@ class CMakeBuild(build_ext):
             shell=False
         )
 
-        # Run config step
+        # Run CMake config step
         print('-'*10, 'Configuring build', '-'*40)
         config_args = [
             '-S.',
@@ -98,7 +97,7 @@ class CMakeBuild(build_ext):
             env=env
         )
 
-        # Run build step
+        # Run CMake build step
         print('-'*10, 'Building library', '-'*40)
         build_args = [
             '--build',
