@@ -74,9 +74,7 @@ class CMakeBuild(build_ext):
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
 
-        # Build dependencies so they'll be in place for the build
-        # This enables the build directory to not be connected to the
-        # source location
+        # Build dependencies
         print('-'*10, 'Building third-party dependencies', '-'*40)
         subprocess.check_call(
             [f"{self.make}", "deps"],
