@@ -63,7 +63,7 @@ class CMakeBuild(build_ext):
         check_prereq("g++")
 
         # Set up parameters
-        source_directory = Path(os.path.abspath(os.path.dirname(__file__))).resolve()
+        source_directory = Path(__file__).parent.resolve()
         build_directory = Path(self.build_temp).resolve()
         cfg = 'Debug' if self.debug else 'Release'
 
@@ -76,7 +76,7 @@ class CMakeBuild(build_ext):
         # Build dependencies
         print('-'*10, 'Building third-party dependencies', '-'*40)
         subprocess.check_call(
-            [f"{self.make}", "deps"],
+            [self.make, "deps"],
             cwd=source_directory,
             shell=False
         )
