@@ -317,7 +317,7 @@ define run_smartredis_tests_with_standalone_server
 	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
-	cat $(SR_TEST_PORT).log && \
+	cat single.log && \
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
@@ -339,7 +339,7 @@ define run_smartredis_tests_with_uds_server
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
 		--udsport $(SR_TEST_UDS_FILE) && \
-	cat $(SR_TEST_PORT).log && \
+	cat UDS.log && \
 	echo "Running standalone tests with Unix Domain Socket connection" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
