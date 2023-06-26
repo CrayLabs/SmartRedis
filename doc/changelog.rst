@@ -9,6 +9,7 @@ To be released at some future point in time
 Description
 
 - Add support for Python 3.10
+- Updated setup.py to work with the new build system
 - Remove unneeded method from Python SRObject class
 - Fixed a memory leak in the C layer
 - Remove debug output in pybind layer
@@ -27,6 +28,7 @@ Description
 Detailed Notes
 
 - List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
+- Streamlined setup.py to simplify Python install (PR359)
 - Remove from_pybind() from Python SRObject class as it's not needed and didn't work properly anyway (PR358_)
 - Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
@@ -51,6 +53,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
 .. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
+.. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
 .. _PR358: https://github.com/CrayLabs/SmartRedis/pull/358
 .. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
