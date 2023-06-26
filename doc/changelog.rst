@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Updated setup.py to work with the new build system
 - Remove unneeded method from Python SRObject class
 - Fixed a memory leak in the C layer
 - Remove debug output in pybind layer
@@ -25,6 +26,7 @@ Description
 
 Detailed Notes
 
+- Streamlined setup.py to simplify Python install (PR359)
 - Remove from_pybind() from Python SRObject class as it's not needed and didn't work properly anyway (PR358_)
 - Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
@@ -48,6 +50,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
 .. _PR358: https://github.com/CrayLabs/SmartRedis/pull/358
 .. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
