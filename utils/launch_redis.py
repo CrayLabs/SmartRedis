@@ -40,10 +40,7 @@ def stop_db(n_nodes, port, udsport):
 
     # It's clobberin' time!
     if is_cicd:
-        rediscli = os.getenv('REDIS_INSTALL_PATH')
-        if rediscli is None:
-            raise RuntimeError("REDIS_INSTALL_PATH must be defined in CI/CD pipeline")
-        rediscli += '/redis-cli'
+        rediscli = 'redis-cli'
     else:
         rediscli = os.path.abspath(
             os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
@@ -128,15 +125,12 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "true"
 
     if is_cicd:
-        redisserver = os.getenv('REDIS_INSTALL_PATH')
-        if redisserver is None:
-            raise RuntimeError("REDIS_INSTALL_PATH must be defined in CI/CD pipeline")
-        redisserver += '/redis-server'
+        redisserver = "redis-server"
     else:
         redisserver = os.path.abspath(
             os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
         )
-    rediscli = os.path.dirname(redisserver) + "/redis-cli"
+    rediscli = "redis-cli" if is_cicd else os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
         "SMARTREDIS_TEST_DEVICE","cpu").lower()
     if is_cicd:
