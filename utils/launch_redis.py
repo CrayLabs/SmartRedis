@@ -80,6 +80,9 @@ def stop_db(n_nodes, port, udsport):
         if os.path.exists(fname):
             os.remove(fname)
 
+    # Pause to give Redis time to die
+    sleep(5)
+
 def prepare_uds_socket(udsport):
     """Sets up the UDS socket
     """
