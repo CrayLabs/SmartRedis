@@ -136,7 +136,7 @@ int put_get_3D_tensor_double(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     for(size_t j=0; j<dims[1]; j++)
       for(size_t k=0; k<dims[2]; k++)
-        tensor[i][j][k] = ((double)rand())/RAND_MAX;
+        tensor[i][j][k] = ((double)rand())/(double)RAND_MAX;
 
   int r_value = 0;
   r_value = put_get_3D_tensor(client, (void*)tensor,
@@ -195,7 +195,7 @@ int put_get_3D_tensor_float(size_t* dims, size_t n_dims,
   for(size_t i=0; i<dims[0]; i++)
     for(size_t j=0; j<dims[1]; j++)
       for(size_t k=0; k<dims[2]; k++)
-        tensor[i][j][k] = ((float)rand())/RAND_MAX;
+        tensor[i][j][k] = ((float)rand())/(float)RAND_MAX;
 
   int r_value = 0;
   r_value = put_get_3D_tensor(client, (void*)tensor,
