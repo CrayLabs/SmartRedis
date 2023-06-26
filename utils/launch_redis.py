@@ -36,10 +36,13 @@ def stop_db(n_nodes, port, udsport):
     is_uds = udsport is not None
     if is_uds:
         n_nodes = 1
+    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "yes"
 
     # It's clobberin' time!
-    rediscli = os.getenv('REDIS_INSTALL_PATH')
-    if rediscli is not None:
+    if is_cicd:
+        rediscli = os.getenv('REDIS_INSTALL_PATH')
+        if rediscli is None:
+            raise RuntimeError("REDIS_INSTALL_PATH must be defined in CI/CD pipeline")
         rediscli += '/redis-cli'
     else:
         rediscli = os.path.abspath(
@@ -122,8 +125,12 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_uds:
         n_nodes = 1
     is_cluster = n_nodes > 1
-    redisserver = os.getenv('REDIS_INSTALL_PATH')
-    if redisserver is not None:
+    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "yes"
+
+    if is_cicd:
+        redisserver = os.getenv('REDIS_INSTALL_PATH')
+        if redisserver is None:
+            raise RuntimeError("REDIS_INSTALL_PATH must be defined in CI/CD pipeline")
         redisserver += '/redis-server'
     else:
         redisserver = os.path.abspath(
@@ -132,7 +139,15 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     rediscli = os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
         "SMARTREDIS_TEST_DEVICE","cpu").lower()
-    if rai_ver is not None and rai_ver != "":
+    if is_cicd:
+        redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so'
+        redisai_modules = os.getenv("REDISAI_MODULES")
+        if redisai_modules is None:
+            raise RuntimeError("REDISAI_MODULES environment variable is not set!")
+        rai_clause = f"--loadmodule {redisai_modules}"
+    else:
+        if rai_ver is None or rai_ver == "":
+            raise RuntimeError("RedisAI version not specified")
         redisai_dir = os.path.abspath(
             os.path.dirname(__file__) + "/../third-party/RedisAI/" + rai_ver +
             "/install-" + test_device
@@ -141,12 +156,6 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         tf_loc = redisai_dir + "/backends/redisai_tensorflow/redisai_tensorflow.so"
         torch_loc = redisai_dir + "/backends/redisai_torch/redisai_torch.so"
         rai_clause = f"--loadmodule {redisai} TF {tf_loc} TORCH {torch_loc}"
-    else:
-        redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so'
-        redisai_modules = os.getenv("REDISAI_MODULES")
-        if redisai_modules is None:
-            raise RuntimeError("REDISAI_MODULES environment variable is not set!")
-        rai_clause = f"--loadmodule {redisai_modules}"
     uds_clause = ""
     if is_uds:
         prepare_uds_socket(udsport)
