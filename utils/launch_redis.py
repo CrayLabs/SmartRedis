@@ -36,7 +36,7 @@ def stop_db(n_nodes, port, udsport):
     is_uds = udsport is not None
     if is_uds:
         n_nodes = 1
-    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "yes"
+    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "true"
 
     # It's clobberin' time!
     if is_cicd:
@@ -125,7 +125,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_uds:
         n_nodes = 1
     is_cluster = n_nodes > 1
-    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "yes"
+    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "true"
 
     if is_cicd:
         redisserver = os.getenv('REDIS_INSTALL_PATH')
