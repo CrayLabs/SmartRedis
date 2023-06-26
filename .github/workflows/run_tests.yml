@@ -143,6 +143,7 @@ jobs:
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
+          echo "REDISAI_CPU_INSTALL_PATH=/usr/lib/redis/modules/" >> $GITHUB_ENV &&
           echo "SR_CICD_EXECUTION=True" >> $GITHUB_ENV &&
           echo "REDISAI_MODULES=/usr/lib/redis/modules/redisai.so \
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
