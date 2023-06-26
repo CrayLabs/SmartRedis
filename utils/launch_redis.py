@@ -36,7 +36,8 @@ def stop_db(n_nodes, port, udsport):
     is_uds = udsport is not None
     if is_uds:
         n_nodes = 1
-    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "true"
+    cicd = os.getenv('SR_CICD_EXECUTION')
+    is_cicd = False if cicd is None else cicd.lower() == "true"
 
     # It's clobberin' time!
     if is_cicd:
@@ -81,7 +82,7 @@ def stop_db(n_nodes, port, udsport):
             os.remove(fname)
 
     # Pause to give Redis time to die
-    sleep(5)
+    sleep(2)
 
 def prepare_uds_socket(udsport):
     """Sets up the UDS socket
@@ -125,7 +126,8 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_uds:
         n_nodes = 1
     is_cluster = n_nodes > 1
-    is_cicd = os.getenv('SR_CICD_EXECUTION').lower() == "true"
+    cicd = os.getenv('SR_CICD_EXECUTION')
+    is_cicd = False if cicd is None else cicd.lower() == "true"
 
     if is_cicd:
         redisserver = "redis-server"
