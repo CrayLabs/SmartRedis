@@ -28,6 +28,7 @@ from subprocess import Popen, SubprocessError, run, DEVNULL
 from time import sleep
 import argparse
 import os
+import pathlib
 
 def check_availability(n_nodes, port, udsport):
     """Repeat a command until it is successful
@@ -93,12 +94,7 @@ def stop_db(n_nodes, port, udsport):
     for proc in procs:
         _,_ = proc.communicate(timeout=15)
         if proc.returncode != 0:
-            msg = "Failed to kill Redis server!"
-            if is_uds:
-                # UDS is last so a failure is nonfatal
-                print(msg)
-            else:
-                raise RuntimeError(msg)
+            raise RuntimeError("Failed to kill Redis server!")
 
     # clean up after ourselves
     for i in range(n_nodes):
@@ -123,17 +119,14 @@ def stop_db(n_nodes, port, udsport):
     sleep(2)
 
 def prepare_uds_socket(udsport):
-    """Sets up the UDS socket
-    """
-    if udsport is not None:
-        uds_abs = os.path.abspath(udsport)
-        basedir = os.path.dirname(uds_abs)
-        if not os.path.exists(basedir):
-            os.makedir(basedir)
-        if not os.path.exists(uds_abs):
-            with open(uds_abs, 'a'):
-                pass
-        os.chmod(uds_abs, 0o777)
+    """Sets up the UDS socket"""
+    if udsport is None:
+        return # Silently bail
+    uds_abs = pathlib.Path(udsport).resolve()
+    basedir = uds_abs.parent
+    basedir.mkdir(exists_okay=True)
+    uds_abs.touch()
+    uds_abs.chmod(0o777)
 
 def create_db(n_nodes, port, device, rai_ver, udsport):
     """Creates a redis database starting with port at 127.0.0.1
