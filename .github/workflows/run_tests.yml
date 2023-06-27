@@ -47,10 +47,6 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB_SINGLE: "127.0.0.1:6380"
-  SSDB_CLUSTERED: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002"
-  SSDB_UDS: "unix:///tmp/redis.sock"
-  SMARTREDIS_TEST_CLUSTER: False
   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
   SR_LOG_LEVEL: "INFO"
 
