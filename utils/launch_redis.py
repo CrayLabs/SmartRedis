@@ -45,7 +45,7 @@ def check_availability(n_nodes, port, udsport):
             os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
         )
     for i in range(n_nodes):
-        connection = f"-s udsport" if is_uds else f"-p {str(port + i)}"
+        connection = f"-s {udsport}" if is_uds else f"-p {str(port + i)}"
         set_cmd = f"{rediscli} {connection} set __test__ __test__"
         del_cmd = f"{rediscli} {connection} del __test__"
         command_succeeded = False
