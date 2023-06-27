@@ -29,10 +29,11 @@ from functools import wraps
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
 import numpy as np
+import typing as t
 
 class Dtypes:
     @staticmethod
-    def tensor_from_numpy(array):
+    def tensor_from_numpy(array: np.ndarray)->str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -49,7 +50,7 @@ class Dtypes:
         raise TypeError(f"Incompatible tensor type provided {dtype}")
 
     @staticmethod
-    def metadata_from_numpy(array):
+    def metadata_from_numpy(array: np.ndarray)->str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -64,7 +65,7 @@ class Dtypes:
         raise TypeError(f"Incompatible metadata type provided {dtype}")
 
     @staticmethod
-    def from_string(type_name):
+    def from_string(type_name: str)->type:
         mapping = {
             "DOUBLE": np.double,
             "FLOAT":  np.float64,
@@ -82,7 +83,7 @@ class Dtypes:
             return mapping[type_name]
         raise TypeError(f"Unrecognized type name {type_name}")
 
-def init_default(default, init_value, expected_type=None):
+def init_default(default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any]=None)->t.Any:
     """Used for setting a mutable type to a default value.
 
     PEP standards forbid setting a default value to a mutable type
@@ -94,7 +95,7 @@ def init_default(default, init_value, expected_type=None):
         raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
     return init_value
 
-def exception_handler(func):
+def exception_handler(func: t.Callable[..., object])->object:
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
@@ -108,7 +109,9 @@ def exception_handler(func):
     :raises RedisReplyError: if the wrapped function raised an exception
     """
     @wraps(func)
-    def smartredis_api_wrapper(*args, **kwargs):
+    def smartredis_api_wrapper(
+        *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
+    )->object:
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
@@ -136,7 +139,7 @@ def exception_handler(func):
             raise globals()[exception_name](cpp_error_str, method_name) from None
     return smartredis_api_wrapper
 
-def typecheck(arg, name, _type):
+def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, t.Type])->None:
     """Validate that an argument is of a given type
 
     :param arg: the variable to be type tested

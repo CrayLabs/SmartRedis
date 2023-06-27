@@ -26,6 +26,7 @@
 
 from numbers import Number
 
+import typing as t
 import numpy as np
 
 from .smartredisPy import PyDataset
@@ -35,7 +36,7 @@ from .util import Dtypes, exception_handler, typecheck
 from .error import *
 
 class Dataset(SRObject):
-    def __init__(self, name):
+    def __init__(self, name: str)->None:
         """Initialize a Dataset object
 
         :param name: name of dataset
@@ -44,7 +45,7 @@ class Dataset(SRObject):
         super().__init__(PyDataset(name))
         typecheck(name, "name", str)
 
-    def __str__(self):
+    def __str__(self)->str:
         """Create a string representation of the client
 
         :return: A string representation of the client
@@ -96,13 +97,13 @@ class Dataset(SRObject):
         self._srobject = dataset
 
     @exception_handler
-    def add_tensor(self, name, data):
+    def add_tensor(self, name: str, data: np.ndarray)->None:
         """Add a named tensor to this dataset
 
         :param name: tensor name
         :type name: str
         :param data: tensor data
-        :type data: np.array
+        :type data: np.ndarray
         """
         typecheck(name, "name", str)
         typecheck(data, "data", np.ndarray)
@@ -110,19 +111,19 @@ class Dataset(SRObject):
         self._data.add_tensor(name, data, dtype)
 
     @exception_handler
-    def get_tensor(self, name):
+    def get_tensor(self, name: str)->np.ndarray:
         """Get a tensor from the Dataset
 
         :param name: name of the tensor to get
         :type name: str
         :return: a numpy array of tensor data
-        :rtype: np.array
+        :rtype: np.ndarray
         """
         typecheck(name, "name", str)
         return self._data.get_tensor(name)
 
     @exception_handler
-    def add_meta_scalar(self, name, data):
+    def add_meta_scalar(self, name: str, data: t.Union[int, float])->None:
         """Add metadata scalar field (non-string) with value to the DataSet
 
             If the field does not exist, it will be created.
@@ -146,15 +147,14 @@ class Dataset(SRObject):
         self._data.add_meta_scalar(name, data_as_array, dtype)
 
     @exception_handler
-    def add_meta_string(self, name, data):
+    def add_meta_string(self, name: str, data: str)->None:
         """Add metadata string field with value to the DataSet
 
         If the field does not exist, it will be created
         If the field exists the value will
         be appended to existing field.
 
-        :param name: The name used to reference the metadata
-                     field
+        :param name: The name used to reference the metadata field
         :type name: str
         :param data: The string to add to the field
         :type data: str
@@ -164,29 +164,31 @@ class Dataset(SRObject):
         self._data.add_meta_string(name, data)
 
     @exception_handler
-    def get_meta_scalars(self, name):
+    def get_meta_scalars(self, name: str):
         """Get the metadata scalar field values from the DataSet
 
         :param name: The name used to reference the metadata
                      field in the DataSet
         :type name: str
+        :rtype: ***FINDME***
         """
         typecheck(name, "name", str)
         return self._data.get_meta_scalars(name)
 
     @exception_handler
-    def get_meta_strings(self, name):
+    def get_meta_strings(self, name: str)->t.List[str]:
         """Get the metadata scalar field values from the DataSet
 
         :param name: The name used to reference the metadata
-                        field in the DataSet
+                     field in the DataSet
         :type name: str
+        :rtype: list[str]
         """
         typecheck(name, "name", str)
         return self._data.get_meta_strings(name)
 
     @exception_handler
-    def get_metadata_field_names(self):
+    def get_metadata_field_names(self)->t.List[str]:
         """Get the names of all metadata scalars and strings from the DataSet
 
         :return: a list of metadata field names
@@ -195,7 +197,7 @@ class Dataset(SRObject):
         return self._data.get_metadata_field_names()
 
     @exception_handler
-    def get_metadata_field_type(self, name):
+    def get_metadata_field_type(self, name: str)->t.Type:
         """Get the names of all metadata scalars and strings from the DataSet
 
         :param name: The name used to reference the metadata
@@ -209,7 +211,7 @@ class Dataset(SRObject):
         return Dtypes.from_string(type_str)
 
     @exception_handler
-    def get_tensor_type(self, name):
+    def get_tensor_type(self, name: str)->t.Type:
         """Get the type of a tensor in the DataSet
 
         :param name: The name used to reference the tensor in the DataSet
@@ -222,7 +224,7 @@ class Dataset(SRObject):
         return Dtypes.from_string(type_str)
 
     @exception_handler
-    def get_tensor_names(self):
+    def get_tensor_names(self)->t.List[str]:
         """Get the names of all tensors in the DataSet
 
         :return: a list of tensor names
@@ -231,7 +233,7 @@ class Dataset(SRObject):
         return self._data.get_tensor_names()
 
     @exception_handler
-    def get_tensor_dims(self, name):
+    def get_tensor_dims(self, name: str)->t.List[int]:
         """Get the dimensions of a tensor in the DataSet
 
         :return: a list of the tensor dimensions

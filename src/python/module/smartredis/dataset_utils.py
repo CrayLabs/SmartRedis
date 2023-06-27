@@ -25,12 +25,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import functools
+import typing as t
 from typing import TYPE_CHECKING
 
 from .dataset import Dataset
 from .util import typecheck
 from itertools import permutations
 from .error import *
+
 
 if TYPE_CHECKING:  # pragma: no cover
     # Import optional deps for intellisense
@@ -42,9 +44,11 @@ else:
 # ----helper decorators -----
 
 
-def _requires_xarray(fn):
+def _requires_xarray(fn: t.Callable[..., object])->object:
     @functools.wraps(fn)
-    def _import_xarray(*args, **kwargs):
+    def _import_xarray(
+        *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
+    )->object:
         global xr
         try:
             import xarray as xr

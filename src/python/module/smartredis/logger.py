@@ -34,7 +34,7 @@ from .util import exception_handler, typecheck
 #LLDeveloper = 4  # Extra verbose logging for internal use
 
 @exception_handler
-def log_data(context, level, data):
+def log_data(context: str, level: SRLoggingLevel, data: str)->None:
     """Log data to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)
@@ -51,7 +51,7 @@ def log_data(context, level, data):
     cpp_log_data(context, level, data)
 
 @exception_handler
-def log_warning(context, level, data):
+def log_warning(context: str, level: SRLoggingLevel, data: str)->None:
     """Log a warning to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)
@@ -68,7 +68,7 @@ def log_warning(context, level, data):
     cpp_log_warning(context, level, data)
 
 @exception_handler
-def log_error(context, level, data):
+def log_error(context: str, level: SRLoggingLevel, data: str)->None:
     """Log an error to the SmartRedis logfile
 
     :param context: Logging context (string to prefix the log entry with)

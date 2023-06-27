@@ -31,7 +31,7 @@ from .util import exception_handler, typecheck
 from .error import *
 
 class LogContext(SRObject):
-    def __init__(self, context):
+    def __init__(self, context: str)->None:
         """Initialize a LogContext object
 
         :param context: logging context
@@ -42,13 +42,13 @@ class LogContext(SRObject):
         self._name = context
 
     @property
-    def _logcontext(self):
+    def _logcontext(self)->SRObject:
         """Alias _srobject to _logcontext
         """
         return self._srobject
 
     @staticmethod
-    def from_pybind(logcontext):
+    def from_pybind(logcontext: PyLogContext):
         """Initialize a LogContext object from
         a PyLogContext object
 
@@ -65,7 +65,7 @@ class LogContext(SRObject):
         return new_logcontext
 
     @exception_handler
-    def get_context(self):
+    def get_context(self)->PyLogContext:
         """Return the PyLogContext attribute
 
         :return: The PyLogContext attribute containing
@@ -75,7 +75,7 @@ class LogContext(SRObject):
         return self._logcontext
 
     @exception_handler
-    def set_context(self, logcontext):
+    def set_context(self, logcontext: PyLogContext)->None:
         """Set the PyLogContext attribute
 
         :param logcontext: The PyLogContext object
