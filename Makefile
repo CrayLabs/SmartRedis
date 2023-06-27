@@ -356,7 +356,7 @@ define run_smartredis_tests_with_uds_server
 	-@echo "Launching standalone Redis server with Unix Domain Socket support"
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
 	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
-	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
+	export SSDB=unix://$(SR_TEST_PORT) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
 		--udsport $(SR_TEST_UDS_FILE) && \
