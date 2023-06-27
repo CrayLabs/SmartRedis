@@ -84,6 +84,7 @@ def stop_db(n_nodes, port, udsport):
     for i in range(n_nodes):
         connection = f"-s udsport" if is_uds else f"-p {str(port + i)}"
         cmd = f"{rediscli} {connection} shutdown"
+        print(cmd)
         proc = Popen(cmd, shell=True)
         procs.append(proc)
 
@@ -92,7 +93,12 @@ def stop_db(n_nodes, port, udsport):
     for proc in procs:
         _,_ = proc.communicate(timeout=15)
         if proc.returncode != 0:
-            raise RuntimeError("Failed to kill Redis server!")
+            msg = "Failed to kill Redis server!"
+            if is_uds:
+                # UDS is last so a failure is nonfatal
+                print(msg)
+            else:
+                raise RuntimeError(msg)
 
     # clean up after ourselves
     for i in range(n_nodes):

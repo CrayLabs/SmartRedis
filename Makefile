@@ -317,7 +317,6 @@ define run_smartredis_tests_with_standalone_server
 	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
-	echo cat single.log && \
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
@@ -337,7 +336,6 @@ define run_smartredis_tests_with_clustered_server
 	export SSDB=$(SSDB_STRING) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
-	echo cat $(SR_TEST_PORT).log && \
 	echo "Running clustered tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
