@@ -82,7 +82,7 @@ def stop_db(n_nodes, port, udsport):
     # Clobber the server(s)
     procs = []
     for i in range(n_nodes):
-        connection = f"-s udsport" if is_uds else f"-p {str(port + i)}"
+        connection = f"-s {udsport}" if is_uds else f"-p {str(port + i)}"
         cmd = f"{rediscli} {connection} shutdown"
         print(cmd)
         proc = Popen(cmd, shell=True)
