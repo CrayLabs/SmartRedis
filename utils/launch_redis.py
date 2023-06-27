@@ -24,10 +24,42 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from subprocess import Popen, SubprocessError, run
+from subprocess import Popen, SubprocessError, run, DEVNULL
 from time import sleep
 import argparse
 import os
+
+def check_availability(n_nodes, port, udsport):
+    """Repeat a command until it is successful
+    """
+    num_tries = 5
+    is_uds = udsport is not None
+    if is_uds:
+        n_nodes = 1
+    cicd = os.getenv('SR_CICD_EXECUTION')
+    is_cicd = False if cicd is None else cicd.lower() == "true"
+    if is_cicd:
+        rediscli = 'redis-cli'
+    else:
+        rediscli = os.path.abspath(
+            os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
+        )
+    for i in range(n_nodes):
+        connection = f"-s udsport" if is_uds else f"-p {str(port + i)}"
+        set_cmd = f"{rediscli} {connection} set __test__ __test__"
+        del_cmd = f"{rediscli} {connection} del __test__"
+        command_succeeded = False
+        for _ in range(num_tries):
+            try:
+                run(set_cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                run(del_cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                command_succeeded = True
+                break
+            except Exception:
+                # That try failed, so just retry
+                sleep(5)
+        if not command_succeeded:
+            raise RuntimeError(f"Failed to execute command {cmd} for connection {connection}")
 
 def stop_db(n_nodes, port, udsport):
     """Stop a redis cluster and clear the files
@@ -186,7 +218,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
 
     # Make sure that all servers are up
     # Let exceptions propagate to the caller
-    sleep(2)
+    check_availability(n_nodes, port, udsport)
     for proc in procs:
         _,_ = proc.communicate(timeout=15)
         if proc.returncode != 0:
@@ -206,6 +238,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         print("Cluster has been setup!")
     else:
         print("Server has been setup!")
+    check_availability(n_nodes, port, udsport)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
