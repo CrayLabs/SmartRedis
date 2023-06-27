@@ -57,7 +57,7 @@ jobs:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
         rai_v: [1.2.4, 1.2.5] # versions of RedisAI
-        py_v: ['3.7.x', '3.8.x', '3.9.x'] # versions of Python
+        py_v: ['3.7.x', '3.8.x', '3.9.x', '3.10.x'] # versions of Python
     env:
       FC: gfortran-${{ matrix.compiler }}
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
