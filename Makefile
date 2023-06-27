@@ -327,29 +327,6 @@ define run_smartredis_tests_with_standalone_server
 	echo "Standalone tests complete"
 endef
 
-# Run test cases with a freshly instantiated standalone Redis server
-# connected via a Unix Domain Socket
-# Parameters:
-# 	1: the test directory in which to run tests
-define run_smartredis_tests_with_uds_server
-	-@echo "Launching standalone Redis server with Unix Domain Socket support"
-	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
-	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
-	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
-	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
-		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
-		--udsport $(SR_TEST_UDS_FILE) && \
-	echo cat UDS.log && \
-	echo "Running standalone tests with Unix Domain Socket connection" && \
-	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
-		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
-	echo "Shutting down standalone Redis server with Unix Domain Socket support"
-	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
-		--udsport $(SR_TEST_UDS_FILE) --stop && \
-	echo "UDS tests complete"
-endef
-
 # Run test cases with a freshly instantiated clustered Redis server
 # Parameters:
 # 	1: the test directory in which to run tests
@@ -369,6 +346,29 @@ define run_smartredis_tests_with_clustered_server
 	python utils/launch_redis.py --port $(SR_TEST_PORT) \
 		--nodes $(SR_TEST_NODES) --stop && \
 	echo "Clustered tests complete"
+endef
+
+# Run test cases with a freshly instantiated standalone Redis server
+# connected via a Unix Domain Socket
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_uds_server
+	-@echo "Launching standalone Redis server with Unix Domain Socket support"
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
+		--udsport $(SR_TEST_UDS_FILE) && \
+	cat UDS.log && \
+	echo "Running standalone tests with Unix Domain Socket connection" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down standalone Redis server with Unix Domain Socket support"
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--udsport $(SR_TEST_UDS_FILE) --stop && \
+	echo "UDS tests complete"
 endef
 
 # Run test cases with freshly instantiated Redis servers
