@@ -30,6 +30,12 @@ from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
 import numpy as np
 import typing as t
+from typing_extensions import ParamSpec
+
+# Type hint magic bits
+_PR = ParamSpec("_PR")
+_RT = t.TypeVar("_RT")
+TFunc = t.Callable[_PR, _RT]
 
 class Dtypes:
     @staticmethod
@@ -83,7 +89,9 @@ class Dtypes:
             return mapping[type_name]
         raise TypeError(f"Unrecognized type name {type_name}")
 
-def init_default(default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any]=None)->t.Any:
+def init_default(
+    default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any]=None
+)->t.Any:
     """Used for setting a mutable type to a default value.
 
     PEP standards forbid setting a default value to a mutable type
@@ -95,8 +103,7 @@ def init_default(default: t.Any, init_value: t.Any, expected_type: t.Optional[t.
         raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
     return init_value
 
-TFunc = t.Callable[..., t.Any]
-def exception_handler(func: TFunc)->TFunc:
+def exception_handler(func: t.Callable[_PR, _RT])->TFunc:
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
@@ -110,9 +117,7 @@ def exception_handler(func: TFunc)->TFunc:
     :raises RedisReplyError: if the wrapped function raised an exception
     """
     @wraps(func)
-    def smartredis_api_wrapper(
-        *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
-    )->t.Any:
+    def smartredis_api_wrapper(*args: _PR.args, **kwargs: _PR.kwargs)->_RT:
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from

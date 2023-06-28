@@ -27,11 +27,17 @@
 import functools
 import typing as t
 from typing import TYPE_CHECKING
+from typing_extensions import ParamSpec
 
 from .dataset import Dataset
 from .util import typecheck
 from itertools import permutations
 from .error import *
+
+# Type hint magic bits
+_PR = ParamSpec("_PR")
+_RT = t.TypeVar("_RT")
+TFunc = t.Callable[_PR, _RT]
 
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -43,12 +49,9 @@ else:
 
 # ----helper decorators -----
 
-TFunc = t.Callable[..., t.Any]
-def _requires_xarray(fn: TFunc)->TFunc:
+def _requires_xarray(fn: t.Callable[_PR, _RT])->TFunc:
     @functools.wraps(fn)
-    def _import_xarray(
-        *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
-    )->t.Any:
+    def _import_xarray(*args: _PR.args, **kwargs: _PR.kwargs)->_RT:
         global xr
         try:
             import xarray as xr
