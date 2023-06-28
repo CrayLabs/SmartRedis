@@ -27,9 +27,8 @@
 from .smartredisPy import PyLogContext
 from .srobject import SRObject
 from .util import exception_handler, typecheck
-
 from .error import *
-
+import typing as t
 class LogContext(SRObject):
     def __init__(self, context: str)->None:
         """Initialize a LogContext object
@@ -42,13 +41,13 @@ class LogContext(SRObject):
         self._name = context
 
     @property
-    def _logcontext(self)->SRObject:
+    def _logcontext(self)->t.Type[SRObject]:
         """Alias _srobject to _logcontext
         """
         return self._srobject
 
     @staticmethod
-    def from_pybind(logcontext: PyLogContext):
+    def from_pybind(logcontext: PyLogContext)->"LogContext":
         """Initialize a LogContext object from
         a PyLogContext object
 

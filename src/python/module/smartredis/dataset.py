@@ -54,13 +54,14 @@ class Dataset(SRObject):
         return self._data.to_string()
 
     @property
-    def _data(self):
+    def _data(self)->PyDataset:
         """Alias _srobject to _data
         """
+        assert isinstance(self._srobject, PyDataset)
         return self._srobject
 
     @staticmethod
-    def from_pybind(dataset):
+    def from_pybind(dataset: PyDataset)->"Dataset":
         """Initialize a Dataset object from
         a PyDataset object
 
@@ -77,7 +78,7 @@ class Dataset(SRObject):
         return new_dataset
 
     @exception_handler
-    def get_data(self):
+    def get_data(self)->PyDataset:
         """Return the PyDataset attribute
 
         :return: The PyDataset attribute containing
@@ -87,7 +88,7 @@ class Dataset(SRObject):
         return self._data
 
     @exception_handler
-    def set_data(self, dataset):
+    def set_data(self, dataset: PyDataset)->None:
         """Set the PyDataset attribute
 
         :param dataset: The PyDataset object
@@ -164,13 +165,13 @@ class Dataset(SRObject):
         self._data.add_meta_string(name, data)
 
     @exception_handler
-    def get_meta_scalars(self, name: str):
+    def get_meta_scalars(self, name: str)->t.Union[t.List[int], t.List[float]]:
         """Get the metadata scalar field values from the DataSet
 
         :param name: The name used to reference the metadata
                      field in the DataSet
         :type name: str
-        :rtype: ***FINDME***
+        :rtype: list[int] | list[float]
         """
         typecheck(name, "name", str)
         return self._data.get_meta_scalars(name)

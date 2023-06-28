@@ -28,6 +28,7 @@ from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 from .error import RedisRuntimeError
 import typing as t
+from typing_extensions import Self
 
 _notfactory = "Method called on a ConfigOptions object not created from a factory method"
 
@@ -36,18 +37,16 @@ class ConfigOptions:
         """Initialize a ConfigOptions base object
         """
         self._is_created_via_factory = False
-        self._config_opts = None
+        self._config_opts: t.Any = None
 
     @staticmethod
-    def from_pybind(configoptions: PyConfigOptions):
-        """Initialize a ConfigOptions object from
-        a PyConfigOptions object
+    def from_pybind(configoptions: PyConfigOptions)->"ConfigOptions":
+        """Initialize a ConfigOptions object from a PyConfigOptions object
 
         :param configoptions: The pybind PyConfigOptions object
                               to use for construction
         :type dataset: PyConfigOptions
-        :return: The newly constructed ConfigOptions from
-                 the PyConfigOptions
+        :return: The newly constructed ConfigOptions from the PyConfigOptions
         :rtype: ConfigOptions
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
@@ -72,7 +71,7 @@ class ConfigOptions:
 
     @classmethod
     @exception_handler
-    def create_from_environment(cls, db_prefix: str):
+    def create_from_environment(cls, db_prefix: str)->"ConfigOptions":
         """Instantiate ConfigOptions, getting selections from
         environment variables. If db_prefix is non-empty,
         then "{db_prefix}_" will be prepended to the name of

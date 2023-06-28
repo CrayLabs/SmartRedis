@@ -43,12 +43,12 @@ else:
 
 # ----helper decorators -----
 
-
-def _requires_xarray(fn: t.Callable[..., object])->object:
+TFunc = t.Callable[..., t.Any]
+def _requires_xarray(fn: TFunc)->TFunc:
     @functools.wraps(fn)
     def _import_xarray(
         *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
-    )->object:
+    )->t.Any:
         global xr
         try:
             import xarray as xr
@@ -65,24 +65,29 @@ def _requires_xarray(fn: t.Callable[..., object])->object:
 # ----helper function -----
 
 
-def get_data(dataset, name, type):
-    return dataset.get_meta_strings(f"_xarray_{name}_{type}_names")[0].split(",")
+def get_data(dataset: Dataset, name: str, dtype: str)->t.List[str]:
+    return dataset.get_meta_strings(
+        f"_xarray_{name}_{dtype}_names")[0].split(",")
 
 
-def typecheck_stringlist(names, strings_name, string_name):
+def typecheck_stringlist(names: t.List[str], strings_name: str, string_name: str)->None:
     typecheck(names, strings_name, list)
     for name in names:
         typecheck(name, string_name, str)
         # Check if empty
         if string_name == "":
-            raise RedisRuntimeError
+            raise RedisRuntimeError("Empty string")
 
 
 class DatasetConverter:
     @staticmethod
     def add_metadata_for_xarray(
-        dataset, data_names, dim_names, coord_names=None, attr_names=None
-    ):
+        dataset: Dataset,
+        data_names: t.Union[t.List[str], str],
+        dim_names: t.Union[t.List[str], str],
+        coord_names: t.Optional[t.Union[t.List[str], str]]=None,
+        attr_names: t.Optional[t.Union[t.List[str], str]]=None
+    )->None:
         """Extract metadata from a SmartRedis dataset and add it to
         dataformat specific fieldnames
 
@@ -98,13 +103,13 @@ class DatasetConverter:
         :type attr_names: list[str], optional
         """
 
-        if type(data_names) == str:
+        if isinstance(data_names, str):
             data_names = [data_names]
-        if type(dim_names) == str:
+        if isinstance(dim_names, str):
             dim_names = [dim_names]
-        if type(coord_names) == str:
+        if isinstance(coord_names, str):
             coord_names = [coord_names]
-        if type(attr_names) == str:
+        if isinstance(attr_names, str):
             attr_names = [attr_names]
 
         typecheck(dataset, "dataset", Dataset)
@@ -135,7 +140,7 @@ class DatasetConverter:
 
     @staticmethod
     @_requires_xarray
-    def transform_to_xarray(dataset):
+    def transform_to_xarray(dataset: Dataset)->t.Dict:
         """Transform a SmartRedis Dataset, with the appropriate metadata,
         to an Xarray Dataarray
 

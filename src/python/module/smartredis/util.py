@@ -95,7 +95,8 @@ def init_default(default: t.Any, init_value: t.Any, expected_type: t.Optional[t.
         raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
     return init_value
 
-def exception_handler(func: t.Callable[..., object])->object:
+TFunc = t.Callable[..., t.Any]
+def exception_handler(func: TFunc)->TFunc:
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
@@ -111,7 +112,7 @@ def exception_handler(func: t.Callable[..., object])->object:
     @wraps(func)
     def smartredis_api_wrapper(
         *args: t.Type[t.Tuple], **kwargs: t.Dict[str, t.Any]
-    )->object:
+    )->t.Any:
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
@@ -139,7 +140,7 @@ def exception_handler(func: t.Callable[..., object])->object:
             raise globals()[exception_name](cpp_error_str, method_name) from None
     return smartredis_api_wrapper
 
-def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, t.Type])->None:
+def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, type])->None:
     """Validate that an argument is of a given type
 
     :param arg: the variable to be type tested

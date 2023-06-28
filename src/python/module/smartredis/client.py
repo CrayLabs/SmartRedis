@@ -79,7 +79,7 @@ class Client(SRObject):
         return self._client.to_string()
 
     @property
-    def _client(self):
+    def _client(self)->PyClient:
         """Alias _srobject to _client
         """
         return self._srobject
@@ -176,7 +176,7 @@ class Client(SRObject):
         self._client.rename_tensor(old_name, new_name)
 
     @exception_handler
-    def put_dataset(self, dataset):
+    def put_dataset(self, dataset: Dataset)->None:
         """Put a Dataset instance into the database
 
         The final dataset key under which the dataset is stored
@@ -197,7 +197,7 @@ class Client(SRObject):
         self._client.put_dataset(pybind_dataset)
 
     @exception_handler
-    def get_dataset(self, name: str):
+    def get_dataset(self, name: str)->Dataset:
         """Get a dataset from the database
 
         The dataset key used to locate the dataset
@@ -459,7 +459,11 @@ class Client(SRObject):
 
     @exception_handler
     def run_script(
-        self, name: str, fn_name: str, inputs: t.List[str], outputs: t.List[str]
+        self,
+        name: str,
+        fn_name: str,
+        inputs: t.List[str],
+        outputs: t.List[str]
     )->None:
         """Execute TorchScript stored inside the database
 
@@ -604,8 +608,8 @@ class Client(SRObject):
         batch_size: int=0,
         min_batch_size: int=0,
         tag: str="",
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None,
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Put a TF, TF-lite, PT, or ONNX model in the database
 
@@ -670,8 +674,8 @@ class Client(SRObject):
         batch_size: int=0,
         min_batch_size: int=0,
         tag: str="",
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Put a TF, TF-lite, PT, or ONNX model in the database for use
         in a multi-GPU system
@@ -737,8 +741,8 @@ class Client(SRObject):
         batch_size: int=0,
         min_batch_size: int=0,
         tag: str="",
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
 
@@ -805,8 +809,8 @@ class Client(SRObject):
         batch_size: int=0,
         min_batch_size: int=0,
         tag: str="",
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
         for use in a multi-GPU system
@@ -868,8 +872,8 @@ class Client(SRObject):
     def run_model(
         self,
         name: str,
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Execute a stored model
 
@@ -897,8 +901,8 @@ class Client(SRObject):
         offset: int,
         first_gpu: int,
         num_gpus: int,
-        inputs: t.Optional[t.List[str]]=None,
-        outputs: t.Optional[t.List[str]]=None
+        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
+        outputs: t.Optional[t.Union[str, t.List[str]]]=None
     )->None:
         """Execute a model stored for a multi-GPU system
 
@@ -1430,7 +1434,7 @@ class Client(SRObject):
         self._client.config_set(config_param, value, address)
 
     @exception_handler
-    def save(self, addresses: t.List[str]):
+    def save(self, addresses: t.List[str])->None:
         """Performs a synchronous save of the database shard
         producing a point in time snapshot of all the data
         inside the Redis instance, in the form of an RBD file.
@@ -1452,7 +1456,7 @@ class Client(SRObject):
         self._client.save(addresses)
 
     @exception_handler
-    def append_to_list(self, list_name: str, dataset):
+    def append_to_list(self, list_name: str, dataset: Dataset)->None:
         """Appends a dataset to the aggregation list
 
         When appending a dataset to an aggregation list,
@@ -1665,7 +1669,7 @@ class Client(SRObject):
             name, list_length, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def get_datasets_from_list(self, list_name: str)->t.List:
+    def get_datasets_from_list(self, list_name: str)->t.List[Dataset]:
         """Get datasets from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1686,7 +1690,7 @@ class Client(SRObject):
     @exception_handler
     def get_dataset_list_range(
         self, list_name: str, start_index: int, end_index: int
-    )->t.List:
+    )->t.List[Dataset]:
         """Get a range of datasets (by index) from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1725,9 +1729,13 @@ class Client(SRObject):
     # ---- helpers --------------------------------------------------------
 
     @staticmethod
-    def __check_tensor_args(inputs, outputs):
+    def __check_tensor_args(
+        inputs: t.Optional[t.Union[t.List[str], str]],
+        outputs: t.Optional[t.Union[t.List[str], str]],
+    )->t.Tuple[t.List[str], t.List[str]]:
         inputs = init_default([], inputs, (list, str))
         outputs = init_default([], outputs, (list, str))
+        assert inputs is not None and outputs is not None
         if isinstance(inputs, str):
             inputs = [inputs]
         if isinstance(outputs, str):
