@@ -194,7 +194,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     daemonize_clause = "--daemonize yes"
     cluster_clause = "--cluster-enabled yes" if is_cluster else ""
     prot_clause = "--protected-mode no" if is_cluster or is_uds else ""
-    save_clause = "--save \"\"" if is_cluster else ""
+    save_clause = '--save ""' if is_cluster else ""
 
     # Start servers
     procs = []
