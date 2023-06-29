@@ -177,7 +177,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
             raise RuntimeError("REDISAI_MODULES environment variable is not set!")
         rai_clause = f"--loadmodule {redisai_modules}"
     else:
-        if rai_ver is None or rai_ver == "":
+        if not rai_ver
             raise RuntimeError("RedisAI version not specified")
         redisai_dir = os.path.abspath(
             os.path.dirname(__file__) + "/../third-party/RedisAI/" + rai_ver +
