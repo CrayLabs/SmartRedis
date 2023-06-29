@@ -200,10 +200,10 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     procs = []
     for i in range(n_nodes):
         l_port = port + i
-        port_clause = f"--port {str(l_port)}" if not is_uds else "--port 0"
+        port_clause = f"--port {l_port}" if not is_uds else "--port 0"
         if is_cluster:
-            log_clause = f"--logfile {str(l_port)}.log"
-            cluster_cfg_clause = f"--cluster-config-file {str(l_port)}.conf"
+            log_clause = f"--logfile {l_port}.log"
+            cluster_cfg_clause = f"--cluster-config-file {l_port}.conf"
         else:
             log_clause = "--logfile " + ("UDS.log" if is_uds else "single.log")
             cluster_cfg_clause = ""
