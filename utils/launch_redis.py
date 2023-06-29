@@ -43,7 +43,7 @@ def check_availability(n_nodes, port, udsport):
         rediscli = 'redis-cli'
     else:
         rediscli = (
-            pathlib.Path(__file__).parent
+            pathlib.Path(__file__).parent.parent
             / "third-party/redis/src/redis-cli"
         ).resolve()
     for i in range(n_nodes):
@@ -61,7 +61,7 @@ def check_availability(n_nodes, port, udsport):
                 # That try failed, so just retry
                 sleep(5)
         if not command_succeeded:
-            raise RuntimeError(f"Failed to execute command {cmd} for connection {connection}")
+            raise RuntimeError(f"Failed to validate availability for connection {connection}")
 
 def stop_db(n_nodes, port, udsport):
     """Stop a redis cluster and clear the files
@@ -77,9 +77,10 @@ def stop_db(n_nodes, port, udsport):
     if is_cicd:
         rediscli = 'redis-cli'
     else:
-        rediscli = os.path.abspath(
-            os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
-        )
+        rediscli = (
+            pathlib.Path(__file__).parent.parent
+            / "third-party/redis/src/redis-cli"
+        ).resolve()
 
     # Clobber the server(s)
     procs = []
@@ -164,9 +165,10 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_cicd:
         redisserver = "redis-server"
     else:
-        redisserver = os.path.abspath(
-            os.path.dirname(__file__) + "/../third-party/redis/src/redis-server"
-        )
+        redisserver = (
+            pathlib.Path(__file__).parent.parent
+            / "third-party/redis/src/redis-server"
+        ).resolve()
     rediscli = "redis-cli" if is_cicd else os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
         "SMARTREDIS_TEST_DEVICE","cpu").lower()
@@ -177,10 +179,10 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
             raise RuntimeError("REDISAI_MODULES environment variable is not set!")
         rai_clause = f"--loadmodule {redisai_modules}"
     else:
-        if not rai_ver
+        if not rai_ver:
             raise RuntimeError("RedisAI version not specified")
         redisai_dir = (
-            pathlib.Path(__file__).parent
+            pathlib.Path(__file__).parent.parent
             / f"third-party/RedisAI/{rai_ver}/install-{test_device}"
         ).resolve()
         redisai = redisai_dir / "redisai.so"
@@ -213,7 +215,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
               f"{prot_clause} {save_clause}"
 
         print(cmd)
-        proc = Popen(cmd, shell=True)
+        proc = Popen(cmd.split(), shell=False)
         procs.append(proc)
 
     # Make sure that all servers are up
@@ -226,7 +228,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
 
     # Create cluster for clustered Redis request
     if n_nodes > 1:
-        cluster_str=' '
+        cluster_str = ''
         cluster_str += " ".join(f"127.0.0.1:{port + i}" for i in range(n_nodes))
         cmd = f"{rediscli} --cluster create {cluster_str} --cluster-replicas 0"
         print(cmd)
