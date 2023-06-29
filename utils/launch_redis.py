@@ -42,9 +42,10 @@ def check_availability(n_nodes, port, udsport):
     if is_cicd:
         rediscli = 'redis-cli'
     else:
-        rediscli = os.path.abspath(
-            os.path.dirname(__file__) + "/../third-party/redis/src/redis-cli"
-        )
+        rediscli = (
+            pathlib.Path(__file__).parent
+            / "third-party/redis/src/redis-cli"
+        ).resolve()
     for i in range(n_nodes):
         connection = f"-s {udsport}" if is_uds else f"-p {str(port + i)}"
         set_cmd = f"{rediscli} {connection} set __test__ __test__"
