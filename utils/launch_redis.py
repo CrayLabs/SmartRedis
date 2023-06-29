@@ -179,13 +179,13 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     else:
         if not rai_ver
             raise RuntimeError("RedisAI version not specified")
-        redisai_dir = os.path.abspath(
-            os.path.dirname(__file__) + "/../third-party/RedisAI/" + rai_ver +
-            "/install-" + test_device
-        )
-        redisai = redisai_dir + "/redisai.so"
-        tf_loc = redisai_dir + "/backends/redisai_tensorflow/redisai_tensorflow.so"
-        torch_loc = redisai_dir + "/backends/redisai_torch/redisai_torch.so"
+        redisai_dir = (
+            pathlib.Path(__file__).parent
+            / f"third-party/RedisAI/{rai_ver}/install-{test_device}"
+        ).resolve()
+        redisai = redisai_dir / "redisai.so"
+        tf_loc = redisai_dir / "backends/redisai_tensorflow/redisai_tensorflow.so"
+        torch_loc = redisai_dir / "backends/redisai_torch/redisai_torch.so"
         rai_clause = f"--loadmodule {redisai} TF {tf_loc} TORCH {torch_loc}"
     uds_clause = ""
     if is_uds:
