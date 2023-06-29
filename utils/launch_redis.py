@@ -99,11 +99,11 @@ def stop_db(n_nodes, port, udsport):
 
     # clean up after ourselves
     for i in range(n_nodes):
-        fname = str(port+i) + ".log"
+        fname = f"{port+i}.log"
         if os.path.exists(fname):
             os.remove(fname)
 
-        fname = str(port+i) + ".conf"
+        fname = f"{port+i}.conf"
         if os.path.exists(fname):
             os.remove(fname)
 
