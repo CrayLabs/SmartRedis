@@ -227,8 +227,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     # Create cluster for clustered Redis request
     if n_nodes > 1:
         cluster_str=' '
-        for i in range(n_nodes):
-            cluster_str += '127.0.0.1:' + str(port+i) + ' '
+        cluster_str += " ".join(f"127.0.0.1:{port + i}" for i in range(n_nodes))
         cmd = f"{rediscli} --cluster create {cluster_str} --cluster-replicas 0"
         print(cmd)
         proc = run(cmd.split(), input="yes", encoding="utf-8", shell=False)
