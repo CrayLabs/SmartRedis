@@ -12,6 +12,7 @@ Description
 - Updated setup.py to work with the new build system
 - Remove unneeded method from Python SRObject class
 - Fixed a memory leak in the C layer
+- Revamp SmartRedis test system
 - Remove debug output in pybind layer
 - Update Hiredis version to 1.1.0
 - Enable parallel build for the SmartRedis examples
@@ -31,6 +32,7 @@ Detailed Notes
 - Streamlined setup.py to simplify Python install (PR359)
 - Remove from_pybind() from Python SRObject class as it's not needed and didn't work properly anyway (PR358_)
 - Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
+- Major revamp to simplify use of SmartRedis test system, automating most test processes (PR356_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
 - Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code
@@ -56,6 +58,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 .. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
 .. _PR358: https://github.com/CrayLabs/SmartRedis/pull/358
 .. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
+.. _PR356: https://github.com/CrayLabs/SmartRedis/pull/356
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
 .. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349
