@@ -9,3 +9,4 @@ breathe==4.26.0
 torch>=1.7.1
 sphinx-fortran==1.1.1
 jinja2==3.0.3
+mypy>=1.4.0
