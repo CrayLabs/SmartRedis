@@ -29,8 +29,9 @@ from .util import exception_handler, typecheck
 
 from .error import *
 
+
 class SRObject:
-    def __init__(self, context):
+    def __init__(self, context: str) -> None:
         """Initialize a SRObject object
 
         :param context: logging context
@@ -44,7 +45,7 @@ class SRObject:
             self._srobject = context
 
     @exception_handler
-    def get_srobject(self):
+    def get_srobject(self) -> PySRObject:
         """Return the PySRObject attribute
 
         :return: The PySRObject attribute containing the srobject information
@@ -53,7 +54,7 @@ class SRObject:
         return self._srobject
 
     @exception_handler
-    def set_srobject(self, srobject):
+    def set_srobject(self, srobject: PySRObject) -> None:
         """Set the PySRObject attribute
 
         :param srobject: The PySRObject object
@@ -63,7 +64,7 @@ class SRObject:
         self._srobject = srobject
 
     @exception_handler
-    def log_data(self, level, data):
+    def log_data(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged
@@ -77,7 +78,7 @@ class SRObject:
         self._srobject.log_data(level, data)
 
     @exception_handler
-    def log_warning(self, level, data):
+    def log_warning(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log warning data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged
@@ -91,7 +92,7 @@ class SRObject:
         self._srobject.log_warning(level, data)
 
     @exception_handler
-    def log_error(self, level, data):
+    def log_error(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log error data if the logging level is high enough
 
         :param level: Minimum logging level for data to be logged
