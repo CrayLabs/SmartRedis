@@ -53,8 +53,8 @@ def check_availability(n_nodes, port, udsport):
         command_succeeded = False
         for _ in range(num_tries):
             try:
-                run(set_cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
-                run(del_cmd, shell=True, stdout=DEVNULL, stderr=DEVNULL)
+                run(set_cmd.split(), shell=False, stdout=DEVNULL, stderr=DEVNULL)
+                run(del_cmd.split(), shell=False, stdout=DEVNULL, stderr=DEVNULL)
                 command_succeeded = True
                 break
             except Exception:
