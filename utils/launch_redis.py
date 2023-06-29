@@ -231,7 +231,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
             cluster_str += '127.0.0.1:' + str(port+i) + ' '
         cmd = f"{rediscli} --cluster create {cluster_str} --cluster-replicas 0"
         print(cmd)
-        proc = run([cmd], input="yes", encoding="utf-8", shell=True)
+        proc = run(cmd.split(), input="yes", encoding="utf-8", shell=False)
         if proc.returncode != 0:
             raise SubprocessError("Cluster could not be created!")
         sleep(2)
