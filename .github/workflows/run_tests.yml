@@ -47,10 +47,6 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB_SINGLE: "127.0.0.1:6380"
-  SSDB_CLUSTERED: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002"
-  SSDB_UDS: "unix:///tmp/redis.sock"
-  SMARTREDIS_TEST_CLUSTER: False
   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
   SR_LOG_LEVEL: "INFO"
 
@@ -143,58 +139,19 @@ jobs:
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
           sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
+          echo "REDISAI_CPU_INSTALL_PATH=/usr/lib/redis/modules/" >> $GITHUB_ENV &&
+          echo "SR_CICD_EXECUTION=True" >> $GITHUB_ENV &&
           echo "REDISAI_MODULES=/usr/lib/redis/modules/redisai.so \
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
-      # Begin running the tests using various DB deployments
-      - name: Single-shard DB tests
+      # Run the tests using various DB deployments
+      - name: Run tests
         run: |
-          SCRATCH_DIR="single_scratch" && PORT=6380 &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --port $PORT --daemonize yes \
-                       --logfile "single.log" \
-                       --loadmodule $REDISAI_MODULES &&
-          popd &&
-          export SSDB=$SSDB_SINGLE SMARTREDIS_TEST_CLUSTER=False &&
-          utils/check_redis.sh $PORT &&
-          make test-verbose-with-coverage COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" SR_FORTRAN=ON SR_PYTHON=ON
-
-      - name: Clustered DB tests
-        run: |
-          SCRATCH_DIR="cluster_scratch" &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          for port in {7000..7002}; do
-            redis-server --port $port --cluster-enabled yes --daemonize yes \
-                         --cluster-config-file "$port.conf" --protected-mode no --save "" \
-                         --logfile "$port.log" \
-                         --loadmodule $REDISAI_MODULES
-          done &&
-          popd &&
-          for port in {7000..7002}; do
-            utils/check_redis.sh $port
-          done &&
-          redis-cli --cluster create $(echo $SSDB_CLUSTERED | tr "," " ") --cluster-yes &&
-          export SSDB=$SSDB_CLUSTERED SMARTREDIS_TEST_CLUSTER=True &&
-          python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests --build Coverage
-
-      - name: UDS DB tests
-        run: |
-          SOCKET="/tmp/redis.sock" &&
-          mkdir -p /tmp && ## Create socketfile for UDS testing
-          touch $SOCKET &&
-          chmod 777 $SOCKET &&
-          SCRATCH_DIR="uds_scratch" &&
-          rm -rf $SCRATCH_DIR; mkdir $SCRATCH_DIR; pushd $SCRATCH_DIR &&
-          redis-server --unixsocket $SOCKET --unixsocketperm 777 --port 0 --bind 127.0.0.1 \
-                       --daemonize yes --protected-mode no --logfile "uds.log" \
-                       --loadmodule $REDISAI_MODULES &&
-          popd &&
-          utils/check_redis.sh $SOCKET
-          export SSDB=$SSDB_UDS SMARTREDIS_TEST_CLUSTER=False &&
-          python -m pytest --cov=./src/python/module/smartredis/ --cov-report=xml --cov-append \
-                 --ignore ./tests/docker -vv -s ./tests --build Coverage
+          make test-verbose-with-coverage \
+            COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
+            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 \
+            SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
