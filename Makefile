@@ -28,18 +28,6 @@
 MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
 
-# Build variables
-NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
-SR_BUILD := Release
-SR_LINK := Shared
-SR_PEDANTIC := OFF
-SR_FORTRAN := OFF
-SR_PYTHON := OFF
-
-# Test variables
-COV_FLAGS :=
-SR_TEST_DEVICE := cpu
-
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
 HIREDIS_VER := v1.1.0
@@ -50,11 +38,29 @@ PYBIND_VER := v2.10.3
 REDIS_URL := https://github.com/redis/redis.git
 REDIS_VER := 6.0.8
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
-REDISAI_VER := v1.2.3
+# REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
 LCOV_VER := v1.15
+
+# Build variables
+NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
+SR_BUILD := Release
+SR_LINK := Shared
+SR_PEDANTIC := OFF
+SR_FORTRAN := OFF
+SR_PYTHON := OFF
+
+# Test variables
+COV_FLAGS :=
+SR_TEST_REDIS_MODE := Clustered
+SR_TEST_UDS_FILE := /tmp/redis.sock
+SR_TEST_PORT := 6379
+SR_TEST_NODES := 3
+SR_TEST_REDISAI_VER := v1.2.3
+SR_TEST_DEVICE := cpu
+SR_TEST_PYTEST_FLAGS := -vv -s
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -81,6 +87,21 @@ help:
 # help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings
 # help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
 # help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
+# help:
+# help: Test variables
+# help: --------------
+# help:
+# help: These variables affect the way that the SmartRedis library is tested. Each
+# help: has several options; the first listed is the default. Use by appending
+# help: the variable name and setting after the make target, e.g.
+# help:    make test SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# help:
+# help: SR_TEST_REDIS_MODE {Clustered, Standalone} -- type of Redis backend launched for tests
+# help: SR_TEST_PORT (Default: 6379) -- first port for Redis server(s)
+# help: SR_TEST_NODES (Default: 3) Number of shards to intantiate for a clustered Redis database
+# help: SR_TEST_REDISAI_VER {v1.2.7, v1.2.5} -- version of RedisAI to use for tests
+# help: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
+# help: SR_TEST_PYTEST_FLAGS (default: "-vv -s"): Verbosity flags to use with pytest
 
 # help:
 # help: Build targets
@@ -278,90 +299,187 @@ endif
 ifeq ($(SR_FORTRAN),OFF)
 SKIP_FORTRAN = --ignore ./tests/fortran
 endif
+SKIP_DOCKER := --ignore ./tests/docker
+
+# Build SSDB string for clustered database
+SSDB_STRING := 127.0.0.1:$(SR_TEST_PORT)
+PORT_RANGE := $(shell seq `expr $(SR_TEST_PORT) + 1` 1 `expr $(SR_TEST_PORT) + $(SR_TEST_NODES) - 1`)
+SSDB_STRING += $(foreach P,$(PORT_RANGE),",127.0.0.1:$(P)")
+SSDB_STRING := $(shell echo $(SSDB_STRING) | tr -d " ")
+
+# Run test cases with a freshly instantiated standalone Redis server
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_standalone_server
+	echo "Launching standalone Redis server" && \
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
+	echo "Running standalone tests" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down standalone Redis server" && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
+	echo "Standalone tests complete"
+endef
+
+# Run test cases with a freshly instantiated clustered Redis server
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_clustered_server
+	echo "Launching clustered Redis server" && \
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Clustered && \
+	export SMARTREDIS_TEST_CLUSTER=True SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	export SSDB=$(SSDB_STRING) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
+		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
+	echo "Running clustered tests" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down clustered Redis server" && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) \
+		--nodes $(SR_TEST_NODES) --stop && \
+	echo "Clustered tests complete"
+endef
+
+# Run test cases with a freshly instantiated standalone Redis server
+# connected via a Unix Domain Socket
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_uds_server
+	echo "Launching standalone Redis server with Unix Domain Socket support"
+	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_SERVER_MODE=Standalone && \
+	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
+	export SSDB=unix://$(SR_TEST_UDS_FILE) && \
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
+		--udsport $(SR_TEST_UDS_FILE) && \
+	echo "Running standalone tests with Unix Domain Socket connection" && \
+	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+	echo "Shutting down standalone Redis server with Unix Domain Socket support"
+	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
+		--udsport $(SR_TEST_UDS_FILE) --stop && \
+	echo "UDS tests complete"
+endef
+
+# Run test cases with freshly instantiated Redis servers
+# Parameters:
+# 	1: the test directory in which to run tests
+define run_smartredis_tests_with_server
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Standalone),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(call run_smartredis_tests_with_standalone_server,$(1))
+	)
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Clustered),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(call run_smartredis_tests_with_clustered_server,$(1))
+	)
+	$(if $(or $(filter $(SR_TEST_REDIS_MODE),UDS),
+	          $(filter $(SR_TEST_REDIS_MODE),All)),
+		$(if $(filter-out $(shell uname -s),Darwin),
+			$(call run_smartredis_tests_with_uds_server,$(1)),
+			@echo "Skipping: Unix Domain Socket is not supported on MacOS"
+		)
+	)
+endef
 
 # help: test                           - Build and run all tests (C, C++, Fortran, Python)
 .PHONY: test
 test: test-deps
 test: build-tests
+test: SR_TEST_PYTEST_FLAGS := -vv
 test:
-	@PYTHONFAULTHANDLER=1 python -m pytest --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv ./tests --build $(SR_BUILD)
-
+	-@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
 test-verbose: test-deps
 test-verbose: build-tests
+test-verbose: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose:
-	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv -s ./tests --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
-test-verbose-with-coverage: SR_BUILD=Coverage
+test-verbose-with-coverage: SR_BUILD := Coverage
 test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
+test-verbose-with-coverage: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose-with-coverage:
-	@PYTHONFAULTHANDLER=1 python -m pytest $(COV_FLAGS) --ignore ./tests/docker \
-		$(SKIP_PYTHON) $(SKIP_FORTRAN) -vv -s ./tests --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
 test-c: test-deps
 test-c: build-test-c
+test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
-	@python -m pytest -vv -s ./tests/c/ --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests/c)
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
 test-cpp: test-deps
 test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
+test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/ --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests/cpp)
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
 unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
+unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
-	@python -m pytest -vv -s ./tests/cpp/unit-tests/ --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
 
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py: test-deps
-test-py: SR_PYTHON=ON
+test-py: SR_PYTHON := ON
 test-py: lib
+test-py: SR_TEST_PYTEST_FLAGS := -vv
 test-py:
-	@PYTHONFAULTHANDLER=1 python -m pytest -vv ./tests/python/ --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
+test-fortran: SR_FORTRAN := ON
 test-fortran: test-deps
 test-fortran: build-test-fortran
-	@python -m pytest -vv ./tests/fortran/ --build $(SR_BUILD)
+test-fortran: SR_TEST_PYTEST_FLAGS := -vv
+test-fortran:
+	-@$(call run_smartredis_tests_with_server,./tests/fortran)
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov: test-deps
-testpy-cov: SR_PYTHON=ON
+testpy-cov: SR_PYTHON := ON
+testpy-cov: SR_TEST_PYTEST_FLAGS := -vv
+testpy-cov: COV_FLAGS := --cov=./src/python/module/smartredis/
 testpy-cov:
-	@PYTHONFAULTHANDLER=1 python -m pytest --cov=./src/python/module/smartredis/ \
-		-vv ./tests/python/ --build $(SR_BUILD)
+	-@$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
 test-examples: test-deps
 test-examples: build-examples
+testpy-cov: SR_TEST_PYTEST_FLAGS := -vv -s
 test-examples:
-	@python -m pytest -vv -s ./examples --build $(SR_BUILD) --sr_fortran $(SR_FORTRAN)
+	-@$(call run_smartredis_tests_with_server,./examples)
 
 
 ############################################################################
 # hidden build targets for third-party software
 
 # Hiredis (hidden build target)
-.phony: hiredis
+.PHONY: hiredis
 hiredis: install/lib/libhiredis.a
 install/lib/libhiredis.a:
 	@rm -rf third-party/hiredis
@@ -376,7 +494,7 @@ install/lib/libhiredis.a:
 	echo "Finished installing Hiredis"
 
 # Redis-plus-plus (hidden build target)
-.phony: redis-plus-plus
+.PHONY: redis-plus-plus
 redis-plus-plus: install/lib/libredis++.a
 install/lib/libredis++.a:
 	@rm -rf third-party/redis-plus-plus
@@ -395,7 +513,7 @@ install/lib/libredis++.a:
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
-.phony: pybind
+.PHONY: pybind
 pybind: third-party/pybind/include/pybind11/pybind11.h
 third-party/pybind/include/pybind11/pybind11.h:
 	@mkdir -p third-party
@@ -405,7 +523,7 @@ third-party/pybind/include/pybind11/pybind11.h:
 	echo "Finished installing Pybind11"
 
 # Redis (hidden test target)
-.phony: redis
+.PHONY: redis
 redis: third-party/redis/src/redis-server
 third-party/redis/src/redis-server:
 	@mkdir -p third-party
@@ -417,7 +535,7 @@ third-party/redis/src/redis-server:
 
 # cudann-check (hidden test target)
 # checks cuda dependencies for GPU build
-.phony: cudann-check
+.PHONY: cudann-check
 cudann-check:
 ifeq ($(SR_TEST_DEVICE),gpu)
 ifndef CUDA_HOME
@@ -438,17 +556,18 @@ endif
 endif
 
 # RedisAI (hidden test target)
-.phony: redisAI
+.PHONY: redisAI
 redisAI: cudann-check
-redisAI: third-party/RedisAI/install-cpu/redisai.so
-third-party/RedisAI/install-cpu/redisai.so:
+redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
+third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
+	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
 	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
 	@mkdir -p third-party
 	@cd third-party && \
-	rm -rf RedisAI && \
-	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI \
-		--branch $(REDISAI_VER) --depth=1
-	-@cd third-party/RedisAI && \
+	rm -rf RedisAI/$(SR_TEST_REDISAI_VER) && \
+	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI/$(SR_TEST_REDISAI_VER) \
+		--branch $(SR_TEST_REDISAI_VER) --depth=1
+	-@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
 	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
 		$(SR_TEST_DEVICE) && \
 	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
@@ -456,7 +575,7 @@ third-party/RedisAI/install-cpu/redisai.so:
 	echo "Finished installing RedisAI"
 
 # Catch2 (hidden test target)
-.phony: catch2
+.PHONY: catch2
 catch2: third-party/catch/single_include/catch2/catch.hpp
 third-party/catch/single_include/catch2/catch.hpp:
 	@mkdir -p third-party
@@ -465,7 +584,7 @@ third-party/catch/single_include/catch2/catch.hpp:
 	@echo "Finished installing Catch2"
 
 # LCOV (hidden test target)
-.phony: lcov
+.PHONY: lcov
 lcov: third-party/lcov/install/usr/local/bin/lcov
 third-party/lcov/install/usr/local/bin/lcov:
 	@mkdir -p third-party
