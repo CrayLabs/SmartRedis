@@ -220,7 +220,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     # Let exceptions propagate to the caller
     check_availability(n_nodes, port, udsport)
     for proc in procs:
-        _,_ = proc.communicate(timeout=15)
+        _ = proc.communicate(timeout=15)
         if proc.returncode != 0:
             raise RuntimeError("Failed to launch Redis server!")
 
