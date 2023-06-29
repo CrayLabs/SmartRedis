@@ -93,7 +93,7 @@ def stop_db(n_nodes, port, udsport):
     # Make sure that all servers are down
     # Let exceptions propagate to the caller
     for proc in procs:
-        _,_ = proc.communicate(timeout=15)
+        _ = proc.communicate(timeout=15)
         if proc.returncode != 0:
             raise RuntimeError("Failed to kill Redis server!")
 
