@@ -35,11 +35,11 @@ from typing_extensions import ParamSpec
 # Type hint magic bits
 _PR = ParamSpec("_PR")
 _RT = t.TypeVar("_RT")
-TFunc = t.Callable[_PR, _RT]
+
 
 class Dtypes:
     @staticmethod
-    def tensor_from_numpy(array: np.ndarray)->str:
+    def tensor_from_numpy(array: np.ndarray) -> str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -56,7 +56,7 @@ class Dtypes:
         raise TypeError(f"Incompatible tensor type provided {dtype}")
 
     @staticmethod
-    def metadata_from_numpy(array: np.ndarray)->str:
+    def metadata_from_numpy(array: np.ndarray) -> str:
         mapping = {
             "float64": "DOUBLE",
             "float32": "FLOAT",
@@ -71,27 +71,28 @@ class Dtypes:
         raise TypeError(f"Incompatible metadata type provided {dtype}")
 
     @staticmethod
-    def from_string(type_name: str)->type:
+    def from_string(type_name: str) -> t.Type:
         mapping = {
             "DOUBLE": np.double,
-            "FLOAT":  np.float64,
-            "UINT8":  np.uint8,
+            "FLOAT": np.float64,
+            "UINT8": np.uint8,
             "UINT16": np.uint16,
             "UINT32": np.uint32,
             "UINT64": np.uint64,
-            "INT8":   np.int8,
-            "INT16":  np.int16,
-            "INT32":  np.int32,
-            "INT64":  np.int64,
+            "INT8": np.int8,
+            "INT16": np.int16,
+            "INT32": np.int32,
+            "INT64": np.int64,
             "STRING": str,
         }
         if type_name in mapping:
             return mapping[type_name]
         raise TypeError(f"Unrecognized type name {type_name}")
 
+
 def init_default(
-    default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any]=None
-)->t.Any:
+    default: t.Any, init_value: t.Any, expected_type: t.Optional[t.Any] = None
+) -> t.Any:
     """Used for setting a mutable type to a default value.
 
     PEP standards forbid setting a default value to a mutable type
@@ -103,7 +104,8 @@ def init_default(
         raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
     return init_value
 
-def exception_handler(func: t.Callable[_PR, _RT])->TFunc:
+
+def exception_handler(func: t.Callable[_PR, _RT]) -> t.Callable[_PR, _RT]:
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
@@ -116,8 +118,9 @@ def exception_handler(func: t.Callable[_PR, _RT])->TFunc:
     :type func: function
     :raises RedisReplyError: if the wrapped function raised an exception
     """
+
     @wraps(func)
-    def smartredis_api_wrapper(*args: _PR.args, **kwargs: _PR.kwargs)->_RT:
+    def smartredis_api_wrapper(*args: _PR.args, **kwargs: _PR.kwargs) -> _RT:
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
@@ -141,11 +144,15 @@ def exception_handler(func: t.Callable[_PR, _RT])->TFunc:
             if error_loc == "unavailable":
                 cpp_error_str = str(cpp_error)
             else:
-                cpp_error_str = f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+                cpp_error_str = (
+                    f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
+                )
             raise globals()[exception_name](cpp_error_str, method_name) from None
+
     return smartredis_api_wrapper
 
-def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, type])->None:
+
+def typecheck(arg: t.Any, name: str, _type: t.Union[t.Tuple, type]) -> None:
     """Validate that an argument is of a given type
 
     :param arg: the variable to be type tested

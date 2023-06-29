@@ -29,8 +29,10 @@ from .srobject import SRObject
 from .util import exception_handler, typecheck
 from .error import *
 import typing as t
+
+
 class LogContext(SRObject):
-    def __init__(self, context: str)->None:
+    def __init__(self, context: str) -> None:
         """Initialize a LogContext object
 
         :param context: logging context
@@ -41,13 +43,12 @@ class LogContext(SRObject):
         self._name = context
 
     @property
-    def _logcontext(self)->t.Type[SRObject]:
-        """Alias _srobject to _logcontext
-        """
+    def _logcontext(self) -> PyLogContext:
+        """Alias _srobject to _logcontext"""
         return self._srobject
 
     @staticmethod
-    def from_pybind(logcontext: PyLogContext)->"LogContext":
+    def from_pybind(logcontext: PyLogContext) -> "LogContext":
         """Initialize a LogContext object from
         a PyLogContext object
 
@@ -64,7 +65,7 @@ class LogContext(SRObject):
         return new_logcontext
 
     @exception_handler
-    def get_context(self)->PyLogContext:
+    def get_context(self) -> PyLogContext:
         """Return the PyLogContext attribute
 
         :return: The PyLogContext attribute containing
@@ -74,7 +75,7 @@ class LogContext(SRObject):
         return self._logcontext
 
     @exception_handler
-    def set_context(self, logcontext: PyLogContext)->None:
+    def set_context(self, logcontext: PyLogContext) -> None:
         """Set the PyLogContext attribute
 
         :param logcontext: The PyLogContext object

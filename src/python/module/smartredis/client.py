@@ -39,10 +39,14 @@ from .util import Dtypes, init_default, exception_handler, typecheck
 from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 
+
 class Client(SRObject):
     def __init__(
-        self, address: t.Optional[str]=None, cluster: bool=False, logger_name: str="default"
-    )->None:
+        self,
+        address: t.Optional[str] = None,
+        cluster: bool = False,
+        logger_name: str = "default",
+    ) -> None:
         """Initialize a RedisAI client
 
         For clusters, the address can be a single tcp/ip address and port
@@ -70,7 +74,7 @@ class Client(SRObject):
         except RuntimeError as e:
             raise RedisConnectionError(str(e)) from None
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         """Create a string representation of the client
 
         :return: A string representation of the client
@@ -79,13 +83,12 @@ class Client(SRObject):
         return self._client.to_string()
 
     @property
-    def _client(self)->PyClient:
-        """Alias _srobject to _client
-        """
+    def _client(self) -> PyClient:
+        """Alias _srobject to _client"""
         return self._srobject
 
     @exception_handler
-    def put_tensor(self, name: str, data: np.ndarray)->None:
+    def put_tensor(self, name: str, data: np.ndarray) -> None:
         """Put a tensor to a Redis database
 
         The final tensor key under which the tensor is stored
@@ -104,7 +107,7 @@ class Client(SRObject):
         self._client.put_tensor(name, dtype, data)
 
     @exception_handler
-    def get_tensor(self, name: str)->np.ndarray:
+    def get_tensor(self, name: str) -> np.ndarray:
         """Get a tensor from the database
 
         The tensor key used to locate the tensor
@@ -122,7 +125,7 @@ class Client(SRObject):
         return self._client.get_tensor(name)
 
     @exception_handler
-    def delete_tensor(self, name: str)->None:
+    def delete_tensor(self, name: str) -> None:
         """Delete a tensor from the database
 
         The tensor key used to locate the tensor to be deleted
@@ -138,7 +141,7 @@ class Client(SRObject):
         self._client.delete_tensor(name)
 
     @exception_handler
-    def copy_tensor(self, src_name: str, dest_name: str)->None:
+    def copy_tensor(self, src_name: str, dest_name: str) -> None:
         """Copy a tensor at one name to another name
 
         The source and destination tensor keys used to locate
@@ -157,7 +160,7 @@ class Client(SRObject):
         self._client.copy_tensor(src_name, dest_name)
 
     @exception_handler
-    def rename_tensor(self, old_name: str, new_name: str)->None:
+    def rename_tensor(self, old_name: str, new_name: str) -> None:
         """Rename a tensor in the database
 
         The old and new tensor keys used to find and relocate
@@ -176,7 +179,7 @@ class Client(SRObject):
         self._client.rename_tensor(old_name, new_name)
 
     @exception_handler
-    def put_dataset(self, dataset: Dataset)->None:
+    def put_dataset(self, dataset: Dataset) -> None:
         """Put a Dataset instance into the database
 
         The final dataset key under which the dataset is stored
@@ -197,7 +200,7 @@ class Client(SRObject):
         self._client.put_dataset(pybind_dataset)
 
     @exception_handler
-    def get_dataset(self, name: str)->Dataset:
+    def get_dataset(self, name: str) -> Dataset:
         """Get a dataset from the database
 
         The dataset key used to locate the dataset
@@ -217,7 +220,7 @@ class Client(SRObject):
         return python_dataset
 
     @exception_handler
-    def delete_dataset(self, name: str)->None:
+    def delete_dataset(self, name: str) -> None:
         """Delete a dataset within the database
 
         The dataset key used to locate the dataset to be deleted
@@ -233,7 +236,7 @@ class Client(SRObject):
         self._client.delete_dataset(name)
 
     @exception_handler
-    def copy_dataset(self, src_name: str, dest_name: str)->None:
+    def copy_dataset(self, src_name: str, dest_name: str) -> None:
         """Copy a dataset from one key to another
 
         The source and destination dataset keys used to
@@ -252,7 +255,7 @@ class Client(SRObject):
         self._client.copy_dataset(src_name, dest_name)
 
     @exception_handler
-    def rename_dataset(self, old_name: str, new_name: str)->None:
+    def rename_dataset(self, old_name: str, new_name: str) -> None:
         """Rename a dataset in the database
 
         The old and new dataset keys used to find and relocate
@@ -272,8 +275,8 @@ class Client(SRObject):
 
     @exception_handler
     def set_function(
-        self, name: str, function: t.Callable, device: str="CPU"
-    )->None:
+        self, name: str, function: t.Callable, device: str = "CPU"
+    ) -> None:
         """Set a callable function into the database
 
         The final script key used to store the function may be formed
@@ -298,7 +301,9 @@ class Client(SRObject):
         typecheck(name, "name", str)
         typecheck(device, "device", str)
         if not callable(function):
-            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
+            raise TypeError(
+                f"Argument provided for function, {type(function)}, is not callable"
+            )
         device = self.__check_device(device)
         fn_src = inspect.getsource(function)
         self._client.set_script(name, device, fn_src)
@@ -306,7 +311,7 @@ class Client(SRObject):
     @exception_handler
     def set_function_multigpu(
         self, name: str, function: t.Callable, first_gpu: int, num_gpus: int
-    )->None:
+    ) -> None:
         """Set a callable function into the database for use
         in a multi-GPU system
 
@@ -333,12 +338,14 @@ class Client(SRObject):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         if not callable(function):
-            raise TypeError(f"Argument provided for function, {type(function)}, is not callable")
+            raise TypeError(
+                f"Argument provided for function, {type(function)}, is not callable"
+            )
         fn_src = inspect.getsource(function)
         self._client.set_script_multigpu(name, fn_src, first_gpu, num_gpus)
 
     @exception_handler
-    def set_script(self, name: str, script: str, device: str="CPU")->None:
+    def set_script(self, name: str, script: str, device: str = "CPU") -> None:
         """Store a TorchScript at a key in the database
 
         The final script key used to store the script may be formed
@@ -365,7 +372,7 @@ class Client(SRObject):
     @exception_handler
     def set_script_multigpu(
         self, name: str, script: str, first_gpu: int, num_gpus: int
-    )->None:
+    ) -> None:
         """Store a TorchScript at a key in the database
 
         The final script key used to store the script may be formed
@@ -389,7 +396,7 @@ class Client(SRObject):
         self._client.set_script_multigpu(name, script, first_gpu, num_gpus)
 
     @exception_handler
-    def set_script_from_file(self, name: str, file: str, device: str="CPU")->None:
+    def set_script_from_file(self, name: str, file: str, device: str = "CPU") -> None:
         """Same as Client.set_script, but from file
 
         The final script key used to store the script may be formed
@@ -414,7 +421,7 @@ class Client(SRObject):
     @exception_handler
     def set_script_from_file_multigpu(
         self, name: str, file: str, first_gpu: int, num_gpus: int
-    )->None:
+    ) -> None:
         """Same as Client.set_script_multigpu, but from file
 
         The final script key used to store the script may be formed
@@ -439,7 +446,7 @@ class Client(SRObject):
         self._client.set_script_from_file_multigpu(name, file_path, first_gpu, num_gpus)
 
     @exception_handler
-    def get_script(self, name: str)->str:
+    def get_script(self, name: str) -> str:
         """Retrieve a Torchscript stored in the database
 
         The script key used to locate the script
@@ -459,12 +466,8 @@ class Client(SRObject):
 
     @exception_handler
     def run_script(
-        self,
-        name: str,
-        fn_name: str,
-        inputs: t.List[str],
-        outputs: t.List[str]
-    )->None:
+        self, name: str, fn_name: str, inputs: t.List[str], outputs: t.List[str]
+    ) -> None:
         """Execute TorchScript stored inside the database
 
         The script key used to locate the script to be run
@@ -500,8 +503,8 @@ class Client(SRObject):
         outputs: t.List[str],
         offset: int,
         first_gpu: int,
-        num_gpus: int
-    )->None:
+        num_gpus: int,
+    ) -> None:
         """Execute TorchScript stored inside the database
 
         The script key used to locate the script to be run
@@ -537,10 +540,11 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         self._client.run_script_multigpu(
-            name, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
+            name, fn_name, inputs, outputs, offset, first_gpu, num_gpus
+        )
 
     @exception_handler
-    def delete_script(self, name: str)->None:
+    def delete_script(self, name: str) -> None:
         """Remove a script from the database
 
         The script key used to locate the script to be run
@@ -556,9 +560,7 @@ class Client(SRObject):
         self._client.delete_script(name)
 
     @exception_handler
-    def delete_script_multigpu(
-        self, name: str, first_gpu: int, num_gpus: int
-    )->None:
+    def delete_script_multigpu(self, name: str, first_gpu: int, num_gpus: int) -> None:
         """Remove a script from the database
 
         The script key used to locate the script to be run
@@ -580,7 +582,7 @@ class Client(SRObject):
         self._client.delete_script_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
-    def get_model(self, name: str)->bytes:
+    def get_model(self, name: str) -> bytes:
         """Get a stored model
 
         The model key used to locate the model
@@ -604,13 +606,13 @@ class Client(SRObject):
         name: str,
         model: bytes,
         backend: str,
-        device: str="CPU",
-        batch_size: int=0,
-        min_batch_size: int=0,
-        tag: str="",
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        device: str = "CPU",
+        batch_size: int = 0,
+        min_batch_size: int = 0,
+        tag: str = "",
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Put a TF, TF-lite, PT, or ONNX model in the database
 
         The final model key used to store the model
@@ -637,9 +639,9 @@ class Client(SRObject):
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: model outputs (TF only), defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model fails to set
         """
         typecheck(name, "name", str)
@@ -671,12 +673,12 @@ class Client(SRObject):
         backend: str,
         first_gpu: int,
         num_gpus: int,
-        batch_size: int=0,
-        min_batch_size: int=0,
-        tag: str="",
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        batch_size: int = 0,
+        min_batch_size: int = 0,
+        tag: str = "",
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Put a TF, TF-lite, PT, or ONNX model in the database for use
         in a multi-GPU system
 
@@ -704,9 +706,9 @@ class Client(SRObject):
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: model outputs (TF only), defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model fails to set
         """
         typecheck(name, "name", str)
@@ -728,7 +730,7 @@ class Client(SRObject):
             min_batch_size,
             tag,
             inputs,
-            outputs
+            outputs,
         )
 
     @exception_handler
@@ -737,13 +739,13 @@ class Client(SRObject):
         name: str,
         model_file: str,
         backend: str,
-        device: str="CPU",
-        batch_size: int=0,
-        min_batch_size: int=0,
-        tag: str="",
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        device: str = "CPU",
+        batch_size: int = 0,
+        min_batch_size: int = 0,
+        tag: str = "",
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
 
         The final model key used to store the model
@@ -770,9 +772,9 @@ class Client(SRObject):
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: model outupts (TF only), defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model fails to set
         """
         typecheck(name, "name", str)
@@ -806,12 +808,12 @@ class Client(SRObject):
         backend: str,
         first_gpu: int,
         num_gpus: int,
-        batch_size: int=0,
-        min_batch_size: int=0,
-        tag: str="",
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        batch_size: int = 0,
+        min_batch_size: int = 0,
+        tag: str = "",
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Put a TF, TF-lite, PT, or ONNX model from file in the database
         for use in a multi-GPU system
 
@@ -839,9 +841,9 @@ class Client(SRObject):
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: model outupts (TF only), defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model fails to set
         """
         typecheck(name, "name", str)
@@ -872,9 +874,9 @@ class Client(SRObject):
     def run_model(
         self,
         name: str,
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Execute a stored model
 
         The model key used to locate the model to be run
@@ -885,9 +887,9 @@ class Client(SRObject):
         :param name: name for stored model
         :type name: str
         :param inputs: names of stored inputs to provide model, defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: names to store outputs under, defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model execution fails
         """
         typecheck(name, "name", str)
@@ -901,9 +903,9 @@ class Client(SRObject):
         offset: int,
         first_gpu: int,
         num_gpus: int,
-        inputs: t.Optional[t.Union[str, t.List[str]]]=None,
-        outputs: t.Optional[t.Union[str, t.List[str]]]=None
-    )->None:
+        inputs: t.Optional[t.Union[str, t.List[str]]] = None,
+        outputs: t.Optional[t.Union[str, t.List[str]]] = None,
+    ) -> None:
         """Execute a model stored for a multi-GPU system
 
         The model key used to locate the model to be run
@@ -921,9 +923,9 @@ class Client(SRObject):
         :param num_gpus: the number of gpus for which the model was stored
         :type num_gpus: int
         :param inputs: names of stored inputs to provide model, defaults to None
-        :type inputs: list[str], optional
+        :type inputs: str | list[str] | None
         :param outputs: names to store outputs under, defaults to None
-        :type outputs: list[str], optional
+        :type outputs: str | list[str] | None
         :raises RedisReplyError: if model execution fails
         """
         typecheck(name, "name", str)
@@ -931,10 +933,12 @@ class Client(SRObject):
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
-        self._client.run_model_multigpu(name, inputs, outputs, offset, first_gpu, num_gpus)
+        self._client.run_model_multigpu(
+            name, inputs, outputs, offset, first_gpu, num_gpus
+        )
 
     @exception_handler
-    def delete_model(self, name: str)->None:
+    def delete_model(self, name: str) -> None:
         """Remove a model from the database
 
         The model key used to locate the script to be run
@@ -950,7 +954,7 @@ class Client(SRObject):
         self._client.delete_model(name)
 
     @exception_handler
-    def delete_model_multigpu(self, name: str, first_gpu: int, num_gpus: str)->None:
+    def delete_model_multigpu(self, name: str, first_gpu: int, num_gpus: str) -> None:
         """Remove a model from the database that was stored for use with multiple GPUs
 
         The model key used to locate the script to be run
@@ -972,7 +976,7 @@ class Client(SRObject):
         self._client.delete_model_multigpu(name, first_gpu, num_gpus)
 
     @exception_handler
-    def tensor_exists(self, name: str)->bool:
+    def tensor_exists(self, name: str) -> bool:
         """Check if a tensor exists in the database
 
         The tensor key used to check for existence
@@ -990,7 +994,7 @@ class Client(SRObject):
         return self._client.tensor_exists(name)
 
     @exception_handler
-    def dataset_exists(self, name: str)->bool:
+    def dataset_exists(self, name: str) -> bool:
         """Check if a dataset exists in the database
 
         The dataset key used to check for existence
@@ -1008,7 +1012,7 @@ class Client(SRObject):
         return self._client.dataset_exists(name)
 
     @exception_handler
-    def model_exists(self, name: str)->bool:
+    def model_exists(self, name: str) -> bool:
         """Check if a model or script exists in the database
 
         The model or script key used to check for existence
@@ -1026,7 +1030,7 @@ class Client(SRObject):
         return self._client.model_exists(name)
 
     @exception_handler
-    def key_exists(self, key: str)->bool:
+    def key_exists(self, key: str) -> bool:
         """Check if the key exists in the database
 
         :param key: The key that will be checked in the database
@@ -1039,9 +1043,7 @@ class Client(SRObject):
         return self._client.key_exists(key)
 
     @exception_handler
-    def poll_key(
-        self, key: str, poll_frequency_ms: int, num_tries: int
-    )->bool:
+    def poll_key(self, key: str, poll_frequency_ms: int, num_tries: int) -> bool:
         """Check if the key exists in the database
 
         The check is repeated at a specified polling interval and for
@@ -1064,9 +1066,7 @@ class Client(SRObject):
         return self._client.poll_key(key, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def poll_tensor(
-        self, name: str, poll_frequency_ms: int, num_tries: int
-    )->bool:
+    def poll_tensor(self, name: str, poll_frequency_ms: int, num_tries: int) -> bool:
         """Check if a tensor exists in the database
 
         The check is repeated at a specified polling interval and for
@@ -1093,9 +1093,7 @@ class Client(SRObject):
         return self._client.poll_tensor(name, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def poll_dataset(
-        self, name: str, poll_frequency_ms: int, num_tries: int
-    )->bool:
+    def poll_dataset(self, name: str, poll_frequency_ms: int, num_tries: int) -> bool:
         """Check if a dataset exists in the database
 
         The check is repeated at a specified polling interval and for
@@ -1122,9 +1120,7 @@ class Client(SRObject):
         return self._client.poll_dataset(name, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def poll_model(
-        self, name: str, poll_frequency_ms: int, num_tries: int
-    )->bool:
+    def poll_model(self, name: str, poll_frequency_ms: int, num_tries: int) -> bool:
         """Check if a model or script exists in the database
 
         The check is repeated at a specified polling interval and for
@@ -1151,7 +1147,7 @@ class Client(SRObject):
         return self._client.poll_model(name, poll_frequency_ms, num_tries)
 
     @exception_handler
-    def set_data_source(self, source_id: str)->None:
+    def set_data_source(self, source_id: str) -> None:
         """Set the data source, a key prefix for future operations
 
         When running multiple applications, such as an ensemble
@@ -1180,7 +1176,7 @@ class Client(SRObject):
         return self._client.set_data_source(source_id)
 
     @exception_handler
-    def use_model_ensemble_prefix(self, use_prefix: bool)->None:
+    def use_model_ensemble_prefix(self, use_prefix: bool) -> None:
         """Control whether model and script keys are
            prefixed (e.g. in an ensemble) when forming database keys
 
@@ -1203,7 +1199,7 @@ class Client(SRObject):
         return self._client.use_model_ensemble_prefix(use_prefix)
 
     @exception_handler
-    def use_list_ensemble_prefix(self, use_prefix: bool)->None:
+    def use_list_ensemble_prefix(self, use_prefix: bool) -> None:
         """Control whether aggregation lists are prefixed
            when forming database keys
 
@@ -1232,7 +1228,7 @@ class Client(SRObject):
         return self._client.use_list_ensemble_prefix(use_prefix)
 
     @exception_handler
-    def use_tensor_ensemble_prefix(self, use_prefix: bool)->None:
+    def use_tensor_ensemble_prefix(self, use_prefix: bool) -> None:
         """Control whether tensor keys are prefixed (e.g. in an
         ensemble) when forming database keys
 
@@ -1254,7 +1250,7 @@ class Client(SRObject):
         return self._client.use_tensor_ensemble_prefix(use_prefix)
 
     @exception_handler
-    def use_dataset_ensemble_prefix(self, use_prefix: bool)->None:
+    def use_dataset_ensemble_prefix(self, use_prefix: bool) -> None:
         """Control whether dataset keys are prefixed (e.g. in an ensemble)
            when forming database keys
 
@@ -1276,7 +1272,7 @@ class Client(SRObject):
         return self._client.use_dataset_ensemble_prefix(use_prefix)
 
     @exception_handler
-    def get_db_node_info(self, addresses: t.List[str])->t.List[t.Dict]:
+    def get_db_node_info(self, addresses: t.List[str]) -> t.List[t.Dict]:
         """Returns information about given database nodes
 
         :param addresses: The addresses of the database nodes
@@ -1299,7 +1295,7 @@ class Client(SRObject):
         return self._client.get_db_node_info(addresses)
 
     @exception_handler
-    def get_db_cluster_info(self, addresses: t.List[str])->t.List[t.Dict]:
+    def get_db_cluster_info(self, addresses: t.List[str]) -> t.List[t.Dict]:
         """Returns cluster information from a specified db node.
         If the address does not correspond to a cluster node,
         an empty dictionary is returned.
@@ -1326,8 +1322,8 @@ class Client(SRObject):
 
     @exception_handler
     def get_ai_info(
-        self, address: t.List[str], key: str, reset_stat: bool=False
-    )->t.List[t.Dict]:
+        self, address: t.List[str], key: str, reset_stat: bool = False
+    ) -> t.List[t.Dict]:
         """Returns AI.INFO command reply information for the
         script or model key at the provided addresses.
 
@@ -1351,7 +1347,7 @@ class Client(SRObject):
         return self._client.get_ai_info(address, key, reset_stat)
 
     @exception_handler
-    def flush_db(self, addresses: t.List[str])->None:
+    def flush_db(self, addresses: t.List[str]) -> None:
         """Removes all keys from a specified db node.
 
         :param addresses: The addresses of the database nodes
@@ -1371,7 +1367,7 @@ class Client(SRObject):
         self._client.flush_db(addresses)
 
     @exception_handler
-    def config_get(self, expression: str, address: t.List[str])->t.Dict:
+    def config_get(self, expression: str, address: t.List[str]) -> t.Dict:
         """Read the configuration parameters of a running server.
         If the address does not correspond to a cluster node,
         an empty dictionary is returned.
@@ -1402,7 +1398,7 @@ class Client(SRObject):
         return self._client.config_get(expression, address)
 
     @exception_handler
-    def config_set(self, config_param: str, value: str, address: str)->None:
+    def config_set(self, config_param: str, value: str, address: str) -> None:
         """Reconfigure the server. It can change both trivial
         parameters or switch from one to another persistence option.
         All the configuration parameters set using this command are
@@ -1434,7 +1430,7 @@ class Client(SRObject):
         self._client.config_set(config_param, value, address)
 
     @exception_handler
-    def save(self, addresses: t.List[str])->None:
+    def save(self, addresses: t.List[str]) -> None:
         """Performs a synchronous save of the database shard
         producing a point in time snapshot of all the data
         inside the Redis instance, in the form of an RBD file.
@@ -1456,7 +1452,7 @@ class Client(SRObject):
         self._client.save(addresses)
 
     @exception_handler
-    def append_to_list(self, list_name: str, dataset: Dataset)->None:
+    def append_to_list(self, list_name: str, dataset: Dataset) -> None:
         """Appends a dataset to the aggregation list
 
         When appending a dataset to an aggregation list,
@@ -1483,7 +1479,7 @@ class Client(SRObject):
         self._client.append_to_list(list_name, pybind_dataset)
 
     @exception_handler
-    def delete_list(self, list_name: str)->None:
+    def delete_list(self, list_name: str) -> None:
         """Delete an aggregation list
 
         The key used to locate the aggregation list to be
@@ -1500,7 +1496,7 @@ class Client(SRObject):
         self._client.delete_list(list_name)
 
     @exception_handler
-    def copy_list(self, src_name: str, dest_name: str)->None:
+    def copy_list(self, src_name: str, dest_name: str) -> None:
         """Copy an aggregation list
 
         The source and destination aggregation list keys used to
@@ -1521,7 +1517,7 @@ class Client(SRObject):
         self._client.copy_list(src_name, dest_name)
 
     @exception_handler
-    def rename_list(self, src_name: str, dest_name: str)->None:
+    def rename_list(self, src_name: str, dest_name: str) -> None:
         """Rename an aggregation list
 
         The old and new aggregation list key used to find and
@@ -1541,7 +1537,7 @@ class Client(SRObject):
         self._client.rename_list(src_name, dest_name)
 
     @exception_handler
-    def get_list_length(self, list_name: str)->int:
+    def get_list_length(self, list_name: str) -> int:
         """Get the number of entries in the list
 
         :param list_name: The list name
@@ -1556,12 +1552,8 @@ class Client(SRObject):
 
     @exception_handler
     def poll_list_length(
-        self,
-        name: str,
-        list_length: int,
-        poll_frequency_ms: int,
-        num_tries: int
-    )->bool:
+        self, name: str, list_length: int, poll_frequency_ms: int, num_tries: int
+    ) -> bool:
         """Poll list length until length is equal
         to the provided length.  If maximum number of
         attempts is exceeded, returns False
@@ -1590,16 +1582,13 @@ class Client(SRObject):
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
         return self._client.poll_list_length(
-            name, list_length, poll_frequency_ms, num_tries)
+            name, list_length, poll_frequency_ms, num_tries
+        )
 
     @exception_handler
     def poll_list_length_gte(
-        self,
-        name: str,
-        list_length: int,
-        poll_frequency_ms: int,
-        num_tries: int
-    )->bool:
+        self, name: str, list_length: int, poll_frequency_ms: int, num_tries: int
+    ) -> bool:
         """Poll list length until length is greater than or equal
         to the user-provided length. If maximum number of
         attempts is exceeded, false is returned.
@@ -1628,16 +1617,13 @@ class Client(SRObject):
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
         return self._client.poll_list_length_gte(
-            name, list_length, poll_frequency_ms, num_tries)
+            name, list_length, poll_frequency_ms, num_tries
+        )
 
     @exception_handler
     def poll_list_length_lte(
-        self,
-        name: str,
-        list_length: int,
-        poll_frequency_ms: int,
-        num_tries: int
-    )->bool:
+        self, name: str, list_length: int, poll_frequency_ms: int, num_tries: int
+    ) -> bool:
         """Poll list length until length is less than or equal
         to the user-provided length. If maximum number of
         attempts is exceeded, false is returned.
@@ -1666,10 +1652,11 @@ class Client(SRObject):
         typecheck(poll_frequency_ms, "poll_frequency_ms", int)
         typecheck(num_tries, "num_tries", int)
         return self._client.poll_list_length_lte(
-            name, list_length, poll_frequency_ms, num_tries)
+            name, list_length, poll_frequency_ms, num_tries
+        )
 
     @exception_handler
-    def get_datasets_from_list(self, list_name: str)->t.List[Dataset]:
+    def get_datasets_from_list(self, list_name: str) -> t.List[Dataset]:
         """Get datasets from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1690,7 +1677,7 @@ class Client(SRObject):
     @exception_handler
     def get_dataset_list_range(
         self, list_name: str, start_index: int, end_index: int
-    )->t.List[Dataset]:
+    ) -> t.List[Dataset]:
         """Get a range of datasets (by index) from an aggregation list
 
         The aggregation list key used to retrieve datasets
@@ -1723,8 +1710,7 @@ class Client(SRObject):
         typecheck(list_name, "list_name", str)
         typecheck(start_index, "start_index", int)
         typecheck(end_index, "end_index", int)
-        return self._client.get_dataset_list_range(
-            list_name, start_index, end_index)
+        return self._client.get_dataset_list_range(list_name, start_index, end_index)
 
     # ---- helpers --------------------------------------------------------
 
@@ -1732,7 +1718,7 @@ class Client(SRObject):
     def __check_tensor_args(
         inputs: t.Optional[t.Union[t.List[str], str]],
         outputs: t.Optional[t.Union[t.List[str], str]],
-    )->t.Tuple[t.List[str], t.List[str]]:
+    ) -> t.Tuple[t.List[str], t.List[str]]:
         inputs = init_default([], inputs, (list, str))
         outputs = init_default([], outputs, (list, str))
         assert inputs is not None and outputs is not None
@@ -1743,7 +1729,7 @@ class Client(SRObject):
         return inputs, outputs
 
     @staticmethod
-    def __check_backend(backend: str)->str:
+    def __check_backend(backend: str) -> str:
         backend = backend.upper()
         if backend in ["TF", "TFLITE", "TORCH", "ONNX"]:
             return backend
@@ -1751,21 +1737,21 @@ class Client(SRObject):
             raise TypeError(f"Backend type {backend} unsupported")
 
     @staticmethod
-    def __check_file(file: str)->str:
+    def __check_file(file: str) -> str:
         file_path = osp.abspath(file)
         if not osp.isfile(file_path):
             raise FileNotFoundError(file_path)
         return file_path
 
     @staticmethod
-    def __check_device(device: str)->str:
+    def __check_device(device: str) -> str:
         device = device.upper()
         if not device.startswith("CPU") and not device.startswith("GPU"):
             raise TypeError("Device argument must start with either CPU or GPU")
         return device
 
     @staticmethod
-    def __set_address(address: str)->None:
+    def __set_address(address: str) -> None:
         if "SSDB" in os.environ:
             del os.environ["SSDB"]
         os.environ["SSDB"] = address
