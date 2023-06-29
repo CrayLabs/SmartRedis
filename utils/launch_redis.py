@@ -87,7 +87,7 @@ def stop_db(n_nodes, port, udsport):
         connection = f"-s {udsport}" if is_uds else f"-p {str(port + i)}"
         cmd = f"{rediscli} {connection} shutdown"
         print(cmd)
-        proc = Popen(cmd, shell=True)
+        proc = Popen(cmd.split(), shell=False)
         procs.append(proc)
 
     # Make sure that all servers are down
