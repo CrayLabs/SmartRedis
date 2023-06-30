@@ -30,7 +30,7 @@ Description
 
 Detailed Notes
 
-- Reuse existing redis connection when mapping the Redis cluster (PR362_)
+- Reuse existing redis connection when mapping the Redis cluster (PR364_)
 - Added type hints to the Python interface layer (PR361_)
 - List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
 - Streamlined setup.py to simplify Python install (PR359)
@@ -58,7 +58,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
-.. _PR362: https://github.com/CrayLabs/SmartRedis/pull/362
+.. _PR362: https://github.com/CrayLabs/SmartRedis/pull/364
 .. _PR361: https://github.com/CrayLabs/SmartRedis/pull/361
 .. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
 .. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
