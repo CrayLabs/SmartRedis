@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Improved compatibility of type hints with third-party software
 - Added type hints to the Python interface layer
 - Add support for Python 3.10
 - Updated setup.py to work with the new build system
