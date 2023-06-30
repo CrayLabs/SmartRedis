@@ -27,21 +27,21 @@
 import functools
 import typing as t
 from typing import TYPE_CHECKING
-from typing_extensions import ParamSpec
 
 from .dataset import Dataset
 from .util import typecheck
 from itertools import permutations
 from .error import *
 
-# Type hint magic bits
-_PR = ParamSpec("_PR")
-_RT = t.TypeVar("_RT")
-
 
 if TYPE_CHECKING:  # pragma: no cover
     # Import optional deps for intellisense
     import xarray as xr
+
+    # Type hint magic bits
+    from typing_extensions import ParamSpec
+    _PR = ParamSpec("_PR")
+    _RT = t.TypeVar("_RT")
 else:
     # Leave optional deps as nullish
     xr = None
@@ -49,9 +49,9 @@ else:
 # ----helper decorators -----
 
 
-def _requires_xarray(fn: t.Callable[_PR, _RT]) -> t.Callable[_PR, _RT]:
+def _requires_xarray(fn: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     @functools.wraps(fn)
-    def _import_xarray(*args: _PR.args, **kwargs: _PR.kwargs) -> _RT:
+    def _import_xarray(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
         global xr
         try:
             import xarray as xr
