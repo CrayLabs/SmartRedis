@@ -30,11 +30,12 @@ from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
 import numpy as np
 import typing as t
-from typing_extensions import ParamSpec
 
-# Type hint magic bits
-_PR = ParamSpec("_PR")
-_RT = t.TypeVar("_RT")
+if t.TYPE_CHECKING:
+    # Type hint magic bits
+    from typing_extensions import ParamSpec
+    _PR = ParamSpec("_PR")
+    _RT = t.TypeVar("_RT")
 
 
 class Dtypes:
@@ -105,7 +106,7 @@ def init_default(
     return init_value
 
 
-def exception_handler(func: t.Callable[_PR, _RT]) -> t.Callable[_PR, _RT]:
+def exception_handler(func: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     """Route exceptions raised in processing SmartRedis API calls to our
     Python wrappers
 
@@ -120,7 +121,7 @@ def exception_handler(func: t.Callable[_PR, _RT]) -> t.Callable[_PR, _RT]:
     """
 
     @wraps(func)
-    def smartredis_api_wrapper(*args: _PR.args, **kwargs: _PR.kwargs) -> _RT:
+    def smartredis_api_wrapper(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
         try:
             return func(*args, **kwargs)
         # Catch RedisReplyErrors for additional processing (convert from
