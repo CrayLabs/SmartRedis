@@ -28,7 +28,6 @@ from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 from .error import RedisRuntimeError
 import typing as t
-from typing_extensions import Self
 
 _notfactory = (
     "Method called on a ConfigOptions object not created from a factory method"

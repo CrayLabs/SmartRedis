@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Improved compatibility of type hints with third-party software
 - Added type hints to the Python interface layer
 - Add support for Python 3.10
 - Updated setup.py to work with the new build system
@@ -29,6 +30,7 @@ Description
 
 Detailed Notes
 
+- Turn `ParamSpec` usage into forward references to not require `typing-extensions` at runtime (PR365_)
 - Added type hints to the Python interface layer (PR361_)
 - List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
 - Streamlined setup.py to simplify Python install (PR359)
@@ -56,6 +58,7 @@ users need not import `iso_c_binding` in their own applications (PR340_)
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR365: https://github.com/CrayLabs/SmartRedis/pull/365
 .. _PR361: https://github.com/CrayLabs/SmartRedis/pull/361
 .. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
 .. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
