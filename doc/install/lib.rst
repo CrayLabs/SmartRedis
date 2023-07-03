@@ -43,7 +43,7 @@ library. This can be done easily with the command:
 Linked statically, the SmartRedis library will have a ``.a`` file extension.  When
 linked dynamically, the SmartRedis library will have a ``.so`` file extension.
 
-It is also possible to adjust compilation settings for the SmartRedis libary.
+It is also possible to adjust compilation settings for the SmartRedis library.
 By default, the library compiles in an optimized build (``Release``), but debug builds
 with full symbols (``Debug``) can be created as can debug builds with extensions enabled
 for code coverage metrics (``Coverage``; this build type is only available with GNU
@@ -91,7 +91,7 @@ with Python support may be achieved via the following command:
 The SR_LINK, SR_BUILD, SR_PYTHON, and SR_FORTRAN variables are fully supported for all
 test and build targets in the Makefile.
 
-Fortran support is built in a secondary libary.
+Fortran support is built in a secondary library.
 The name of the Fortran library produced for a Debug mode build is ``smartredis-fortran-debug``.
 The name of the library produced for a Coverage mode build is ``smartredis-fortran-coverage``.
 The name of the library  produced for a Release mode build is ``smartredis-fortran``.
