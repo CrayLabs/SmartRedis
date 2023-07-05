@@ -32,12 +32,12 @@ RedisAI capabilities and include additional
 features for high performance computing (HPC) applications.
 SmartRedis provides clients in the following languages:
 
-| Language   | Version/Standard        |
-|------------|:-----------------------:|
-| Python     |   3.7, 3.8, 3.9, 3.10   |
-| C++        |   C++17                 |
-| C          |   C99                   |
-| Fortran    |   Fortran 2018          |
+| Language   | Version/Standard                               |
+|------------|:----------------------------------------------:|
+| Python     |   3.7, 3.8, 3.9, 3.10                          |
+| C++        |   C++17                                        |
+| C          |   C99                                          |
+| Fortran    |   Fortran 2018 (GNU/Intel), 2003 (PGI/Nvidia)  |
 
 SmartRedis is used in the [SmartSim library](https://github.com/CrayLabs/SmartSim).
 SmartSim makes it easier to use common Machine Learning (ML) libraries like
