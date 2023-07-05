@@ -37,13 +37,13 @@ library. This can be done easily with the command:
     cd SmartRedis
     # Static build
     make lib SR_LINK=Static
-    # Release build
+    # Shared build
     make lib SR_LINK=Shared #or skip the SR_LINK variable as this is the default
 
 Linked statically, the SmartRedis library will have a ``.a`` file extension.  When
 linked dynamically, the SmartRedis library will have a ``.so`` file extension.
 
-It is also possible to adjust compilation settings for the SmartRedis libary.
+It is also possible to adjust compilation settings for the SmartRedis library.
 By default, the library compiles in an optimized build (``Release``), but debug builds
 with full symbols (``Debug``) can be created as can debug builds with extensions enabled
 for code coverage metrics (``Coverage``; this build type is only available with GNU
@@ -91,6 +91,14 @@ with Python support may be achieved via the following command:
 The SR_LINK, SR_BUILD, SR_PYTHON, and SR_FORTRAN variables are fully supported for all
 test and build targets in the Makefile.
 
+Fortran support is built in a secondary library.
+The name of the Fortran library produced for a Debug mode build is ``smartredis-fortran-debug``.
+The name of the library produced for a Coverage mode build is ``smartredis-fortran-coverage``.
+The name of the library  produced for a Release mode build is ``smartredis-fortran``.
+As with the main libray, the file extension is dependent on the link type, ``.so`` or ``.a``.
+All libraries will be located in the ``install/lib`` folder.
+
+
 Additional make variables are described in the ``help`` make target:
 
 .. code-block:: bash
@@ -109,18 +117,19 @@ following flags should be included for the preprocessor
     -I/path/to/smartredis/install/include
 
 The linking flags will differ slightly whether the Fortran client library needs
-to be included. If so, be sure that you ran ``make lib-with-fortran`` and
-include the SmartRedis fortran library in the following flags
+to be included. If so, be sure that you ran ``make lib-with-fortran`` (or ``make
+lib SR_FORTRAN=ON``) and include the SmartRedis fortran library via the following flags:
 
 .. code-block:: text
 
-    -L/path/to/smartredis/install/lib -lhiredis -lredis++ -lsmartredis [-lsmartredis-fortran]
+    -L/path/to/smartredis/install/lib -lsmartredis [-lsmartredis-fortran]
 
 .. note::
 
     Fortran applications need to link in both ``smartredis-fortran`` and
     ``smartredis`` libraries whereas C/C++ applications require only
-    ``smartredis``
+    ``smartredis``. For debug or coverage builds, use the appropriate alternate
+    libraries as described previously.
 
 
 Linking instructions for CMake-based build systems
@@ -132,9 +141,8 @@ with SmartRedis. To build a Fortran client, uncomment out the lines after the
 
 .. code-block:: text
 
-    project(Example)
-
     cmake_minimum_required(VERSION 3.13)
+    project(Example)
 
     set(CMAKE_CXX_STANDARD 17)
 
