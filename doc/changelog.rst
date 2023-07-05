@@ -1,12 +1,16 @@
 Changelog
 =========
 
-Development branch
-------------------
+0.4.1
+-----
 
-To be released at some future point in time
+Released on July 5, 2023
 
 Description
+
+This release revamps the build and test systems for SmartRedis as well as improving
+compatibility with different Fortran compilers and laying the groundwork for future
+support for interacting with multiple concurrent backend databases:
 
 - Documentation improvements
 - Improved compatibility of type hints with third-party software
@@ -26,7 +30,7 @@ Description
 - Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
 - Update Redis++ version to 1.3.8
 - Refactor third-party software dependency installation
-- Add pip-install target to Makefile to automate this process going forward
+- Add pip-install target to Makefile to automate this process going forward (note: this was later removed)
 - Added infrastructure for multiDB support
 
 Detailed Notes
