@@ -78,7 +78,7 @@ Please use the following citation when referencing SmartSim, SmartRedis, or any 
     Partee et al., "Using Machine Learning at scale in numerical simulations with SmartSim:
     An application to ocean climate modeling",
     Journal of Computational Science, Volume 62, 2022, 101707, ISSN 1877-7503.
-    Available: https://doi.org/10.1016/j.jocs.2022.101707.
+    Open Access: https://doi.org/10.1016/j.jocs.2022.101707.
 
 ### bibtex
 
