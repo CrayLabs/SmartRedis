@@ -2,7 +2,7 @@
 Testing
 *******
 
-To build and run all tests, run the following command in the top
+To build and run all tests on the local host, run the following command in the top
 level of the smartredis repository:
 
 .. code-block:: bash
@@ -51,3 +51,18 @@ a standalone Redis server, execute the following command:
 .. code-block:: bash
 
   make test SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=Standalone
+
+Similarly, it is possible to run the tests against each type of Redis server in sequence
+(all tests against a standalone Redis server, then all tests against a Clustered server,
+then all tests against a standalone server with a Unix domain socket connection) via the
+following command:
+
+.. code-block:: bash
+
+  make test SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All
+
+.. note::
+
+  Unix domain socket connections are not supported on MacOS. If the SmartRedis test
+  system detects that it is running on MacOS, it will automatically skip UDS testing.
+
