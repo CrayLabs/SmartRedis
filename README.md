@@ -82,7 +82,6 @@ Available: https://doi.org/10.1016/j.jocs.2022.101707.
 
 ### bibtex
 
-    ```latex
     @article{PARTEE2022101707,
         title = {Using Machine Learning at scale in numerical simulations with SmartSim:
         An application to ocean climate modeling},
@@ -97,4 +96,3 @@ Available: https://doi.org/10.1016/j.jocs.2022.101707.
         and Scott Bachman and Gustavo Marques and Benjamin Robbins},
         keywords = {Deep learning, Numerical simulation, Climate modeling, High performance computing, SmartSim},
         }
-    ```
