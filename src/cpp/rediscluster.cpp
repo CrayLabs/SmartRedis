@@ -1080,8 +1080,7 @@ inline void RedisCluster::_map_cluster()
     cmd << "CLUSTER" << "SLOTS";
 
     // Run it
-    CommandReply reply(_redis_cluster->
-                 command(cmd.begin(), cmd.end()));
+    CommandReply reply = run(cmd);
     if (reply.has_error() > 0) {
         throw SRRuntimeException("CLUSTER SLOTS command failed");
     }
