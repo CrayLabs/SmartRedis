@@ -1,6 +1,24 @@
 Changelog
 =========
 
+Changelog
+=========
+
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Improved clustered redis initialization
+
+Detailed Notes
+
+- Reuse existing redis connection when mapping the Redis cluster (PR364_)
+
+.. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+
 0.4.1
 -----
 
