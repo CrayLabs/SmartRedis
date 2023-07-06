@@ -1,6 +1,24 @@
 Changelog
 =========
 
+Changelog
+=========
+
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Improved clustered redis initialization
+
+Detailed Notes
+
+- Reuse existing redis connection when mapping the Redis cluster (PR364_)
+
+.. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+
 0.4.1
 -----
 
@@ -14,7 +32,6 @@ support for interacting with multiple concurrent backend databases:
 
 - Documentation improvements
 - Improved compatibility of type hints with third-party software
-- Improved clustered redis initialization
 - Added type hints to the Python interface layer
 - Add support for Python 3.10
 - Updated setup.py to work with the new build system
@@ -38,7 +55,6 @@ Detailed Notes
 
 - Assorted updates and clarifications to the documentation (PR367_)
 - Turn `ParamSpec` usage into forward references to not require `typing-extensions` at runtime (PR365_)
-- Reuse existing redis connection when mapping the Redis cluster (PR364_)
 - Added type hints to the Python interface layer (PR361_)
 - List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
 - Streamlined setup.py to simplify Python install (PR359)
@@ -60,7 +76,6 @@ Detailed Notes
 
 .. _PR367: https://github.com/CrayLabs/SmartRedis/pull/367
 .. _PR365: https://github.com/CrayLabs/SmartRedis/pull/365
-.. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
 .. _PR361: https://github.com/CrayLabs/SmartRedis/pull/361
 .. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
 .. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
