@@ -24,7 +24,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .smartredisPy import cpp_log_data, cpp_log_warning, cpp_log_error, SRLoggingLevel
+from .smartredisPy import SRLoggingLevel, cpp_log_data, cpp_log_error, cpp_log_warning
 from .util import exception_handler, typecheck
 
 # Logging levels

@@ -87,6 +87,7 @@ def test_dbcluster_info_command(mock_model, use_cluster, context):
     with pytest.raises(RedisRuntimeError):
         client.get_ai_info(address, "bad_key")
 
+
 def test_flushdb_command(use_cluster, context):
     # from within the testing framework, there is no way
     # of knowing each db node that is being used, so skip
@@ -165,8 +166,12 @@ def test_save_command(use_cluster, mock_data, context):
 
     # for each address, check that the timestamp of the last SAVE increases after calling Client::save
     for address in addresses:
-        save_time_before = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+        save_time_before = client.get_db_node_info([address])[0]["Persistence"][
+            "rdb_last_save_time"
+        ]
         client.save([address])
-        save_time_after = client.get_db_node_info([address])[0]["Persistence"]["rdb_last_save_time"]
+        save_time_after = client.get_db_node_info([address])[0]["Persistence"][
+            "rdb_last_save_time"
+        ]
 
         assert save_time_before <= save_time_after

@@ -61,6 +61,8 @@ class RedisReplyError(RuntimeError):
         msg = ""
         if method:
             msg = f"{method} execution failed\n"
+        if key:
+            msg += f"key: {key}\n"
         msg += cpp_error
         return msg
 

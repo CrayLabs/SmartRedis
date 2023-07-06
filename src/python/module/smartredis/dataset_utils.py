@@ -26,13 +26,12 @@
 
 import functools
 import typing as t
+from itertools import permutations
 from typing import TYPE_CHECKING
 
 from .dataset import Dataset
+from .error import RedisRuntimeError
 from .util import typecheck
-from itertools import permutations
-from .error import *
-
 
 if TYPE_CHECKING:  # pragma: no cover
     # Import optional deps for intellisense
@@ -40,11 +39,12 @@ if TYPE_CHECKING:  # pragma: no cover
 
     # Type hint magic bits
     from typing_extensions import ParamSpec
+
     _PR = ParamSpec("_PR")
     _RT = t.TypeVar("_RT")
 else:
     # Leave optional deps as nullish
-    xr = None
+    xr = None  # pylint: disable=invalid-name
 
 # ----helper decorators -----
 
@@ -52,9 +52,9 @@ else:
 def _requires_xarray(fn: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     @functools.wraps(fn)
     def _import_xarray(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
-        global xr
+        global xr  # pylint: disable=global-statement
         try:
-            import xarray as xr
+            import xarray as xr  # pylint: disable=import-outside-toplevel
         except ImportError as e:
             raise RedisRuntimeError(
                 "Optional package xarray must be installed; "
@@ -143,8 +143,84 @@ class DatasetConverter:
                         dataset.add_meta_string(f"_xarray_{name}_{sarg}", "null")
 
     @staticmethod
+    def _find_coord_vars(source_ds: Dataset) -> t.Dict[str, t.Dict]:
+        variable_names = source_ds.get_meta_strings("_xarray_data_names")
+        coord_dict = {}
+        coord_final = {}
+
+        # Check for data names that are equal to coordinate names. If any matches
+        # are found, then those data variables are treated as coordinates variables
+        for tensor_name, tensor_dname in list(permutations(variable_names, 2)):
+            for coordname in get_data(source_ds, tensor_name, "coord"):
+                if tensor_dname == coordname:
+                    # Remove coordinate data names from data names
+                    if tensor_dname in variable_names:
+                        variable_names.remove(tensor_dname)
+                    # Get coordinate dimensions in the appropriate format for Xarray
+                    coord_dims = []
+                    for coord_dim_field_name in get_data(
+                        source_ds, tensor_dname, "dim"
+                    ):
+                        coord_dims.append(
+                            source_ds.get_meta_strings(coord_dim_field_name)[0]
+                        )
+                    # Get coordinate attributes in the appropriate format for Xarray
+                    coord_attrs = {}
+                    for coord_attr_field_name in get_data(
+                        source_ds, tensor_dname, "attr"
+                    ):
+                        fieldname = source_ds.get_meta_strings(coord_attr_field_name)[0]
+                        coord_attrs[coord_attr_field_name] = fieldname
+                    # Add dimensions, data, and attributes to the coordinate variable
+                    coord_dict[tensor_dname] = (
+                        coord_dims,
+                        source_ds.get_tensor(tensor_dname),
+                        coord_attrs,
+                    )
+                    # Add coordinate names and relative values in the appropriate
+                    # form to add to Xarray coords variable
+                    coord_final[tensor_name] = coord_dict
+
+        return coord_final
+
+    @staticmethod
+    def _construct_xarray(
+        source_ds: Dataset, coord_vars: t.Dict
+    ) -> t.Dict[str, "xr.DataArray"]:
+        ret_xarray = {}
+        variable_names = source_ds.get_meta_strings("_xarray_data_names")
+
+        for variable_name in variable_names:
+            data_final = source_ds.get_tensor(variable_name)
+            dims_final = []
+            # Extract dimensions in correct form
+            for dim_field_name in get_data(source_ds, variable_name, "dim"):
+                dims_final.append(source_ds.get_meta_strings(dim_field_name)[0])
+            attrs_final = {}
+            # Extract attributes in correct form
+            for attr_field_name in get_data(source_ds, variable_name, "attr"):
+                fieldname = source_ds.get_meta_strings(attr_field_name)[0]
+                attrs_final[attr_field_name] = fieldname
+            # Add coordinates to the correct data name
+            for name, value in coord_vars.items():
+                if name == variable_name:
+                    coords_final = value
+
+            # Construct a xr.DataArray using extracted dataset data,
+            # append the dataarray to corresponding variable names
+            ret_xarray[variable_name] = xr.DataArray(
+                name=variable_name,
+                data=data_final,
+                coords=coords_final,
+                dims=dims_final,
+                attrs=attrs_final,
+            )
+
+        return ret_xarray
+
+    @staticmethod
     @_requires_xarray
-    def transform_to_xarray(dataset: Dataset) -> t.Dict:
+    def transform_to_xarray(dataset: Dataset) -> t.Dict[str, "xr.DataArray"]:
         """Transform a SmartRedis Dataset, with the appropriate metadata,
         to an Xarray Dataarray
 
@@ -158,66 +234,6 @@ class DatasetConverter:
         """
         typecheck(dataset, "dataset", Dataset)
 
-        coord_dict = {}
-        coord_final = {}
-        variable_names = dataset.get_meta_strings("_xarray_data_names")
-
-        # Check for data names that are equal to coordinate names. If any matches
-        # are found, then those data variables are treated as coordinates variables
-        for tensor_name, tensor_dname in list(permutations(variable_names, 2)):
-            for coordname in get_data(dataset, tensor_name, "coord"):
-                if tensor_dname == coordname:
-                    # Remove coordinate data names from data names
-                    if tensor_dname in variable_names:
-                        variable_names.remove(tensor_dname)
-                    # Get coordinate dimensions in the appropriate format for Xarray
-                    coord_dims = []
-                    for coord_dim_field_name in get_data(dataset, tensor_dname, "dim"):
-                        coord_dims.append(
-                            dataset.get_meta_strings(coord_dim_field_name)[0]
-                        )
-                    # Get coordinate attributes in the appropriate format for Xarray
-                    coord_attrs = {}
-                    for coord_attr_field_name in get_data(
-                        dataset, tensor_dname, "attr"
-                    ):
-                        fieldname = dataset.get_meta_strings(coord_attr_field_name)[0]
-                        coord_attrs[coord_attr_field_name] = fieldname
-                    # Add dimensions, data, and attributes to the coordinate variable
-                    coord_dict[tensor_dname] = (
-                        coord_dims,
-                        dataset.get_tensor(tensor_dname),
-                        coord_attrs,
-                    )
-                    # Add coordinate names and relative values in the appropriate
-                    # form to add to Xarray coords variable
-                    coord_final[tensor_name] = coord_dict
-
-        ret_xarray = {}
-        for variable_name in variable_names:
-            data_final = dataset.get_tensor(variable_name)
-            dims_final = []
-            # Extract dimensions in correct form
-            for dim_field_name in get_data(dataset, variable_name, "dim"):
-                dims_final.append(dataset.get_meta_strings(dim_field_name)[0])
-            attrs_final = {}
-            # Extract attributes in correct form
-            for attr_field_name in get_data(dataset, variable_name, "attr"):
-                fieldname = dataset.get_meta_strings(attr_field_name)[0]
-                attrs_final[attr_field_name] = fieldname
-            # Add coordinates to the correct data name
-            for name in coord_final.keys():
-                if name == variable_name:
-                    coords_final = coord_final.get(name)
-
-            # Construct a xr.DataArray using extracted dataset data,
-            # append the dataarray to corresponding variable names
-            ret_xarray[variable_name] = xr.DataArray(
-                name=variable_name,
-                data=data_final,
-                coords=coords_final,
-                dims=dims_final,
-                attrs=attrs_final,
-            )
-
+        coord_final = DatasetConverter._find_coord_vars(dataset)
+        ret_xarray = DatasetConverter._construct_xarray(dataset, coord_final)
         return ret_xarray

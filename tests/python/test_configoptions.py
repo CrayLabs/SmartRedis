@@ -33,6 +33,7 @@ from smartredis.error import *
 #####
 # Test attempts to use API functions from non-factory object
 
+
 def test_non_factory_configobject():
     co = ConfigOptions()
     with pytest.raises(RedisRuntimeError):
@@ -46,6 +47,7 @@ def test_non_factory_configobject():
     with pytest.raises(RedisRuntimeError):
         _ = co.override_string_option("key", "value")
 
+
 def test_options(monkeypatch):
     monkeypatch.setenv("test_integer_key", "42")
     monkeypatch.setenv("test_string_key", "charizard")
@@ -58,8 +60,7 @@ def test_options(monkeypatch):
         _ = co.get_integer_option("test_integer_key_that_is_not_really_present")
     co.override_integer_option("test_integer_key_that_is_not_really_present", 42)
     assert co.is_configured("test_integer_key_that_is_not_really_present")
-    assert co.get_integer_option(
-        "test_integer_key_that_is_not_really_present") == 42
+    assert co.get_integer_option("test_integer_key_that_is_not_really_present") == 42
 
     # string option tests
     assert co.get_string_option("test_string_key") == "charizard"
@@ -68,8 +69,10 @@ def test_options(monkeypatch):
         _ = co.get_string_option("test_string_key_that_is_not_really_present")
     co.override_string_option("test_string_key_that_is_not_really_present", "meowth")
     assert co.is_configured("test_string_key_that_is_not_really_present")
-    assert co.get_string_option(
-        "test_string_key_that_is_not_really_present") == "meowth"
+    assert (
+        co.get_string_option("test_string_key_that_is_not_really_present") == "meowth"
+    )
+
 
 def test_options_with_prefix(monkeypatch):
     monkeypatch.setenv("prefixtest_integer_key", "42")
@@ -92,5 +95,4 @@ def test_options_with_prefix(monkeypatch):
         _ = co.get_string_option("string_key_that_is_not_really_present")
     co.override_string_option("string_key_that_is_not_really_present", "meowth")
     assert co.is_configured("string_key_that_is_not_really_present")
-    assert co.get_string_option(
-        "string_key_that_is_not_really_present") == "meowth"
+    assert co.get_string_option("string_key_that_is_not_really_present") == "meowth"

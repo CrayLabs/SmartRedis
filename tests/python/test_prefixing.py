@@ -25,9 +25,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
-import numpy as np
 
+import numpy as np
 from smartredis import Client, Dataset
+
 
 def test_prefixing(use_cluster, context, monkeypatch):
     # configure prefix variables
