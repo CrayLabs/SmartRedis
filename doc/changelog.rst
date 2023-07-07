@@ -1,6 +1,82 @@
 Changelog
 =========
 
+0.4.1
+-----
+
+Released on July 5, 2023
+
+Description
+
+This release revamps the build and test systems for SmartRedis as well as improving
+compatibility with different Fortran compilers and laying the groundwork for future
+support for interacting with multiple concurrent backend databases:
+
+- Documentation improvements
+- Improved compatibility of type hints with third-party software
+- Added type hints to the Python interface layer
+- Add support for Python 3.10
+- Updated setup.py to work with the new build system
+- Remove unneeded method from Python SRObject class
+- Fixed a memory leak in the C layer
+- Revamp SmartRedis test system
+- Remove debug output in pybind layer
+- Update Hiredis version to 1.1.0
+- Enable parallel build for the SmartRedis examples
+- Experimental support for Nvidia toolchain
+- Major revamp of build and test systems for SmartRedis
+- Refactor Fortran methods to return default logical kind
+- Update CI/CD tests to use a modern version of MacOS
+- Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
+- Update Redis++ version to 1.3.8
+- Refactor third-party software dependency installation
+- Add pip-install target to Makefile to automate this process going forward (note: this was later removed)
+- Added infrastructure for multiDB support
+
+Detailed Notes
+
+- Assorted updates and clarifications to the documentation (PR367_)
+- Turn `ParamSpec` usage into forward references to not require `typing-extensions` at runtime (PR365_)
+- Added type hints to the Python interface layer (PR361_)
+- List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
+- Streamlined setup.py to simplify Python install (PR359)
+- Remove from_pybind() from Python SRObject class as it's not needed and didn't work properly anyway (PR358_)
+- Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
+- Major revamp to simplify use of SmartRedis test system, automating most test processes (PR356_)
+- Remove debug output in pybind layer associated with put_dataset (PR352_)
+- Updated to the latest version of Hiredis (1.1.0) (PR351_)
+- Enable parallel build for the SmartRedis examples by moving utility Fortran code into a small static library (PR349_)
+- For the NVidia toolchain only: Replaces the assumed rank feature of F2018 used in the Fortran client with assumed shape arrays, making it possible to compile SmartRedis with the Nvidia toolchain. (PR346_)
+- Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
+- Many Fortran  routines were returning logical kind = c_bool which turns out not to be the same default kind of most Fortran compilers. These have now been refactored so that users need not import `iso_c_binding` in their own applications (PR340_)
+- Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR339_)
+- Correct the spelling of the C DataSet destruction interface from DeallocateeDataSet to DeallocateDataSet (PR338_)
+- Updated the version of Redis++ to v1.3.8 to pull in a change that ensures the redis++.pc file properly points to the generated libraries (PR334_)
+- Third-party software dependency installation is now handled in the Makefile instead of separate scripts
+- New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
+- Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
+
+.. _PR367: https://github.com/CrayLabs/SmartRedis/pull/367
+.. _PR365: https://github.com/CrayLabs/SmartRedis/pull/365
+.. _PR361: https://github.com/CrayLabs/SmartRedis/pull/361
+.. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
+.. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
+.. _PR358: https://github.com/CrayLabs/SmartRedis/pull/358
+.. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
+.. _PR356: https://github.com/CrayLabs/SmartRedis/pull/356
+.. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
+.. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
+.. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349
+.. _PR346: https://github.com/CrayLabs/SmartRedis/pull/346
+.. _PR341: https://github.com/CrayLabs/SmartRedis/pull/341
+.. _PR340: https://github.com/CrayLabs/SmartRedis/pull/340
+.. _PR339: https://github.com/CrayLabs/SmartRedis/pull/339
+.. _PR338: https://github.com/CrayLabs/SmartRedis/pull/338
+.. _PR334: https://github.com/CrayLabs/SmartRedis/pull/334
+.. _PR331: https://github.com/CrayLabs/SmartRedis/pull/331
+.. _PR330: https://github.com/CrayLabs/SmartRedis/pull/330
+.. _PR303: https://github.com/CrayLabs/SmartRedis/pull/303
+
 0.4.0
 -----
 
@@ -24,7 +100,7 @@ inspection, documentation updates, fixes to the multi-GPU support, and much more
 - Streamline pipelined execution of tasks for backend database
 - Enhance code coverage to include all 4 languages supported by SmartRedis
 - Fix a bug which resulted in wrong key prefixing when retrieving aggregation lists in ensembles
-- Correct assorted API documentation errors
+- Correct assorted API documentation errors and omissions
 - Improve documentation of exception handling in Redis server classes
 - Improve error handling for setting of scripts and models
 - Add support to inspect the dimensions of a tensor via get_tensor_dims()
@@ -85,7 +161,7 @@ Detailed Notes
 
 .. _PR321: https://github.com/CrayLabs/SmartRedis/pull/321
 .. _PR317: https://github.com/CrayLabs/SmartRedis/pull/317
-.. _PR315: https://github.com/CrayLabs/SmartRedis/pull/320
+.. _PR320: https://github.com/CrayLabs/SmartRedis/pull/320
 .. _PR315: https://github.com/CrayLabs/SmartRedis/pull/315
 .. _PR313: https://github.com/CrayLabs/SmartRedis/pull/313
 .. _PR312: https://github.com/CrayLabs/SmartRedis/pull/312

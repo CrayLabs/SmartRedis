@@ -26,6 +26,7 @@
 
 __all__ = [
     "Client",
+    "ConfigOptions",
     "Dataset",
     "SRObject",
     "LogContext",
@@ -40,13 +41,10 @@ __all__ = [
 ]
 
 from .client import Client
+from .configoptions import ConfigOptions
 from .dataset import Dataset
 from .dataset_utils import DatasetConverter
-from .logger import (
-    log_data, log_warning, log_error
-)
+from .logger import log_data, log_warning, log_error
 from .srobject import SRObject
 from .logcontext import LogContext
-from .smartredisPy import (
-    LLQuiet, LLInfo, LLDebug, LLDeveloper
-)
+from .smartredisPy import LLQuiet, LLInfo, LLDebug, LLDeveloper

@@ -24,81 +24,58 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(CClientTester)
-
+# Project definition for the SmartRedis-Tests-C project
 cmake_minimum_required(VERSION 3.13)
+project(SmartSim-Tests-C)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE DEBUG)
+# Enable language support for the tests
+enable_language(C)
+
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../..")
+include(smartredis_defs)
 
-if(COVERAGE)
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-        set(CMAKE_CXX_FLAGS --coverage)
-        add_link_options(--coverage)
-    endif()
+# Assume by default that users should link against the
+# install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../install/")
 endif()
 
-find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+# Locate dependencies
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
 
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-add_executable(client_test_dataset_aggregation
-client_test_dataset_aggregation.c
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+    client_test_dataset_aggregation
+    client_test_dataset_exists
+    client_test_logging
+    client_test_put_unpack_1D
+    client_test_put_get_1D
+    client_test_put_get_2D
+    client_test_put_get_3D
 )
 
-target_link_libraries(client_test_dataset_aggregation
+# Build the tests
+foreach(EXECUTABLE ${EXECUTABLES})
+    add_executable(${EXECUTABLE}_c_test
+        ${EXECUTABLE}.c
+    )
+    set_target_properties(${EXECUTABLE}_c_test PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+    target_link_libraries(${EXECUTABLE}_c_test
         ${SR_LIB}
-)
-
-add_executable(client_test_dataset_exists
-	client_test_dataset_exists.c
-)
-
-target_link_libraries(client_test_dataset_exists
-	${SR_LIB}
-)
-
-add_executable(client_test_logging
-	client_test_logging.c
-)
-
-target_link_libraries(client_test_logging
-	${SR_LIB}
-)
-
-add_executable(client_test_put_unpack_1D
-	client_test_put_unpack_1D.c
-)
-
-target_link_libraries(client_test_put_unpack_1D
-	${SR_LIB}
-)
-
-add_executable(client_test_put_get_1D
-        client_test_put_get_1D.c
-)
-
-target_link_libraries(client_test_put_get_1D
-        ${SR_LIB}
-)
-
-add_executable(client_test_put_get_2D
-        client_test_put_get_2D.c
-)
-
-target_link_libraries(client_test_put_get_2D
-        ${SR_LIB}
-)
-
-add_executable(client_test_put_get_3D
-        client_test_put_get_3D.c
-)
-
-target_link_libraries(client_test_put_get_3D
-        ${SR_LIB}
-)
+    )
+endforeach()

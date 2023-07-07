@@ -40,7 +40,7 @@ if ls ../install/lib/libredis++.a 1>/dev/null 2>&1; then
     echo "Redis-plus-plus has already been installed"
 else
     if [[ ! -d "./redis-plus-plus" ]]; then
-        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.3.5 --depth=1
+        git clone https://github.com/sewenew/redis-plus-plus.git redis-plus-plus --branch 1.3.8 --depth=1
 	    echo "Redis-plus-plus downloaded"
     fi
     cd redis-plus-plus

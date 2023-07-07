@@ -26,10 +26,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-project(DockerTester)
-
 cmake_minimum_required(VERSION 3.13)
-
+project(DockerTesterFortran)
 enable_language(Fortran)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -49,9 +47,11 @@ include_directories(SYSTEM
     /usr/local/include/smartredis
 )
 
-add_executable(docker_test
+add_executable(docker_test_fortran
 	test_docker.F90
 	${ftn_client_src}
 )
-
-target_link_libraries(docker_test ${SR_LIB} pthread)
+set_target_properties(docker_test_fortran PROPERTIES
+    OUTPUT_NAME docker_test
+)
+target_link_libraries(docker_test_fortran ${SR_LIB} pthread)

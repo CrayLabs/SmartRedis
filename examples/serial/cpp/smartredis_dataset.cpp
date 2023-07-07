@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
     std::vector<int64_t> tensor_2(n_values, 0);
 
     for(size_t i=0; i<n_values; i++) {
-        tensor_1[i] = 2.0*rand()/RAND_MAX - 1.0;
+        tensor_1[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
         tensor_2[i] = rand();
     }
 

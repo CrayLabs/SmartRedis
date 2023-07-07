@@ -44,7 +44,6 @@
 
 namespace SmartRedis {
 
-///@file
 /*!
 *   \brief The DataSet class aggregates tensors
 *          and metadata into a nested data structure
