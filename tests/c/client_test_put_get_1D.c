@@ -126,7 +126,7 @@ int put_get_1D_tensor_double(size_t* dims, size_t n_dims,
   double* result = 0;
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((double)rand())/RAND_MAX;
+    tensor[i] = ((double)rand())/(double)RAND_MAX;
 
   int r_value = 0;
   r_value = put_get_1D_tensor(client,(void*)tensor,

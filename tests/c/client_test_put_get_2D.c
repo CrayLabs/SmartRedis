@@ -143,7 +143,7 @@ int put_get_2D_tensor_double(size_t* dims, size_t n_dims,
 
   for(int i=0; i<dims[0]; i++)
     for(int j=0; j<dims[1]; j++)
-      tensor[i][j] = ((double)rand())/RAND_MAX;
+      tensor[i][j] = ((double)rand())/(double)RAND_MAX;
 
   printf("Tensor established\n");
 

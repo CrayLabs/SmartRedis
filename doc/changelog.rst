@@ -1,6 +1,9 @@
 Changelog
 =========
 
+Changelog
+=========
+
 Development branch
 ------------------
 
@@ -8,6 +11,33 @@ To be released at some future point in time
 
 Description
 
+- Improved clustered redis initialization
+
+Detailed Notes
+
+- Reuse existing redis connection when mapping the Redis cluster (PR364_)
+
+.. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+
+0.4.1
+-----
+
+Released on July 5, 2023
+
+Description
+
+This release revamps the build and test systems for SmartRedis as well as improving
+compatibility with different Fortran compilers and laying the groundwork for future
+support for interacting with multiple concurrent backend databases:
+
+- Documentation improvements
+- Improved compatibility of type hints with third-party software
+- Added type hints to the Python interface layer
+- Add support for Python 3.10
+- Updated setup.py to work with the new build system
+- Remove unneeded method from Python SRObject class
+- Fixed a memory leak in the C layer
+- Revamp SmartRedis test system
 - Remove debug output in pybind layer
 - Update Hiredis version to 1.1.0
 - Enable parallel build for the SmartRedis examples
@@ -18,11 +48,19 @@ Description
 - Fix the spelling of the Dataset destructor's C interface (now DeallocateDataSet)
 - Update Redis++ version to 1.3.8
 - Refactor third-party software dependency installation
-- Add pip-install target to Makefile to automate this process going forward
+- Add pip-install target to Makefile to automate this process going forward (note: this was later removed)
 - Added infrastructure for multiDB support
 
 Detailed Notes
 
+- Assorted updates and clarifications to the documentation (PR367_)
+- Turn `ParamSpec` usage into forward references to not require `typing-extensions` at runtime (PR365_)
+- Added type hints to the Python interface layer (PR361_)
+- List Python 3.10 support and loosen PyTorch requirement to allow for versions support Python 3.10 (PR360_)
+- Streamlined setup.py to simplify Python install (PR359)
+- Remove from_pybind() from Python SRObject class as it's not needed and didn't work properly anyway (PR358_)
+- Fixed memory leaked from the C layer when calling get_string_option() (PR357_)
+- Major revamp to simplify use of SmartRedis test system, automating most test processes (PR356_)
 - Remove debug output in pybind layer associated with put_dataset (PR352_)
 - Updated to the latest version of Hiredis (1.1.0) (PR351_)
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code into a small static library (PR349_)
@@ -36,6 +74,14 @@ Detailed Notes
 - New pip-install target in Makefile will be a dependency of the lib target going forward so that users don't have to manually pip install SmartRedis in the future (PR330_)
 - Added ConfigOptions class and API, which will form the backbone of multiDB support (PR303_)
 
+.. _PR367: https://github.com/CrayLabs/SmartRedis/pull/367
+.. _PR365: https://github.com/CrayLabs/SmartRedis/pull/365
+.. _PR361: https://github.com/CrayLabs/SmartRedis/pull/361
+.. _PR360: https://github.com/CrayLabs/SmartRedis/pull/360
+.. _PR359: https://github.com/CrayLabs/SmartRedis/pull/359
+.. _PR358: https://github.com/CrayLabs/SmartRedis/pull/358
+.. _PR357: https://github.com/CrayLabs/SmartRedis/pull/357
+.. _PR356: https://github.com/CrayLabs/SmartRedis/pull/356
 .. _PR352: https://github.com/CrayLabs/SmartRedis/pull/352
 .. _PR351: https://github.com/CrayLabs/SmartRedis/pull/351
 .. _PR349: https://github.com/CrayLabs/SmartRedis/pull/349

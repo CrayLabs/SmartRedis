@@ -67,9 +67,8 @@ for a containerized application.
 
     # C++ containerized CMake file
 
-    project(DockerTester)
-
     cmake_minimum_required(VERSION 3.13)
+    project(DockerTester)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -111,9 +110,8 @@ for a containerized application.
 
     # C containerized CMake file
 
-    project(DockerTester)
-
     cmake_minimum_required(VERSION 3.13)
+    project(DockerTester)
 
     set(CMAKE_CXX_STANDARD 17)
 
@@ -170,6 +168,7 @@ for a containerized application.
 
     cmake_minimum_required(VERSION 3.13)
     project(DockerTesterFortran)
+
     enable_language(Fortran)
 
     # Configure the build

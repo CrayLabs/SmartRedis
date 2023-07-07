@@ -94,7 +94,7 @@ int put_unpack_1D_tensor_double(size_t* dims, size_t n_dims,
   double* result = (double*)malloc(dims[0]*sizeof(double));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((double)rand())/RAND_MAX;
+    tensor[i] = ((double)rand())/(double)RAND_MAX;
 
   int r_value = put_unpack_1D_tensor((void*)tensor, dims, n_dims, (void*)result,
                                      SRTensorTypeDouble, key_suffix, key_suffix_length);

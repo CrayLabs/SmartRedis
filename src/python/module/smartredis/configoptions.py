@@ -26,28 +26,28 @@
 
 from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
-
 from .error import RedisRuntimeError
+import typing as t
 
-_notfactory = "Method called on a ConfigOptions object not created from a factory method"
+_notfactory = (
+    "Method called on a ConfigOptions object not created from a factory method"
+)
+
 
 class ConfigOptions:
-    def __init__(self):
-        """Initialize a ConfigOptions base object
-        """
+    def __init__(self) -> None:
+        """Initialize a ConfigOptions base object"""
         self._is_created_via_factory = False
-        self._config_opts = None
+        self._config_opts: t.Any = None
 
     @staticmethod
-    def from_pybind(configoptions):
-        """Initialize a ConfigOptions object from
-        a PyConfigOptions object
+    def from_pybind(configoptions: PyConfigOptions) -> "ConfigOptions":
+        """Initialize a ConfigOptions object from a PyConfigOptions object
 
         :param configoptions: The pybind PyConfigOptions object
                               to use for construction
         :type dataset: PyConfigOptions
-        :return: The newly constructed ConfigOptions from
-                 the PyConfigOptions
+        :return: The newly constructed ConfigOptions from the PyConfigOptions
         :rtype: ConfigOptions
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
@@ -68,7 +68,7 @@ class ConfigOptions:
         return self._config_opts
 
     @exception_handler
-    def set_configoptions(self, configoptions):
+    def set_configoptions(self, configoptions: PyConfigOptions) -> None:
         """Set the PyConfigOptions attribute
 
         :param configoptions: The PyConfigOptions object
@@ -77,14 +77,13 @@ class ConfigOptions:
         typecheck(configoptions, "configoptions", PyConfigOptions)
         self._config_opts = configoptions
 
-    def _is_factory_object(self):
-        """Check whether this object was created via a factory method
-        """
+    def _is_factory_object(self) -> bool:
+        """Check whether this object was created via a factory method"""
         return self._is_created_via_factory
 
     @classmethod
     @exception_handler
-    def create_from_environment(cls, db_prefix):
+    def create_from_environment(cls, db_prefix: str) -> "ConfigOptions":
         """Instantiate ConfigOptions, getting selections from
         environment variables. If db_prefix is non-empty,
         then "{db_prefix}_" will be prepended to the name of
@@ -105,7 +104,7 @@ class ConfigOptions:
         return result
 
     @exception_handler
-    def get_integer_option(self, option_name):
+    def get_integer_option(self, option_name: str) -> int:
         """Retrieve the value of a numeric configuration option
         from the selected source
 
@@ -122,7 +121,7 @@ class ConfigOptions:
         return self._config_opts.get_integer_option(option_name)
 
     @exception_handler
-    def get_string_option(self, option_name):
+    def get_string_option(self, option_name: str) -> str:
         """Retrieve the value of a string configuration option
         from the selected source
 
@@ -139,7 +138,7 @@ class ConfigOptions:
         return self._config_opts.get_string_option(option_name)
 
     @exception_handler
-    def is_configured(self, option_name):
+    def is_configured(self, option_name: str) -> bool:
         """Check whether a configuration option is set in the selected source
 
         :param option_name: The name of the configuration option to check
@@ -154,7 +153,7 @@ class ConfigOptions:
         return self._config_opts.is_configured(option_name)
 
     @exception_handler
-    def override_integer_option(self, option_name, value):
+    def override_integer_option(self, option_name: str, value: int) -> None:
         """Override the value of a numeric configuration option
         in the selected source
 
@@ -175,7 +174,7 @@ class ConfigOptions:
         self._config_opts.override_integer_option(option_name, value)
 
     @exception_handler
-    def override_string_option(self, option_name, value):
+    def override_string_option(self, option_name: str, value: str) -> None:
         """Override the value of a string configuration option
         in the selected source
 

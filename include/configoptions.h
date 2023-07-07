@@ -96,7 +96,7 @@ class ConfigOptions
         /*!
         *   \brief ConfigOptions destructor
         */
-        virtual ~ConfigOptions() = default;
+        virtual ~ConfigOptions();
 
         /*!
         *   \brief Deep copy a ConfigOptions object
@@ -218,6 +218,14 @@ class ConfigOptions
         */
         void _clearOptionFromCache(const std::string& option_name);
 
+        /*!
+        *   \brief Stash a string buffer so we can delete it on cleanup
+        *   \param buf The buffer to store
+        */
+        void _add_string_buffer(char* buf) {
+            _string_buffer_stash.push_back(buf);
+        }
+
         /////////////////////////////////////////////////////////////
         // Option overrides
 
@@ -293,6 +301,11 @@ class ConfigOptions
         *  \brief Logging context
         */
         SRObject* _log_context;
+
+        /*!
+        *  \brief Stash of string buffers to free at cleanup time
+        */
+       std::vector<char*> _string_buffer_stash;
 };
 
 } // namespace SmartRedis
