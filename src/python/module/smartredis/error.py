@@ -53,16 +53,14 @@ class RedisConnectionError(RuntimeError):
 
 
 class RedisReplyError(RuntimeError):
-    def __init__(self, cpp_error: str, method: str = "", key: str = "") -> None:
-        super().__init__(self._check_error(cpp_error, method, key))
+    def __init__(self, cpp_error: str, method: str = "") -> None:
+        super().__init__(self._check_error(cpp_error, method))
 
     @staticmethod
-    def _check_error(cpp_error: str, method: str = "", key: str = "") -> str:
+    def _check_error(cpp_error: str, method: str = "") -> str:
         msg = ""
         if method:
             msg = f"{method} execution failed\n"
-        if key:
-            msg += f"key: {key}\n"
         msg += cpp_error
         return msg
 
