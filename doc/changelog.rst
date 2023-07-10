@@ -16,10 +16,10 @@ Description
 
 Detailed Notes
 
-- The Fortran client will no longer statically link to the SmartRedis library generated from the previous compilation attempt (PR372_)
+- The Fortran client will no longer statically link to the SmartRedis library generated from the previous compilation attempt (PR374_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
-.. _PR372: https://github.com/CrayLabs/SmartRedis/pull/372
+.. _PR372: https://github.com/CrayLabs/SmartRedis/pull/374
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
 
 0.4.1
