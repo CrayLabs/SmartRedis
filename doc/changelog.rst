@@ -15,8 +15,10 @@ Description
 
 Detailed Notes
 
+- Update pylint configuration and mitigate issues, run in CI pipeline (PR371_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
+.. _PR371: https://github.com/CrayLabs/SmartRedis/pull/371
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
 
 0.4.1
