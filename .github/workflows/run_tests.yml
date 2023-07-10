@@ -164,5 +164,3 @@ jobs:
 
       - name: Run Pylint
         run: make check-lint
-        with:
-          fail_ci_if_error: false
