@@ -76,5 +76,3 @@ doc/fortran_client
 
 # Mypy Cache
 .mypy_cache/
-
-.vscode/
