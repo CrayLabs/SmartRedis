@@ -124,6 +124,27 @@ include_directories(SYSTEM
     install/include
 )
 
+# Build the main SmartRedis library
+add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+set_target_properties(smartredis PROPERTIES
+    SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
+)
+set_target_properties(smartredis PROPERTIES
+    OUTPUT_NAME ${SMARTREDIS_LIB}
+)
+target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+
+# Install SmartRedis header files
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
+        DESTINATION "include"
+        FILES_MATCHING
+        PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
+)
+
+# Install dynamic library and headers
+install(TARGETS smartredis
+     	LIBRARY DESTINATION lib)
+
 # Build the Fortran library
 if (SR_FORTRAN)
     set(FORTRAN_SRC
@@ -151,28 +172,6 @@ if (SR_FORTRAN)
     install(TARGETS smartredis-fortran
     	LIBRARY DESTINATION lib)
 endif()
-
-
-# Build the main SmartRedis library
-add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
-set_target_properties(smartredis PROPERTIES
-    SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
-)
-set_target_properties(smartredis PROPERTIES
-    OUTPUT_NAME ${SMARTREDIS_LIB}
-)
-target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
-
-# Install SmartRedis header files
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
-        DESTINATION "include"
-        FILES_MATCHING
-        PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
-)
-
-# Install dynamic library and headers
-install(TARGETS smartredis
-     	LIBRARY DESTINATION lib)
 
 # Build the Python library for SmartRedis
 if(SR_PYTHON)
