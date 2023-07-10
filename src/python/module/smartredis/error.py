@@ -56,7 +56,7 @@ class RedisReplyError(RuntimeError):
     def __init__(self, cpp_error: str, method: str = "", key: str = "") -> None:
         super().__init__(self._check_error(cpp_error, method, key))
 
-    #pylint: disable-next=unused-argument
+    # pylint: disable=unused-argument
     @staticmethod
     def _check_error(cpp_error: str, method: str = "", key: str = "") -> str:
         msg = ""
