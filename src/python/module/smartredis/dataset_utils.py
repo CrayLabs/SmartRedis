@@ -52,7 +52,7 @@ else:
 def _requires_xarray(fn: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     @functools.wraps(fn)
     def _import_xarray(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
-        global xr  # pylint: disable=global-statement
+        global xr  # pylint: disable=global-statement,invalid-name
         try:
             import xarray as xr  # pylint: disable=import-outside-toplevel
         except ImportError as e:
