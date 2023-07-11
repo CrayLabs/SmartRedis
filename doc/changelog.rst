@@ -1,9 +1,6 @@
 Changelog
 =========
 
-Changelog
-=========
-
 Development branch
 ------------------
 
@@ -11,15 +8,19 @@ To be released at some future point in time
 
 Description
 
+- Removed obsolete files
 - Improved clustered redis initialization
 
 Detailed Notes
 
+- Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Update pylint configuration and mitigate issues, run in CI pipeline (PR371_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
 .. _PR371: https://github.com/CrayLabs/SmartRedis/pull/371
+.. _PR366: https://github.com/CrayLabs/SmartRedis/pull/366
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+
 
 0.4.1
 -----
