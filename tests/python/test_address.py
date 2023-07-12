@@ -28,6 +28,7 @@ import os
 
 from smartredis import Client
 
+
 def test_serialization(use_cluster, context):
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
