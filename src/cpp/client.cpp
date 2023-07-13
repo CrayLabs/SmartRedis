@@ -229,31 +229,40 @@ void Client::put_tensor(const std::string& name,
     std::string key = _build_tensor_key(name, false);
 
     TensorBase* tensor = NULL;
+    std::string first_val;
     try {
         switch (type) {
             case SRTensorTypeDouble:
                 tensor = new Tensor<double>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(double*)data);
                 break;
             case SRTensorTypeFloat:
                 tensor = new Tensor<float>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(float*)data);
                 break;
             case SRTensorTypeInt64:
                 tensor = new Tensor<int64_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(int64_t*)data);
                 break;
             case SRTensorTypeInt32:
                 tensor = new Tensor<int32_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(int32_t*)data);
                 break;
             case SRTensorTypeInt16:
                 tensor = new Tensor<int16_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(int16_t*)data);
                 break;
             case SRTensorTypeInt8:
                 tensor = new Tensor<int8_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(int8_t*)data);
                 break;
             case SRTensorTypeUint16:
                 tensor = new Tensor<uint16_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(uint16_t*)data);
                 break;
             case SRTensorTypeUint8:
                 tensor = new Tensor<uint8_t>(key, data, dims, type, mem_layout);
+                first_val = std::to_string(*(uint8_t*)data);
                 break;
             default:
                 throw SRTypeException("Invalid type for put_tensor");
@@ -263,6 +272,14 @@ void Client::put_tensor(const std::string& name,
         throw SRBadAllocException("tensor");
     }
 
+    int nItems = 1;
+    for (auto dim = dims.cbegin(); dim != dims.cend(); ++dim)
+        nItems *= *dim;
+    std::cout << "CPP: Putting tensor to key " << key
+        << ". Tensor type is: " << SmartRedis::to_string(type)
+        << ". Number of values is: " << std::to_string(nItems)
+        << ". Value 0 is " << first_val << std::endl;
+
     // Send the tensor
     CommandReply reply = _redis_server->put_tensor(*tensor);
 
@@ -271,6 +288,8 @@ void Client::put_tensor(const std::string& name,
     tensor = NULL;
     if (reply.has_error())
         throw SRRuntimeException("put_tensor failed");
+
+    std::cout << "CPP: Tensor put successful" << std::endl;
 }
 
 // Get the tensor data, dimensions, and type for the provided tensor name.
@@ -348,6 +367,9 @@ void Client::unpack_tensor(const std::string& name,
     CommandReply reply = _redis_server->get_tensor(get_key);
 
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
+    int nItems = 1;
+    for (auto dim = reply_dims.cbegin(); dim != reply_dims.cend(); ++dim)
+        nItems *= *dim;
 
     // Make sure we have the right dims to unpack into (Contiguous case)
     if (mem_layout == SRMemLayoutContiguous ||
@@ -395,47 +417,56 @@ void Client::unpack_tensor(const std::string& name,
     // Retrieve the tensor data into a Tensor
     std::string_view blob = GetTensorCommand::get_data_blob(reply);
     TensorBase* tensor = NULL;
+    std::string first_val;
     try {
         switch (reply_type) {
             case SRTensorTypeDouble:
                 tensor = new Tensor<double>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(double*)blob.data());
                 break;
             case SRTensorTypeFloat:
                 tensor = new Tensor<float>(get_key, (void*)blob.data(),
                                            reply_dims, reply_type,
                                            SRMemLayoutContiguous);
+                first_val = std::to_string(*(float*)blob.data());
                 break;
             case SRTensorTypeInt64:
                 tensor = new Tensor<int64_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(int64_t*)blob.data());
                 break;
             case SRTensorTypeInt32:
                 tensor = new Tensor<int32_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(int32_t*)blob.data());
                 break;
             case SRTensorTypeInt16:
                 tensor = new Tensor<int16_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(int16_t*)blob.data());
                 break;
             case SRTensorTypeInt8:
                 tensor = new Tensor<int8_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(int8_t*)blob.data());
                 break;
             case SRTensorTypeUint16:
                 tensor = new Tensor<uint16_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(uint16_t*)blob.data());
                 break;
             case SRTensorTypeUint8:
                 tensor = new Tensor<uint8_t>(get_key, (void*)blob.data(),
                                             reply_dims, reply_type,
                                             SRMemLayoutContiguous);
+                first_val = std::to_string(*(uint8_t*)blob.data());
                 break;
             default:
                 throw SRTypeException("Invalid type for unpack_tensor");
@@ -444,6 +475,12 @@ void Client::unpack_tensor(const std::string& name,
     catch (std::bad_alloc& e) {
         throw SRBadAllocException("tensor");
     }
+
+    std::cout << "CPP: Retrieved tensor data from key " << get_key
+        << ". First value is: " << first_val
+        << ". Retrieved " << std::to_string(nItems) << " values"
+        << ". Tensor type is " << SmartRedis::to_string(reply_type)
+        << std::endl;
 
     // Unpack the tensor and reclaim it
     tensor->fill_mem_space(data, dims, mem_layout);

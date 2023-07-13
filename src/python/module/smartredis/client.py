@@ -104,6 +104,9 @@ class Client(SRObject):
         typecheck(name, "name", str)
         typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
+        print(
+            f"PYTHON: Sending {len(data)} items to key {name}. First item is {data[0]}"
+        )
         self._client.put_tensor(name, dtype, data)
 
     @exception_handler
@@ -122,7 +125,11 @@ class Client(SRObject):
         :rtype: np.array
         """
         typecheck(name, "name", str)
-        return self._client.get_tensor(name)
+        result = self._client.get_tensor(name)
+        print(
+            f"PYTHON: Retrieved {len(result)} items from key {name}. First item is {result[0]}"
+        )
+        return result
 
     @exception_handler
     def delete_tensor(self, name: str) -> None:
