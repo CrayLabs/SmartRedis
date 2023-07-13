@@ -29,7 +29,6 @@ from time import sleep
 import argparse
 import os
 import pathlib
-import typing as t
 
 def check_availability(n_nodes, port, udsport):
     """Repeat a command until it is successful
