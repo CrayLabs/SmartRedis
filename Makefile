@@ -320,9 +320,11 @@ define run_smartredis_tests_with_standalone_server
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1)  ; \
+	(testresult=$$?; \
 	echo "Shutting down standalone Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
+	exit $$testresult) && \
 	echo "Standalone tests complete"
 endef
 
@@ -339,10 +341,12 @@ define run_smartredis_tests_with_clustered_server
 	echo "Running clustered tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) ; \
+	(testresult=$$?; \
 	echo "Shutting down clustered Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) \
-		--nodes $(SR_TEST_NODES) --stop && \
+		--nodes $(SR_TEST_NODES) --stop; \
+	exit $$testresult) && \
 	echo "Clustered tests complete"
 endef
 
@@ -361,10 +365,12 @@ define run_smartredis_tests_with_uds_server
 	echo "Running standalone tests with Unix Domain Socket connection" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) && \
-	echo "Shutting down standalone Redis server with Unix Domain Socket support"
+		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) ; \
+	(testresult=$$?; \
+	echo "Shutting down standalone Redis server with Unix Domain Socket support" &&
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
-		--udsport $(SR_TEST_UDS_FILE) --stop && \
+		--udsport $(SR_TEST_UDS_FILE) --stop; \
+	exit $$testresult) && \
 	echo "UDS tests complete"
 endef
 
@@ -395,7 +401,7 @@ test: test-deps
 test: build-tests
 test: SR_TEST_PYTEST_FLAGS := -vv
 test:
-	-@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
@@ -403,7 +409,7 @@ test-verbose: test-deps
 test-verbose: build-tests
 test-verbose: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose:
-	-@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
@@ -412,7 +418,7 @@ test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose-with-coverage:
-	-@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests)
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
@@ -420,7 +426,7 @@ test-c: test-deps
 test-c: build-test-c
 test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
-	-@$(call run_smartredis_tests_with_server,./tests/c)
+	@$(call run_smartredis_tests_with_server,./tests/c)
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
@@ -429,7 +435,7 @@ test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 test-cpp:
-	-@$(call run_smartredis_tests_with_server,./tests/cpp)
+	@$(call run_smartredis_tests_with_server,./tests/cpp)
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
@@ -437,7 +443,7 @@ unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
-	-@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
+	@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
 
 # help: test-py                        - run python tests
 .PHONY: test-py
@@ -446,7 +452,7 @@ test-py: SR_PYTHON := ON
 test-py: lib
 test-py: SR_TEST_PYTEST_FLAGS := -vv
 test-py:
-	-@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
@@ -455,7 +461,7 @@ test-fortran: test-deps
 test-fortran: build-test-fortran
 test-fortran: SR_TEST_PYTEST_FLAGS := -vv
 test-fortran:
-	-@$(call run_smartredis_tests_with_server,./tests/fortran)
+	@$(call run_smartredis_tests_with_server,./tests/fortran)
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
@@ -464,7 +470,7 @@ testpy-cov: SR_PYTHON := ON
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv
 testpy-cov: COV_FLAGS := --cov=./src/python/module/smartredis/
 testpy-cov:
-	-@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python)
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
@@ -472,7 +478,7 @@ test-examples: test-deps
 test-examples: build-examples
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv -s
 test-examples:
-	-@$(call run_smartredis_tests_with_server,./examples)
+	@$(call run_smartredis_tests_with_server,./examples)
 
 
 ############################################################################
