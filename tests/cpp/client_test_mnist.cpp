@@ -96,5 +96,5 @@ int main(int argc, char* argv[]) {
 
   std::cout<<"Finished MNIST test."<<std::endl;
 
-  return ;
+  return 0;
 }
