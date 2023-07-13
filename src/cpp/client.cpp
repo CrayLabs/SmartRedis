@@ -272,7 +272,7 @@ void Client::put_tensor(const std::string& name,
         throw SRBadAllocException("tensor");
     }
 
-    int nItems = 1;
+    size_t nItems = 1;
     for (auto dim = dims.cbegin(); dim != dims.cend(); ++dim)
         nItems *= *dim;
     std::cout << "CPP: Putting tensor to key " << key
@@ -367,7 +367,7 @@ void Client::unpack_tensor(const std::string& name,
     CommandReply reply = _redis_server->get_tensor(get_key);
 
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
-    int nItems = 1;
+    size_t nItems = 1;
     for (auto dim = reply_dims.cbegin(); dim != reply_dims.cend(); ++dim)
         nItems *= *dim;
 

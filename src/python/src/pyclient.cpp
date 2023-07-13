@@ -26,9 +26,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "pyclient.h"
 #include "tensorbase.h"
 #include "tensor.h"
+#include "utility.h"
 #include "srexception.h"
 
 using namespace SmartRedis;
@@ -96,12 +98,49 @@ void PyClient::put_tensor(
         void* ptr = buffer.ptr;
 
         // get dims
+        size_t nItems = 1;
         std::vector<size_t> dims(buffer.ndim);
         for (size_t i = 0; i < buffer.shape.size(); i++) {
             dims[i] = (size_t)buffer.shape[i];
+            nItems *= dims[i];
         }
 
         SRTensorType ttype = TENSOR_TYPE_MAP.at(type);
+
+        std::string first_val;
+        switch (ttype) {
+            case SRTensorTypeDouble:
+                first_val = std::to_string(*(double*)ptr);
+                break;
+            case SRTensorTypeFloat:
+                first_val = std::to_string(*(float*)ptr);
+                break;
+            case SRTensorTypeInt64:
+                first_val = std::to_string(*(int64_t*)ptr);
+                break;
+            case SRTensorTypeInt32:
+                first_val = std::to_string(*(int32_t*)ptr);
+                break;
+            case SRTensorTypeInt16:
+                first_val = std::to_string(*(int16_t*)ptr);
+                break;
+            case SRTensorTypeInt8:
+                first_val = std::to_string(*(int8_t*)ptr);
+                break;
+            case SRTensorTypeUint16:
+                first_val = std::to_string(*(uint16_t*)ptr);
+                break;
+            case SRTensorTypeUint8:
+                first_val = std::to_string(*(uint8_t*)ptr);
+                break;
+            default:
+                first_val = "(Invalid tensor type supplied)";
+        }
+
+        std::cout << "PYBIND translation: PutTensor called with key " << name
+            << ". Tensor contains " << std::to_string(nItems) << " items"
+            << ". Tensor type is " << type
+            << ". First element is " << first_val << std::endl;
 
         _client->put_tensor(name, ptr, dims, ttype, SRMemLayoutContiguous);
     });
@@ -111,6 +150,16 @@ py::array PyClient::get_tensor(const std::string& name)
 {
     return MAKE_CLIENT_API({
         TensorBase* tensor = _client->_get_tensorbase_obj(name);
+
+        size_t nItems = 1;
+        auto dims = tensor->dims();
+        for (auto it = dims.begin(); it != dims.end(); ++it)
+            nItems *= *it;
+
+        std::cout << "PYBIND translation: GetTensor called with key " << name
+            << ". Tensor contains " << std::to_string(nItems) << " items"
+            << ". Tensor type is " << SmartRedis::to_string(tensor->type());
+
 
         // Define py::capsule lambda function for destructor
         py::capsule free_when_done((void*)tensor, [](void *tensor) {
@@ -122,41 +171,49 @@ py::array PyClient::get_tensor(const std::string& name)
             case SRTensorTypeDouble: {
                 double* data = reinterpret_cast<double*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(double*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeFloat: {
                 float* data = reinterpret_cast<float*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(float*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeInt64: {
                 int64_t* data = reinterpret_cast<int64_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(int64_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeInt32: {
                 int32_t* data = reinterpret_cast<int32_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(int32_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeInt16: {
                 int16_t* data = reinterpret_cast<int16_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(int16_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeInt8: {
                 int8_t* data = reinterpret_cast<int8_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(int8_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeUint16: {
                 uint16_t* data = reinterpret_cast<uint16_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(uint16_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             case SRTensorTypeUint8: {
                 uint8_t* data = reinterpret_cast<uint8_t*>(tensor->data_view(
                     SRMemLayoutContiguous));
+                std::cout << ". First element is " << std::to_string(*(uint8_t*)data) << std::endl;
                 return py::array(tensor->dims(), data, free_when_done);
             }
             default :
