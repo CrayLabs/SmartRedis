@@ -29,6 +29,7 @@ from time import sleep
 import argparse
 import os
 import pathlib
+import typing as t
 
 def check_availability(n_nodes, port, udsport):
     """Repeat a command until it is successful
@@ -126,7 +127,7 @@ def prepare_uds_socket(udsport):
         return # Silently bail
     uds_abs = pathlib.Path(udsport).resolve()
     basedir = uds_abs.parent
-    basedir.mkdir(exists_okay=True)
+    basedir.mkdir(exist_ok=True)
     uds_abs.touch()
     uds_abs.chmod(0o777)
 
