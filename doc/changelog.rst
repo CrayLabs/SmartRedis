@@ -15,12 +15,12 @@ Description
 
 Detailed Notes
 
-- Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR380_)
+- Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
-.. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
+.. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
 .. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379
 .. _PR366: https://github.com/CrayLabs/SmartRedis/pull/366
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
