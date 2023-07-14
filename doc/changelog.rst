@@ -16,11 +16,13 @@ Detailed Notes
 
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
 - Fix typo causing startup failure in utility script for unit tests (PR378_)
+- Update pylint configuration and mitigate issues, run in CI pipeline (PR371_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
 .. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379
 .. _PR378: https://github.com/CrayLabs/SmartRedis/pull/378
+.. _PR371: https://github.com/CrayLabs/SmartRedis/pull/371
 .. _PR366: https://github.com/CrayLabs/SmartRedis/pull/366
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
 
