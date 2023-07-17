@@ -51,7 +51,7 @@ SmartSim in any Python, C++, C, or Fortran project.
 ## Using SmartRedis
 
 SmartRedis installation instructions are currently hosted as part of the
-[SmartSim library installation instructions](https://www.craylabs.org/docs/installation.html#smartredis)
+[SmartSim library installation instructions](https://www.craylabs.org/docs/installation_instructions/basic.html#smartredis)
 Additionally, detailed [API documents](https://www.craylabs.org/docs/api/smartredis_api.html) are also available as
 part of the SmartSim documentation.
 
