@@ -367,7 +367,7 @@ define run_smartredis_tests_with_uds_server
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
 		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) ; \
 	(testresult=$$?; \
-	echo "Shutting down standalone Redis server with Unix Domain Socket support" &&
+	echo "Shutting down standalone Redis server with Unix Domain Socket support" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--udsport $(SR_TEST_UDS_FILE) --stop; \
 	exit $$testresult) && \
