@@ -160,6 +160,7 @@ build-tests: test-lib
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
+build-test-cpp: test-deps # Need catch to build
 build-test-cpp: test-lib
 	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) \
 		-DSR_LINK=$(SR_LINK)
@@ -167,6 +168,7 @@ build-test-cpp: test-lib
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
+build-unit-test-cpp: test-deps # Need catch to build
 build-unit-test-cpp: test-lib
 	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
