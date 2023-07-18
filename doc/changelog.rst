@@ -10,13 +10,14 @@ Description
 
 - Update supported languages documentation
 - Removed obsolete files
+- Add pylint to CI/CD pipeline and mitigate existing errors
 - Improved clustered redis initialization
 
 Detailed Notes
 
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
 - Fix typo causing startup failure in utility script for unit tests (PR378_)
-- Update pylint configuration and mitigate issues, run in CI pipeline (PR371_)
+- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
