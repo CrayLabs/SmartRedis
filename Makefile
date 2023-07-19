@@ -497,8 +497,8 @@ install/lib/libhiredis.a:
 	@cd third-party/hiredis && \
 	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
 	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
-	rm -f ../../install/lib/libhiredis*.so && \
-	rm -f ../../install/lib/libhiredis*.dylib && \
+	rm -f ../../install/lib/libhiredis*.so* && \
+	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
 
 # Redis-plus-plus (hidden build target)
