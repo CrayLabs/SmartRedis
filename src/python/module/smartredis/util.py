@@ -24,16 +24,19 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .error import *
+import typing as t
 from functools import wraps
+
+import numpy as np
+from .error import *  # pylint: disable=wildcard-import,unused-wildcard-import
+
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
-import numpy as np
-import typing as t
 
 if t.TYPE_CHECKING:
     # Type hint magic bits
     from typing_extensions import ParamSpec
+
     _PR = ParamSpec("_PR")
     _RT = t.TypeVar("_RT")
 
@@ -102,7 +105,8 @@ def init_default(
     if init_value is None:
         return default
     if expected_type is not None and not isinstance(init_value, expected_type):
-        raise TypeError(f"Argument was of type {type(init_value)}, not {expected_type}")
+        msg = f"Argument was of type {type(init_value)}, not {expected_type}"
+        raise TypeError(msg)
     return init_value
 
 

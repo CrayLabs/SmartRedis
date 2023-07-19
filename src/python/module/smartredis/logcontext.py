@@ -27,8 +27,6 @@
 from .smartredisPy import PyLogContext
 from .srobject import SRObject
 from .util import exception_handler, typecheck
-from .error import *
-import typing as t
 
 
 class LogContext(SRObject):
@@ -60,7 +58,9 @@ class LogContext(SRObject):
         :rtype: LogContext
         """
         typecheck(logcontext, "logcontext", PyLogContext)
-        new_logcontext = LogContext(logcontext._name)
+        new_logcontext = LogContext(
+            logcontext._name  # pylint: disable=protected-access
+        )
         new_logcontext.set_context(logcontext)
         return new_logcontext
 
