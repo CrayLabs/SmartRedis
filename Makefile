@@ -464,7 +464,7 @@ test-py:
 .PHONY: test-fortran
 test-fortran: SR_FORTRAN := ON
 test-fortran: build-test-fortran
-test-fortran: SR_TEST_PYTEST_FLAGS := -vv
+test-fortran: SR_TEST_PYTEST_FLAGS := -vv -s
 test-fortran:
 	@$(call run_smartredis_tests_with_server,./tests/fortran)
 
