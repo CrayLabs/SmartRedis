@@ -46,12 +46,12 @@ def get_test_names():
 
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_unit_cpp_client(test, use_cluster, build):
+def test_unit_cpp_client(test, use_cluster, build, link):
     # Build the path to the test executable from the source file name
-    # . keep only the last four parts of the path: (tests, language, unit-tests, basename)
-    test = "/".join(test.split("/")[-4:])
+    # . keep only the last three parts of the path: (language, unit-tests, basename)
+    test = "/".join(test.split("/")[-3:])
     # . prepend the path to the built test executable
-    test = f"{getcwd()}/build/{build}/{test}"
+    test = f"{getcwd()}/build/{build}/tests/{link}/{test}"
     cmd = [test]
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")
