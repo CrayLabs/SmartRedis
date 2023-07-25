@@ -76,6 +76,10 @@ find_library(HIREDIS hiredis
 find_package(Threads REQUIRED)
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
+message(STATUS "Hiredis: ${HIREDIS}")
+message(STATUS "Redis++: ${REDISPP}")
+#message(STATUS "Threads: ${Threads::Threads} Threads::Threads")
+
 # Define source code that goes into the SmartRedis library
 set(CLIENT_SRC
     src/c/c_client.cpp
@@ -125,14 +129,53 @@ include_directories(SYSTEM
 )
 
 # Build the main SmartRedis library
-add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
-set_target_properties(smartredis PROPERTIES
-    SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
-)
-set_target_properties(smartredis PROPERTIES
-    OUTPUT_NAME ${SMARTREDIS_LIB}
-)
-target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+if (STATIC_BUILD)
+    message(STATUS "Static build")
+    set(TEMP_LIB_NAME sr-static)
+    message(STATUS SMARTREDIS_LIB: "${SMARTREDIS_LIB}")
+    message(STATUS TEMP_LIB_NAME: "${TEMP_LIB_NAME}")
+    add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+    set_target_properties(smartredis PROPERTIES
+        SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
+    )
+    set_target_properties(smartredis PROPERTIES
+        OUTPUT_NAME ${TEMP_LIB_NAME}
+    )
+    target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+
+    # Merge SmartRedis static library with dependencies
+    set(STATIC_LIB_COMPONENTS lib${TEMP_LIB_NAME}.a ${EXT_CLIENT_LIBRARIES})
+    message(STATUS STATIC_LIB_COMPONENTS: "${STATIC_LIB_COMPONENTS}")
+    set(DUMMY_FILE ${CMAKE_BINARY_DIR}/merge-dummy.cpp)
+    file(
+        WRITE ${DUMMY_FILE}
+        "// Life, the universe, and everything!\nstatic int sr_magic_number = 42;\n"
+    )
+    add_library(${SMARTREDIS_LIB} STATIC ${DUMMY_FILE})
+    add_custom_command(
+        TARGET smartredis
+        POST_BUILD
+        COMMAND ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+    )
+
+    # Install static library
+    install(TARGETS ${SMARTREDIS_LIB}
+     	LIBRARY DESTINATION lib)
+
+else ()
+    add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+    set_target_properties(smartredis PROPERTIES
+        SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
+    )
+    set_target_properties(smartredis PROPERTIES
+        OUTPUT_NAME ${SMARTREDIS_LIB}
+    )
+    target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+
+    # Install dynamic library
+    install(TARGETS smartredis
+     	LIBRARY DESTINATION lib)
+endif()
 
 # Install SmartRedis header files
 install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
@@ -140,10 +183,6 @@ install(DIRECTORY "${CMAKE_SOURCE_DIR}/include/"
         FILES_MATCHING
         PATTERN "*.h" PATTERN "*.tcc" PATTERN "*.inc"
 )
-
-# Install dynamic library and headers
-install(TARGETS smartredis
-     	LIBRARY DESTINATION lib)
 
 # Build the Fortran library
 if (SR_FORTRAN)
