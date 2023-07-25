@@ -146,9 +146,16 @@ jobs:
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
       # Check the static build by compiling and linking examples
-      - name: Test static build
-        if: contains(matrix.os, 'ubuntu')
+      # Only supported on Linux; static builds are not currently available for MacOS
+      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
+        run: sudo apt-get install -y mpich
+      - name: Test static build -- GNU compilers
+        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
         run: make build-examples SR_LINK=Static SR_FORTRAN=ON
+      - name: Test static build -- intel compilers
+        if: contains(matrix.os, 'ubuntu') && contains(matrix.compiler, 'intel')
+        run: make build-example-serial SR_LINK=Static SR_FORTRAN=ON
 
       # Run the tests using various DB deployments
       - name: Run tests
