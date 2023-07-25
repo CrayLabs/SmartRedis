@@ -46,6 +46,7 @@ find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
+find_package(Threads REQUIRED)
 find_library(SR_LIB ${SMARTREDIS_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
     REQUIRED
@@ -89,6 +90,7 @@ foreach(EXECUTABLE ${EXECUTABLES})
 	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
 		MPI::MPI_Fortran
+		Threads::Threads
 		example_utils
 	)
 endforeach()

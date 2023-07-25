@@ -49,6 +49,7 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
     REQUIRED
     ${SMARTREDIS_LINK_MODE}
 )
+find_package(Threads REQUIRED)
 
 # Define include directories for header files
 include_directories(SYSTEM
@@ -73,6 +74,7 @@ foreach(EXECUTABLE ${EXECUTABLES})
     )
     target_link_libraries(${EXECUTABLE}_cpp_parallel
     	MPI::MPI_CXX
+        Threads::Threads
         ${SR_LIB}
     )
 endforeach()

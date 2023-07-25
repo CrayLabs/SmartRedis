@@ -44,6 +44,7 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
+find_package(Threads REQUIRED)
 find_library(SR_LIB ${SMARTREDIS_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
     REQUIRED
@@ -81,5 +82,6 @@ foreach(EXECUTABLE ${EXECUTABLES})
     )
 	target_link_libraries(${EXECUTABLE}_fortran_serial
 		${SMARTREDIS_LIBRARIES}
+		Threads::Threads
 	)
 endforeach()
