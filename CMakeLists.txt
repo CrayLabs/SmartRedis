@@ -149,7 +149,7 @@ if (STATIC_BUILD)
     add_custom_command(
         TARGET smartredis
         POST_BUILD
-        COMMAND rm -f lib${SMARTREDIS_LIB}.a && cp ${CMAKE_BINARY_DIR}/${TEMP_LIB_FULLNAME} ${SR_LIB_INSTALL_PATH} && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+        COMMAND rm -f lib${SMARTREDIS_LIB}.a && mkdir -p ${SR_LIB_INSTALL_PATH} && cp ${CMAKE_BINARY_DIR}/${TEMP_LIB_FULLNAME} ${SR_LIB_INSTALL_PATH} && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
         VERBATIM
         COMMENT "Bundling static libraries together as lib${SMARTREDIS_LIB}.a"
     )
