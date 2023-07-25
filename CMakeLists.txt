@@ -155,7 +155,8 @@ if (STATIC_BUILD)
     add_custom_command(
         TARGET smartredis
         POST_BUILD
-        COMMAND ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+        COMMAND rm lib${SMARTREDIS_LIB}.a && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+        VERBATIM
     )
 
     # Install static library
