@@ -44,12 +44,24 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
-find_package(Threads REQUIRED)
 find_library(SR_LIB ${SMARTREDIS_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
     REQUIRED
     ${SMARTREDIS_LINK_MODE}
 )
+
+# Extras for static builds
+if (STATIC_BUILD)
+    # Static builds have an extra dependency on the Pthreads library
+    find_package(Threads REQUIRED)
+    set(SMARTREDIS_LIBRARIES
+        ${SR_LIB}
+        Threads::Threads
+    )
+else()
+    # Shared builds only need the SmartRedis library
+    set(SMARTREDIS_LIBRARIES ${SR_LIB})
+endif()
 
 # Define include directories for header files
 include_directories(SYSTEM
@@ -74,7 +86,6 @@ foreach(EXECUTABLE ${EXECUTABLES})
         OUTPUT_NAME ${EXECUTABLE}
     )
     target_link_libraries(${EXECUTABLE}_cpp_serial
-        ${SR_LIB}
-		Threads::Threads
+        ${SMARTREDIS_LIBRARIES}
     )
 endforeach()

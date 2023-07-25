@@ -46,7 +46,6 @@ find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
-find_package(Threads REQUIRED)
 find_library(SR_LIB ${SMARTREDIS_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
     REQUIRED
@@ -57,6 +56,27 @@ find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
 	REQUIRED
     ${SMARTREDIS_LINK_MODE}
 )
+
+# Extras for static builds
+if (STATIC_BUILD)
+    # Static builds have an extra dependency on the Pthreads library
+    find_package(Threads REQUIRED)
+	set(SMARTREDIS_LIBRARIES
+		${SR_LIB}
+		${SR_FTN_LIB}
+		Threads::Threads
+    )
+
+    # Static library builds need to link against the C++ library
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
+else()
+    # Shared builds only need the SmartRedis libraries
+	set(SMARTREDIS_LIBRARIES
+		${SR_LIB}
+		${SR_FTN_LIB}
+	)
+endif()
+
 set(SMARTREDIS_LIBRARIES
 	${SR_LIB}
 	${SR_FTN_LIB}
@@ -69,7 +89,7 @@ include_directories(SYSTEM
     ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-# Stuff the example_utils into a library to enable parallel builds
+# Stuff the example_utils into a library to enable building the examples in parallel
 add_library(example_utils STATIC example_utils.F90)
 
 # Define all the examples to be built
@@ -90,7 +110,6 @@ foreach(EXECUTABLE ${EXECUTABLES})
 	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
 		MPI::MPI_Fortran
-		Threads::Threads
 		example_utils
 	)
 endforeach()
