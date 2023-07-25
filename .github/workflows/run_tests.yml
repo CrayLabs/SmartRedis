@@ -145,6 +145,11 @@ jobs:
                 TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
                 TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
 
+      # Check the static build by compiling and linking examples
+      - name: Test static build
+        if: contains(matrix.os, 'ubuntu')
+        run: make build-examples SR_LINK=Static SR_FORTRAN=ON
+
       # Run the tests using various DB deployments
       - name: Run tests
         run: |
