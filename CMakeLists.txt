@@ -76,10 +76,6 @@ find_library(HIREDIS hiredis
 find_package(Threads REQUIRED)
 set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
-message(STATUS "Hiredis: ${HIREDIS}")
-message(STATUS "Redis++: ${REDISPP}")
-#message(STATUS "Threads: ${Threads::Threads} Threads::Threads")
-
 # Define source code that goes into the SmartRedis library
 set(CLIENT_SRC
     src/c/c_client.cpp
@@ -130,7 +126,7 @@ include_directories(SYSTEM
 
 # Build the main SmartRedis library
 if (STATIC_BUILD)
-    set(TEMP_LIB_NAME sr-static)
+    set(TEMP_LIB_NAME sr${SR_STATIC_NAME_SUFFIX}-static)
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
@@ -151,7 +147,7 @@ if (STATIC_BUILD)
     add_custom_command(
         TARGET smartredis
         POST_BUILD
-        COMMAND rm lib${SMARTREDIS_LIB}.a && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+        COMMAND rm -f lib${SMARTREDIS_LIB}.a && cp ${TEMP_LIB_NAME} ${CMAKE_SOURCE_DIR}/include/lib && ar crT ${CMAKE_SOURCE_DIR}/include/lib/lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
         VERBATIM
         COMMENT "Bundling static libraries together as lib${SMARTREDIS_LIB}.a"
     )
