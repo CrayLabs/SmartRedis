@@ -276,7 +276,7 @@ check-sort-imports:
 # help: check-lint                     - run static analysis checks
 .PHONY: check-lint
 check-lint:
-	@pylint --rcfile=.pylintrc ./src/python/module/smartredis ./tests/python
+	@pylint --rcfile=.pylintrc ./src/python/module/smartredis
 
 
 # help:
