@@ -127,6 +127,8 @@ include_directories(SYSTEM
 # Build the main SmartRedis library
 if (STATIC_BUILD)
     set(TEMP_LIB_NAME sr${SR_STATIC_NAME_SUFFIX}-static)
+    set(TEMP_LIB_FULLNAME lib${TEMP_LIB_NAME}.a)
+    set(SR_LIB_INSTALL_PATH ${CMAKE_SOURCE_DIR}/include/lib)
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
@@ -137,17 +139,17 @@ if (STATIC_BUILD)
     target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
     # Merge SmartRedis static library with dependencies
-    set(STATIC_LIB_COMPONENTS lib${TEMP_LIB_NAME}.a ${EXT_CLIENT_LIBRARIES})
     set(DUMMY_FILE ${CMAKE_BINARY_DIR}/merge-dummy.cpp)
     file(
         WRITE ${DUMMY_FILE}
         "// Life, the universe, and everything!\nstatic int sr_magic_number = 42;\n"
     )
     add_library(${SMARTREDIS_LIB} STATIC ${DUMMY_FILE})
+    set(STATIC_LIB_COMPONENTS ${SR_LIB_INSTALL_PATH}/${TEMP_LIB_FULLNAME} ${EXT_CLIENT_LIBRARIES})
     add_custom_command(
         TARGET smartredis
         POST_BUILD
-        COMMAND rm -f lib${SMARTREDIS_LIB}.a && cp ${CMAKE_BINARY_DIR}/lib${TEMP_LIB_NAME}.a ${CMAKE_SOURCE_DIR}/include/lib && ar crT ${CMAKE_SOURCE_DIR}/include/lib/lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
+        COMMAND rm -f lib${SMARTREDIS_LIB}.a && cp ${CMAKE_BINARY_DIR}/${TEMP_LIB_FULLNAME} ${SR_LIB_INSTALL_PATH} && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
         VERBATIM
         COMMENT "Bundling static libraries together as lib${SMARTREDIS_LIB}.a"
     )
