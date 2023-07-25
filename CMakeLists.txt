@@ -130,10 +130,7 @@ include_directories(SYSTEM
 
 # Build the main SmartRedis library
 if (STATIC_BUILD)
-    message(STATUS "Static build")
     set(TEMP_LIB_NAME sr-static)
-    message(STATUS SMARTREDIS_LIB: "${SMARTREDIS_LIB}")
-    message(STATUS TEMP_LIB_NAME: "${TEMP_LIB_NAME}")
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
@@ -145,7 +142,6 @@ if (STATIC_BUILD)
 
     # Merge SmartRedis static library with dependencies
     set(STATIC_LIB_COMPONENTS lib${TEMP_LIB_NAME}.a ${EXT_CLIENT_LIBRARIES})
-    message(STATUS STATIC_LIB_COMPONENTS: "${STATIC_LIB_COMPONENTS}")
     set(DUMMY_FILE ${CMAKE_BINARY_DIR}/merge-dummy.cpp)
     file(
         WRITE ${DUMMY_FILE}
@@ -157,6 +153,7 @@ if (STATIC_BUILD)
         POST_BUILD
         COMMAND rm lib${SMARTREDIS_LIB}.a && ar crT lib${SMARTREDIS_LIB}.a ${STATIC_LIB_COMPONENTS}
         VERBATIM
+        COMMENT "Bundling static libraries together as lib${SMARTREDIS_LIB}.a"
     )
 
     # Install static library
