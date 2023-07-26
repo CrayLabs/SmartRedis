@@ -47,7 +47,7 @@ IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
 add_library(smartredis-main IMPORTED)
-set_target_properties(smartredis-main EXPORT_PROPERTIES
+set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
 )
 #find_library(SR_LIB ${SMARTREDIS_LIB}
@@ -64,7 +64,7 @@ find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
 # Extras for static builds
 if (STATIC_BUILD)
 	# Mark that SmartRedis requires the C++ linker
-    set_target_properties(smartredis-main EXPORT_PROPERTIES
+    set_target_properties(smartredis-main PROPERTIES
 		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 	)
 

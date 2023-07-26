@@ -45,7 +45,7 @@ endif()
 
 # Locate dependencies
 add_library(smartredis-main IMPORTED)
-set_target_properties(smartredis-main EXPORT_PROPERTIES
+set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
 )
 #find_library(SR_LIB ${SMARTREDIS_LIB}
@@ -58,7 +58,7 @@ set_target_properties(smartredis-main EXPORT_PROPERTIES
 if (STATIC_BUILD)
 if (STATIC_BUILD)
 	# Mark that SmartRedis requires the C++ linker
-    set_target_properties(smartredis-main EXPORT_PROPERTIES
+    set_target_properties(smartredis-main PROPERTIES
 		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 	)
 
