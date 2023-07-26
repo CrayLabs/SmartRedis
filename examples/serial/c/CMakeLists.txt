@@ -44,29 +44,37 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
-find_library(SR_LIB ${SMARTREDIS_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
+add_library(smartredis-main IMPORTED)
+set_target_properties(smartredis-main EXPORT_PROPERTIES
+    IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
 )
+#find_library(SR_LIB ${SMARTREDIS_LIB}
+#    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+#    REQUIRED
+#    ${SMARTREDIS_LINK_MODE}
+#)
 
 # Extras for static builds
 if (STATIC_BUILD)
+if (STATIC_BUILD)
 	# Mark that SmartRedis requires the C++ linker
-	set_target_properties(SR_LIB PROPERTIES
-		IMPORTED_LOCATION ${SR_LIB}
+    set_target_properties(smartredis-main EXPORT_PROPERTIES
 		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 	)
 
     # Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)
     set(SMARTREDIS_LIBRARIES
-        ${SR_LIB}
+#        ${SR_LIB}
+        smartredis-main
         Threads::Threads
     )
 else()
     # Shared builds only need the SmartRedis library
-    set(SMARTREDIS_LIBRARIES ${SR_LIB})
+    set(SMARTREDIS_LIBRARIES
+#        ${SR_LIB}
+        smartredis-main
+    )
 endif()
 
 # Define include directories for header files
