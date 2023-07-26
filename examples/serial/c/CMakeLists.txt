@@ -58,9 +58,6 @@ if (STATIC_BUILD)
         ${SR_LIB}
         Threads::Threads
     )
-
-    # Static library builds need to link against the C++ library
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++")
 else()
     # Shared builds only need the SmartRedis library
     set(SMARTREDIS_LIBRARIES ${SR_LIB})
