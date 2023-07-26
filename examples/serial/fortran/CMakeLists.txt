@@ -30,6 +30,7 @@ project(SmartRedis-Examples-Serial-Fortran)
 
 # Enable language support for the examples
 enable_language(Fortran)
+enable_language(CXX) # We need a C++ aware linker
 
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
