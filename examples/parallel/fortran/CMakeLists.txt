@@ -30,7 +30,6 @@ project(SmartRedis-Examples-Parallel-Fortran)
 
 # Enable language support for the examples
 enable_language(Fortran)
-enable_language(CXX) # We need a C++ aware linker
 
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
@@ -60,7 +59,13 @@ find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
 
 # Extras for static builds
 if (STATIC_BUILD)
-    # Static builds have an extra dependency on the Pthreads library
+	# Mark that SmartRedis requires the C++ linker
+	set_target_properties(SR_LIB PROPERTIES
+		IMPORTED_LOCATION ${SR_LIB}
+		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+	)
+
+	# Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)
 	set(SMARTREDIS_LIBRARIES
 		${SR_LIB}
