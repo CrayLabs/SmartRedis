@@ -46,7 +46,7 @@ find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
-add_library(smartredis-main IMPORTED)
+add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
 set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
 )

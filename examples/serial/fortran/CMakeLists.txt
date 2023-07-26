@@ -44,7 +44,7 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
-add_library(smartredis-main IMPORTED)
+add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
 set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
 )
