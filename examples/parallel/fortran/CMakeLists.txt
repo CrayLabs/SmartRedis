@@ -71,21 +71,28 @@ set_target_properties(smartredis-fortran PROPERTIES
 
 # Extras for static builds
 if (STATIC_BUILD)
-	# Mark that SmartRedis requires the C++ linker
-    set_target_properties(smartredis-main PROPERTIES
-		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-	)
-    set_target_properties(smartredis-fortran PROPERTIES
-		IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
-	)
+	if (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
+		# For Intel, don't set languages so that CMake will use the Fortran linker (default)
+
+		# Add the stdc++ linker flag
+		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
+	else() # Solution tested with GNU
+		# Mark that SmartRedis requires the C++ linker
+		set_target_properties(smartredis-main PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+		)
+		set_target_properties(smartredis-fortran PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
+		)
+	endif()
 
 	# Static builds have an extra dependency on the Pthreads library
-    find_package(Threads REQUIRED)
-    set(SMARTREDIS_LIBRARIES
+	find_package(Threads REQUIRED)
+	set(SMARTREDIS_LIBRARIES
 		smartredis-fortran
 		smartredis-main
-        Threads::Threads
-    )
+		Threads::Threads
+	)
 else()
     # Shared builds only need the SmartRedis libraries
     set(SMARTREDIS_LIBRARIES

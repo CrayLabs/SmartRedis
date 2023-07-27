@@ -66,14 +66,12 @@ if (STATIC_BUILD)
     # Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)
     set(SMARTREDIS_LIBRARIES
-#        ${SR_LIB}
         smartredis-main
         Threads::Threads
     )
 else()
     # Shared builds only need the SmartRedis library
     set(SMARTREDIS_LIBRARIES
-#        ${SR_LIB}
         smartredis-main
     )
 endif()
