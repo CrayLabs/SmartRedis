@@ -64,7 +64,7 @@ find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
     REQUIRED
     ${SMARTREDIS_LINK_MODE}
 )
-set_target_properties(smartredis-fortranmain PROPERTIES
+set_target_properties(smartredis-fortran PROPERTIES
     IMPORTED_LOCATION ${SR_FTN_LIB}
 )
 
