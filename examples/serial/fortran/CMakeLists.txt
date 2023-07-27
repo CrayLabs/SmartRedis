@@ -58,10 +58,14 @@ set_target_properties(smartredis-main PROPERTIES
 #    REQUIRED
 #    ${SMARTREDIS_LINK_MODE}
 #)
+add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
 find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
     REQUIRED
     ${SMARTREDIS_LINK_MODE}
+)
+set_target_properties(smartredis-fortranmain PROPERTIES
+    IMPORTED_LOCATION ${SR_FTN_LIB}
 )
 
 # Extras for static builds
@@ -70,21 +74,22 @@ if (STATIC_BUILD)
     set_target_properties(smartredis-main PROPERTIES
 		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 	)
+    set_target_properties(smartredis-fortran PROPERTIES
+		IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
+	)
 
     # Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)
     set(SMARTREDIS_LIBRARIES
-#        ${SR_LIB}
         smartredis-main
-        ${SR_FTN_LIB}
+        smartredis-fortran
         Threads::Threads
     )
 else()
     # Shared builds only need the SmartRedis libraries
     set(SMARTREDIS_LIBRARIES
-#        ${SR_LIB}
         smartredis-main
-        ${SR_FTN_LIB}
+        smartredis-fortran
     )
 endif()
 
