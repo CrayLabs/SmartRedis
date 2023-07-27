@@ -66,7 +66,7 @@ set_target_properties(smartredis-fortran PROPERTIES
     IMPORTED_LOCATION ${SR_FTN_LIB}
 )
 
-# Extras for static builds
+# Select libraries for build
 if (STATIC_BUILD)
 	# The CMake "preferred" approach only seems to work with the GNU
 	# compiler. We will streamline this in the future

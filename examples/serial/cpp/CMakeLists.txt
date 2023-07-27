@@ -50,7 +50,7 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
     ${SMARTREDIS_LINK_MODE}
 )
 
-# Extras for static builds
+# Select libraries for build
 if (STATIC_BUILD)
     # Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)

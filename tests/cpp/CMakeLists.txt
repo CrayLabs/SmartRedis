@@ -53,13 +53,24 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
     ${SMARTREDIS_LINK_MODE}
 )
 
+# Select libraries for build
+if (STATIC_BUILD)
+    # Static builds have an extra dependency on the Pthreads library
+    find_package(Threads REQUIRED)
+    set(SMARTREDIS_LIBRARIES
+        ${SR_LIB}
+        Threads::Threads
+    )
+else()
+    # Shared builds only need the SmartRedis library
+    set(SMARTREDIS_LIBRARIES ${SR_LIB})
+endif()
+
 # Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
     ${SMARTREDIS_INSTALL_PATH}/include
 )
-
-
 
 # Define all the tests to be built
 list(APPEND EXECUTABLES
@@ -97,6 +108,6 @@ foreach(EXECUTABLE ${EXECUTABLES})
         OUTPUT_NAME ${EXECUTABLE}
     )
     target_link_libraries(${EXECUTABLE}_cpp_test
-        ${SR_LIB}
+        ${SMARTREDIS_LIBRARIES}
     )
 endforeach()

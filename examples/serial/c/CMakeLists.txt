@@ -55,7 +55,7 @@ set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SR_LIB}
 )
 
-# Extras for static builds
+# Select libraries for build
 if (STATIC_BUILD)
 	# Mark that SmartRedis requires the C++ linker
     set_target_properties(smartredis-main PROPERTIES
