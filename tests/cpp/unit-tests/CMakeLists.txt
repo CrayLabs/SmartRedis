@@ -47,9 +47,9 @@ endif()
 
 # Locate dependencies
 find_library(SR_LIB ${SMARTREDIS_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
+  PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+  REQUIRED
+  ${SMARTREDIS_LINK_MODE}
 )
 find_package(Threads REQUIRED)
 
@@ -57,7 +57,7 @@ find_package(Threads REQUIRED)
 include_directories(SYSTEM
     /usr/local/include
     ${SMARTREDIS_INSTALL_PATH}/include
-  )
+)
 
 # Identify source files to be built into the CPP Catch2 unit tests
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)

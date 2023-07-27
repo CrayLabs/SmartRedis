@@ -46,7 +46,7 @@ def get_test_names():
 
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_c_client(test, use_cluster, build):
+def test_c_client(test, use_cluster, build, link):
     """This function actually runs the tests using the parameterization
     function provided in Pytest
 
@@ -54,12 +54,12 @@ def test_c_client(test, use_cluster, build):
     :type test: str
     """
     # Build the path to the test executable from the source file name
-    # . keep only the last three parts of the path: (tests, language, basename)
-    test = "/".join(test.split("/")[-3:])
+    # . keep only the last two parts of the path: (language, basename)
+    test = "/".join(test.split("/")[-2:])
     # . drop the file extension
     test = ".".join(test.split(".")[:-1])
     # . prepend the path to the built test executable
-    test = f"{getcwd()}/build/{build}/{test}"
+    test = f"{getcwd()}/build/{build}/tests/{link}/{test}"
     cmd = [test]
     print(f"Running test: {osp.basename(test)}")
     print(f"Test command {' '.join(cmd)}")

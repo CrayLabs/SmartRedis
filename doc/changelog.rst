@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Enable static builds of SmartRedis
 - Improve robustness of test runs
 - Fix installation link
 - Update supported languages documentation
@@ -17,6 +18,7 @@ Description
 
 Detailed Notes
 
+- Static builds of SmartRedis can now work with Linux platforms. Fortran is tested with GNU, PGI, Intel compilers (PR386_)
 - Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
 - Fix incorrect link to installation documentation (PR380_)
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
@@ -25,6 +27,7 @@ Detailed Notes
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
+.. _PR386: https://github.com/CrayLabs/SmartRedis/pull/386
 .. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
 .. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
 .. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379

@@ -152,65 +152,70 @@ test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
+build-tests: test-deps
 build-tests: test-lib
-	@cmake -S tests -B build/$(SR_BUILD)/tests -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/tests -- -j $(NPROC)
+	@cmake -S tests -B build/$(SR_BUILD)/tests/$(SR_LINK) \
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK) -- -j $(NPROC)
 
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
+build-test-cpp: test-deps
 build-test-cpp: test-lib
-	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/cpp -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp -- -j $(NPROC)
+	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp \
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp -- -j $(NPROC)
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
+build-unit-test-cpp: test-deps
 build-unit-test-cpp: test-lib
-	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/cpp/unit-tests \
+	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/cpp/unit-tests -- -j $(NPROC)
+	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests -- -j $(NPROC)
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
+build-test-c: test-deps
 build-test-c: test-lib
-	@cmake -S tests/c -B build/$(SR_BUILD)/tests/c -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/c -- -j $(NPROC)
+	@cmake -S tests/c -B build/$(SR_BUILD)/tests/$(SR_LINK)/c \
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/c -- -j $(NPROC)
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
+build-test-fortran: test-deps
 build-test-fortran: SR_FORTRAN=ON
 build-test-fortran: test-lib
-	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/fortran -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/fortran -- -j $(NPROC)
+	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/$(SR_LINK)/fortran \
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/fortran -- -j $(NPROC)
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
 build-examples: lib
-	@cmake -S examples -B build/$(SR_BUILD)/examples -DSR_BUILD=$(SR_BUILD) \
+	@cmake -S examples -B build/$(SR_BUILD)/examples/$(SR_LINK) -DSR_BUILD=$(SR_BUILD) \
 		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples -- -j $(NPROC)
+	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK) -- -j $(NPROC)
 
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
 build-example-serial: lib
-	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/serial \
+	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/$(SR_LINK)/serial \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/serial
+	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/serial
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
 build-example-parallel: lib
-	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/parallel \
+	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/$(SR_LINK)/parallel \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/parellel
+	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parellel
 
 
 # help: clean-deps                     - remove third-party deps
@@ -293,6 +298,7 @@ cov:
 # help: Test targets
 # help: ------------
 
+# Build Pytest flags to skip various subsets of the tests
 ifeq ($(SR_PYTHON),OFF)
 SKIP_PYTHON = --ignore ./tests/python
 endif
@@ -320,7 +326,8 @@ define run_smartredis_tests_with_standalone_server
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1)  ; \
+		--build $(SR_BUILD) --link $(SR_LINK) \
+		--sr_fortran $(SR_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
@@ -341,7 +348,8 @@ define run_smartredis_tests_with_clustered_server
 	echo "Running clustered tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) ; \
+		--build $(SR_BUILD) --link $(SR_LINK) \
+		--sr_fortran $(SR_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down clustered Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) \
@@ -365,7 +373,8 @@ define run_smartredis_tests_with_uds_server
 	echo "Running standalone tests with Unix Domain Socket connection" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --sr_fortran $(SR_FORTRAN) $(1) ; \
+		--build $(SR_BUILD) --link $(SR_LINK) \
+		--sr_fortran $(SR_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server with Unix Domain Socket support" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
@@ -422,7 +431,6 @@ test-verbose-with-coverage:
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
-test-c: test-deps
 test-c: build-test-c
 test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
@@ -430,7 +438,6 @@ test-c:
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
-test-cpp: test-deps
 test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
@@ -439,7 +446,6 @@ test-cpp:
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
-unit-test-cpp: test-deps
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
@@ -457,9 +463,8 @@ test-py:
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
 test-fortran: SR_FORTRAN := ON
-test-fortran: test-deps
 test-fortran: build-test-fortran
-test-fortran: SR_TEST_PYTEST_FLAGS := -vv
+test-fortran: SR_TEST_PYTEST_FLAGS := -vv -s
 test-fortran:
 	@$(call run_smartredis_tests_with_server,./tests/fortran)
 
@@ -495,8 +500,8 @@ install/lib/libhiredis.a:
 	@cd third-party/hiredis && \
 	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
 	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
-	rm -f ../../install/lib/libhiredis*.so && \
-	rm -f ../../install/lib/libhiredis*.dylib && \
+	rm -f ../../install/lib/libhiredis*.so* && \
+	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
 
 # Redis-plus-plus (hidden build target)
