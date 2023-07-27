@@ -18,7 +18,7 @@ Description
 
 Detailed Notes
 
-- Static builds of SmartRedis can now work with Linux platforms. Fortran is only tested with GNU and Intel compilers (PR386_)
+- Static builds of SmartRedis can now work with Linux platforms. Fortran is tested with GNU, PGI, Intel compilers (PR386_)
 - Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
 - Fix incorrect link to installation documentation (PR380_)
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
