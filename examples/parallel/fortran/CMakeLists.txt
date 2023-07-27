@@ -43,19 +43,22 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
+#  . MPI
 find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
+#  . Main SmartRedis Library (C++ based)
 add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
-set_target_properties(smartredis-main PROPERTIES
-    IMPORTED_LOCATION ${SMARTREDIS_INSTALL_PATH}/lib/${SMARTREDIS_LIB_FULLNAME}
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
 )
-#find_library(SR_LIB ${SMARTREDIS_LIB}
-#    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-#    REQUIRED
-#    ${SMARTREDIS_LINK_MODE}
-#)
+set_target_properties(smartredis-main PROPERTIES
+    IMPORTED_LOCATION ${SR_LIB}
+)
+#  . SmartRedis Fortran Library (C++ based)
 add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
 find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
 	PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
@@ -79,8 +82,8 @@ if (STATIC_BUILD)
 	# Static builds have an extra dependency on the Pthreads library
     find_package(Threads REQUIRED)
     set(SMARTREDIS_LIBRARIES
-        smartredis-main
 		smartredis-fortran
+		smartredis-main
         Threads::Threads
     )
 else()
@@ -88,7 +91,6 @@ else()
     set(SMARTREDIS_LIBRARIES
 		smartredis-fortran
 		smartredis-main
-        ${SR_FTN_LIB}
     )
 endif()
 

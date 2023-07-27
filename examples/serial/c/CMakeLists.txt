@@ -30,6 +30,7 @@ project(SmartRedis-Examples-Serial-C)
 
 # Enable language support for the examples
 enable_language(C)
+enable_language(CXX)
 
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
