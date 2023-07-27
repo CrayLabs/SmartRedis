@@ -139,6 +139,7 @@ if (STATIC_BUILD)
     target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
 
     # Merge SmartRedis static library with dependencies
+    #  . Create a sacrificial dummy file so we have source to make a target against
     set(DUMMY_FILE ${CMAKE_BINARY_DIR}/merge-dummy.cpp)
     file(
         WRITE ${DUMMY_FILE}
@@ -146,6 +147,8 @@ if (STATIC_BUILD)
     )
     add_library(${SMARTREDIS_LIB} STATIC ${DUMMY_FILE})
     set(STATIC_LIB_COMPONENTS ${SR_LIB_INSTALL_PATH}/${TEMP_LIB_FULLNAME} ${EXT_CLIENT_LIBRARIES})
+
+    #  . Archive the static libraries together into a thin library
     add_custom_command(
         TARGET smartredis
         POST_BUILD
@@ -157,8 +160,7 @@ if (STATIC_BUILD)
     # Install static library
     install(TARGETS ${SMARTREDIS_LIB}
      	LIBRARY DESTINATION lib)
-
-else ()
+else () # Shared library build
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}

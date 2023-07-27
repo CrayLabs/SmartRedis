@@ -45,6 +45,7 @@ if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
 endif()
 
 # Locate dependencies
+#  . Main SmartRedis Library (C++ based)
 add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
 find_library(SR_LIB ${SMARTREDIS_LIB}
     PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
@@ -54,15 +55,11 @@ find_library(SR_LIB ${SMARTREDIS_LIB}
 set_target_properties(smartredis-main PROPERTIES
     IMPORTED_LOCATION ${SR_LIB}
 )
-#find_library(SR_LIB ${SMARTREDIS_LIB}
-#    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-#    REQUIRED
-#    ${SMARTREDIS_LINK_MODE}
-#)
+#  . SmartRedis Fortran Library (C++ based)
 add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
 find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
+	PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+	REQUIRED
     ${SMARTREDIS_LINK_MODE}
 )
 set_target_properties(smartredis-fortran PROPERTIES
@@ -71,12 +68,9 @@ set_target_properties(smartredis-fortran PROPERTIES
 
 # Extras for static builds
 if (STATIC_BUILD)
-	if (CMAKE_Fortran_COMPILER_ID MATCHES "^Intel")
-		# For Intel, don't set languages so that CMake will use the Fortran linker (default)
-
-		# Add the stdc++ linker flag
-		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
-	else() # Solution tested with GNU
+	# The CMake "preferred" approach only seems to work with the GNU
+	# compiler. We will streamline this in the future
+	if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
 		# Mark that SmartRedis requires the C++ linker
 		set_target_properties(smartredis-main PROPERTIES
 			IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
@@ -84,9 +78,15 @@ if (STATIC_BUILD)
 		set_target_properties(smartredis-fortran PROPERTIES
 			IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
 		)
+	else() # Tested with PGI, Intel
+		# For other compilers, don't set languages so that CMake will use the Fortran linker (default)
+
+		# Add the stdc++ linker flag
+		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
 	endif()
 
 	# Static builds have an extra dependency on the Pthreads library
+	# The order of libraries here is crucial to get dependencies covered
 	find_package(Threads REQUIRED)
 	set(SMARTREDIS_LIBRARIES
 		smartredis-fortran
