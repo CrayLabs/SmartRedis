@@ -8,16 +8,18 @@ To be released at some future point in time
 
 Description
 
-- Enable static builds of SmartRedis
-- Improve robustness of test runs
-- Fix installation link
-- Update supported languages documentation
+- Updated post-merge tests in CI/CD to work with new test system
+- Enabled static builds of SmartRedis
+- Improvee robustness of test runs
+- Fixed installation link
+- Updated supported languages documentation
 - Removed obsolete files
-- Add pylint to CI/CD pipeline and mitigate existing errors
+- Added pylint to CI/CD pipeline and mitigate existing errors
 - Improved clustered redis initialization
 
 Detailed Notes
 
+- Post-merge tests in CI/CD have been updated to interface cleanly with the new test system that was deployed in the previous release (PR388_)
 - Static builds of SmartRedis can now work with Linux platforms. Fortran is tested with GNU, PGI, Intel compilers (PR386_)
 - Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
 - Fix incorrect link to installation documentation (PR380_)
@@ -27,6 +29,7 @@ Detailed Notes
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
+.. _PR388: https://github.com/CrayLabs/SmartRedis/pull/388
 .. _PR386: https://github.com/CrayLabs/SmartRedis/pull/386
 .. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
 .. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
