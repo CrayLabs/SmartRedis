@@ -35,6 +35,10 @@ on:
     branches:
       - master
       - develop
+  pull_request: # To demonstrate correct functionality; will remove this clause before merge
+    branches:
+      - master
+      - develop
 
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
