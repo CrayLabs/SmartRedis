@@ -10,7 +10,7 @@ Description
 
 - Updated post-merge tests in CI/CD to work with new test system
 - Enabled static builds of SmartRedis
-- Improvee robustness of test runs
+- Improve robustness of test runs
 - Fixed installation link
 - Updated supported languages documentation
 - Removed obsolete files
