@@ -42,7 +42,7 @@ REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
-LCOV_VER := v2.0
+LCOV_VER := v1.15
 
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)

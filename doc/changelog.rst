@@ -20,7 +20,7 @@ Description
 
 Detailed Notes
 
-- Updated lcov (1.15 => 2.0), pybind (2.10.3 => 2.11.1), hiredis (1.1.0 => 1.2.0), and redis++ (1.3.5 => 1.3.10) dependencies to current versions (PR389_)
+- Updated pybind (2.10.3 => 2.11.1), hiredis (1.1.0 => 1.2.0), and redis++ (1.3.5 => 1.3.10) dependencies to current versions (PR389_)
 - Post-merge tests in CI/CD have been updated to interface cleanly with the new test system that was deployed in the previous release (PR388_)
 - Static builds of SmartRedis can now work with Linux platforms. Fortran is tested with GNU, PGI, Intel compilers (PR386_)
 - Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
