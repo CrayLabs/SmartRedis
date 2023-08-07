@@ -30,11 +30,11 @@ SHELL:=/bin/bash
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
-HIREDIS_VER := v1.1.0
+HIREDIS_VER := v1.2.0
 RPP_URL := https://github.com/sewenew/redis-plus-plus.git
-RPP_VER := 1.3.5
+RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
-PYBIND_VER := v2.10.3
+PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
 REDIS_VER := 6.0.8
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
@@ -42,7 +42,7 @@ REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
-LCOV_VER := v1.15
+LCOV_VER := v2.0
 
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
