@@ -30,11 +30,11 @@ SHELL:=/bin/bash
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
-HIREDIS_VER := v1.1.0
+HIREDIS_VER := v1.2.0
 RPP_URL := https://github.com/sewenew/redis-plus-plus.git
-RPP_VER := 1.3.5
+RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
-PYBIND_VER := v2.10.3
+PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
 REDIS_VER := 6.0.8
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
