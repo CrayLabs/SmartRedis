@@ -9,11 +9,11 @@
 
    overview
    data_structures
-   advanced_data_structures
    dataset_conversions
    installation
    testing
    runtime
+   advanced_topics
 
 .. toctree::
    :maxdepth: 2

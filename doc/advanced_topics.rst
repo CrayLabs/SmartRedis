@@ -1,11 +1,11 @@
-******************************
-Advanced Data Structure Topics
-******************************
+***************
+Advanced Topics
+***************
 
 This page of documentation is reserved for advanced topics in SmartRedis
 data structures that may not be needed for all users.
 
-.. _advanced_data_structures_dataset_aggregation:
+.. _advanced_topics_dataset_aggregation:
 
 Dataset Aggregation
 ===================
@@ -14,7 +14,7 @@ In addition to the ability to work with individual datasets, SmartRedis offers
 users the manage lists of datasets and work with them collectively. This is
 particularly useful for producer/consumer relationships.
 
-The DataSet Aggregation API stores multiple ``DataSet`` objects
+The DataSet Aggregation API manages references to multiple ``DataSet`` objects
 on one or more database nodes through an interface referred to as
 ``aggregation lists``.
 An ``aggregation list`` in SmartRedis stores references to
@@ -24,10 +24,10 @@ subsequently, ``SmartRedis`` clients in the same application or a different
 application can retrieve some or all of the ``DataSet`` objects referenced
 in that ``aggregation list``.
 
-Appending to a DataSet
-----------------------
+Appending to a DataSet aggregation list
+---------------------------------------
 
-For example, the C++ client function to append a ``DataSet`` to an
+The C++ client function to append a reference to a ``DataSet`` to an
 aggregation list is shown below:
 
 .. code-block:: cpp
@@ -36,19 +36,22 @@ aggregation list is shown below:
     void append_to_list(const std::string& list_name,
                         const DataSet& dataset);
 
-The above function will append the provided ``DataSet`` to the
+NOTE: The ``DataSet`` must have already been added to the database via
+the ``put_dataset()`` method in the SmartRedis ``Client``.
+
+The above function will append the a reference to the provided ``DataSet`` to the
 ``aggregation list``, which can be referenced in all user-facing functions
 by the provided list name.  Note that a list can be appended by
 any client in the same or different application.  Implicitly, all
-DataSets, when appended, are added to the end of the list. If the list does not
+``DataSets``, when appended, are added to the end of the list. If the list does not
 already exist, it is automatically created.
 
-Retrieving DataSets from an aggregation list
---------------------------------------------
+Retrieving the DataSets in an aggregation list
+----------------------------------------------
 
-To retrieve ``aggregation list`` contents,
-the SmartRedis ``Client`` method provides an API function that
-will return an iterable container with all of the ``DataSet`` objects
+To retrieve the ``DataSet`` referenced in an ``aggregation list``,
+the SmartRedis ``Client`` provides an API function that
+returns an iterable object containing all of ``DataSets``
 appended to the ``aggregation list``.  For example, the C++ client
 function to retrieve the entire ``aggregation list`` contents is shown below:
 
@@ -67,6 +70,11 @@ list:
                                                     const int start_index,
                                                     const int end_index);
 
+The start_index and end_index may be specified as negative numbers.
+In this case, the offset is from the most recently appended DataSets.
+For example, an offset of -1 is the last element in the list, and -3 is the
+antepenultimate DataSet.
+
 An application can determine how many DataSets are in an aggregation List
 via the following API:
 
@@ -74,6 +82,7 @@ via the following API:
 
     # C++ aggregation list length query
     int get_list_length(const std::string& list_name);
+
 
 Synchronization
 ---------------

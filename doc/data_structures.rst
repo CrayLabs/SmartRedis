@@ -329,7 +329,7 @@ Aggregating
 
 SmartRedis also supports an advanced API for working with aggregate
 lists of DataSets; details may be found
-:ref:`here <_advanced_data_structures_dataset_aggregation>`.
+:ref:`here <_advanced_topics_dataset_aggregation>`.
 
 Model
 =====
