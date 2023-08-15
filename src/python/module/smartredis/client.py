@@ -24,21 +24,25 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# pylint: disable=too-many-lines,too-many-public-methods
 import inspect
 import os
 import os.path as osp
-
 import typing as t
+
 import numpy as np
 
 from .dataset import Dataset
+<<<<<<< HEAD
 from .configoptions import ConfigOptions
 from .srobject import SRObject
+=======
+from .error import RedisConnectionError
+>>>>>>> develop
 from .smartredisPy import PyClient
-from .util import Dtypes, init_default, exception_handler, typecheck
-
-from .error import *
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
+from .srobject import SRObject
+from .util import Dtypes, exception_handler, init_default, typecheck
 
 
 class Client(SRObject):
@@ -1800,8 +1804,8 @@ class Client(SRObject):
         backend = backend.upper()
         if backend in ["TF", "TFLITE", "TORCH", "ONNX"]:
             return backend
-        else:
-            raise TypeError(f"Backend type {backend} unsupported")
+
+        raise TypeError(f"Backend type {backend} unsupported")
 
     @staticmethod
     def __check_file(file: str) -> str:

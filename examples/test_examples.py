@@ -48,32 +48,31 @@ def get_test_names():
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_example(test, build, sr_fortran):
+def test_example(test, build, sr_fortran, link):
     if (sr_fortran == "ON" or ".F90" not in test):
         # Build the path to the test executable from the source file name
         # . keep only the last three parts of the path: (parallel/serial, language, basename)
         test = "/".join(test.split("/")[-3:])
+        test_subdir = "/".join(test.split("/")[0:2])
         # . drop the file extension
         test = ".".join(test.split(".")[:-1])
         # . prepend the path to the built test executable
-        test = f"{getcwd()}/build/{build}/examples/{test}"
+        test = f"{getcwd()}/build/{build}/examples/{link}/{test}"
         cmd = [test]
-        print(f"\nRunning test: {osp.basename(test)}")
-        execute_cmd(cmd)
+        print(f"Running test: {osp.basename(test)}")
+        print(f"Test command {' '.join(cmd)}")
+        print(f"Using cluster: {use_cluster}")
+        execute_cmd(cmd, test_subdir)
         time.sleep(1)
     else:
         print (f"Skipping Fortran test {test}")
 
-def find_path(executable_path):
-    if executable_path.find('/') == -1:
-        return '.'
-    return "/".join(executable_path.split("/")[:-1])
-
-def execute_cmd(cmd_list):
+def execute_cmd(cmd_list, test_subdir):
     """Execute a command """
 
     # spawning the subprocess and connecting to its output
-    run_path = find_path(cmd_list[0])
+    run_path = TEST_PATH + "/" + test_subdir
+    print(f"Test path: {run_path}")
     proc = Popen(
         cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
     try:

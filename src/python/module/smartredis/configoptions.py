@@ -24,12 +24,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from .smartredisPy import PyConfigOptions
-from .util import exception_handler, typecheck
-from .error import RedisRuntimeError
 import typing as t
 
-_notfactory = (
+from .error import RedisRuntimeError
+from .smartredisPy import PyConfigOptions
+from .util import exception_handler, typecheck
+
+_NOT_FACTORY = (
     "Method called on a ConfigOptions object not created from a factory method"
 )
 
@@ -77,7 +78,8 @@ class ConfigOptions:
         typecheck(configoptions, "configoptions", PyConfigOptions)
         self._config_opts = configoptions
 
-    def _is_factory_object(self) -> bool:
+    @property
+    def is_factory_object(self) -> bool:
         """Check whether this object was created via a factory method"""
         return self._is_created_via_factory
 
@@ -100,7 +102,7 @@ class ConfigOptions:
         typecheck(db_prefix, "db_prefix", str)
         factory_object = PyConfigOptions.create_from_environment(db_prefix)
         result = cls.from_pybind(factory_object)
-        result._is_created_via_factory = True
+        result._is_created_via_factory = True  # pylint: disable=protected-access
         return result
 
     @exception_handler
@@ -117,7 +119,7 @@ class ConfigOptions:
         """
         typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.get_integer_option(option_name)
 
     @exception_handler
@@ -134,7 +136,7 @@ class ConfigOptions:
         """
         typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.get_string_option(option_name)
 
     @exception_handler
@@ -149,7 +151,7 @@ class ConfigOptions:
         """
         typecheck(option_name, "option_name", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.is_configured(option_name)
 
     @exception_handler
@@ -170,7 +172,7 @@ class ConfigOptions:
         typecheck(option_name, "option_name", str)
         typecheck(value, "value", int)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         self._config_opts.override_integer_option(option_name, value)
 
     @exception_handler
@@ -191,5 +193,5 @@ class ConfigOptions:
         typecheck(option_name, "option_name", str)
         typecheck(value, "value", str)
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         self._config_opts.override_string_option(option_name, value)

@@ -26,13 +26,12 @@
 
 import functools
 import typing as t
+from itertools import permutations
 from typing import TYPE_CHECKING
 
 from .dataset import Dataset
+from .error import RedisRuntimeError
 from .util import typecheck
-from itertools import permutations
-from .error import *
-
 
 if TYPE_CHECKING:  # pragma: no cover
     # Import optional deps for intellisense
@@ -40,11 +39,12 @@ if TYPE_CHECKING:  # pragma: no cover
 
     # Type hint magic bits
     from typing_extensions import ParamSpec
+
     _PR = ParamSpec("_PR")
     _RT = t.TypeVar("_RT")
 else:
     # Leave optional deps as nullish
-    xr = None
+    xr = None  # pylint: disable=invalid-name
 
 # ----helper decorators -----
 
@@ -52,9 +52,9 @@ else:
 def _requires_xarray(fn: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
     @functools.wraps(fn)
     def _import_xarray(*args: "_PR.args", **kwargs: "_PR.kwargs") -> "_RT":
-        global xr
+        global xr  # pylint: disable=global-statement,invalid-name
         try:
-            import xarray as xr
+            import xarray as xr  # pylint: disable=import-outside-toplevel
         except ImportError as e:
             raise RedisRuntimeError(
                 "Optional package xarray must be installed; "
@@ -195,26 +195,30 @@ class DatasetConverter:
 
         ret_xarray = {}
         for variable_name in variable_names:
-            data_final = dataset.get_tensor(variable_name)
-            dims_final = []
             # Extract dimensions in correct form
-            for dim_field_name in get_data(dataset, variable_name, "dim"):
-                dims_final.append(dataset.get_meta_strings(dim_field_name)[0])
-            attrs_final = {}
+            dims_final = [
+                dataset.get_meta_strings(dim_field_name)[0]
+                for dim_field_name
+                in get_data(dataset, variable_name, "dim")
+            ]
+
             # Extract attributes in correct form
-            for attr_field_name in get_data(dataset, variable_name, "attr"):
-                fieldname = dataset.get_meta_strings(attr_field_name)[0]
-                attrs_final[attr_field_name] = fieldname
+            attrs_final = {
+                attr_field_name: dataset.get_meta_strings(attr_field_name)[0]
+                for attr_field_name
+                in get_data(dataset, variable_name, "attr")
+            }
+
             # Add coordinates to the correct data name
-            for name in coord_final.keys():
+            for name, value in coord_final.items():
                 if name == variable_name:
-                    coords_final = coord_final.get(name)
+                    coords_final = value
 
             # Construct a xr.DataArray using extracted dataset data,
             # append the dataarray to corresponding variable names
             ret_xarray[variable_name] = xr.DataArray(
                 name=variable_name,
-                data=data_final,
+                data=dataset.get_tensor(variable_name),
                 coords=coords_final,
                 dims=dims_final,
                 attrs=attrs_final,

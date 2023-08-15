@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
   float* tensor = (float*)malloc(dims[0]*sizeof(float));
 
   for(size_t i=0; i<dims[0]; i++)
-    tensor[i] = ((float)rand())/RAND_MAX;
+    tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   void* client = NULL;
   if (SRNoError != CreateSimpleClient(logger_name, cid_len, &client)) {
