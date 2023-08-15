@@ -2,16 +2,16 @@
 Advanced Topics
 ***************
 
-This page of documentation is reserved for advanced topics in SmartRedis
-data structures that may not be needed for all users.
+This page of documentation is reserved for advanced topics
+that may not be needed for all users.
 
 .. _advanced_topics_dataset_aggregation:
 
 Dataset Aggregation
 ===================
 
-In addition to the ability to work with individual datasets, SmartRedis offers
-users the manage lists of datasets and work with them collectively. This is
+In addition to the ability to work with individual datasets, SmartRedis lets
+users manage lists of datasets and work with them collectively. This is
 particularly useful for producer/consumer relationships.
 
 The DataSet Aggregation API manages references to multiple ``DataSet`` objects
@@ -75,7 +75,7 @@ In this case, the offset is from the most recently appended DataSets.
 For example, an offset of -1 is the last element in the list, and -3 is the
 antepenultimate DataSet.
 
-An application can determine how many DataSets are in an aggregation List
+An application can determine how many DataSets are in an aggregation list
 via the following API:
 
 .. code-block:: cpp
