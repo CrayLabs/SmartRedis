@@ -43,7 +43,8 @@ SmartRedis library. A ``Clustered`` database, such as the one in
 the previous example, is replicated across multiple shards.
 By way of comparison, a ``Standalone`` database only has a single
 shard that services all traffic; this is the form used when a
-colocated database is requested.
+colocated database or a standard deployment with a non-sharded
+database is requested.
 
 The ``SR_DB_TYPE`` environment variable informs the SmartRedis
 library which form is in use. Below is an example of setting

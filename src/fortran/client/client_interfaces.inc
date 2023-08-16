@@ -26,7 +26,7 @@
 
 interface
   function c_simple_constructor(logger_name, logger_name_length, new_client) &
-    bind(c, name="CreateSimpleClient")
+    bind(c, name="SimpleCreateClient")
     use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: c_simple_constructor

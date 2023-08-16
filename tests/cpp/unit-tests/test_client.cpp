@@ -769,7 +769,6 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
     log_data(context, LLDebug, "***End Client config get unsupported testing***");
 }
 
-#if TEST_REMOVAL
 SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing SAVE command on Client Object" << std::endl;
@@ -858,7 +857,6 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
     }
     log_data(context, LLDebug, "***End Client prefix coverage testing***");
 }
-#endif
 
 SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 {

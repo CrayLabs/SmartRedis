@@ -31,7 +31,6 @@
 
 #ifdef __cplusplus // Skip C++ headers for C users
 #include <string>
-#include <iostream>
 #include "utility.h"
 #endif // __cplusplus
 #include <stdlib.h>

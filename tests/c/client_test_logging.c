@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   size_t ctx_logcontext_len = strlen(ctx_logcontext);
 
   // Initialize client, dataset, logcontext
-  if (SRNoError != CreateSimpleClient(
+  if (SRNoError != SimpleCreateClient(
     ctx_client, ctx_client_len, &client) || NULL == client) {
     return -1;
   }

@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     tensor[i] = ((float)rand())/(float)RAND_MAX;
 
   void* client = NULL;
-  if (SRNoError != CreateSimpleClient(logger_name, cid_len, &client)) {
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client)) {
     printf("Client initialization failed!\n");
     exit(-1);
   }

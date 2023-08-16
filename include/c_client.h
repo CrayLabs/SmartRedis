@@ -50,7 +50,7 @@ extern "C" {
 *   \param new_client Receives the new client
 *   \return Returns SRNoError on success or an error code on failure
 */
-SRError CreateSimpleClient(
+SRError SimpleCreateClient(
     const char* logger_name,
     const size_t logger_name_length,
     void** new_client);

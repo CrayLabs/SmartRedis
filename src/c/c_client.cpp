@@ -68,7 +68,7 @@ auto c_client_api(T&& client_api_func, const char* name)
     c_client_api([&] { stuff }, __func__)()
 
 // Create a simple Client
-SRError CreateSimpleClient(
+SRError SimpleCreateClient(
     const char* logger_name,
     const size_t logger_name_length,
     void** new_client)
