@@ -231,7 +231,7 @@ std::string ConfigOptions::_suffixed(const std::string& option_name)
 }
 
 // Clear a configuration option from the cache
-void ConfigOptions::_clearOptionFromCache(const std::string& option_name)
+void ConfigOptions::_clear_option_from_cache(const std::string& option_name)
 {
     _int_options.erase(option_name);
     _string_options.erase(option_name);

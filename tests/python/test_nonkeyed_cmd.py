@@ -46,7 +46,7 @@ def test_dbcluster_info_command(mock_model, context):
     co = ConfigOptions().create_from_environment("")
     client = Client(co, logger_name=context)
 
-    if os.environ["SR_SERVER_TYPE"] == "Clustered":
+    if os.environ["SR_DB_TYPE"] == "Clustered":
         info = client.get_db_cluster_info(addresses)
         assert len(info) > 0
     else:
@@ -78,7 +78,7 @@ def test_flushdb_command(context):
     # if on cluster
     ssdb = os.environ["SSDB"]
     addresses = ssdb.split(',')
-    if os.environ["SR_SERVER_TYPE"] == "Clustered":
+    if os.environ["SR_DB_TYPE"] == "Clustered":
         return
 
     client = Client(None, logger_name=context)

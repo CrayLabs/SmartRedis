@@ -70,7 +70,7 @@ inline bool use_cluster()
     /* This function determines if a cluster
     configuration is being used
     */
-    char* server_type = std::getenv("SR_SERVER_TYPE");
+    char* server_type = std::getenv("SR_DB_TYPE");
     if (server_type == NULL)
       return false;
 

@@ -57,7 +57,7 @@ bool use_cluster()
     the test when creating a Client.
     (deprecated)
     */
-    char* server_type = getenv("SR_SERVER_TYPE");
+    char* server_type = getenv("SR_DB_TYPE");
     to_lower(server_type, 256);
 
     if(server_type) {

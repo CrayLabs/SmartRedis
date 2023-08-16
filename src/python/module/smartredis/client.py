@@ -33,12 +33,9 @@ import typing as t
 import numpy as np
 
 from .dataset import Dataset
-<<<<<<< HEAD
 from .configoptions import ConfigOptions
 from .srobject import SRObject
-=======
 from .error import RedisConnectionError
->>>>>>> develop
 from .smartredisPy import PyClient
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .srobject import SRObject
@@ -70,10 +67,10 @@ class Client(SRObject):
 
         :param a: The positional arguments supplied to this method; see above for
                   valid options
-        :type a: tuple(any); see above for valid options
+        :type a: tuple[any]; see above for valid options
         :param kw: Keyword arguments supplied to this method; see above for
                    valid options
-        :type kw: dict {string, any}; see above for valid options
+        :type kw: dict[string, any]; see above for valid options
         :raises RedisConnectionError: if connection initialization fails
         """
         if a:
@@ -116,9 +113,7 @@ class Client(SRObject):
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
             return PyClient(cluster, logger_name)
-        except PybindRedisReplyError as e:
-            raise RedisConnectionError(str(e)) from None
-        except RuntimeError as e:
+        except (PybindRedisReplyError, RuntimeError) as e:
             raise RedisConnectionError(str(e)) from None
 
     def __new_construction(self, config_options=None, logger_name="Default"):

@@ -52,7 +52,7 @@ class TestSSDB : public Redis
 
         void clear_cached_SSDB()
         {
-            _cfgopts->_clearOptionFromCache("SSDB");
+            _cfgopts->_clear_option_from_cache("SSDB");
         }
 };
 

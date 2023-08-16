@@ -18,6 +18,7 @@ Description
 - Removed obsolete files
 - Added pylint to CI/CD pipeline and mitigate existing errors
 - Improved clustered redis initialization
+- Added support for multiple backend databases via a new Client constructor that accepts a ConfigOptions object
 
 Detailed Notes
 
@@ -32,6 +33,7 @@ Detailed Notes
 - Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
+- Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
 .. _PR390: https://github.com/CrayLabs/SmartRedis/pull/390
 .. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
@@ -44,6 +46,7 @@ Detailed Notes
 .. _PR371: https://github.com/CrayLabs/SmartRedis/pull/371
 .. _PR366: https://github.com/CrayLabs/SmartRedis/pull/366
 .. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+.. _PR353: https://github.com/CrayLabs/SmartRedis/pull/353
 
 
 0.4.1

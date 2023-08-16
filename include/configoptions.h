@@ -39,6 +39,7 @@
 #include <unordered_map>
 #include "srobject.h"
 #include "sr_enums.h"
+#include "srexception.h"
 
 ///@file
 
@@ -202,7 +203,13 @@ class ConfigOptions
         *   \brief Retrieve the logging context
         *   \returns The log context associated with this object
         */
-        SRObject* _get_log_context() { return _log_context; }
+        SRObject* _get_log_context() {
+            if (_log_context == NULL) {
+                throw SRRuntimeException(
+                    "Attempt to _get_log_context() before context was set!");
+            }
+            return _log_context;
+        }
 
         /*!
         *   \brief Store the logging context
@@ -216,7 +223,7 @@ class ConfigOptions
         *   \brief Clear a configuration option from the cache
         *   \param option_name The name of the option to clear
         */
-        void _clearOptionFromCache(const std::string& option_name);
+        void _clear_option_from_cache(const std::string& option_name);
 
         /*!
         *   \brief Stash a string buffer so we can delete it on cleanup

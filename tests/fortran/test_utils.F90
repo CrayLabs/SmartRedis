@@ -67,7 +67,7 @@ module test_utils
   logical function use_cluster()
     character(len=16) :: server_type
 
-    call get_environment_variable('SR_SERVER_TYPE', server_type)
+    call get_environment_variable('SR_DB_TYPE', server_type)
     server_type = to_lower(server_type)
     use_cluster = .false.
     if (len_trim(server_type)>0) then

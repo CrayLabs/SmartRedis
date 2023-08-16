@@ -40,18 +40,18 @@ at three different addresses, each using port ``6379``:
 
 There are two types of Redis databases that can be used by the
 SmartRedis library. A ``Clustered`` database, such as the one in
-the previous example, Is replicated across multiple shards.
+the previous example, is replicated across multiple shards.
 By way of comparison, a ``Standalone`` database only has a single
 shard that services all traffic; this is the form used when a
 colocated database is requested.
 
-The ``SR_SERVER_TYPE`` environment variable informs the SmartRedis
+The ``SR_DB_TYPE`` environment variable informs the SmartRedis
 library which form is in use. Below is an example of setting
-``SR_SERVER_TYPE`` for a Redis cluster:
+``SR_DB_TYPE`` for a Redis cluster:
 
 .. code-block:: bash
 
-    export SR_SERVER_TYPE="Clustered"
+    export SR_DB_TYPE="Clustered"
 
 Logging Environment Variables
 =============================
@@ -80,7 +80,7 @@ though this can happen only if the variables to set up logging are in place. If
 this parameter is not set, a default logging level of ``INFO`` will be adopted.
 
 The runtime impact of log levels NONE or INFO should be minimal on
-client performance; however, seting the log level to DEBUG may cause some
+client performance; however, setting the log level to DEBUG may cause some
 degradation.
 
 Ensemble Environment Variables

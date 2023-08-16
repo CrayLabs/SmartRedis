@@ -46,7 +46,7 @@ module example_utils
 
     character(len=16) :: server_type
 
-    call get_environment_variable('SR_SERVER_TYPE', server_type)
+    call get_environment_variable('SR_DB_TYPE', server_type)
     server_type = to_lower(server_type)
     if (len_trim(server_type)>0) then
       select case (server_type)

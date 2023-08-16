@@ -94,7 +94,7 @@ void Client::_establish_server_connection()
 {
     // See what type of connection the user wants
     std::string server_type = _cfgopts->_resolve_string_option(
-        "SR_SERVER_TYPE", "Clustered");
+        "SR_DB_TYPE", "Clustered");
     std::transform(server_type.begin(), server_type.end(), server_type.begin(),
         [](unsigned char c){ return std::tolower(c); });
 
@@ -137,7 +137,7 @@ Client::Client(bool cluster, const std::string& logger_name)
         "Deprecation Notice: Client::Client(bool, std::string) constructor "
         "should not be used. Please migrate your code to use the "
         "Client::Client(ConfigOptions*) constructor and set the server type "
-        "in the SR_SERVER_TYPE environment variable.");
+        "in the SR_DB_TYPE environment variable.");
 
     // Create our ConfigOptions object (default = no suffixing)
     auto cfgopts = ConfigOptions::create_from_environment("");
