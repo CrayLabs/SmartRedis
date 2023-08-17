@@ -90,7 +90,8 @@ class Client : public SRObject
         *   \throw SmartRedis::Exception if client connection or
         *          object initialization fails
         */
-        Client(const std::string& logger_name = "default");
+        Client(const std::string& logger_name = "default")
+            : Client(logger_name.c_str()) {}
 
         /*!
         *   \brief Client constructor

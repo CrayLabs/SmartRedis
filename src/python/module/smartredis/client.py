@@ -29,7 +29,7 @@ import inspect
 import os
 import os.path as osp
 import typing as t
-
+import warnings as w
 import numpy as np
 
 from .dataset import Dataset
@@ -107,6 +107,12 @@ class Client(SRObject):
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
+        w.warn(
+            'This construction method is deprecated and will be removed in the next ' +
+            'release of the SmartRedis client.',
+            DeprecationWarning,
+            stacklevel=3
+        )
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
