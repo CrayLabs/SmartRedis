@@ -34,7 +34,6 @@ import numpy as np
 
 from .dataset import Dataset
 from .configoptions import ConfigOptions
-from .srobject import SRObject
 from .error import RedisConnectionError
 from .smartredisPy import PyClient
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
@@ -122,7 +121,7 @@ class Client(SRObject):
         except (PybindRedisReplyError, RuntimeError) as e:
             raise RedisConnectionError(str(e)) from None
 
-    def __new_construction(self, config_options=None, logger_name="Default"):
+    def __new_construction(self, config_options=None, logger_name="Default"):  # pylint: disable=no-self-use
         """Initialize a RedisAI client
 
         The address of the Redis database is expected to be found in the
@@ -139,8 +138,7 @@ class Client(SRObject):
             if config_options:
                 pybind_config_options = config_options.get_data()
                 return PyClient(pybind_config_options, logger_name)
-            else:
-                return PyClient(logger_name)
+            return PyClient(logger_name)
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:

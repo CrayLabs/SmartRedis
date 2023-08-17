@@ -65,7 +65,7 @@ class ConfigOptions:
         :rtype: PyConfigOptions
         """
         if not self._is_created_via_factory:
-            raise RedisRuntimeError(_notfactory)
+            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts
 
     @exception_handler
