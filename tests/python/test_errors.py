@@ -941,7 +941,7 @@ def test_is_configured_wrong_type(cfg_opts: ConfigOptions):
     with pytest.raises(TypeError):
         _ = cfg_opts.is_configured(42)
 
-def test_override_integer_option_wrong_type(cfg_opts: ConfigOptions, key: str, value: str):
+def test_override_integer_option_wrong_type(cfg_opts: ConfigOptions):
     """Ensure override_integer_option raises an exception on an invalid key type
     and when an invalid value for the target storage type is encountered"""
     key = 42
