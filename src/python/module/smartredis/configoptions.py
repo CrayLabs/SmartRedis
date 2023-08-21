@@ -37,7 +37,7 @@ class _Managed:
     """Marker class identifying factory-created objects"""
 
 
-def create_config_options(base: t.Type[t.Any]) -> t.Any:
+def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
     """Factory method for creating managed instances"""
     def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
         """Create a name for the new type by concatenating base names. Appends a
@@ -87,7 +87,7 @@ class ConfigOptions:
         :rtype: ConfigOptions
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
-        opts: ConfigOptions = create_config_options(ConfigOptions)
+        opts: ConfigOptions = create_managed_instance(ConfigOptions)
         opts.set_configoptions(configoptions)
         return opts
 
@@ -119,7 +119,7 @@ class ConfigOptions:
         """
         typecheck(db_prefix, "db_prefix", str)
         configoptions = PyConfigOptions.create_from_environment(db_prefix)
-        opts: ConfigOptions = create_config_options(ConfigOptions)
+        opts: ConfigOptions = create_managed_instance(ConfigOptions)
         opts.set_configoptions(configoptions)
         return opts
 
