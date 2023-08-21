@@ -36,20 +36,22 @@ from .util import exception_handler, typecheck
 class _Managed:
     """Marker class identifying factory-created objects"""
 
-class _FactoryMeta(type):
-    @classmethod
-    def instantiate(mcs, base: t.Type[t.Any]) -> t.Any:
-        """Factory method for creating managed instances"""
-        bases = (_Managed, base)
-        unique_key = str(uuid4()).split("-", 1)[0]
-        class_name = "".join(base.__name__ for base in bases) + unique_key
-        managed_class = mcs(class_name, bases, {})
-        return managed_class()
+
+def create_config_options(mcs, base: t.Type[t.Any]) -> t.Any:
+    """Factory method for creating managed instances"""
+    bases = (_Managed, base)
+    unique_key = str(uuid4()).split("-", 1)[0]
+    class_name = "".join(base.__name__ for base in bases) + unique_key
+    managed_class = type(class_name, bases, {})
+    return managed_class()
 
 
 def managed(func: t.Callable) -> t.Callable:
     """Decorator to verify that a class was constructed using a factory"""
-    not_managed = "Managed method called from an unmanaged {0} instance"
+    not_managed = (
+        "Attempting to call managed method on ConfigOptions object not "
+        "created from a factory method"
+    )
 
     @wraps(func)
     def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
@@ -58,6 +60,7 @@ def managed(func: t.Callable) -> t.Callable:
             msg = not_managed.format(instance.__class__.__name__)
             raise RedisRuntimeError(msg)
         return func(*args, **kwargs)
+
     return _wrapper
 
 
@@ -77,7 +80,7 @@ class ConfigOptions:
         :rtype: ConfigOptions
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
-        opts: ConfigOptions = _FactoryMeta.instantiate(ConfigOptions)
+        opts: ConfigOptions = create_config_options(ConfigOptions)
         opts.set_configoptions(configoptions)
         return opts
 
@@ -108,9 +111,10 @@ class ConfigOptions:
         :rtype: ConfigOptions
         """
         typecheck(db_prefix, "db_prefix", str)
-        factory_object = PyConfigOptions.create_from_environment(db_prefix)
-        result = cls.from_pybind(factory_object)
-        return result
+        configoptions = PyConfigOptions.create_from_environment(db_prefix)
+        opts: ConfigOptions = create_config_options(ConfigOptions)
+        opts.set_configoptions(configoptions)
+        return opts
 
     @exception_handler
     @managed
