@@ -37,7 +37,7 @@ class _Managed:
     """Marker class identifying factory-created objects"""
 
 
-def create_config_options(mcs, base: t.Type[t.Any]) -> t.Any:
+def create_config_options(base: t.Type[t.Any]) -> t.Any:
     """Factory method for creating managed instances"""
     bases = (_Managed, base)
     unique_key = str(uuid4()).split("-", 1)[0]

@@ -941,29 +941,30 @@ def test_is_configured_wrong_type(cfg_opts: ConfigOptions):
     with pytest.raises(TypeError):
         _ = cfg_opts.is_configured(42)
 
-@pytest.mark.parametrize(
-        "key,value",
-        [
-            pytest.param(42, 42, id="Invalid key type"),
-            pytest.param("key", "stringval", id="Invalid value type"),
-        ]
-)
 def test_override_integer_option_wrong_type(cfg_opts: ConfigOptions, key: str, value: str):
     """Ensure override_integer_option raises an exception on an invalid key type
     and when an invalid value for the target storage type is encountered"""
+    key = 42
+    value = 42
     with pytest.raises(TypeError):
         _ = cfg_opts.override_integer_option(key, value)
 
-@pytest.mark.parametrize(
-        "key,value",
-        [
-            pytest.param(42, "stringval", id="Invalid key type"),
-            pytest.param("stringval", 42, id="Invalid value type"),
-        ]
-)
-def test_override_string_option_wrong_type(cfg_opts: ConfigOptions, key: str, value: str):
+    key = "key"
+    value = "stringval"
+    with pytest.raises(TypeError):
+        _ = cfg_opts.override_integer_option(key, value)
+
+def test_override_string_option_wrong_type(cfg_opts: ConfigOptions):
     """Ensure override_string_option raises an exception on an invalid key type
     and when an invalid value for the target storage type is encountered"""
+
+    key = 42
+    value = "stringval"
+    with pytest.raises(TypeError):
+        _ = cfg_opts.override_string_option(key, value)
+
+    key = "stringkey"
+    value = 42
     with pytest.raises(TypeError):
         _ = cfg_opts.override_string_option(key, value)
 
