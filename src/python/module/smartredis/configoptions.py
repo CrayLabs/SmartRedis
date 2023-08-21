@@ -38,7 +38,8 @@ class _Managed:
 
 
 def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
-    """Factory method for creating managed instances"""
+    """Instantiate a managed instance of the class, enabling the use of type 
+    checking to detect if an instance is managed"""
     def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
         """Create a name for the new type by concatenating base names. Appends a
         unique suffix to avoid confusion if dynamic type comparisons occur"""
