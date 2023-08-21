@@ -39,9 +39,16 @@ class _Managed:
 
 def create_config_options(base: t.Type[t.Any]) -> t.Any:
     """Factory method for creating managed instances"""
+    def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
+        """Create a name for the new type by concatenating base names. Appends a
+        unique suffix to avoid confusion if dynamic type comparisons occur"""
+        unique_key = str(uuid4()).split("-", 1)[0]
+        class_name = "".join(base.__name__ for base in bases) + unique_key
+        return class_name
+
+    # Create a subtype that includes the _Managed marker
     bases = (_Managed, base)
-    unique_key = str(uuid4()).split("-", 1)[0]
-    class_name = "".join(base.__name__ for base in bases) + unique_key
+    class_name = get_dynamic_class_name(bases)
     managed_class = type(class_name, bases, {})
     return managed_class()
 
