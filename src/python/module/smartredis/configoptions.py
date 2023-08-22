@@ -25,20 +25,56 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import typing as t
+from functools import wraps
+from uuid import uuid4
 
 from .error import RedisRuntimeError
 from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 
-_NOT_FACTORY = (
-    "Method called on a ConfigOptions object not created from a factory method"
-)
+
+class _Managed:
+    """Marker class identifying factory-created objects"""
+
+
+def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
+    """Instantiate a managed instance of the class, enabling the use of type 
+    checking to detect if an instance is managed"""
+    def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
+        """Create a name for the new type by concatenating base names. Appends a
+        unique suffix to avoid confusion if dynamic type comparisons occur"""
+        unique_key = str(uuid4()).split("-", 1)[0]
+        class_name = "".join(base.__name__ for base in bases) + unique_key
+        return class_name
+
+    # Create a subtype that includes the _Managed marker
+    bases = (_Managed, base)
+    class_name = get_dynamic_class_name(bases)
+    managed_class = type(class_name, bases, {})
+    return managed_class()
+
+
+def managed(func: t.Callable) -> t.Callable:
+    """Decorator to verify that a class was constructed using a factory"""
+    not_managed = (
+        "Attempting to call managed method on ConfigOptions object not "
+        "created from a factory method"
+    )
+
+    @wraps(func)
+    def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
+        instance = args[0]
+        if not isinstance(instance, _Managed):
+            msg = not_managed.format(instance.__class__.__name__)
+            raise RedisRuntimeError(msg)
+        return func(*args, **kwargs)
+
+    return _wrapper
 
 
 class ConfigOptions:
     def __init__(self) -> None:
         """Initialize a ConfigOptions base object"""
-        self._is_created_via_factory = False
         self._config_opts: t.Any = None
 
     @staticmethod
@@ -52,9 +88,9 @@ class ConfigOptions:
         :rtype: ConfigOptions
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
-        new_configoptions = ConfigOptions()
-        new_configoptions.set_configoptions(configoptions)
-        return new_configoptions
+        opts: ConfigOptions = create_managed_instance(ConfigOptions)
+        opts.set_configoptions(configoptions)
+        return opts
 
     @exception_handler
     def set_configoptions(self, configoptions: PyConfigOptions) -> None:
@@ -65,11 +101,6 @@ class ConfigOptions:
         """
         typecheck(configoptions, "configoptions", PyConfigOptions)
         self._config_opts = configoptions
-
-    @property
-    def is_factory_object(self) -> bool:
-        """Check whether this object was created via a factory method"""
-        return self._is_created_via_factory
 
     @classmethod
     @exception_handler
@@ -88,12 +119,13 @@ class ConfigOptions:
         :rtype: ConfigOptions
         """
         typecheck(db_prefix, "db_prefix", str)
-        factory_object = PyConfigOptions.create_from_environment(db_prefix)
-        result = cls.from_pybind(factory_object)
-        result._is_created_via_factory = True  # pylint: disable=protected-access
-        return result
+        configoptions = PyConfigOptions.create_from_environment(db_prefix)
+        opts: ConfigOptions = create_managed_instance(ConfigOptions)
+        opts.set_configoptions(configoptions)
+        return opts
 
     @exception_handler
+    @managed
     def get_integer_option(self, option_name: str) -> int:
         """Retrieve the value of a numeric configuration option
         from the selected source
@@ -106,11 +138,10 @@ class ConfigOptions:
         :rtype: int
         """
         typecheck(option_name, "option_name", str)
-        if not self._is_created_via_factory:
-            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.get_integer_option(option_name)
 
     @exception_handler
+    @managed
     def get_string_option(self, option_name: str) -> str:
         """Retrieve the value of a string configuration option
         from the selected source
@@ -123,11 +154,10 @@ class ConfigOptions:
         :rtype: str
         """
         typecheck(option_name, "option_name", str)
-        if not self._is_created_via_factory:
-            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.get_string_option(option_name)
 
     @exception_handler
+    @managed
     def is_configured(self, option_name: str) -> bool:
         """Check whether a configuration option is set in the selected source
 
@@ -138,11 +168,10 @@ class ConfigOptions:
         :rtype: bool
         """
         typecheck(option_name, "option_name", str)
-        if not self._is_created_via_factory:
-            raise RedisRuntimeError(_NOT_FACTORY)
         return self._config_opts.is_configured(option_name)
 
     @exception_handler
+    @managed
     def override_integer_option(self, option_name: str, value: int) -> None:
         """Override the value of a numeric configuration option
         in the selected source
@@ -159,11 +188,10 @@ class ConfigOptions:
         """
         typecheck(option_name, "option_name", str)
         typecheck(value, "value", int)
-        if not self._is_created_via_factory:
-            raise RedisRuntimeError(_NOT_FACTORY)
         self._config_opts.override_integer_option(option_name, value)
 
     @exception_handler
+    @managed
     def override_string_option(self, option_name: str, value: str) -> None:
         """Override the value of a string configuration option
         in the selected source
@@ -180,6 +208,4 @@ class ConfigOptions:
         """
         typecheck(option_name, "option_name", str)
         typecheck(value, "value", str)
-        if not self._is_created_via_factory:
-            raise RedisRuntimeError(_NOT_FACTORY)
         self._config_opts.override_string_option(option_name, value)
