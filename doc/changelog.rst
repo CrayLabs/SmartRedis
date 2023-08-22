@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Reduced number of suppressed lint errors
 - Expanded documentation of aggregation lists
 - Updated third-party software dependencies to current versions
 - Updated post-merge tests in CI/CD to work with new test system
@@ -22,6 +23,7 @@ Description
 
 Detailed Notes
 
+- Refactor factory for ConfigOptions to avoid using protected member outside an instance (PR393_)
 - Added a new advanced topics documentation page with a section on aggregation lists (PR390_)
 - Updated pybind (2.10.3 => 2.11.1), hiredis (1.1.0 => 1.2.0), and redis++ (1.3.5 => 1.3.10) dependencies to current versions (PR389_)
 - Post-merge tests in CI/CD have been updated to interface cleanly with the new test system that was deployed in the previous release (PR388_)
@@ -35,6 +37,7 @@ Detailed Notes
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR393: https://github.com/CrayLabs/SmartRedis/pull/393
 .. _PR390: https://github.com/CrayLabs/SmartRedis/pull/390
 .. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
 .. _PR388: https://github.com/CrayLabs/SmartRedis/pull/388
