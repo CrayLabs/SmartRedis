@@ -226,7 +226,7 @@ std::string ConfigOptions::_suffixed(const std::string& option_name)
     }
     std::string result(option_name);
     if (_source == cs_envt && _string != "")
-        result = _string + + "_" + option_name;
+        result = option_name + + "_" + _string;
     return result;
 }
 
