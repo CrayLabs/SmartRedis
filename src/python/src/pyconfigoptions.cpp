@@ -96,10 +96,10 @@ ConfigOptions* PyConfigOptions::get() {
 
 // Instantiate ConfigOptions from environment variables
 PyConfigOptions* PyConfigOptions::create_from_environment(
-    const std::string& db_prefix)
+    const std::string& db_suffix)
 {
     return MAKE_CFGOPT_API({
-        auto cfgOpts = ConfigOptions::create_from_environment(db_prefix);
+        auto cfgOpts = ConfigOptions::create_from_environment(db_suffix);
         ConfigOptions* pCfgOpts = cfgOpts.release();
         return new PyConfigOptions(pCfgOpts);
     });
