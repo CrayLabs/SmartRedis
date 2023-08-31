@@ -108,6 +108,14 @@ jobs:
           echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
 
+      # Set up perl environment for LCOV
+      - uses: actions/checkout@v3
+      - name: Setup perl
+        uses: shogo82148/actions-setup-perl@1
+        with:
+          perl-version: '5.30'
+          install-modules: Capture::Tiny
+
       # Install additional dependencies
       - name: Install Cmake Linux
         if: contains(matrix.os, 'ubuntu')
@@ -117,9 +125,7 @@ jobs:
         run: python -m pip install -e .[dev,xarray]
 
       - name: Build and install test dependencies
-        run: |
-        sudo perl -MCPAN -e 'install "Capture::Tiny"' && \
-        make lcov && make catch2
+        run: make lcov && make catch2
 
       - name: Install docker, redis-server, and RedisAI
         run: |
