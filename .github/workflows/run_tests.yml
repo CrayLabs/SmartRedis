@@ -167,7 +167,7 @@ jobs:
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
-        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/Coverage/CMakeFiles -o coverage.info
+        run: third-party/lcov/install/bin/lcov -c -d build/Coverage/CMakeFiles -o coverage.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
