@@ -118,7 +118,7 @@ jobs:
 
       - name: Build and install test dependencies
         run: |
-        sudo perl -MCPAN -e 'install "Capture::Tiny"'
+        sudo perl -MCPAN -e 'install "Capture::Tiny"' && \
         make lcov && make catch2
 
       - name: Install docker, redis-server, and RedisAI
