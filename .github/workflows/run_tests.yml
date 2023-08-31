@@ -111,7 +111,7 @@ jobs:
       # Set up perl environment for LCOV
       - uses: actions/checkout@v3
       - name: Setup perl
-        uses: shogo82148/actions-setup-perl@1
+        uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: '5.30'
           install-modules: Capture::Tiny
