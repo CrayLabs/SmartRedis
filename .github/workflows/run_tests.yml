@@ -117,7 +117,9 @@ jobs:
         run: python -m pip install -e .[dev,xarray]
 
       - name: Build and install test dependencies
-        run: make lcov && make catch2
+        run: |
+        sudo perl -MCPAN -e 'install "Capture::Tiny"'
+        make lcov && make catch2
 
       - name: Install docker, redis-server, and RedisAI
         run: |
