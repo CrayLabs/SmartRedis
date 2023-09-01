@@ -119,13 +119,13 @@ jobs:
       - name: Add perl modules
         run: |
           sudo apt install libcapture-tiny-perl && \
-          sudu apt install libdatetime-perl && \
-          sudu apt install libdevel-cover-perl && \
-          sudu apt install libdigest-md5-perl && \
-          sudu apt install libfile-spec-perl && \
-          sudu apt install libjson-xs-perl && \
-          sudu apt install libmemory-process-perl && \
-          sudu apt install libtime-hires-perl
+          sudo apt install libdatetime-perl && \
+          sudo apt install libdevel-cover-perl && \
+          sudo apt install libdigest-md5-perl && \
+          sudo apt install libfile-spec-perl && \
+          sudo apt install libjson-xs-perl && \
+          sudo apt install libmemory-process-perl && \
+          sudo apt install libtime-hires-perl
 
       # Install additional dependencies
       - name: Install Cmake Linux
