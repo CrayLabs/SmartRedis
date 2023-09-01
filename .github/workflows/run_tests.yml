@@ -114,7 +114,18 @@ jobs:
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: '5.30'
-          install-modules: Capture::Tiny DateTime Devel::Cover Digest::MD5 File::Spec JSON::XS Memory::Process Time::HiRes
+
+      # Install additional perl Modules
+      - name: Add perl modules
+        run: |
+          sudo apt install libcapture-tiny-perl && \
+          sudu apt install libdatetime-perl && \
+          sudu apt install libdevel-cover-perl && \
+          sudu apt install libdigest-md5-perl && \
+          sudu apt install libfile-spec-perl && \
+          sudu apt install libjson-xs-perl && \
+          sudu apt install libmemory-process-perl && \
+          sudu apt install libtime-hires-perl
 
       # Install additional dependencies
       - name: Install Cmake Linux
