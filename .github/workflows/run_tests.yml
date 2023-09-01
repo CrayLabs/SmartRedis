@@ -114,6 +114,7 @@ jobs:
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: '5.30'
+          install-modules: Memory::Process
 
       # Install additional perl Modules
       - name: Add perl modules
@@ -124,7 +125,6 @@ jobs:
           sudo apt install libdigest-md5-perl && \
           sudo apt install libfile-spec-perl && \
           sudo apt install libjson-xs-perl && \
-          sudo apt install libmemory-process-perl && \
           sudo apt install libtime-hires-perl
 
       # Install additional dependencies
