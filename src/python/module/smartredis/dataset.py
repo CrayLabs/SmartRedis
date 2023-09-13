@@ -24,16 +24,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from numbers import Number
-
 import typing as t
+
 import numpy as np
 
 from .smartredisPy import PyDataset
 from .srobject import SRObject
 from .util import Dtypes, exception_handler, typecheck
-
-from .error import *
 
 
 class Dataset(SRObject):

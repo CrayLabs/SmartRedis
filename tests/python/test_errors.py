@@ -32,6 +32,12 @@ from smartredis import *
 from smartredis.error import *
 
 
+@pytest.fixture
+def cfg_opts() -> ConfigOptions:
+    opts = ConfigOptions.create_from_environment("")
+    return opts
+
+
 def test_SSDB_not_set(use_cluster, context):
     ssdb = os.environ["SSDB"]
     del os.environ["SSDB"]
@@ -913,43 +919,54 @@ def test_get_tensor_names_wrong_type():
 # Test type errors from bad parameter types to ConfigOptions API calls
 
 def test_create_from_environment_wrong_type():
+    """Ensure create_from_environment doesn't accept an invalid db_prefix param"""
     with pytest.raises(TypeError):
         _ = ConfigOptions.create_from_environment(42)
 
-def test_get_integer_option_wrong_type():
-    co = ConfigOptions()
-    key = "intval"
-    with pytest.raises(TypeError):
-        _ = co.get_integer_option(42)
+def test_get_integer_option_wrong_type(cfg_opts: ConfigOptions):
+    """Ensure get_integer_option raises an exception on an invalid key type"""
 
-def test_get_string_option_wrong_type():
-    co = ConfigOptions()
-    key = "stringval"
     with pytest.raises(TypeError):
-        _ = co.get_string_option(42)
+        _ = cfg_opts.get_integer_option(42)
 
-def test_is_configured_wrong_type():
-    co = ConfigOptions()
+def test_get_string_option_wrong_type(cfg_opts: ConfigOptions):
+    """Ensure get_string_option raises an exception on an invalid key type"""
+    
     with pytest.raises(TypeError):
-        _ = co.is_configured(42)
+        _ = cfg_opts.get_string_option(42)
 
-def test_override_integer_option_wrong_type():
-    co = ConfigOptions()
-    key = "intval"
+def test_is_configured_wrong_type(cfg_opts: ConfigOptions):
+    """Ensure is_configured raises an exception on an invalid key type"""
+    
+    with pytest.raises(TypeError):
+        _ = cfg_opts.is_configured(42)
+
+def test_override_integer_option_wrong_type(cfg_opts: ConfigOptions):
+    """Ensure override_integer_option raises an exception on an invalid key type
+    and when an invalid value for the target storage type is encountered"""
+    key = 42
     value = 42
     with pytest.raises(TypeError):
-        _ = co.override_integer_option(42, value)
-    with pytest.raises(TypeError):
-        _ = co.override_integer_option(key, "not an integer")
+        _ = cfg_opts.override_integer_option(key, value)
 
-def test_override_string_option_wrong_type():
-    co = ConfigOptions()
-    key = "stringval"
-    value = "target_string_value"
+    key = "key"
+    value = "stringval"
     with pytest.raises(TypeError):
-        _ = co.override_string_option(42, value)
+        _ = cfg_opts.override_integer_option(key, value)
+
+def test_override_string_option_wrong_type(cfg_opts: ConfigOptions):
+    """Ensure override_string_option raises an exception on an invalid key type
+    and when an invalid value for the target storage type is encountered"""
+
+    key = 42
+    value = "stringval"
     with pytest.raises(TypeError):
-        _ = co.override_string_option(key, 42)
+        _ = cfg_opts.override_string_option(key, value)
+
+    key = "stringkey"
+    value = 42
+    with pytest.raises(TypeError):
+        _ = cfg_opts.override_string_option(key, value)
 
 ####
 # Utility functions

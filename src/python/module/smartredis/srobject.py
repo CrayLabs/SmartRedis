@@ -27,8 +27,6 @@
 from .smartredisPy import PySRObject, SRLoggingLevel
 from .util import exception_handler, typecheck
 
-from .error import *
-
 
 class SRObject:
     def __init__(self, context: str) -> None:

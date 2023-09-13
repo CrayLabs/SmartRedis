@@ -1,6 +1,55 @@
 Changelog
 =========
 
+0.4.2
+-----
+
+Released on September 13, 2023
+
+Description
+
+- Reduced number of suppressed lint errors
+- Expanded documentation of aggregation lists
+- Updated third-party software dependencies to current versions
+- Updated post-merge tests in CI/CD to work with new test system
+- Enabled static builds of SmartRedis
+- Improve robustness of test runs
+- Fixed installation link
+- Updated supported languages documentation
+- Removed obsolete files
+- Added pylint to CI/CD pipeline and mitigate existing errors
+- Improved clustered redis initialization
+
+Detailed Notes
+
+- Refactor factory for ConfigOptions to avoid using protected member outside an instance (PR393_)
+- Added a new advanced topics documentation page with a section on aggregation lists (PR390_)
+- Updated pybind (2.10.3 => 2.11.1), hiredis (1.1.0 => 1.2.0), and redis++ (1.3.5 => 1.3.10) dependencies to current versions (PR389_)
+- Post-merge tests in CI/CD have been updated to interface cleanly with the new test system that was deployed in the previous release (PR388_)
+- Static builds of SmartRedis can now work with Linux platforms. Fortran is tested with GNU, PGI, Intel compilers (PR386_)
+- Preserve the shell output of test runs while making sure that server shutdown happens unconditionally (PR381_)
+- Fix incorrect link to installation documentation (PR380_)
+- Update language support matrix in documentation to reflect updates from the last release (PR379_)
+- Fix typo causing startup failure in utility script for unit tests (PR378_)
+- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_, PR382_)
+- Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
+- Reuse existing redis connection when mapping the Redis cluster (PR364_)
+
+.. _PR393: https://github.com/CrayLabs/SmartRedis/pull/393
+.. _PR390: https://github.com/CrayLabs/SmartRedis/pull/390
+.. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
+.. _PR388: https://github.com/CrayLabs/SmartRedis/pull/388
+.. _PR386: https://github.com/CrayLabs/SmartRedis/pull/386
+.. _PR382: https://github.com/CrayLabs/SmartRedis/pull/382
+.. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
+.. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
+.. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379
+.. _PR378: https://github.com/CrayLabs/SmartRedis/pull/378
+.. _PR371: https://github.com/CrayLabs/SmartRedis/pull/371
+.. _PR366: https://github.com/CrayLabs/SmartRedis/pull/366
+.. _PR364: https://github.com/CrayLabs/SmartRedis/pull/364
+
+
 0.4.1
 -----
 
