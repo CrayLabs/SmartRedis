@@ -69,7 +69,7 @@ def test_run_script(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     c.put_tensor("script-test-data", data)
     c.set_function("one-to-one", one_to_one)
-    c.run_script("one-to-one", "one_to_one", ["script-test-data"], ["script-test-out"])
+    c.run_script("one-to-one", "one_to_one", "script-test-data", "script-test-out")
     out = c.get_tensor("script-test-out")
     assert out == 5
 
@@ -85,8 +85,8 @@ def test_run_script_multi(use_cluster, context):
     c.run_script(
         "two-to-one",
         "two_to_one",
-        ["srpt-multi-out-data-1", "srpt-multi-out-data-2"],
-        ["srpt-multi-out-output"],
+        "srpt-multi-out-data-1 srpt-multi-out-data-2", #here
+        "srpt-multi-out-output",
     )
     out = c.get_tensor("srpt-multi-out-output")
     expected = np.array([4, 8])

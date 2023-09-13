@@ -466,7 +466,7 @@ class Client(SRObject):
 
     @exception_handler
     def run_script(
-        self, name: str, fn_name: str, inputs: t.List[str], outputs: t.List[str]
+        self, name: str, fn_name: str, inputs: str, outputs: str
     ) -> None:
         """Execute TorchScript stored inside the database
 
@@ -482,15 +482,15 @@ class Client(SRObject):
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
         :param inputs: database tensor names to use as script inputs
-        :type inputs: list[str]
+        :type inputs: str
         :param outputs: database tensor names to receive script outputs
-        :type outputs: list[str]
+        :type outputs: str
         :raises RedisReplyError: if script execution fails
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        typecheck(inputs, "inputs", list)
-        typecheck(outputs, "outputs", list)
+        typecheck(inputs, "inputs", str)
+        typecheck(outputs, "outputs", str)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         self._client.run_script(name, fn_name, inputs, outputs)
 
@@ -499,8 +499,8 @@ class Client(SRObject):
         self,
         name: str,
         fn_name: str,
-        inputs: t.List[str],
-        outputs: t.List[str],
+        inputs: str,
+        outputs: str,
         offset: int,
         first_gpu: int,
         num_gpus: int,
@@ -519,9 +519,9 @@ class Client(SRObject):
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
         :param inputs: database tensor names to use as script inputs
-        :type inputs: list[str]
+        :type inputs: str
         :param outputs: database tensor names to receive script outputs
-        :type outputs: list[str]
+        :type outputs: str
         :param offset: index of the current image, such as a processor ID
                          or MPI rank
         :type offset: int
@@ -533,8 +533,8 @@ class Client(SRObject):
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        typecheck(inputs, "inputs", list)
-        typecheck(outputs, "outputs", list)
+        typecheck(inputs, "inputs", str)
+        typecheck(outputs, "outputs", str)
         typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)

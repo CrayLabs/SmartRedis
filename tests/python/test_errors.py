@@ -87,7 +87,7 @@ def test_bad_function_execution(use_cluster, context):
     data = np.array([1, 2, 3, 4])
     c.put_tensor("bad-func-tensor", data)
     with pytest.raises(RedisReplyError):
-        c.run_script("bad-function", "bad_function", ["bad-func-tensor"], ["output"])
+        c.run_script("bad-function", "bad_function", "bad-func-tensor", "output")
 
 
 def test_missing_script_function(use_cluster, context):
@@ -97,7 +97,7 @@ def test_missing_script_function(use_cluster, context):
     c.set_function("bad-function", bad_function)
     with pytest.raises(RedisReplyError):
         c.run_script(
-            "bad-function", "not-a-function-in-script", ["bad-func-tensor"], ["output"]
+            "bad-function", "not-a-function-in-script", "bad-func-tensor", "output"
         )
 
 
@@ -326,8 +326,8 @@ def test_bad_type_run_script_multigpu(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
     fn_name = "phred"
-    inputs = ["list", "of", "strings"]
-    outputs = ["another", "string", "list"]
+    inputs = "list of strings"
+    outputs = "another string list"
     offset = 0
     first_gpu = 0
     num_gpus = 1
