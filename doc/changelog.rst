@@ -1,10 +1,10 @@
 Changelog
 =========
 
-Development branch
-------------------
+0.4.2
+-----
 
-To be released at some future point in time
+Released on September 13, 2023
 
 Description
 
@@ -31,7 +31,7 @@ Detailed Notes
 - Fix incorrect link to installation documentation (PR380_)
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
 - Fix typo causing startup failure in utility script for unit tests (PR378_)
-- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_)
+- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_, PR382_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
@@ -40,6 +40,7 @@ Detailed Notes
 .. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
 .. _PR388: https://github.com/CrayLabs/SmartRedis/pull/388
 .. _PR386: https://github.com/CrayLabs/SmartRedis/pull/386
+.. _PR382: https://github.com/CrayLabs/SmartRedis/pull/382
 .. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
 .. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
 .. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379
