@@ -498,8 +498,8 @@ install/lib/libhiredis.a:
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	LIBRARY_PATH=lib make PREFIX="../../install" static -j $(NPROC) && \
+	LIBRARY_PATH=lib make PREFIX="../../install" install && \
 	rm -f ../../install/lib/libhiredis*.so* && \
 	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
@@ -518,7 +518,7 @@ install/lib/libredis++.a:
 	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
 		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. )&& \
+		-DCMAKE_INSTALL_LIBDIR="lib" .. )&& \
 	CC=gcc CXX=g++ make -j $(NPROC) && \
 	CC=gcc CXX=g++ make install && \
 	echo "Finished installing Redis-plus-plus"
