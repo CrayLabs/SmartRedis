@@ -598,6 +598,7 @@ third-party/catch/single_include/catch2/catch.hpp:
 .PHONY: lcov
 lcov: third-party/lcov/install/bin/lcov
 third-party/lcov/install/bin/lcov:
+	@echo Installing LCOV
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
