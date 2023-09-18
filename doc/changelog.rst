@@ -1,6 +1,21 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Updated the third-party lcov component
+
+Detailed Notes
+
+- Updated lcov from version 1.15 to 2.0 (PR395_)
+
+.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+
 0.4.2
 -----
 
@@ -8,7 +23,6 @@ Released on September 13, 2023
 
 Description
 
-- Updated the third-party lcov component
 - Reduced number of suppressed lint errors
 - Expanded documentation of aggregation lists
 - Updated third-party software dependencies to current versions
@@ -23,7 +37,6 @@ Description
 
 Detailed Notes
 
-- Updated lcov from version 1.15 to 2.0 (PR395_)
 - Refactor factory for ConfigOptions to avoid using protected member outside an instance (PR393_)
 - Added a new advanced topics documentation page with a section on aggregation lists (PR390_)
 - Updated pybind (2.10.3 => 2.11.1), hiredis (1.1.0 => 1.2.0), and redis++ (1.3.5 => 1.3.10) dependencies to current versions (PR389_)
@@ -37,7 +50,6 @@ Detailed Notes
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
-.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
 .. _PR393: https://github.com/CrayLabs/SmartRedis/pull/393
 .. _PR390: https://github.com/CrayLabs/SmartRedis/pull/390
 .. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
