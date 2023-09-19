@@ -29,61 +29,63 @@
 #include "client.h"
 #include <vector>
 #include <string>
-
 int main(int argc, char* argv[]) {
 
     // Initialize tensor dimensions
-    size_t dim1 = 3;
-    size_t dim2 = 2;
-    size_t dim3 = 5;
-    std::vector<size_t> dims = {3, 2, 5};
+    size_t dim1 = 400;
+    size_t dim2 = 300;
+    size_t dim3 = 50;
+    //x direction 3 elements - y 2 - z 5
+    std::vector<size_t> dims = {400, 300, 50};
 
     // Initialize a tensor to random values.  Note that a dynamically
     // allocated tensor via malloc is also useable with the client
     // API.  The std::vector is used here for brevity.
+
+    //how many elements will be stored in the tensor
     size_t n_values = dim1 * dim2 * dim3;
-    std::vector<double> input_tensor(n_values, 0);
-    for(size_t i=0; i<n_values; i++)
-        input_tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
+    std::string key = "3d_tensor";
+    bool cluster_mode = false; // Set to false if not using a clustered database
+    SmartRedis::Client client(cluster_mode, __FILE__);
+    double*** input_tensor = (double***)malloc(dims[0]*sizeof(double**));
+
+    for(size_t i=0; i<dims[0]; i++) {
+        input_tensor[i] = (double**)malloc(dims[1]*sizeof(double*));
+        for(size_t j=0; j<dims[1]; j++) {
+            input_tensor[i][j] = (double*)malloc(dims[2]*sizeof(double));
+        }
+    }
+
+    for(size_t i=0; i<dims[0]; i++)
+        for(size_t j=0; j<dims[1]; j++)
+            for(size_t k=0; k<dims[2]; k++)
+                input_tensor[i][j][k] = ((double)rand())/(double)RAND_MAX;
 
     // Initialize a SmartRedis client
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, __FILE__);
-
     // Put the tensor in the database
-    std::string key = "3d_tensor";
-    client.put_tensor(key, input_tensor.data(), dims,
-                      SRTensorTypeDouble, SRMemLayoutContiguous);
-
+    for(size_t j=0; j<100; j++) {
+        client.put_tensor(key, (void*)input_tensor, dims,
+                        SRTensorTypeDouble, SRMemLayoutNested);
+    }
     // Retrieve the tensor from the database using the unpack feature.
-    std::vector<double> unpack_tensor(n_values, 0);
-    client.unpack_tensor(key, unpack_tensor.data(), {n_values},
-                        SRTensorTypeDouble, SRMemLayoutContiguous);
-
-    // Print the values retrieved with the unpack feature
-    std::cout<<"Comparison of the sent and "\
-                "retrieved (via unpack) values: "<<std::endl;
-    for(size_t i=0; i<n_values; i++)
-        std::cout<<"Sent: "<<input_tensor[i]<<" "
-                 <<"Received: "<<unpack_tensor[i]<<std::endl;
-
+    // vector<vector<vector<size_t>>> vector_3d = 
+    // std::vector<size_t> u_result = allocate_3D_array<size_t>(dims[0], dims[1], dims[2]);
+    //std::vector<size_t> u_result[dim1][dim2][dim3];
+    double*** u_result = (double***)malloc(dim1*sizeof(double**));
+    for (int i=0; i<dim1; i++) {
+        u_result[i] = (double**)malloc(dim2*sizeof(double*));
+        for(int j=0; j<dim2; j++){
+            u_result[i][j] = (double*)malloc(dim3 * sizeof(double));
+        }
+    }
+    
+    client.unpack_tensor(key, u_result, dims,
+                        SRTensorTypeDouble, SRMemLayoutNested);
 
     // Retrieve the tensor from the database using the get feature.
     SRTensorType get_type;
     std::vector<size_t> get_dims;
     void* get_tensor;
     client.get_tensor(key, get_tensor, get_dims, get_type, SRMemLayoutNested);
-
-    // Print the values retrieved with the unpack feature
-    std::cout<<"Comparison of the sent and "\
-                "retrieved (via get) values: "<<std::endl;
-    for(size_t i=0, c=0; i<dims[0]; i++)
-        for(size_t j=0; j<dims[1]; j++)
-            for(size_t k=0; k<dims[2]; k++, c++) {
-                std::cout<<"Sent: "<<input_tensor[c]<<" "
-                         <<"Received: "
-                         <<((double***)get_tensor)[i][j][k]<<std::endl;
-    }
-
     return 0;
 }
