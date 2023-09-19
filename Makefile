@@ -27,6 +27,7 @@
 # General settings
 MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
+CWD := $(shell pwd)
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -604,5 +605,5 @@ third-party/lcov/install/bin/lcov:
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
 	@cd third-party/lcov && \
 	mkdir -p install && \
-	CC=gcc CXX=g++ make PREFIX=`pwd`/install/ install && \
+	CC=gcc CXX=g++ make PREFIX=$(CWD)/install/ install && \
 	echo "Finished installing LCOV"
