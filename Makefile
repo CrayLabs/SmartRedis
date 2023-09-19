@@ -605,5 +605,5 @@ third-party/lcov/install/bin/lcov:
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
 	@cd third-party/lcov && \
 	mkdir -p install && \
-	CC=gcc CXX=g++ make PREFIX=$(CWD)/install/ install && \
+	CC=gcc CXX=g++ make PREFIX=$(CWD)/third-party/lcov/install/ install && \
 	echo "Finished installing LCOV"
