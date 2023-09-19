@@ -1,6 +1,21 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Updated the third-party lcov component
+
+Detailed Notes
+
+- Updated lcov from version 1.15 to 2.0 (PR395_)
+
+.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+
 0.4.2
 -----
 
