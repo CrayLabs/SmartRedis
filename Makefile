@@ -49,7 +49,7 @@ NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; p
 SR_BUILD := Release
 SR_LINK := Shared
 SR_PEDANTIC := OFF
-SR_FORTRAN := OFF
+SR_FORTRAN := ON
 SR_PYTHON := OFF
 
 # Test variables
@@ -519,8 +519,8 @@ install/lib/libredis++.a:
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
 		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
 		-DCMAKE_INSTALL_LIBDIR="lib" .. )&& \
-	CC=gcc CXX=g++ make -j $(NPROC) && \
-	CC=gcc CXX=g++ make install && \
+	make -j $(NPROC) && \
+	make install && \
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
