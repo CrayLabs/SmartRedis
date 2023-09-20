@@ -14,10 +14,10 @@ Description
 Detailed Notes
 
 - Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
-- Updated lcov from version 1.15 to 2.0 (PR395_)
+- Updated lcov from version 1.15 to 2.0 (PR396_)
 
-.. _PR396: https://github.com/CrayLabs/SmartRedis/pull/402
-.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+.. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
+.. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
 
 0.4.2
 -----
