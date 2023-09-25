@@ -277,7 +277,7 @@ class RedisServer {
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the model
-        *   \param model The model as a continuous buffer string_view
+        *   \param model The model as a sequence of buffer string_view chunks
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
         *   \param device The name of the device for execution
@@ -295,7 +295,7 @@ class RedisServer {
         *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_model(const std::string& key,
-                                       std::string_view model,
+                                       const std::vector<std::string_view>& model,
                                        const std::string& backend,
                                        const std::string& device,
                                        int batch_size = 0,
@@ -311,7 +311,7 @@ class RedisServer {
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution in a multi-GPU system
         *   \param name The name to associate with the model
-        *   \param model The model as a continuous buffer string_view
+        *   \param model The model as a sequence of buffer string_view chunks
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
         *   \param first_gpu The first GPU to use with this model
@@ -328,7 +328,7 @@ class RedisServer {
         *   \throw RuntimeException for all client errors
         */
         virtual void set_model_multigpu(const std::string& name,
-                                        const std::string_view& model,
+                                        const std::vector<std::string_view>& model,
                                         const std::string& backend,
                                         int first_gpu,
                                         int num_gpus,
@@ -521,6 +521,35 @@ class RedisServer {
                                  const bool reset_stat) = 0;
 
         /*!
+        *   \brief Retrieve the current model chunk size
+        *   \returns The size in bytes for model chunking
+        */
+        virtual int get_model_chunk_size() {
+            return _model_chunk_size;
+        }
+
+        /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *             database to change the model chunking size. The default
+        *             size of 511MB should be fine for most applications, so
+        *             it is expected to be very rare that a client calls this
+        *             method.
+        *   \param chunk_size The new chunk size
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        virtual void set_model_chunk_size(int chunk_size) = 0;
+
+        /*!
+        *   \brief Store the current model chunk size
+        *   \param chunk_size The updated model chunk size
+        */
+        virtual void store_model_chunk_size(int chunk_size) {
+            _model_chunk_size = chunk_size;
+        }
+
+        /*!
         *   \brief Run a CommandList via a Pipeline. For clustered databases
         *          all commands must go to the same shard
         *   \param cmdlist The list of commands to run
@@ -566,6 +595,12 @@ class RedisServer {
         *   \brief The number of client command execution attempts
         */
         int _command_attempts;
+
+        /*!
+        *   \brief The chunk size into which models need to be broken for
+        *          transfer to Redis
+        */
+        int _model_chunk_size;
 
         /*!
         *   \brief Default value of connection timeout (seconds)
@@ -629,6 +664,11 @@ class RedisServer {
         *          (false)
         */
         bool _is_domain_socket;
+
+        /*!
+        *   \brief Default model chunk size
+        */
+        static constexpr int _DEFAULT_MODEL_CHUNK_SIZE = 511 * 1024 * 1024;
 
         /*!
         *   \brief Environment variable for connection timeout

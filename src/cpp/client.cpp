@@ -28,6 +28,10 @@
 
 #include <ctype.h>
 #include <algorithm>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "client.h"
 #include "srexception.h"
 #include "logger.h"
@@ -602,9 +606,21 @@ void Client::set_model(const std::string& name,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     auto response = _redis_server->set_model(
-        key, model, backend, device,
+        key, model_segments, backend, device,
         batch_size, min_batch_size,
         tag, inputs, outputs);
     if (response.has_error()) {
@@ -661,9 +677,21 @@ void Client::set_model_multigpu(const std::string& name,
         throw SRParameterException(backend + " is not a valid backend.");
     }
 
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
-        key, model, backend, first_gpu, num_gpus,
+        key, model_segments, backend, first_gpu, num_gpus,
         batch_size, min_batch_size,
         tag, inputs, outputs);
 }
@@ -675,16 +703,35 @@ std::string_view Client::get_model(const std::string& name)
     // Track calls to this API function
     LOG_API_FUNCTION();
 
+    // Get the model from the server
     std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_model(get_key);
     if (reply.has_error())
         throw SRRuntimeException("failed to get model from server");
 
-    char* model = _model_queries.allocate(reply.str_len());
+    // In most cases, the reply will be a single string
+    // consisting of the serialized model
+    if (!reply.is_array()) {
+        char* model = _model_queries.allocate(reply.str_len());
+        if (model == NULL)
+            throw SRBadAllocException("model query");
+        std::memcpy(model, reply.str(), reply.str_len());
+        return std::string_view(model, reply.str_len());
+    }
+
+    // Otherwise, we need to concatenate the segments together
+    size_t model_length = 0;
+    size_t offset = 0;
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        model_length += reply[i].str_len();
+    }
+    char* model = _model_queries.allocate(model_length);
     if (model == NULL)
         throw SRBadAllocException("model query");
-    std::memcpy(model, reply.str(), reply.str_len());
-    return std::string_view(model, reply.str_len());
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        std::memcpy(model + offset, reply[i].str(), reply[i].str_len());
+    }
+    return std::string_view(model, model_length);
 }
 
 // Set a script from file in the database for future execution
