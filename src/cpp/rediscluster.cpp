@@ -941,6 +941,34 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
     return run(cmd);
 }
 
+// Retrieve the current model chunk size
+int RedisCluster::get_model_chunk_size()
+{
+    // If we've already set a chunk size, just return it
+    if (_model_chunk_size != _UNKNOWN_MODEL_CHUNK_SIZE)
+        return _model_chunk_size;
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "GET" << "MODEL_CHUNK_SIZE";
+
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG GET MODEL_CHUNK_SIZE command failed");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_INTEGER")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for the model chunk size.");
+
+    int chunk_size = reply.integer();
+
+    if (chunk_size < 0)
+        throw SRRuntimeException("An invalid, negative value was "
+                                 "returned for the model chunk size.");
+
+    return chunk_size;
+}
+
 // Reconfigure the model chunk size for the database
 void RedisCluster::set_model_chunk_size(int chunk_size)
 {

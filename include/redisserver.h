@@ -524,9 +524,7 @@ class RedisServer {
         *   \brief Retrieve the current model chunk size
         *   \returns The size in bytes for model chunking
         */
-        virtual int get_model_chunk_size() {
-            return _model_chunk_size;
-        }
+        virtual int get_model_chunk_size() = 0;
 
         /*!
         *   \brief Reconfigure the chunking size that Redis uses for model
@@ -668,7 +666,7 @@ class RedisServer {
         /*!
         *   \brief Default model chunk size
         */
-        static constexpr int _DEFAULT_MODEL_CHUNK_SIZE = 511 * 1024 * 1024;
+        static constexpr int _UNKNOWN_MODEL_CHUNK_SIZE = -1;
 
         /*!
         *   \brief Environment variable for connection timeout

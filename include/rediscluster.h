@@ -527,6 +527,11 @@ class RedisCluster : public RedisServer
         get_model_script_ai_info(const std::string& address,
                                  const std::string& key,
                                  const bool reset_stat);
+        /*!
+        *   \brief Retrieve the current model chunk size
+        *   \returns The size in bytes for model chunking
+        */
+        virtual int get_model_chunk_size();
 
         /*!
         *   \brief Run a CommandList via a Pipeline.
