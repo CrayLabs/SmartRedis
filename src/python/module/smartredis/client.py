@@ -1466,7 +1466,7 @@ class Client(SRObject):
                 in command execution.
         """
         typecheck(chunk_size, "chunk_size", int)
-        super().set_model_chunk_size(chunk_size)
+        self._client.set_model_chunk_size(chunk_size)
 
     @exception_handler
     def append_to_list(self, list_name: str, dataset: Dataset) -> None:
