@@ -117,6 +117,7 @@ PYBIND11_MODULE(smartredisPy, m) {
         .CLIENT_METHOD(poll_list_length_lte)
         .CLIENT_METHOD(get_datasets_from_list)
         .CLIENT_METHOD(get_dataset_list_range)
+        .CLIENT_METHOD(set_model_chunk_size)
         .CLIENT_METHOD(to_string)
     ;
 

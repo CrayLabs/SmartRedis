@@ -2162,9 +2162,32 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
     return false;
 }
 
+// Reconfigure the model chunk size for the database
+void Client::set_model_chunk_size(int chunk_size)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+    std::cout << cmd.to_string() << std::endl;
+
+    // Run it
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+
+    // Remember the new chunk size
+    _redis_server->store_model_chunk_size(chunk_size);
+}
+
 // Create a string representation of the client
 std::string Client::to_string() const
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string result;
     result = "Client (" + _lname + "):\n";
     result += _redis_server->to_string();

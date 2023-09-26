@@ -752,6 +752,14 @@ def test_bad_type_get_dataset_list_range(use_cluster, context):
     with pytest.raises(TypeError):
         c.get_dataset_list_range(listname, start_index, "not an integer")
 
+def test_bad_type_set_model_chunk_size(use_cluster, context):
+    c = Client(None, use_cluster, logger_name=context)
+    with pytest.raises(TypeError):
+        c.set_model_chunk_size("not an integer")
+
+#####
+# Test type errors from bad parameter types to logging calls
+
 @pytest.mark.parametrize("log_fn", [
     (log_data,), (log_warning,), (log_error,)
 ])
@@ -931,13 +939,11 @@ def test_get_integer_option_wrong_type(cfg_opts: ConfigOptions):
 
 def test_get_string_option_wrong_type(cfg_opts: ConfigOptions):
     """Ensure get_string_option raises an exception on an invalid key type"""
-    
     with pytest.raises(TypeError):
         _ = cfg_opts.get_string_option(42)
 
 def test_is_configured_wrong_type(cfg_opts: ConfigOptions):
     """Ensure is_configured raises an exception on an invalid key type"""
-    
     with pytest.raises(TypeError):
         _ = cfg_opts.is_configured(42)
 

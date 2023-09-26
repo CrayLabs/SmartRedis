@@ -81,6 +81,7 @@ int main(int argc, char* argv[]) {
   SmartRedis::Client client(use_cluster(), "client_test_mnist");
   std::string model_key = "mnist_model";
   std::string model_file = "mnist_data/mnist_cnn.pt";
+  client.set_model_chunk_size(1024 * 1024);
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
 
   std::string script_key = "mnist_script";
