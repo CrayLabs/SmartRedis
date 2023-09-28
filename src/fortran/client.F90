@@ -747,7 +747,7 @@ end function get_model
 
 !> Load the machine learning model from a file and set the configuration
 function set_model_from_file(self, name, model_file, backend, device, batch_size, min_batch_size, &
-    min_batch_timeout, tag, min_batch_timeout, inputs, outputs) result(code)
+    min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: name           !< The name to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -940,7 +940,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 end function set_model_from_file_multigpu
 
 !> Establish a model to run
-function set_model(self, name, model, backend, device, batch_size, min_batch_size, min_batch_timeout,
+function set_model(self, name, model, backend, device, batch_size, min_batch_size, min_batch_timeout, &
     tag, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name           !< The name to use to place the model
