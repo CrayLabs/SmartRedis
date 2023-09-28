@@ -148,6 +148,21 @@ class Command
         }
 
         /*!
+        *   \brief Add a vector of string_views to the command.
+        *   \details The string values are copied to the command.
+        *            To add a vector of keys, use the add_keys()
+        *            method.
+        *   \param fields The strings to add to the command
+        *   \returns The command object, for chaining.
+        */
+        virtual Command& operator<<(const std::vector<std::string_view>& fields) {
+            for (size_t i = 0; i < fields.size(); i++) {
+                add_field_ptr(fields[i]);
+            }
+            return *this;
+        }
+
+        /*!
         *   \brief Add a vector of strings to the command.
         *   \details The string values are copied to the command.
         *            To add a vector of keys, use the add_keys()

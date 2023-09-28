@@ -294,7 +294,7 @@ CommandReply Redis::copy_tensors(const std::vector<std::string>& src,
 
 // Set a model from std::string_view buffer in the database for future execution
 CommandReply Redis::set_model(const std::string& model_name,
-                              std::string_view model,
+                              const std::vector<std::string_view>& model,
                               const std::string& backend,
                               const std::string& device,
                               int batch_size,
@@ -333,7 +333,7 @@ CommandReply Redis::set_model(const std::string& model_name,
 // Set a model from std::string_view buffer in the
 // database for future execution in a multi-GPU system
 void Redis::set_model_multigpu(const std::string& name,
-                               const std::string_view& model,
+                               const std::vector<std::string_view>& model,
                                const std::string& backend,
                                int first_gpu,
                                int num_gpus,
@@ -581,7 +581,7 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
                                  "non-cluster client connection.");
     }
 
-    //Build the Command
+    // Build the Command
     cmd.set_exec_address(db_address);
     cmd << "AI.INFO" << Keyfield(key);
 
@@ -591,6 +591,48 @@ CommandReply Redis::get_model_script_ai_info(const std::string& address,
     }
 
     return run(cmd);
+}
+
+// Retrieve the current model chunk size
+int Redis::get_model_chunk_size()
+{
+    // If we've already set a chunk size, just return it
+    if (_model_chunk_size != _UNKNOWN_MODEL_CHUNK_SIZE)
+        return _model_chunk_size;
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "GET" << "MODEL_CHUNK_SIZE";
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG GET MODEL_CHUNK_SIZE command failed");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_INTEGER")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for the model chunk size.");
+
+    int chunk_size = reply.integer();
+
+    if (chunk_size < 0)
+        throw SRRuntimeException("An invalid, negative value was "
+                                 "returned for the model chunk size.");
+
+    return chunk_size;
+}
+
+// Reconfigure the model chunk size for the database
+void Redis::set_model_chunk_size(int chunk_size)
+{
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+
+    // Store the new model chunk size for later
+    _model_chunk_size = chunk_size;
 }
 
 inline CommandReply Redis::_run(const Command& cmd)

@@ -710,6 +710,14 @@ py::list PyClient::get_dataset_list_range(
     });
 }
 
+// Configure the Redis module chunk size
+void PyClient::set_model_chunk_size(int chunk_size)
+{
+    return MAKE_CLIENT_API({
+        return _client->set_model_chunk_size(chunk_size);
+    });
+}
+
 // Create a string representation of the Client
 std::string PyClient::to_string()
 {
