@@ -746,8 +746,8 @@ function get_model(self, name, model) result(code)
 end function get_model
 
 !> Load the machine learning model from a file and set the configuration
-function set_model_from_file(self, name, model_file, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model_from_file(self, name, model_file, backend, device, batch_size, min_batch_size, &
+    min_batch_timeout, tag, min_batch_timeout, inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: name           !< The name to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -755,6 +755,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   character(len=*),                         intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        optional, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -775,7 +776,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_file_length, backend_length, device_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -784,6 +785,8 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   if (present(batch_size)) c_batch_size = batch_size
   c_min_batch_size = 0
   if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  c_min_batch_timeout = 0
+  if (present(min_batch_timeout)) c_min_batch_timeout = min_batch_timeout
   if (present(tag)) then
     allocate(character(kind=c_char, len=len_trim(tag)) :: c_tag)
     c_tag = tag
@@ -828,8 +831,8 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
 
   code = set_model_from_file_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_device, device_length, c_batch_size, c_min_batch_size, &
-                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
-                             output_lengths_ptr, n_outputs)
+                             c_min_batch_timeout, c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                             outputs_ptr, output_lengths_ptr, n_outputs)
   if (allocated(c_inputs))        deallocate(c_inputs)
   if (allocated(input_lengths))   deallocate(input_lengths)
   if (allocated(ptrs_to_inputs))  deallocate(ptrs_to_inputs)
@@ -840,7 +843,7 @@ end function set_model_from_file
 
 !> Load the machine learning model from a file and set the configuration for use in multi-GPU systems
 function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu, num_gpus, batch_size, min_batch_size, &
-                                      tag, inputs, outputs) result(code)
+                                      min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),                       intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),                         intent(in) :: name           !< The name to use to place the model
   character(len=*),                         intent(in) :: model_file     !< The file storing the model
@@ -849,6 +852,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer,                                  intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        optional, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -868,7 +872,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_file_length, backend_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -877,6 +881,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   if (present(batch_size)) c_batch_size = batch_size
   c_min_batch_size = 0
   if (present(min_batch_size)) c_min_batch_size = min_batch_size
+  c_min_batch_timeout = 0
+  if (present(min_batch_timeout)) c_min_batch_timeout = min_batch_timeout
   if (present(tag)) then
     allocate(character(kind=c_char, len=len_trim(tag)) :: c_tag)
     c_tag = tag
@@ -922,8 +928,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 
   code = set_model_from_file_multigpu_c(self%client_ptr, c_name, name_length, c_model_file, model_file_length, &
                              c_backend, backend_length, c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, &
-                             c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, &
-                             output_lengths_ptr, n_outputs)
+                             c_min_batch_timeout, c_tag, tag_length, inputs_ptr, input_lengths_ptr, n_inputs, &
+                             outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)
   if (allocated(input_lengths))   deallocate(input_lengths)
@@ -934,8 +940,8 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
 end function set_model_from_file_multigpu
 
 !> Establish a model to run
-function set_model(self, name, model, backend, device, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model(self, name, model, backend, device, batch_size, min_batch_size, min_batch_timeout,
+    tag, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name           !< The name to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representation of the model
@@ -943,6 +949,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -960,7 +967,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, device_length, tag_length, n_inputs, &
                             n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -984,12 +991,13 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
                                 output_lengths_ptr, n_outputs)
   if (code /= SRNoError) return
 
-  ! Cast the batch sizes to C integers
+  ! Cast the batch params to C integers
   c_batch_size = batch_size
   c_min_batch_size = min_batch_size
+  c_min_batch_timeout = min_batch_timeout
 
   code = set_model_c(self%client_ptr, c_name, name_length, c_model, model_length, c_backend, backend_length, &
-                 c_device, device_length, batch_size, min_batch_size, c_tag, tag_length, &
+                 c_device, device_length, batch_size, min_batch_size, c_min_batch_timeout, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)
@@ -1001,8 +1009,8 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
 end function set_model
 
 !> Set a model from a byte string to run on a system with multiple GPUs
-function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, batch_size, min_batch_size, tag, &
-    inputs, outputs) result(code)
+function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, batch_size, min_batch_size, &
+    min_batch_timeout, tag, inputs, outputs) result(code)
   class(client_type),             intent(in) :: self           !< An initialized SmartRedis client
   character(len=*),               intent(in) :: name           !< The name to use to place the model
   character(len=*),               intent(in) :: model          !< The binary representation of the model
@@ -1011,6 +1019,7 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
   integer,                        intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
+  integer,                        intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -1026,7 +1035,7 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
 
   integer(c_size_t), dimension(:), allocatable, target :: input_lengths, output_lengths
   integer(kind=c_size_t) :: name_length, model_length, backend_length, tag_length, n_inputs, n_outputs
-  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_first_gpu, c_num_gpus
+  integer(kind=c_int)    :: c_batch_size, c_min_batch_size, c_min_batch_timeout, c_first_gpu, c_num_gpus
   type(c_ptr)            :: inputs_ptr, input_lengths_ptr, outputs_ptr, output_lengths_ptr
   type(c_ptr), dimension(:), allocatable :: ptrs_to_inputs, ptrs_to_outputs
 
@@ -1048,14 +1057,15 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
                                  output_lengths_ptr, n_outputs)
   if (code /= SRNoError) return
 
-  ! Cast the batch sizes to C integers
+  ! Cast the batch params to C integers
   c_batch_size = batch_size
   c_min_batch_size = min_batch_size
+  c_min_batch_timeout = min_batch_timeout
   c_first_gpu = first_gpu
   c_num_gpus = num_gpus
 
   code = set_model_multigpu_c(self%client_ptr, c_name, name_length, c_model, model_length, c_backend, backend_length, &
-                 c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_tag, tag_length, &
+                 c_first_gpu, c_num_gpus, c_batch_size, c_min_batch_size, c_min_batch_timeout, c_tag, tag_length, &
                  inputs_ptr, input_lengths_ptr, n_inputs, outputs_ptr, output_lengths_ptr, n_outputs)
 
   if (allocated(c_inputs))        deallocate(c_inputs)

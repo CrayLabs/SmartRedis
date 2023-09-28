@@ -502,6 +502,7 @@ void Client::set_model_from_file(const std::string& name,
                                  const std::string& device,
                                  int batch_size,
                                  int min_batch_size,
+                                 int min_batch_timeout,
                                  const std::string& tag,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
@@ -522,7 +523,7 @@ void Client::set_model_from_file(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model(name, model, backend, device, batch_size,
-              min_batch_size, tag, inputs, outputs);
+              min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
 
 // Set a model from file in the database for future execution in a multi-GPU system
@@ -533,6 +534,7 @@ void Client::set_model_from_file_multigpu(const std::string& name,
                                           int num_gpus,
                                           int batch_size,
                                           int min_batch_size,
+                                          int min_batch_timeout,
                                           const std::string& tag,
                                           const std::vector<std::string>& inputs,
                                           const std::vector<std::string>& outputs)
@@ -553,7 +555,7 @@ void Client::set_model_from_file_multigpu(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model_multigpu(name, model, backend, first_gpu, num_gpus, batch_size,
-                       min_batch_size, tag, inputs, outputs);
+                       min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
 // Set a model from a string buffer in the database for future execution
 void Client::set_model(const std::string& name,
@@ -562,6 +564,7 @@ void Client::set_model(const std::string& name,
                        const std::string& device,
                        int batch_size,
                        int min_batch_size,
+                       int min_batch_timeout,
                        const std::string& tag,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
@@ -621,7 +624,7 @@ void Client::set_model(const std::string& name,
     std::string key = _build_model_key(name, false);
     auto response = _redis_server->set_model(
         key, model_segments, backend, device,
-        batch_size, min_batch_size,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
     if (response.has_error()) {
         throw SRInternalException(
@@ -636,6 +639,7 @@ void Client::set_model_multigpu(const std::string& name,
                                 int num_gpus,
                                 int batch_size,
                                 int min_batch_size,
+                                int min_batch_timeout,
                                 const std::string& tag,
                                 const std::vector<std::string>& inputs,
                                 const std::vector<std::string>& outputs)
@@ -692,7 +696,7 @@ void Client::set_model_multigpu(const std::string& name,
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
         key, model_segments, backend, first_gpu, num_gpus,
-        batch_size, min_batch_size,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
 }
 
