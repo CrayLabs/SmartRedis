@@ -10,14 +10,17 @@ Description
 
 - Updated the third-party RedisAI component
 - Updated the third-party lcov component
+- Add link to contributing guidelines
 
 Detailed Notes
 
 - Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
 - Updated lcov from version 1.15 to 2.0 (PR396_)
+- Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 
 .. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
 .. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
+.. _PR394: https://github.com/CrayLabs/SmartRedis/pull/395
 
 0.4.2
 -----
