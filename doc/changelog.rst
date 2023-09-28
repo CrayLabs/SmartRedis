@@ -23,7 +23,7 @@ Detailed Notes
 .. _PR404: https://github.com/CrayLabs/SmartRedis/pull/404
 .. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
 .. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
-.. _PR394: https://github.com/CrayLabs/SmartRedis/pull/395
+.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
 
 0.4.2
 -----
