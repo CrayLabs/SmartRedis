@@ -515,11 +515,13 @@ class Redis : public RedisServer
         *   \brief Reconfigure the chunking size that Redis uses for model
         *          serialization, replication, and the model_get command.
         *   \details This method triggers the AI.CONFIG method in the Redis
-        *             database to change the model chunking size. The default
-        *             size of 511MB should be fine for most applications, so
-        *             it is expected to be very rare that a client calls this
-        *             method.
-        *   \param chunk_size The new chunk size
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
         *   \throw SmartRedis::Exception if the command fails.
         */
         virtual void set_model_chunk_size(int chunk_size);
