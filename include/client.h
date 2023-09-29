@@ -345,7 +345,7 @@ class Client : public SRObject
         *   \param min_batch_size The minimum batch size for model
         *                         execution
         *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution
+        *                            model execution (ms)
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only). For other models, provide an
@@ -387,7 +387,7 @@ class Client : public SRObject
         *   \param min_batch_size The minimum batch size for model
         *                         execution
         *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution
+        *                            model execution (ms)
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -430,7 +430,7 @@ class Client : public SRObject
         *   \param min_batch_size The minimum batch size for model
         *                         execution
         *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution
+        *                            model execution (ms)
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only). For other models, provide an
@@ -472,7 +472,7 @@ class Client : public SRObject
         *   \param min_batch_size The minimum batch size for model
         *                         execution
         *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution
+        *                            model execution (ms)
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes

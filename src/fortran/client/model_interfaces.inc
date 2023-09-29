@@ -60,7 +60,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
-    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -99,7 +99,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
-    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -138,7 +138,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
-    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
@@ -177,7 +177,7 @@ interface
                                                                    !! null terminating character
     integer(kind=c_int),    value, intent(in) :: batch_size        !< The batch size for model execution
     integer(kind=c_int),    value, intent(in) :: min_batch_size    !< The minimum batch size for model execution
-    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum amount of time to wait before model execution
+    integer(kind=c_int),    value, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
     character(kind=c_char),        intent(in) :: tag(*)            !< A tag to attach to the model for information
                                                                    !! purposes
     integer(kind=c_size_t), value, intent(in) :: tag_length        !< The length of the tag c-string, excluding null
