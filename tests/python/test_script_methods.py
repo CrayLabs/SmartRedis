@@ -85,7 +85,7 @@ def test_run_script_multi(use_cluster, context):
     c.run_script_multigpu(
         "two-to-one",
         "two_to_one",
-        ["srpt-multi-out-data-1", "srpt-multi-out-data-2"], #here
+        ["srpt-multi-out-data-1", "srpt-multi-out-data-2"],
         ["srpt-multi-out-output"],
         0,
         0,

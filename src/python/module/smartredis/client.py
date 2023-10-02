@@ -519,9 +519,9 @@ class Client(SRObject):
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
         :param inputs: database tensor names to use as script inputs
-        :type inputs: str
+        :type inputs: str or list
         :param outputs: database tensor names to receive script outputs
-        :type outputs: str
+        :type outputs: str or list
         :param offset: index of the current image, such as a processor ID
                          or MPI rank
         :type offset: int
@@ -533,8 +533,8 @@ class Client(SRObject):
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        # typecheck(inputs, "inputs", str)
-        # typecheck(outputs, "outputs", str)
+        if not (isinstance(inputs, str) or isinstance(inputs, list)):
+            raise TypeError('Expected str')
         typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
