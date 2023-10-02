@@ -8,6 +8,30 @@ To be released at some future point in time
 
 Description
 
+- Added support for model chunking
+- Updated the third-party RedisAI component
+- Updated the third-party lcov component
+- Add link to contributing guidelines
+
+Detailed Notes
+
+- Models will now be automatically chunked when sent to/received from the backed database. This allows use of models greater than 511MB in size. (PR404_)
+- Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
+- Updated lcov from version 1.15 to 2.0 (PR396_)
+- Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
+
+.. _PR404: https://github.com/CrayLabs/SmartRedis/pull/404
+.. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
+.. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
+.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+
+0.4.2
+-----
+
+Released on September 13, 2023
+
+Description
+
 - Reduced number of suppressed lint errors
 - Expanded documentation of aggregation lists
 - Updated third-party software dependencies to current versions
@@ -31,7 +55,7 @@ Detailed Notes
 - Fix incorrect link to installation documentation (PR380_)
 - Update language support matrix in documentation to reflect updates from the last release (PR379_)
 - Fix typo causing startup failure in utility script for unit tests (PR378_)
-- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_)
+- Update pylint configuration and version, mitigate most errors, execute in CI/CD pipeline (PR371_, PR382_)
 - Deleted obsolete build and testing files that are no longer needed with the new build and test system (PR366_)
 - Reuse existing redis connection when mapping the Redis cluster (PR364_)
 
@@ -40,6 +64,7 @@ Detailed Notes
 .. _PR389: https://github.com/CrayLabs/SmartRedis/pull/389
 .. _PR388: https://github.com/CrayLabs/SmartRedis/pull/388
 .. _PR386: https://github.com/CrayLabs/SmartRedis/pull/386
+.. _PR382: https://github.com/CrayLabs/SmartRedis/pull/382
 .. _PR381: https://github.com/CrayLabs/SmartRedis/pull/381
 .. _PR380: https://github.com/CrayLabs/SmartRedis/pull/380
 .. _PR379: https://github.com/CrayLabs/SmartRedis/pull/379

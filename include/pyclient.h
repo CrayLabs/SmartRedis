@@ -926,6 +926,21 @@ class PyClient : public PySRObject
                                         const int end_index);
 
         /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        void set_model_chunk_size(int chunk_size);
+
+        /*!
         *   \brief Create a string representation of the Client
         *   \returns A string representation of the Client
         */

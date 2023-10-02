@@ -59,7 +59,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
+        rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x', '3.10.x'] # versions of Python
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
     env:
@@ -107,6 +107,25 @@ jobs:
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifort" >> $GITHUB_ENV
+
+      # Set up perl environment for LCOV
+      - uses: actions/checkout@v3
+      - name: Setup perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.30'
+          install-modules: Memory::Process
+
+      # Install additional perl Modules
+      - name: Add perl modules
+        run: |
+          sudo apt install libcapture-tiny-perl && \
+          sudo apt install libdatetime-perl && \
+          sudo apt install libdevel-cover-perl && \
+          sudo apt install libdigest-md5-perl && \
+          sudo apt install libfile-spec-perl && \
+          sudo apt install libjson-xs-perl && \
+          sudo apt install libtime-hires-perl
 
       # Install additional dependencies
       - name: Install Cmake Linux
@@ -167,7 +186,7 @@ jobs:
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
-        run: third-party/lcov/install/usr/local/bin/lcov -c -d build/Coverage/CMakeFiles -o coverage.info
+        run: third-party/lcov/install/bin/lcov --ignore-errors gcov,mismatch --keep-going -c -d build/Coverage/CMakeFiles -o coverage.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3

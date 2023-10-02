@@ -27,6 +27,7 @@
 # General settings
 MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
+CWD := $(shell pwd)
 
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
@@ -42,7 +43,7 @@ REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
-LCOV_VER := v1.15
+LCOV_VER := v2.0
 
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
@@ -58,7 +59,7 @@ SR_TEST_REDIS_MODE := Clustered
 SR_TEST_UDS_FILE := /tmp/redis.sock
 SR_TEST_PORT := 6379
 SR_TEST_NODES := 3
-SR_TEST_REDISAI_VER := v1.2.3
+SR_TEST_REDISAI_VER := v1.2.7
 SR_TEST_DEVICE := cpu
 SR_TEST_PYTEST_FLAGS := -vv -s
 
@@ -596,12 +597,13 @@ third-party/catch/single_include/catch2/catch.hpp:
 
 # LCOV (hidden test target)
 .PHONY: lcov
-lcov: third-party/lcov/install/usr/local/bin/lcov
-third-party/lcov/install/usr/local/bin/lcov:
+lcov: third-party/lcov/install/bin/lcov
+third-party/lcov/install/bin/lcov:
+	@echo Installing LCOV
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
 	@cd third-party/lcov && \
 	mkdir -p install && \
-	CC=gcc CXX=g++ DESTDIR="install/" make install && \
+	CC=gcc CXX=g++ make PREFIX=$(CWD)/third-party/lcov/install/ install && \
 	echo "Finished installing LCOV"
