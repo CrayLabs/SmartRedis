@@ -755,7 +755,7 @@ function set_model_from_file(self, name, model_file, backend, device, batch_size
   character(len=*),                         intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
-  integer,                        optional, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
+  integer,                        optional, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -852,7 +852,7 @@ function set_model_from_file_multigpu(self, name, model_file, backend, first_gpu
   integer,                                  intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        optional, intent(in) :: batch_size     !< The batch size for model execution
   integer,                        optional, intent(in) :: min_batch_size !< The minimum batch size for model execution
-  integer,                        optional, intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
+  integer,                        optional, intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               optional, intent(in) :: tag            !< A tag to attach to the model for
                                                                          !! information purposes
   character(len=*), dimension(:), optional, intent(in) :: inputs         !< One or more names of model input nodes (TF
@@ -949,7 +949,7 @@ function set_model(self, name, model, backend, device, batch_size, min_batch_siz
   character(len=*),               intent(in) :: device         !< The name of the device (CPU, GPU, GPU:0, GPU:1...)
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
-  integer,                        intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
+  integer,                        intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)
@@ -1019,7 +1019,7 @@ function set_model_multigpu(self, name, model, backend, first_gpu, num_gpus, bat
   integer,                        intent(in) :: num_gpus       !< The number of GPUs to use with the model
   integer,                        intent(in) :: batch_size     !< The batch size for model execution
   integer,                        intent(in) :: min_batch_size !< The minimum batch size for model execution
-  integer,                        intent(in) :: min_batch_timeout !< Minimum time to wait before model execution (ms)
+  integer,                        intent(in) :: min_batch_timeout !< Max time (ms) to wait for min batch size
   character(len=*),               intent(in) :: tag            !< A tag to attach to the model for information purposes
   character(len=*), dimension(:), intent(in) :: inputs         !< One or more names of model input nodes (TF models)
   character(len=*), dimension(:), intent(in) :: outputs        !< One or more names of model output nodes (TF models)

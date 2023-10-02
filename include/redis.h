@@ -283,8 +283,7 @@ class Redis : public RedisServer
         *                 (e.g. CPU or GPU)
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model execution
-        *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution (ms)
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only)
@@ -317,8 +316,7 @@ class Redis : public RedisServer
         *   \param num_gpus The number of GPUs to use with this model
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model execution
-        *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution (ms)
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for information purposes
         *   \param inputs One or more names of model input nodes
         *                 (TF models only)

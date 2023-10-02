@@ -302,8 +302,7 @@ class RedisCluster : public RedisServer
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
-        *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution (ms)
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -338,8 +337,7 @@ class RedisCluster : public RedisServer
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
-        *   \param min_batch_timeout Minimum amount of time to wait before
-        *                            model execution (ms)
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes

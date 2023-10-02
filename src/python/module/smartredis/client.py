@@ -637,7 +637,7 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
-        :param min_batch_timeout: Minimum time to wait before model execution (ms)
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
         :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
@@ -709,7 +709,7 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
-        :param min_batch_timeout: Minimum time to wait before model execution (ms)
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
         :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
@@ -780,7 +780,7 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
-        :param min_batch_timeout: Minimum time to wait before model execution (ms)
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
         :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
@@ -854,7 +854,7 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
-        :param min_batch_timeout: Minimum time to wait before model execution (ms)
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
         :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
