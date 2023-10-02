@@ -12,6 +12,7 @@ Description
 - Updated the third-party RedisAI component
 - Updated the third-party lcov component
 - Add link to contributing guidelines
+- Allow strings in Python interface for Client.run_script, Client.run_script_multiGPU
 
 Detailed Notes
 
@@ -19,11 +20,13 @@ Detailed Notes
 - Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
 - Updated lcov from version 1.15 to 2.0 (PR396_)
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
+- Allow users to pass single keys for the inputs and outputs parameters as a string for Python run_script and run_script_multigpu
 
 .. _PR404: https://github.com/CrayLabs/SmartRedis/pull/404
 .. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
 .. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
 .. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+.. _PR407: https://github.com/CrayLabs/SmartRedis/pull/407
 
 0.4.2
 -----
