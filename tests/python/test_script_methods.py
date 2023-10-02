@@ -81,12 +81,15 @@ def test_run_script_multi(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
-    c.set_function("two-to-one", two_to_one)
-    c.run_script(
+    c.set_function_multigpu("two-to-one", two_to_one, 0, 2)
+    c.run_script_multigpu(
         "two-to-one",
         "two_to_one",
-        "srpt-multi-out-data-1 srpt-multi-out-data-2", #here
-        "srpt-multi-out-output",
+        ["srpt-multi-out-data-1", "srpt-multi-out-data-2"], #here
+        ["srpt-multi-out-output"],
+        0,
+        0,
+        2
     )
     out = c.get_tensor("srpt-multi-out-output")
     expected = np.array([4, 8])

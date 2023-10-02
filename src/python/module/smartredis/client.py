@@ -499,8 +499,8 @@ class Client(SRObject):
         self,
         name: str,
         fn_name: str,
-        inputs: str,
-        outputs: str,
+        inputs: t.Optional[t.Union[str, t.List[str]]],
+        outputs: t.Optional[t.Union[str, t.List[str]]],
         offset: int,
         first_gpu: int,
         num_gpus: int,
@@ -533,8 +533,8 @@ class Client(SRObject):
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        typecheck(inputs, "inputs", str)
-        typecheck(outputs, "outputs", str)
+        # typecheck(inputs, "inputs", str)
+        # typecheck(outputs, "outputs", str)
         typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
