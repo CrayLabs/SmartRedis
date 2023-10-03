@@ -63,7 +63,7 @@ def test_set_script_from_file(use_cluster, context):
     assert not c.model_exists("test-script-file")
 
 
-def test_run_script(use_cluster, context):
+def test_run_script_str(use_cluster, context):
     data = np.array([[1, 2, 3, 4, 5]])
 
     c = Client(None, use_cluster, logger_name=context)
@@ -74,7 +74,18 @@ def test_run_script(use_cluster, context):
     assert out == 5
 
 
-def test_run_script_multi(use_cluster, context):
+def test_run_script_list(use_cluster, context):
+    data = np.array([[1, 2, 3, 4, 5]])
+
+    c = Client(None, use_cluster, logger_name=context)
+    c.put_tensor("script-test-data", data)
+    c.set_function("one-to-one", one_to_one)
+    c.run_script("one-to-one", "one_to_one", ["script-test-data"], ["script-test-out"])
+    out = c.get_tensor("script-test-out")
+    assert out == 5
+
+
+def test_run_script_multi_list(use_cluster, context):
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
@@ -96,6 +107,30 @@ def test_run_script_multi(use_cluster, context):
     np.testing.assert_array_equal(
         out, expected, "Returned array from script not equal to expected result"
     )
+    
+    
+# def test_run_script_multi_str(use_cluster, context):
+#     data = np.array([[1, 2, 3, 4]])
+#     data_2 = np.array([[5, 6, 7, 8]])
+
+#     c = Client(None, use_cluster, logger_name=context)
+#     c.put_tensor("srpt-multi-out-data-1", data)
+#     c.put_tensor("srpt-multi-out-data-2", data_2)
+#     c.set_function_multigpu("two-to-one", two_to_one, 0, 1)
+#     c.run_script_multigpu(
+#         "two-to-one",
+#         "two_to_one",
+#         "srpt-multi-out-data-1",
+#         "srpt-multi-out-output",
+#         0,
+#         0,
+#         2
+#     )
+#     out = c.get_tensor("srpt-multi-out-output")
+#     expected = np.array([4, 8])
+#     np.testing.assert_array_equal(
+#         out, expected, "Returned array from script not equal to expected result"
+#     )
 
 
 def one_to_one(data):

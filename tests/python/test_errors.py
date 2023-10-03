@@ -87,6 +87,8 @@ def test_bad_function_execution(use_cluster, context):
     data = np.array([1, 2, 3, 4])
     c.put_tensor("bad-func-tensor", data)
     with pytest.raises(RedisReplyError):
+        c.run_script("bad-function", "bad_function", ["bad-func-tensor"], ["output"])
+    with pytest.raises(RedisReplyError):
         c.run_script("bad-function", "bad_function", "bad-func-tensor", "output")
 
 
@@ -96,11 +98,34 @@ def test_missing_script_function(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     c.set_function("bad-function", bad_function)
     with pytest.raises(RedisReplyError):
-        c.run_script(
-            "bad-function", "not-a-function-in-script", "bad-func-tensor", "output"
-        )
+        c.run_script("bad-function", "not-a-function-in-script", ["bad-func-tensor"], ["output"])
+    with pytest.raises(RedisReplyError):
+        c.run_script("bad-function", "not-a-function-in-script", "bad-func-tensor", "output")
+
+def test_bad_function_execution_multi(use_cluster, context):
+    """Error raised inside function"""
+
+    c = Client(None, use_cluster, logger_name=context)
+    c.set_function_multigpu("bad-function", bad_function, 0, 1)
+    data = np.array([1, 2, 3, 4])
+    c.put_tensor("bad-func-tensor", data)
+    with pytest.raises(RedisReplyError):
+        c.run_script_multigpu("bad-function", "bad_function", ["bad-func-tensor"], ["output"], 0, 0, 2)
+    # with pytest.raises(RedisReplyError):
+    #     c.run_script_multigpu("bad-function", "bad_function", "bad-func-tensor", "output", 0, 0, 2)
 
 
+def test_missing_script_function_multi(use_cluster, context):
+    """User requests to run a function not in the script"""
+
+    c = Client(None, use_cluster, logger_name=context)
+    c.set_function_multigpu("bad-function", bad_function, 0, 1)
+    with pytest.raises(RedisReplyError):
+        c.run_script_multigpu("bad-function", "not-a-function-in-script", ["bad-func-tensor"], ["output"], 0, 0, 2)
+    with pytest.raises(RedisReplyError):
+        c.run_script_multigpu("bad-function", "not-a-function-in-script", "bad-func-tensor", "output", 0, 0, 2)
+        
+        
 def test_wrong_model_name(mock_data, mock_model, use_cluster, context):
     """User requests to run a model that is not there"""
 
