@@ -82,11 +82,6 @@ jobs:
           sudo rm -rf /opt/ghc &&
           sudo rm -rf "/usr/local/share/boost"
 
-      # sudo rm -rf /usr/share/dotnet &&
-      # sudo rm -rf /opt/ghc &&
-      # sudo rm -rf "/usr/local/share/boost" &&
-      # sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
       # Install compilers (Intel or GCC)
       - name: Install GCC
         if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler

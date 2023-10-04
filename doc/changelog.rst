@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Updated RedisAI version used in post-commit check-in testing in Github pipeline
 - Improved support for model execution batching
 - Added support for model chunking
 - Updated the third-party RedisAI component
@@ -16,12 +17,14 @@ Description
 
 Detailed Notes
 
+- Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
 - Exposed access to the Redis.AI MINBATCHTIMEOUT parameter, which limits the delay in model execution when trying to accumulate multiple executions in a batch (PR406_)
 - Models will now be automatically chunked when sent to/received from the backed database. This allows use of models greater than 511MB in size. (PR404_)
 - Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
 - Updated lcov from version 1.15 to 2.0 (PR396_)
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 
+.. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
 .. _PR406: https://github.com/CrayLabs/SmartRedis/pull/406
 .. _PR404: https://github.com/CrayLabs/SmartRedis/pull/404
 .. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
