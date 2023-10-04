@@ -299,6 +299,7 @@ CommandReply Redis::set_model(const std::string& model_name,
                               const std::string& device,
                               int batch_size,
                               int min_batch_size,
+                              int min_batch_timeout,
                               const std::string& tag,
                               const std::vector<std::string>& inputs,
                               const std::vector<std::string>& outputs
@@ -317,6 +318,9 @@ CommandReply Redis::set_model(const std::string& model_name,
     }
     if (min_batch_size > 0) {
         cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
+    }
+    if (min_batch_timeout > 0) {
+        cmd << "MINBATCHTIMEOUT" << std::to_string(min_batch_timeout);
     }
     if (inputs.size() > 0) {
         cmd << "INPUTS" << std::to_string(inputs.size()) <<  inputs;
@@ -339,6 +343,7 @@ void Redis::set_model_multigpu(const std::string& name,
                                int num_gpus,
                                int batch_size,
                                int min_batch_size,
+                               int min_batch_timeout,
                                const std::string& tag,
                                const std::vector<std::string>& inputs,
                                const std::vector<std::string>& outputs)
@@ -349,7 +354,8 @@ void Redis::set_model_multigpu(const std::string& name,
         std::string device = "GPU:" + std::to_string(i);
         std::string model_key = name + "." + device;
         result = set_model(
-            model_key, model, backend, device, batch_size, min_batch_size, tag, inputs, outputs);
+            model_key, model, backend, device, batch_size, min_batch_size, min_batch_timeout,
+            tag, inputs, outputs);
         if (result.has_error() > 0) {
             throw SRRuntimeException("Failed to set model for GPU " + std::to_string(i));
         }
@@ -357,7 +363,8 @@ void Redis::set_model_multigpu(const std::string& name,
 
     // Add a version for get_model to find
     result = set_model(
-        name, model, backend, "GPU", batch_size, min_batch_size, tag, inputs, outputs);
+        name, model, backend, "GPU", batch_size, min_batch_size, min_batch_timeout,
+        tag, inputs, outputs);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to set general model");
     }

@@ -326,14 +326,15 @@ void PyClient::set_model(const std::string& name,
                  const std::string& device,
                  int batch_size,
                  int min_batch_size,
+                 int min_batch_timeout,
                  const std::string& tag,
                  const std::vector<std::string>& inputs,
                  const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model(name, model, backend, device,
-                           batch_size, min_batch_size, tag,
-                           inputs, outputs);
+                           batch_size, min_batch_size, min_batch_timeout,
+                           tag, inputs, outputs);
     });
 }
 
@@ -344,14 +345,15 @@ void PyClient::set_model_multigpu(const std::string& name,
                                   int num_gpus,
                                   int batch_size,
                                   int min_batch_size,
+                                  int min_batch_timeout,
                                   const std::string& tag,
                                   const std::vector<std::string>& inputs,
                                   const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model_multigpu(name, model, backend, first_gpu, num_gpus,
-                                    batch_size, min_batch_size, tag,
-                                    inputs, outputs);
+                                    batch_size, min_batch_size, min_batch_timeout,
+                                    tag, inputs, outputs);
     });
 }
 
@@ -361,14 +363,15 @@ void PyClient::set_model_from_file(const std::string& name,
                                    const std::string& device,
                                    int batch_size,
                                    int min_batch_size,
+                                   int min_batch_timeout,
                                    const std::string& tag,
                                    const std::vector<std::string>& inputs,
                                    const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model_from_file(name, model_file, backend, device,
-                                           batch_size, min_batch_size, tag,
-                                           inputs, outputs);
+                                           batch_size, min_batch_size, min_batch_timeout,
+                                           tag, inputs, outputs);
     });
 }
 
@@ -379,6 +382,7 @@ void PyClient::set_model_from_file_multigpu(const std::string& name,
                                             int num_gpus,
                                             int batch_size,
                                             int min_batch_size,
+                                            int min_batch_timeout,
                                             const std::string& tag,
                                             const std::vector<std::string>& inputs,
                                             const std::vector<std::string>& outputs)
@@ -386,7 +390,7 @@ void PyClient::set_model_from_file_multigpu(const std::string& name,
     MAKE_CLIENT_API({
         _client->set_model_from_file_multigpu(
             name, model_file, backend, first_gpu, num_gpus, batch_size,
-            min_batch_size, tag, inputs, outputs);
+            min_batch_size, min_batch_timeout, tag, inputs, outputs);
     });
 }
 
