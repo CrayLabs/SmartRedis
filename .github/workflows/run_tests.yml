@@ -67,13 +67,6 @@ jobs:
       GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
     steps:
-      # Free up some disk space
-      run: |
-        sudo rm -rf /usr/share/dotnet &&
-        sudo rm -rf /opt/ghc &&
-        sudo rm -rf "/usr/local/share/boost" &&
-        sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-
       # download a copy of SmartRedis before running CI tests
       - uses: actions/checkout@v3
 
@@ -81,6 +74,14 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py_v }}
+
+      # Free up some disk space
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet &&
+          sudo rm -rf /opt/ghc &&
+          sudo rm -rf "/usr/local/share/boost" &&
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
       # Install compilers (Intel or GCC)
       - name: Install GCC
