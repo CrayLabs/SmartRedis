@@ -445,6 +445,8 @@ def test_bad_type_set_model_from_file_multigpu(context):
     with pytest.raises(TypeError):
         c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, min_batch_size="not_an_integer")
     with pytest.raises(TypeError):
+        c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, min_batch_timeout="not_an_integer")
+    with pytest.raises(TypeError):
         c.set_model_from_file_multigpu("simple_cnn", modelfile, "TORCH", 0, 1, tag=42)
 
 def test_bad_type_run_model(context):
@@ -751,6 +753,14 @@ def test_bad_type_get_dataset_list_range(context):
         c.get_dataset_list_range(listname, "not an integer", end_index)
     with pytest.raises(TypeError):
         c.get_dataset_list_range(listname, start_index, "not an integer")
+
+def test_bad_type_set_model_chunk_size(context):
+    c = Client(None, logger_name=context)
+    with pytest.raises(TypeError):
+        c.set_model_chunk_size("not an integer")
+
+#####
+# Test type errors from bad parameter types to logging calls
 
 @pytest.mark.parametrize("log_fn", [
     (log_data,), (log_warning,), (log_error,)

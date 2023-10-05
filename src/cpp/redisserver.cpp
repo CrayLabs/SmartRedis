@@ -61,6 +61,7 @@ RedisServer::RedisServer(ConfigOptions* cfgopts)
                          _command_interval + 1;
 
     _tp = new ThreadPool(_context, _thread_count);
+    _model_chunk_size = _UNKNOWN_MODEL_CHUNK_SIZE;
 }
 
 // RedisServer destructor

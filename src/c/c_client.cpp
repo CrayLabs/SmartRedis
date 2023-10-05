@@ -439,6 +439,7 @@ extern "C" SRError set_model_from_file(
   const char* device, const size_t device_length,
   const int batch_size,
   const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
@@ -477,8 +478,8 @@ extern "C" SRError set_model_from_file(
     }
 
     s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
-                            batch_size, min_batch_size, tag_str, input_vec,
-                            output_vec);
+                            batch_size, min_batch_size, min_batch_timeout,
+                            tag_str, input_vec, output_vec);
   });
 }
 
@@ -490,6 +491,7 @@ extern "C" SRError set_model_from_file_multigpu(
   const char* backend, const size_t backend_length,
   const int first_gpu, const int num_gpus,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs, const char** outputs,
@@ -528,8 +530,8 @@ extern "C" SRError set_model_from_file_multigpu(
     }
 
     s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
-                                    num_gpus, batch_size, min_batch_size, tag_str,
-                                    input_vec, output_vec);
+                                    num_gpus, batch_size, min_batch_size, min_batch_timeout,
+                                    tag_str, input_vec, output_vec);
   });
 }
 
@@ -541,6 +543,7 @@ extern "C" SRError set_model(
   const char* backend, const size_t backend_length,
   const char* device, const size_t device_length,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs,
@@ -581,8 +584,8 @@ extern "C" SRError set_model(
     }
 
     s->set_model(name_str, model_str, backend_str, device_str,
-                batch_size, min_batch_size, tag_str, input_vec,
-                output_vec);
+                batch_size, min_batch_size, min_batch_timeout,
+                tag_str, input_vec, output_vec);
   });
 }
 
@@ -594,6 +597,7 @@ extern "C" SRError set_model_multigpu(
   const char* backend, const size_t backend_length,
   const int first_gpu, const int num_gpus,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs,
@@ -633,8 +637,8 @@ extern "C" SRError set_model_multigpu(
     }
 
     s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
-                          batch_size, min_batch_size, tag_str, input_vec,
-                          output_vec);
+                          batch_size, min_batch_size, min_batch_timeout,
+                          tag_str, input_vec, output_vec);
   });
 }
 

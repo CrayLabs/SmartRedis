@@ -294,7 +294,7 @@ class RedisCluster : public RedisServer
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution
         *   \param key The key to associate with the model
-        *   \param model The model as a continuous buffer string_view
+        *   \param model The model as a sequence of buffer string_view chunks
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
         *   \param device The name of the device for execution
@@ -302,6 +302,7 @@ class RedisCluster : public RedisServer
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -312,11 +313,12 @@ class RedisCluster : public RedisServer
         *   \throw RuntimeException for all client errors
         */
         virtual CommandReply set_model(const std::string& key,
-                                       std::string_view model,
+                                       const std::vector<std::string_view>& model,
                                        const std::string& backend,
                                        const std::string& device,
                                        int batch_size = 0,
                                        int min_batch_size = 0,
+                                       int min_batch_timeout = 0,
                                        const std::string& tag = "",
                                        const std::vector<std::string>& inputs
                                             = std::vector<std::string>(),
@@ -327,7 +329,7 @@ class RedisCluster : public RedisServer
         *   \brief Set a model from std::string_view buffer in the
         *          database for future execution in a multi-GPU system
         *   \param name The name to associate with the model
-        *   \param model The model as a continuous buffer string_view
+        *   \param model The model as a sequence of buffer string_view chunks
         *   \param backend The name of the backend
         *                  (TF, TFLITE, TORCH, ONNX)
         *   \param first_gpu The first GPU to use with this model
@@ -335,6 +337,7 @@ class RedisCluster : public RedisServer
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -344,12 +347,13 @@ class RedisCluster : public RedisServer
         *   \throw RuntimeException for all client errors
         */
         virtual void set_model_multigpu(const std::string& name,
-                                        const std::string_view& model,
+                                        const std::vector<std::string_view>& model,
                                         const std::string& backend,
                                         int first_gpu,
                                         int num_gpus,
                                         int batch_size = 0,
                                         int min_batch_size = 0,
+                                        int min_batch_timeout = 0,
                                         const std::string& tag = "",
                                         const std::vector<std::string>& inputs
                                             = std::vector<std::string>(),
@@ -527,6 +531,11 @@ class RedisCluster : public RedisServer
         get_model_script_ai_info(const std::string& address,
                                  const std::string& key,
                                  const bool reset_stat);
+        /*!
+        *   \brief Retrieve the current model chunk size
+        *   \returns The size in bytes for model chunking
+        */
+        virtual int get_model_chunk_size();
 
         /*!
         *   \brief Run a CommandList via a Pipeline.
@@ -740,6 +749,21 @@ class RedisCluster : public RedisServer
         DBNode* _get_model_script_db(const std::string& name,
                                      std::vector<std::string>& inputs,
                                      std::vector<std::string>& outputs);
+
+        /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        virtual void set_model_chunk_size(int chunk_size);
 
         /*!
         *   \brief Execute a pipeline for the provided commands.

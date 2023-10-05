@@ -29,6 +29,10 @@
 #include <ctype.h>
 #include <algorithm>
 #include <cctype>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "client.h"
 #include "srexception.h"
 #include "logger.h"
@@ -578,6 +582,7 @@ void Client::set_model_from_file(const std::string& name,
                                  const std::string& device,
                                  int batch_size,
                                  int min_batch_size,
+                                 int min_batch_timeout,
                                  const std::string& tag,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
@@ -598,7 +603,7 @@ void Client::set_model_from_file(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model(name, model, backend, device, batch_size,
-              min_batch_size, tag, inputs, outputs);
+              min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
 
 // Set a model from file in the database for future execution in a multi-GPU system
@@ -609,6 +614,7 @@ void Client::set_model_from_file_multigpu(const std::string& name,
                                           int num_gpus,
                                           int batch_size,
                                           int min_batch_size,
+                                          int min_batch_timeout,
                                           const std::string& tag,
                                           const std::vector<std::string>& inputs,
                                           const std::vector<std::string>& outputs)
@@ -629,8 +635,42 @@ void Client::set_model_from_file_multigpu(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model_multigpu(name, model, backend, first_gpu, num_gpus, batch_size,
-                       min_batch_size, tag, inputs, outputs);
+                       min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
+
+// Validate batch settings for the set_model calls
+inline void __check_batch_settings(
+    int batch_size, int min_batch_size, int min_batch_timeout)
+{
+    // Throw a usage exception if batch_size is zero but one of the other
+    // parameters is non-zero
+    if (batch_size == 0 && (min_batch_size > 0 || min_batch_timeout > 0)) {
+        throw SRRuntimeException(
+            "batch_size must be non-zero if min_batch_size or "
+            "min_batch_timeout is used; otherwise batching will "
+            "not be performed."
+        );
+    }
+
+    // Throw a usage exception if min_batch_timeout is nonzero and
+    // min_batch_size is zero. (batch_size also has to be non-zero, but
+    // this was caught in the previous clause.)
+    if (min_batch_timeout > 0 && min_batch_size == 0) {
+        throw SRRuntimeException(
+            "min_batch_size must be non-zero if min_batch_timeout "
+            "is used; otherwise the min_batch_timeout parameter is ignored."
+        );
+    }
+
+    // Issue a warning if min_batch_size is non-zero but min_batch_timeout is zero
+    if (min_batch_size > 0 && min_batch_timeout == 0) {
+        std::cerr << "WARNING: min_batch_timeout was not set when a non-zero "
+                  << "min_batch_size was selected. " << std::endl
+                  << "Setting a small value (~10ms) for min_batch_timeout "
+                  << "may improve performance" << std::endl;
+    }
+}
+
 // Set a model from a string buffer in the database for future execution
 void Client::set_model(const std::string& name,
                        const std::string_view& model,
@@ -638,6 +678,7 @@ void Client::set_model(const std::string& name,
                        const std::string& device,
                        int batch_size,
                        int min_batch_size,
+                       int min_batch_timeout,
                        const std::string& tag,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
@@ -682,10 +723,24 @@ void Client::set_model(const std::string& name,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     auto response = _redis_server->set_model(
-        key, model, backend, device,
-        batch_size, min_batch_size,
+        key, model_segments, backend, device,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
     if (response.has_error()) {
         throw SRInternalException(
@@ -700,6 +755,7 @@ void Client::set_model_multigpu(const std::string& name,
                                 int num_gpus,
                                 int batch_size,
                                 int min_batch_size,
+                                int min_batch_timeout,
                                 const std::string& tag,
                                 const std::vector<std::string>& inputs,
                                 const std::vector<std::string>& outputs)
@@ -741,10 +797,24 @@ void Client::set_model_multigpu(const std::string& name,
         throw SRParameterException(backend + " is not a valid backend.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
-        key, model, backend, first_gpu, num_gpus,
-        batch_size, min_batch_size,
+        key, model_segments, backend, first_gpu, num_gpus,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
 }
 
@@ -755,16 +825,35 @@ std::string_view Client::get_model(const std::string& name)
     // Track calls to this API function
     LOG_API_FUNCTION();
 
+    // Get the model from the server
     std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_model(get_key);
     if (reply.has_error())
         throw SRRuntimeException("failed to get model from server");
 
-    char* model = _model_queries.allocate(reply.str_len());
+    // In most cases, the reply will be a single string
+    // consisting of the serialized model
+    if (!reply.is_array()) {
+        char* model = _model_queries.allocate(reply.str_len());
+        if (model == NULL)
+            throw SRBadAllocException("model query");
+        std::memcpy(model, reply.str(), reply.str_len());
+        return std::string_view(model, reply.str_len());
+    }
+
+    // Otherwise, we need to concatenate the segments together
+    size_t model_length = 0;
+    size_t offset = 0;
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        model_length += reply[i].str_len();
+    }
+    char* model = _model_queries.allocate(model_length);
     if (model == NULL)
         throw SRBadAllocException("model query");
-    std::memcpy(model, reply.str(), reply.str_len());
-    return std::string_view(model, reply.str_len());
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        std::memcpy(model + offset, reply[i].str(), reply[i].str_len());
+    }
+    return std::string_view(model, model_length);
 }
 
 // Set a script from file in the database for future execution
@@ -2195,9 +2284,32 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
     return false;
 }
 
+// Reconfigure the model chunk size for the database
+void Client::set_model_chunk_size(int chunk_size)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+    std::cout << cmd.to_string() << std::endl;
+
+    // Run it
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+
+    // Remember the new chunk size
+    _redis_server->store_model_chunk_size(chunk_size);
+}
+
 // Create a string representation of the client
 std::string Client::to_string() const
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string result;
     result = "Client (" + _lname + "):\n";
     result += _redis_server->to_string();

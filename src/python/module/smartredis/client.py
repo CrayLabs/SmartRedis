@@ -679,6 +679,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -706,6 +707,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -719,6 +722,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -730,6 +734,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -745,6 +750,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -773,6 +779,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -787,6 +795,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
@@ -798,6 +807,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -812,6 +822,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -839,6 +850,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -853,6 +866,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -865,6 +879,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -880,6 +895,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -908,6 +924,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -923,6 +941,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
@@ -935,6 +954,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -1520,6 +1540,25 @@ class Client(SRObject):
         """
         typecheck(addresses, "addresses", list)
         self._client.save(addresses)
+
+    @exception_handler
+    def set_model_chunk_size(self, chunk_size: int) -> None:
+        """Reconfigures the chunking size that Redis uses for model
+           serialization, replication, and the model_get command.
+           This method triggers the AI.CONFIG method in the Redis
+           database to change the model chunking size.
+
+           NOTE: The default size of 511MB should be fine for most
+           applications, so it is expected to be very rare that a
+           client calls this method. It is not necessary to call
+           this method a model to be chunked.
+        :param chunk_size: The new chunk size in bytes
+        :type addresses: int
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(chunk_size, "chunk_size", int)
+        self._client.set_model_chunk_size(chunk_size)
 
     @exception_handler
     def append_to_list(self, list_name: str, dataset: Dataset) -> None:

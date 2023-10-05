@@ -358,6 +358,7 @@ are uniform across all SmartRedis clients, and as an example, the C++
                    const std::string& device,
                    int batch_size = 0,
                    int min_batch_size = 0,
+                   int min_batch_timeout = 0,
                    const std::string& tag = "",
                    const std::vector<std::string>& inputs
                        = std::vector<std::string>(),
