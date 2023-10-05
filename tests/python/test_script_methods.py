@@ -24,15 +24,18 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pytest
 import inspect
 import os.path as osp
-
+from os import environ
 import numpy as np
 import torch
 from smartredis import Client
 
 file_path = osp.dirname(osp.abspath(__file__))
 
+
+test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
 def test_set_get_function(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
@@ -94,7 +97,10 @@ def test_run_script_list(use_cluster, context):
         out, expected, "Returned array from script not equal to expected result"
     )
 
-
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
 def test_run_script_multigpu_str(use_cluster, context):
     data = np.array([[1, 2, 3, 4, 5]])
 
@@ -105,7 +111,10 @@ def test_run_script_multigpu_str(use_cluster, context):
     out = c.get_tensor("script-test-out")
     assert out == 5
 
-
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
 def test_run_script_multigpu_list(use_cluster, context):
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])

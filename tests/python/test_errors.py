@@ -24,13 +24,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pytest
 import os
 
 import numpy as np
 import pytest
+from os import environ
 from smartredis import *
 from smartredis.error import *
 
+
+test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
 @pytest.fixture
 def cfg_opts() -> ConfigOptions:
@@ -331,7 +335,23 @@ def test_bad_type_get_script(use_cluster, context):
         c.get_script(42)
 
 
-def test_bad_type_run_script(use_cluster, context):
+def test_bad_type_run_script_str(use_cluster, context):
+    c = Client(None, use_cluster, logger_name=context)
+    key = "my_script"
+    fn_name = "phred"
+    inputs = "a string"
+    outputs = "another string"
+    with pytest.raises(TypeError):
+        c.run_script(42, fn_name, inputs, outputs)
+    with pytest.raises(TypeError):
+        c.run_script(key, 42, inputs, outputs)
+    with pytest.raises(TypeError):
+        c.run_script(key, fn_name, 42, outputs)
+    with pytest.raises(TypeError):
+        c.run_script(key, fn_name, inputs, 42)
+
+
+def test_bad_type_run_script_list(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
     fn_name = "phred"
@@ -346,13 +366,16 @@ def test_bad_type_run_script(use_cluster, context):
     with pytest.raises(TypeError):
         c.run_script(key, fn_name, inputs, 42)
 
-
-def test_bad_type_run_script_multigpu(use_cluster, context):
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
+def test_bad_type_run_script_multigpu_str(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
     fn_name = "phred"
-    inputs = "list of strings"
-    outputs = "another string list"
+    inputs = "a string"
+    outputs = "another string"
     offset = 0
     first_gpu = 0
     num_gpus = 1
@@ -375,7 +398,39 @@ def test_bad_type_run_script_multigpu(use_cluster, context):
     with pytest.raises(ValueError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, 0)
 
-
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
+def test_bad_type_run_script_multigpu_list(use_cluster, context):
+    c = Client(None, use_cluster, logger_name=context)
+    key = "my_script"
+    fn_name = "phred"
+    inputs = ["list", "of", "strings"]
+    outputs = ["another", "string", "list"]
+    offset = 0
+    first_gpu = 0
+    num_gpus = 1
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(42, fn_name, inputs, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, 42, inputs, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, 42, outputs, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, 42, offset, first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, "not an integer", first_gpu, num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, "not an integer", num_gpus)
+    with pytest.raises(TypeError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, "not an integer")
+    with pytest.raises(ValueError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, -1, num_gpus)
+    with pytest.raises(ValueError):
+        c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, 0)
+        
+        
 def test_bad_type_get_model(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     with pytest.raises(TypeError):
