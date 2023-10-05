@@ -285,6 +285,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -299,6 +300,7 @@ class PyClient : public PySRObject
                         const std::string& device,
                         int batch_size = 0,
                         int min_batch_size = 0,
+                        int min_batch_timeout = 0,
                         const std::string& tag = "",
                         const std::vector<std::string>& inputs
                             = std::vector<std::string>(),
@@ -317,6 +319,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -332,6 +335,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -350,6 +354,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -364,6 +369,7 @@ class PyClient : public PySRObject
                                 const std::string& device,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -382,6 +388,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -397,6 +404,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),

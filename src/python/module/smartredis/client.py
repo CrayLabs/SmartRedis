@@ -605,6 +605,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -632,6 +633,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -645,6 +648,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -656,6 +660,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -671,6 +676,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -699,6 +705,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -713,6 +721,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
@@ -724,6 +733,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -738,6 +748,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -765,6 +776,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -779,6 +792,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -791,6 +805,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -806,6 +821,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -834,6 +850,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -849,6 +867,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
@@ -861,6 +880,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,

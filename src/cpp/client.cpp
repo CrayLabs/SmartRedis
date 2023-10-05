@@ -502,6 +502,7 @@ void Client::set_model_from_file(const std::string& name,
                                  const std::string& device,
                                  int batch_size,
                                  int min_batch_size,
+                                 int min_batch_timeout,
                                  const std::string& tag,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
@@ -522,7 +523,7 @@ void Client::set_model_from_file(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model(name, model, backend, device, batch_size,
-              min_batch_size, tag, inputs, outputs);
+              min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
 
 // Set a model from file in the database for future execution in a multi-GPU system
@@ -533,6 +534,7 @@ void Client::set_model_from_file_multigpu(const std::string& name,
                                           int num_gpus,
                                           int batch_size,
                                           int min_batch_size,
+                                          int min_batch_timeout,
                                           const std::string& tag,
                                           const std::vector<std::string>& inputs,
                                           const std::vector<std::string>& outputs)
@@ -553,8 +555,42 @@ void Client::set_model_from_file_multigpu(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model_multigpu(name, model, backend, first_gpu, num_gpus, batch_size,
-                       min_batch_size, tag, inputs, outputs);
+                       min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
+
+// Validate batch settings for the set_model calls
+inline void __check_batch_settings(
+    int batch_size, int min_batch_size, int min_batch_timeout)
+{
+    // Throw a usage exception if batch_size is zero but one of the other
+    // parameters is non-zero
+    if (batch_size == 0 && (min_batch_size > 0 || min_batch_timeout > 0)) {
+        throw SRRuntimeException(
+            "batch_size must be non-zero if min_batch_size or "
+            "min_batch_timeout is used; otherwise batching will "
+            "not be performed."
+        );
+    }
+
+    // Throw a usage exception if min_batch_timeout is nonzero and
+    // min_batch_size is zero. (batch_size also has to be non-zero, but
+    // this was caught in the previous clause.)
+    if (min_batch_timeout > 0 && min_batch_size == 0) {
+        throw SRRuntimeException(
+            "min_batch_size must be non-zero if min_batch_timeout "
+            "is used; otherwise the min_batch_timeout parameter is ignored."
+        );
+    }
+
+    // Issue a warning if min_batch_size is non-zero but min_batch_timeout is zero
+    if (min_batch_size > 0 && min_batch_timeout == 0) {
+        std::cerr << "WARNING: min_batch_timeout was not set when a non-zero "
+                  << "min_batch_size was selected. " << std::endl
+                  << "Setting a small value (~10ms) for min_batch_timeout "
+                  << "may improve performance" << std::endl;
+    }
+}
+
 // Set a model from a string buffer in the database for future execution
 void Client::set_model(const std::string& name,
                        const std::string_view& model,
@@ -562,6 +598,7 @@ void Client::set_model(const std::string& name,
                        const std::string& device,
                        int batch_size,
                        int min_batch_size,
+                       int min_batch_timeout,
                        const std::string& tag,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
@@ -606,6 +643,8 @@ void Client::set_model(const std::string& name,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
     // Split model into chunks
     size_t offset = 0;
     std::vector<std::string_view> model_segments;
@@ -621,7 +660,7 @@ void Client::set_model(const std::string& name,
     std::string key = _build_model_key(name, false);
     auto response = _redis_server->set_model(
         key, model_segments, backend, device,
-        batch_size, min_batch_size,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
     if (response.has_error()) {
         throw SRInternalException(
@@ -636,6 +675,7 @@ void Client::set_model_multigpu(const std::string& name,
                                 int num_gpus,
                                 int batch_size,
                                 int min_batch_size,
+                                int min_batch_timeout,
                                 const std::string& tag,
                                 const std::vector<std::string>& inputs,
                                 const std::vector<std::string>& outputs)
@@ -677,6 +717,8 @@ void Client::set_model_multigpu(const std::string& name,
         throw SRParameterException(backend + " is not a valid backend.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
     // Split model into chunks
     size_t offset = 0;
     std::vector<std::string_view> model_segments;
@@ -692,7 +734,7 @@ void Client::set_model_multigpu(const std::string& name,
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
         key, model_segments, backend, first_gpu, num_gpus,
-        batch_size, min_batch_size,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
 }
 
