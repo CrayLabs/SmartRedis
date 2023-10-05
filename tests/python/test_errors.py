@@ -24,7 +24,6 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import pytest
 import os
 
 import numpy as np
@@ -106,7 +105,7 @@ def test_missing_script_function(use_cluster, context):
     with pytest.raises(RedisReplyError):
         c.run_script("bad-function", "not-a-function-in-script", "bad-func-tensor", "output")
 
-def test_bad_function_execution_multi(use_cluster, context):
+def test_bad_function_execution_multigpu(use_cluster, context):
     """Error raised inside function"""
 
     c = Client(None, use_cluster, logger_name=context)
@@ -115,11 +114,11 @@ def test_bad_function_execution_multi(use_cluster, context):
     c.put_tensor("bad-func-tensor", data)
     with pytest.raises(RedisReplyError):
         c.run_script_multigpu("bad-function", "bad_function", ["bad-func-tensor"], ["output"], 0, 0, 2)
-    # with pytest.raises(RedisReplyError):
-    #     c.run_script_multigpu("bad-function", "bad_function", "bad-func-tensor", "output", 0, 0, 2)
+    with pytest.raises(RedisReplyError):
+        c.run_script_multigpu("bad-function", "bad_function", "bad-func-tensor", "output", 0, 0, 2)
 
 
-def test_missing_script_function_multi(use_cluster, context):
+def test_missing_script_function_multigpu(use_cluster, context):
     """User requests to run a function not in the script"""
 
     c = Client(None, use_cluster, logger_name=context)
@@ -366,10 +365,7 @@ def test_bad_type_run_script_list(use_cluster, context):
     with pytest.raises(TypeError):
         c.run_script(key, fn_name, inputs, 42)
 
-@pytest.mark.skipif(
-    not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
-)
+
 def test_bad_type_run_script_multigpu_str(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
@@ -398,10 +394,7 @@ def test_bad_type_run_script_multigpu_str(use_cluster, context):
     with pytest.raises(ValueError):
         c.run_script_multigpu(key, fn_name, inputs, outputs, offset, first_gpu, 0)
 
-@pytest.mark.skipif(
-    not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
-)
+
 def test_bad_type_run_script_multigpu_list(use_cluster, context):
     c = Client(None, use_cluster, logger_name=context)
     key = "my_script"
