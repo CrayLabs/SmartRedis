@@ -105,6 +105,10 @@ def test_missing_script_function(use_cluster, context):
     with pytest.raises(RedisReplyError):
         c.run_script("bad-function", "not-a-function-in-script", "bad-func-tensor", "output")
 
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
 def test_bad_function_execution_multigpu(use_cluster, context):
     """Error raised inside function"""
 
@@ -118,6 +122,10 @@ def test_bad_function_execution_multigpu(use_cluster, context):
         c.run_script_multigpu("bad-function", "bad_function", "bad-func-tensor", "output", 0, 0, 2)
 
 
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
 def test_missing_script_function_multigpu(use_cluster, context):
     """User requests to run a function not in the script"""
 
