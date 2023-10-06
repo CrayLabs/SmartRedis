@@ -466,10 +466,10 @@ class Client(SRObject):
 
     @exception_handler
     def run_script(
-        self, 
-        name: str, 
-        fn_name: str, 
-        inputs: t.Union[str, t.List[str]], 
+        self,
+        name: str,
+        fn_name: str,
+        inputs: t.Union[str, t.List[str]],
         outputs: t.Union[str, t.List[str]]
     ) -> None:
         """Execute TorchScript stored inside the database
