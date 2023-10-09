@@ -123,7 +123,8 @@ class Dataset(SRObject):
 
     @exception_handler
     def add_meta_scalar(self, name: str, data: t.Union[int, float]) -> None:
-        """Add scalar (non-string) metadata to a field name if it exists; otherwise, create and add
+        """Add scalar (non-string) metadata to a field name if it exists; 
+        otherwise, create and add
 
             If the field name exists, append the scalar metadata; otherwise, 
             create the field within the DataSet object and add the scalar metadata.
@@ -240,3 +241,4 @@ class Dataset(SRObject):
         """
         typecheck(name, "name", str)
         return self._data.get_tensor_dims(name)
+    
