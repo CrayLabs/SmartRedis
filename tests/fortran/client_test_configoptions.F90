@@ -43,15 +43,15 @@ program main
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! Establish test keys
-  ! non-prefixed testing keys
+  ! non-suffixed testing keys
   call setenv("test_integer_key", "42")
   call setenv("test_string_key", "charizard")
-  ! prefixed testing keys
-  call setenv("prefixtest_integer_key", "42")
-  call setenv("prefixtest_string_key", "charizard")
+  ! suffixed testing keys
+  call setenv("integer_key_suffixtest", "42")
+  call setenv("string_key_suffixtest", "charizard")
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  !! non-prefixed option testing
+  !! non-suffixed option testing
   result = co%create_configoptions_from_environment("");
   if (result .ne. SRNoError) error stop
 
@@ -118,12 +118,12 @@ program main
 
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! Prefixed testing
-  result = co%create_configoptions_from_environment("prefixtest");
+  ! suffixtest testing
+  result = co%create_configoptions_from_environment("suffixtest");
   if (result .ne. SRNoError) error stop
 
   ! integer option tests
-  write(*,*) "ConfigOption testing: prefixed integer option tests"
+  write(*,*) "ConfigOption testing: suffixed integer option tests"
 
   result = co%get_integer_option("integer_key", iresult)
   if (result .ne. SRNoError) error stop
@@ -155,7 +155,7 @@ program main
 
 
   ! string option tests
-  write(*,*) "ConfigOption testing: prefixed string option tests"
+  write(*,*) "ConfigOption testing: suffixed string option tests"
 
   result = co%get_string_option("string_key", sresult)
   if (result .ne. SRNoError) error stop
@@ -189,9 +189,9 @@ program main
   ! non-prefixed testing keys
   call unsetenv("test_integer_key")
   call unsetenv("test_string_key")
-  ! prefixed testing keys
-  call unsetenv("prefixtest_integer_key")
-  call unsetenv("prefixtest_string_key")
+  ! suffixed testing keys
+  call unsetenv("integer_key_suffixtest")
+  call unsetenv("string_key_suffixtest")
 
   ! Done
   write(*,*) "ConfigOption testing: passed"

@@ -93,6 +93,17 @@ class ConfigOptions:
         return opts
 
     @exception_handler
+    @managed
+    def get_data(self):
+        """Return the PyConfigOptions attribute
+
+        :return: The PyConfigOptions attribute containing
+                 the ConfigOptions information
+        :rtype: PyConfigOptions
+        """
+        return self._config_opts
+
+    @exception_handler
     def set_configoptions(self, configoptions: PyConfigOptions) -> None:
         """Set the PyConfigOptions attribute
 
@@ -104,22 +115,22 @@ class ConfigOptions:
 
     @classmethod
     @exception_handler
-    def create_from_environment(cls, db_prefix: str) -> "ConfigOptions":
+    def create_from_environment(cls, db_suffix: str) -> "ConfigOptions":
         """Instantiate ConfigOptions, getting selections from
-        environment variables. If db_prefix is non-empty,
-        then "{db_prefix}_" will be prepended to the name of
+        environment variables. If db_suffix is non-empty,
+        then "_{db_suffix}" will be appended to the name of
         each environment variable that is read
 
         :param cls: The ConfigOptions class
         :type cls: type
-        :param db_prefix: Prefix to prepend to environment variables
-                          or an empty string to eschew prepending
-        :type db_prefix: str
+        :param db_suffix: Prefix to append to environment variables
+                          or an empty string to eschew appending
+        :type db_suffix: str
         :return: An instantiated ConfigOptions object
         :rtype: ConfigOptions
         """
-        typecheck(db_prefix, "db_prefix", str)
-        configoptions = PyConfigOptions.create_from_environment(db_prefix)
+        typecheck(db_suffix, "db_suffix", str)
+        configoptions = PyConfigOptions.create_from_environment(db_suffix)
         opts: ConfigOptions = create_managed_instance(ConfigOptions)
         opts.set_configoptions(configoptions)
         return opts

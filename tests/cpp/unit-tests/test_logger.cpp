@@ -45,7 +45,7 @@ SCENARIO("Additional Testing for logging", "[LOG]")
 
     GIVEN("A Logger object")
     {
-        Client client(use_cluster(), "test_logger");
+        Client client("test_logger");
 
         THEN("Logging should be able to be done")
         {

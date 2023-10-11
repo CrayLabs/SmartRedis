@@ -16,6 +16,7 @@ Description
 - Updated the third-party lcov component
 - Add link to contributing guidelines
 - Added link to contributing guidelines
+- Added support for multiple backend databases via a new Client constructor that accepts a ConfigOptions object
 
 Detailed Notes
 
@@ -26,6 +27,7 @@ Detailed Notes
 - Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
 - Updated lcov from version 1.15 to 2.0 (PR396_)
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
+- Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
 .. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
 .. _PR407: https://github.com/CrayLabs/SmartRedis/pull/407
@@ -34,6 +36,7 @@ Detailed Notes
 .. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
 .. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
 .. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+.. _PR353: https://github.com/CrayLabs/SmartRedis/pull/353
 
 0.4.2
 -----
@@ -131,7 +134,7 @@ Detailed Notes
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code into a small static library (PR349_)
 - For the NVidia toolchain only: Replaces the assumed rank feature of F2018 used in the Fortran client with assumed shape arrays, making it possible to compile SmartRedis with the Nvidia toolchain. (PR346_)
 - Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
-- Many Fortran  routines were returning logical kind = c_bool which turns out not to be the same default kind of most Fortran compilers. These have now been refactored so that users need not import `iso_c_binding` in their own applications (PR340_)
+- Many Fortran routines were returning logical kind = c_bool which turns out not to be the same default kind of most Fortran compilers. These have now been refactored so that users need not import `iso_c_binding` in their own applications (PR340_)
 - Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR339_)
 - Correct the spelling of the C DataSet destruction interface from DeallocateeDataSet to DeallocateDataSet (PR338_)
 - Updated the version of Redis++ to v1.3.8 to pull in a change that ensures the redis++.pc file properly points to the generated libraries (PR334_)

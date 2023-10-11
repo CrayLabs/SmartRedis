@@ -24,18 +24,17 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import numpy as np
 
 from smartredis import Client, Dataset
 
-def test_prefixing(use_cluster, context, monkeypatch):
+def test_prefixing(context, monkeypatch):
     # configure prefix variables
     monkeypatch.setenv("SSKEYOUT", "prefix_test")
     monkeypatch.setenv("SSKEYIN", "prefix_test")
 
     # Set up client
-    c = Client(address=None, cluster=use_cluster, logger_name=context)
+    c = Client(address=None, logger_name=context)
     c.use_dataset_ensemble_prefix(True)
     c.use_tensor_ensemble_prefix(True)
     d = Dataset("test_dataset")
