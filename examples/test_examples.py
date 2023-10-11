@@ -48,7 +48,7 @@ def get_test_names():
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_example(test, use_cluster, build, sr_fortran, link):
+def test_example(test, build, sr_fortran, link):
     if (sr_fortran == "ON" or ".F90" not in test):
         # Build the path to the test executable from the source file name
         # . keep only the last three parts of the path: (parallel/serial, language, basename)

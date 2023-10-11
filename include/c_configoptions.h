@@ -44,19 +44,19 @@ extern "C" {
 
 /*!
 *   \brief Instantiate ConfigOptions, getting selections from
-*          environment variables. If \p db_prefix is non-empty,
-*          then "{db_prefix}_" will be prepended to the name of
+*          environment variables. If \p db_suffix is non-empty,
+*          then "_{db_suffix}" will be appended to the name of
 *          each environment variable that is read.
-*   \param db_prefix The prefix to use with environment variables,
-*                    or an empty string to disable prefixing
-*   \param db_prefix_length The length of the db_prefix string,
+*   \param db_suffix The suffix to use with environment variables,
+*                    or an empty string to disable suffixing
+*   \param db_suffix_length The length of the db_suffix string,
 *                           excluding null terminating character
 *   \param new_configoptions Receives the new configoptions object
 *   \returns Returns SRNoError on success or an error code on failure
 */
 SRError create_configoptions_from_environment(
-    const char* db_prefix,
-    const size_t db_prefix_length,
+    const char* db_suffix,
+    const size_t db_suffix_length,
     void** new_configoptions);
 
 /////////////////////////////////////////////////////////////

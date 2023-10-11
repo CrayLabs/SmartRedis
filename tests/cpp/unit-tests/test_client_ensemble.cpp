@@ -131,7 +131,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
             setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
 
-            Client producer_client(use_cluster(), "test_client_ensemble::producer");
+            Client producer_client("test_client_ensemble::producer");
             producer_client.use_model_ensemble_prefix(true);
             producer_client.set_model_chunk_size(1024 * 1024);
 
@@ -185,7 +185,7 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             setenv("SSKEYIN", keyin_env_get, 1);
             setenv("SSKEYOUT", keyout_env_get, 1);
 
-            Client consumer_client(use_cluster(), "test_client_ensemble::consumer");
+            Client consumer_client("test_client_ensemble::consumer");
             consumer_client.use_model_ensemble_prefix(true);
 
             // Tensors

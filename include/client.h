@@ -56,6 +56,9 @@
 
 namespace SmartRedis {
 
+// class declarations
+class ConfigOptions;
+
 /*!
 *  \brief The database response to a command
 */
@@ -72,7 +75,35 @@ class Client : public SRObject
     public:
 
         /*!
+        *   \brief Simple Client constructor with default configuration:
+        *          environment variables, no suffix
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(const char* logger_name);
+
+        /*!
+        *   \brief Simple Client constructor with default configuration:
+        *          environment variables, no suffix
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(const std::string& logger_name = "default")
+            : Client(logger_name.c_str()) {}
+
+        /*!
         *   \brief Client constructor
+        *   \param cfgopts source from which to access runtime settings
+        *   \param logger_name Name to use for this client when logging
+        *   \throw SmartRedis::Exception if client connection or
+        *          object initialization fails
+        */
+        Client(ConfigOptions* cfgopts, const std::string& logger_name = "default");
+
+        /*!
+        *   \brief Client constructor (deprecated)
         *   \param cluster Flag for if a database cluster is being used
         *   \param logger_name Name to use for this client when logging
         *   \throw SmartRedis::Exception if client connection or
@@ -1382,9 +1413,9 @@ class Client : public SRObject
 
         /*!
         *  \brief Set the prefixes that are used for set and get methods
-        *         using SSKEYIN and SSKEYOUT environment variables.
+        *         using SSKEYIN and SSKEYOUT config settings
         */
-        void _set_prefixes_from_env();
+        void _get_prefix_settings();
 
         /*!
         *  \brief Get the key prefix for placement methods
@@ -1534,6 +1565,11 @@ class Client : public SRObject
         *        for model and script keys.
         */
         bool _use_list_prefix;
+
+        /*!
+        * \brief Our configuration options, used to access runtime settings
+        */
+        ConfigOptions* _cfgopts;
 
         /*!
         * \brief Build full formatted key of a tensor, based on
@@ -1705,6 +1741,12 @@ class Client : public SRObject
         bool _poll_list_length(const std::string& name, int list_length,
                                int poll_frequency_ms, int num_tries,
                                std::function<bool(int,int)> comp_func);
+
+        /*!
+        *   \brief Initialize a connection to the back-end database
+        *   \throw SmartRedis::Exception if the connection fails
+        */
+       void _establish_server_connection();
 
 };
 
