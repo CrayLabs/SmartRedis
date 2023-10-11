@@ -119,6 +119,15 @@ class Dataset(SRObject):
         """
         typecheck(name, "name", str)
         return self._data.get_tensor(name)
+    
+    @exception_handler
+    def get_name(self) -> str:
+        """Get a tensor from the Dataset
+
+        :return: the name of the dataset in-memory
+        :rtype: str
+        """
+        return self._data.get_name()
 
     @exception_handler
     def add_meta_scalar(self, name: str, data: t.Union[int, float]) -> None:
