@@ -42,6 +42,14 @@ def test_set_model(mock_model, use_cluster, context):
     assert model == returned_model
 
 
+def test_poll_model(mock_model, use_cluster, context):
+    model = mock_model.create_torch_cnn()
+    c = Client(None, use_cluster, logger_name=context)
+    c.set_model("simple_cnn", model, "TORCH", "CPU")
+    poll_model_bool = c.poll_model("simple_cnn", 100, 100)
+    assert poll_model_bool == True
+    
+
 def test_set_model_from_file(mock_model, use_cluster, context):
     try:
         mock_model.create_torch_cnn(filepath="./torch_cnn.pt")

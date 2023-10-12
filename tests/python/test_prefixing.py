@@ -29,15 +29,16 @@ import numpy as np
 
 from smartredis import Client, Dataset
 
-def test_prefixing(use_cluster, context, monkeypatch):
+def test_dataset_and_tensor_prefixing(use_cluster, context, monkeypatch):
     # configure prefix variables
     monkeypatch.setenv("SSKEYOUT", "prefix_test")
-    monkeypatch.setenv("SSKEYIN", "prefix_test")
+    monkeypatch.setenv("SSKEYIN", "prefix_test,prefix_test")
 
     # Set up client
     c = Client(address=None, cluster=use_cluster, logger_name=context)
     c.use_dataset_ensemble_prefix(True)
     c.use_tensor_ensemble_prefix(True)
+    c.set_data_source("prefix_test")
     d = Dataset("test_dataset")
     data = np.uint16([1, 2, 3, 4])
     d.add_tensor("dataset_tensor", data)
@@ -51,3 +52,62 @@ def test_prefixing(use_cluster, context, monkeypatch):
     assert c.tensor_exists("test_tensor")
     assert c.key_exists("prefix_test.test_tensor")
     assert not c.key_exists("test_tensor")
+    
+
+# def test_model_prefixing(mock_model, use_cluster, context, monkeypatch):
+#     # configure prefix variables
+#     monkeypatch.setenv("SSKEYOUT", "prefix_test")
+#     monkeypatch.setenv("SSKEYIN", "prefix_test,prefix_test")
+
+#     # Set up client
+#     c = Client(address=None, cluster=use_cluster, logger_name=context)
+#     c.use_model_ensemble_prefix(True)
+#     c.set_data_source("prefix_test")
+#     model = mock_model.create_torch_cnn()
+#     c = Client(None, use_cluster, logger_name=context)
+#     c.set_model("simple_cnn", model, "TORCH", "CPU")
+
+#     # Validate keys to see whether prefixing was applied properly
+#     assert c.model_exists("simple_cnn")
+#     # assert c.key_exists("prefix_test.simple_cnn.meta")
+#     assert not c.key_exists("simple_cnn")
+
+
+# def test_list_prefixing(use_cluster, context, monkeypatch):
+#     # configure prefix variables
+#     monkeypatch.setenv("SSKEYOUT", "prefix_test")
+#     monkeypatch.setenv("SSKEYIN", "prefix_test,prefix_test")
+
+#     # Set up client
+#     c = Client(address=None, cluster=use_cluster, logger_name=context)
+#     c.use_list_ensemble_prefix(True)
+#     c.set_data_source("prefix_test")
+
+#     # Build datasets
+#     num_datasets = 4
+#     original_datasets = [create_dataset(f"dataset_{i}") for i in range(num_datasets)]
+    
+#     # Make sure the list is cleared
+#     list_name = "dataset_test_list"
+#     c.delete_list(list_name)
+    
+#     # Put datasets into the list
+#     for i in range(num_datasets):
+#         c.put_dataset(original_datasets[i])
+#         c.append_to_list(list_name, original_datasets[i])
+    
+#     # Validate keys to see whether prefixing was applied properly
+#     assert c.dataset_exists("dataset_test_list")
+    
+# ------------ helper functions ---------------------------------
+
+# def create_dataset(name):
+#     array = np.array([1, 2, 3, 4])
+#     string = "test_meta_strings"
+#     scalar = 7
+
+#     dataset = Dataset(name)
+#     dataset.add_tensor("test_array", array)
+#     dataset.add_meta_string("test_string", string)
+#     dataset.add_meta_scalar("test_scalar", scalar)
+#     return dataset

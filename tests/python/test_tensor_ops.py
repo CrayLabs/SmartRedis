@@ -39,11 +39,23 @@ def test_copy_tensor(use_cluster, context):
     client.put_tensor("test_copy", tensor)
 
     client.copy_tensor("test_copy", "test_copied")
-
+    bool_poll_key = client.poll_key(get_prefix() + "test_copy", 100, 100)
+    assert bool_poll_key == True
     assert client.key_exists(get_prefix() + "test_copy")
     assert client.key_exists(get_prefix() + "test_copied")
     returned = client.get_tensor("test_copied")
     assert np.array_equal(tensor, returned)
+
+
+def test_poll_tensor(use_cluster, context):
+    # test copying tensor
+
+    client = Client(None, use_cluster, logger_name=context)
+    tensor = np.array([1, 2])
+    client.put_tensor("test_copy", tensor)
+
+    poll_tensor_bool = client.poll_tensor("test_copy", 100, 100)
+    assert poll_tensor_bool == True
 
 
 def test_rename_tensor(use_cluster, context):
