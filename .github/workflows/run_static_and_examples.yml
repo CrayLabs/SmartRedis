@@ -148,7 +148,6 @@ jobs:
         if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
         run: make test-examples SR_FORTRAN=ON SR_PYTHON=ON \
             SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
-            
       - name: Test static build -- intel compilers
         if: contains(matrix.compiler, 'intel')
         run: make build-example-serial SR_FORTRAN=ON
