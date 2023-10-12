@@ -47,6 +47,16 @@ def test_copy_tensor(context):
     assert np.array_equal(tensor, returned)
 
 
+def test_poll_tensor(context):
+    # test polling tensor
+    
+    client = Client(None, logger_name=context)
+    tensor = np.array([1, 2])
+    client.put_tensor("test_copy", tensor)
+
+    assert client.poll_tensor("test_copy", 100, 100)
+
+
 def test_rename_tensor(context):
     # test renaming tensor
 
