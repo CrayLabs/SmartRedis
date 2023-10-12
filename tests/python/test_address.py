@@ -28,20 +28,21 @@ import os
 
 from smartredis import Client
 
-def test_serialization(use_cluster, context):
-    # get env var to set through client init
-    ssdb = os.environ["SSDB"]
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+def test_serialization(context):
+    c = Client(None, logger_name=context)
     assert str(c) != repr(c)
 
 
-def test_address(use_cluster, context):
+def test_address(context):
+    # This test evaluates deprecated behavior and will be removed
+    # in the next release when the deprecated Client construction
+    # is removed.
     # get env var to set through client init
     ssdb = os.environ["SSDB"]
     del os.environ["SSDB"]
 
     # client init should fail if SSDB not set
-    c = Client(address=ssdb, cluster=use_cluster, logger_name=context)
+    _ = Client(False, address=ssdb, logger_name=context)
 
     # check if SSDB was set anyway
     assert os.environ["SSDB"] == ssdb

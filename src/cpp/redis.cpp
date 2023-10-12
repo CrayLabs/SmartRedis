@@ -35,8 +35,8 @@
 using namespace SmartRedis;
 
 // Redis constructor.
-Redis::Redis(const SRObject* context)
-    : RedisServer(context)
+Redis::Redis(ConfigOptions* cfgopts)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(_get_ssdb());
     // Remember whether it's a unix domain socket for later
@@ -46,8 +46,8 @@ Redis::Redis(const SRObject* context)
 }
 
 // Redis constructor. Uses address provided to constructor instead of environment variables
-Redis::Redis(const SRObject* context, std::string addr_spec)
-    : RedisServer(context)
+Redis::Redis(ConfigOptions* cfgopts, std::string addr_spec)
+    : RedisServer(cfgopts)
 {
     SRAddress db_address(addr_spec);
     _add_to_address_map(db_address);
@@ -80,10 +80,13 @@ CommandReply Redis::run(CompoundCommand& cmd){
 
 // Run an address-at Command on the server
 CommandReply Redis::run(AddressAtCommand& cmd){
-    if (!is_addressable(cmd.get_address()))
-        throw SRRuntimeException("The provided address does not match "\
-                                 "the address used to initialize the "\
-                                 "non-cluster client connection.");
+    if (!is_addressable(cmd.get_address())) {
+        std::string msg("The provided address does not match "\
+                        "the address used to initialize the "\
+                        "non-cluster client connection.");
+        msg += " Received: " + cmd.get_address().to_string();
+        throw SRRuntimeException(msg);
+    }
     return this->_run(cmd);
 }
 

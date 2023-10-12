@@ -92,15 +92,15 @@ predicate is matched on the length of the list:
 
 .. code-block:: cpp
 
-    # Block until the list reaches a specific length
+    // Block until the list reaches a specific length
     bool poll_list_length(const std::string& name, int list_length,
                             int poll_frequency_ms, int num_tries);
 
-    # Block until the list reaches or exceeds a specific length
+    // Block until the list reaches or exceeds a specific length
     bool poll_list_length_gte(const std::string& name, int list_length,
                                 int poll_frequency_ms, int num_tries);
 
-    # Block until the list is no longer than a specific length
+    // Block until the list is no longer than a specific length
     bool poll_list_length_lte(const std::string& name, int list_length,
                                 int poll_frequency_ms, int num_tries);
 
@@ -114,13 +114,72 @@ lead to race conditions:
 
 .. code-block:: cpp
 
-    # Copy an aggregation list
+    // Copy an aggregation list
     void copy_list(const std::string& src_name,
                     const std::string& dest_name);
 
-    # Rename an aggregation list
+    // Rename an aggregation list
     void rename_list(const std::string& src_name,
                         const std::string& dest_name);
 
-    # Delete an aggregation list
+    // Delete an aggregation list
     void delete_list(const std::string& list_name);
+
+.. _advanced_topics_dataset_aggregation:
+
+Multiple Database Support
+=========================
+
+SmartRedis offers clients the ability to interact with multiple databases
+concurrently. Each Client represents a connection to a specific database,
+but an application with multiple clients can have each one connected to a
+different database.
+
+Differentiating databases via environment variables
+---------------------------------------------------
+
+In order to differentiate the databases that clients connect to, SmartRedis
+relies on differentiation in the environment variables that the client uses
+to initialize itself. Of primary importance here are the SSDB and SR_DB_TYPE
+variables, but all environment variables (other than SR_LOG_LEVEL and
+SR_LOG_FILE, which are shared for all databases) are duplicated in order to
+represent additional databases.
+
+This duplication is done via suffixing: an underscore and the identifier for
+the database are suffixed to the base variable names to derive a set of
+environment variables specific to each database. For example, SSDB_INPUT
+and SR_DB_TYPE_INPUT reflect a database named ``INPUT``.
+
+For backward compatibility, the default database is anonymous and thus its
+environment variables use neither an underscore nor a database name. This
+behavior exactly matches earlier releases of SmartRedis.
+
+Instantiating Clients for named databases
+-----------------------------------------
+
+Beginning with version 0.5.0 of SmartRedis, users can initialize Clients
+using a new construction method that accepts a ConfigOptions object as
+an input parameter. In turn, the ConfigOptions object can be constructed
+via the ConfigOptions create_from_environment() factory method, which
+accepts the suffix to be applied to environment variables when looking
+them up (or an empty string, to indicate that the default names should be
+used, as for an anonymous database). Depending on the programming language
+for the SmartRedis client, variously None, NULL, or skipping the
+ConfigOptions parameter altogether also implicitly requests an anonymous
+database.
+
+For example, to create a Client for a database named ``INPUT`` in C++,
+one would write the following code:
+
+.. code-block:: cpp
+
+    // Create a ConfigOptions object
+    auto co = ConfigOptions::create_from_environment("INPUT");
+
+    // Pass it to the Client constructor along with an identifier for logging
+    Client* input_client = new Client(co, "input_client");
+
+Note that with the Client constructor that accepts a ConfigOptions object,
+there is no parameter for whether the database is clustered or not. This is
+because the type of database is now read in from the SR_DB_TYPE environment
+variable (with optional {_suffix}).

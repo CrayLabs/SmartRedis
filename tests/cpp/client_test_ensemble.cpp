@@ -54,11 +54,11 @@ void load_mnist_image_to_array(float**** img)
 }
 
 void produce(
-            std::vector<size_t> dims,
-        std::string keyout="",
-        std::string keyin="")
+  std::vector<size_t> dims,
+  std::string keyout="",
+  std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster(), "client_test_ensemble::producer");
+  SmartRedis::Client client("client_test_ensemble::producer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors
@@ -128,7 +128,7 @@ void consume(std::vector<size_t> dims,
              std::string keyout="",
              std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster(), "client_test_ensemble::consumer");
+  SmartRedis::Client client("client_test_ensemble::consumer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors

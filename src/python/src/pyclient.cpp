@@ -69,6 +69,24 @@ auto pb_client_api(T&& client_api_func, const char* name)
 #define MAKE_CLIENT_API(stuff)\
     pb_client_api([&] { stuff }, __func__)()
 
+PyClient::PyClient(const std::string& logger_name)
+    : PySRObject(logger_name)
+{
+    MAKE_CLIENT_API({
+        _client = new Client(logger_name);
+    });
+}
+
+PyClient::PyClient(
+    PyConfigOptions& config_options,
+    const std::string& logger_name)
+    : PySRObject(logger_name)
+{
+    MAKE_CLIENT_API({
+        ConfigOptions* co = config_options.get();
+        _client = new Client(co, logger_name);
+    });
+}
 
 PyClient::PyClient(bool cluster, const std::string& logger_name)
     : PySRObject(logger_name)

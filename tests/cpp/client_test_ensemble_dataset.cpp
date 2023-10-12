@@ -35,7 +35,7 @@ void rename_dataset(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
     client.use_dataset_ensemble_prefix(true);
 
@@ -130,15 +130,13 @@ void rename_dataset(std::string keyout)
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(retrieved_dataset);
-
-    return;
 }
 
 void add_to_aggregation_list(std::string keyout)
 {
     std::vector<size_t> dims({10,10,2});
 
-    DATASET_TEST_UTILS::DatasetTestClient client(use_cluster(), "client_test_ensemble_dataset");
+    DATASET_TEST_UTILS::DatasetTestClient client("client_test_ensemble_dataset");
     client.use_tensor_ensemble_prefix(true);
     client.use_dataset_ensemble_prefix(true);
     client.use_list_ensemble_prefix(true);
@@ -237,8 +235,6 @@ void add_to_aggregation_list(std::string keyout)
 
     //Check that the metadata values are correct for the metadata
     DATASET_TEST_UTILS::check_dataset_metadata(retrieved_dataset);
-
-    return;
 }
 
 int main(int argc, char* argv[]) {

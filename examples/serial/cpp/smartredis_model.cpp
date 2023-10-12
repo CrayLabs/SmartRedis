@@ -47,8 +47,7 @@ int main(int argc, char* argv[]) {
     std::memcpy(img.data(), tmp.data(), img.size()*sizeof(float));
 
     // Initialize a SmartRedis client to connect to the Redis database
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, __FILE__);
+    SmartRedis::Client client(__FILE__);
 
     // Use the client to set a model in the database from a file
     std::string model_key = "mnist_model";
