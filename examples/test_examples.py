@@ -61,7 +61,6 @@ def test_example(test, build, sr_fortran, link):
         cmd = [test]
         print(f"Running test: {osp.basename(test)}")
         print(f"Test command {' '.join(cmd)}")
-        print(f"Using cluster: {use_cluster}")
         execute_cmd(cmd, test_subdir)
         time.sleep(1)
     else:

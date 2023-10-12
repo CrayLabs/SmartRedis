@@ -26,16 +26,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-name: run_post_merge_tests
-
-# This file is for tests that are to be run rarely, once on each merge.
+name: run_static_and_examples
 
 on:
   push:
     branches:
       - master
       - develop
-
+  pull_request:
+    branches:
+      - master
+      - develop
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
   HOMEBREW_NO_AUTO_UPDATE: "ON"
