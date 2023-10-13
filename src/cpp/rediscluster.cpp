@@ -1075,6 +1075,18 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
 // Connect to the cluster at the address and port
 inline void RedisCluster::_connect(SRAddress& db_address)
 {
+    // Build a connections object for this connection
+    // No need to repeat the build on each connection attempt
+    // so we do it outside the loop
+    sw::redis::ConnectionOptions connectOpts;
+    connectOpts.host = db_address._tcp_host;
+    if (db_address._is_tcp)
+        connectOpts.port = db_address._tcp_port;
+    else
+        connectOpts.path = db_address._uds_file;
+    connectOpts.socket_timeout = std::chrono::milliseconds(100);
+
+    // Connect
     std::string msg;
     for (int i = 1; i <= _connection_attempts; i++) {
         msg = "Connection attempt " + std::to_string(i) + " of " +
@@ -1083,8 +1095,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
 
         try {
             // Attempt the connection
-            _redis_cluster = new sw::redis::RedisCluster(db_address.to_string(true));
-            return;
+            _redis_cluster = new sw::redis::RedisCluster(connectOpts);            return;
         }
         catch (std::bad_alloc& e) {
             // On a memory error, bail immediately
