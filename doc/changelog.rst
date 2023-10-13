@@ -22,7 +22,7 @@ Description
 
 Detailed Notes
 
-- Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR414_)
+- Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR413_)
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
 - Allow users to pass single keys for the inputs and outputs parameters as a string for Python run_script and run_script_multigpu
@@ -33,7 +33,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
-.. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
+.. _PR413: https://github.com/CrayLabs/SmartRedis/pull/413
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
 .. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
 .. _PR407: https://github.com/CrayLabs/SmartRedis/pull/407
