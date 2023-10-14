@@ -1084,7 +1084,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
         connectOpts.port = db_address._tcp_port;
     else
         connectOpts.path = db_address._uds_file;
-    connectOpts.socket_timeout = std::chrono::milliseconds(100);
+    // connectOpts.socket_timeout = std::chrono::milliseconds(100);
 
     // Connect
     std::string msg;
