@@ -137,6 +137,14 @@ def test_copy_nonexistant_dataset(context):
         client.copy_dataset("not-a-tensor", "still-not-a-tensor")
 
 
+def test_dataset_get_name():
+    """Test getting a dataset name
+    """
+    dataset = Dataset("test-dataset")
+    name = dataset.get_name()
+    assert name == "test-dataset"
+
+
 def test_copy_not_dataset(context):
     def test_func(param):
         print(param)

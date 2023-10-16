@@ -95,12 +95,6 @@ def test_add_get_strings(mock_data):
     data = mock_data.create_metadata_strings(10)
     add_get_strings(dataset, data)
 
-def test_dataset_get_name():
-    """Test getting a dataset name
-    """
-    dataset = Dataset("test-dataset")
-    name = dataset.get_name()
-    assert name == "test-dataset"
 
 def test_dataset_inspection(context):
     d = Dataset(context)

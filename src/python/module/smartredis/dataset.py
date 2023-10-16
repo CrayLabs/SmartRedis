@@ -119,7 +119,7 @@ class Dataset(SRObject):
         """
         typecheck(name, "name", str)
         return self._data.get_tensor(name)
-    
+
     @exception_handler
     def get_name(self) -> str:
         """Get the name of a Dataset
