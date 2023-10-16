@@ -122,9 +122,9 @@ class Dataset(SRObject):
     
     @exception_handler
     def get_name(self) -> str:
-        """Get a tensor from the Dataset
+        """Get the name of a Dataset
 
-        :return: the name of the dataset in-memory
+        :return: the name of the in-memory dataset
         :rtype: str
         """
         return self._data.get_name()
