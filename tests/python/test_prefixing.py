@@ -77,7 +77,7 @@ def test_model_prefixing(mock_model, context, monkeypatch):
 def test_list_prefixing(context, monkeypatch):
     # configure prefix variables
     monkeypatch.setenv("SSKEYOUT", "prefix_test")
-    monkeypatch.setenv("SSKEYIN", "prefix_test,prefix_test")
+    monkeypatch.setenv("SSKEYIN", "prefix_test,prefix_ignore")
 
     # Set up client
     c = Client(address=None, logger_name=context)

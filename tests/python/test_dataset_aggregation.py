@@ -122,8 +122,8 @@ def test_aggregation(context):
     num_datasets = client.get_dataset_list_range(list_name, 0, 1)
     if (len(num_datasets) != 2):
         raise RuntimeError(
-            f"The length of {len(num_datasets)} does not match expected "
-            f"value of 2.")
+            f"The length is {len(num_datasets)}, which does not "
+            f"match expected value of 2.")
     log_data(context, LLDebug, "Retrieve datasets from list checked")
 
     # Retrieve datasets via the aggregation list
@@ -134,9 +134,9 @@ def test_aggregation(context):
             f"does not match expected value of {list_length}.")
     for ds in datasets:
         check_dataset(ds)
-    log_data(context, LLDebug, "DataSet retrieval")
+    log_data(context, LLDebug, "DataSet list retrieval")
     
-    # Rename an list of datasets
+    # Rename a list of datasets
     client.rename_list(list_name, "new_list_name")
     renamed_list_datasets = client.get_datasets_from_list("new_list_name")
     if len(renamed_list_datasets) != list_length:
@@ -145,9 +145,9 @@ def test_aggregation(context):
             f"does not match expected value of {list_length}.")
     for ds in renamed_list_datasets:
         check_dataset(ds)
-    log_data(context, LLDebug, "DataSet retrieval")
+    log_data(context, LLDebug, "DataSet list rename complete")
     
-    # Rename an list of datasets
+    # Copy a list of datasets
     client.copy_list("new_list_name", "copied_list_name")
     copied_list_datasets = client.get_datasets_from_list("copied_list_name")
     if len(copied_list_datasets) != list_length:
@@ -156,7 +156,7 @@ def test_aggregation(context):
             f"does not match expected value of {list_length}.")
     for ds in copied_list_datasets:
         check_dataset(ds)
-    log_data(context, LLDebug, "DataSet retrieval")
+    log_data(context, LLDebug, "DataSet list copied")
     
     
 

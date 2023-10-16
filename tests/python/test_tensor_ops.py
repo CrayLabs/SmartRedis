@@ -55,7 +55,7 @@ def test_poll_tensor(context):
     client.put_tensor("test_copy", tensor)
 
     assert client.poll_tensor("test_copy", 100, 100)
-
+    assert client.tensor_exists("test_copy")
 
 def test_rename_tensor(context):
     # test renaming tensor

@@ -1007,7 +1007,7 @@ def test_from_string_wrong_type():
         Dtypes.from_string("Incorrect input")
 
 def test_metadata_from_numpy_wrong_type():
-    """A call to Dataset.get_metadata_field_type is made with the wrong type
+    """A call to Dataset.add_meta_scalar is made with the wrong type
     """
     array = np.array(["Incorrect Input"])
     with pytest.raises(TypeError):
