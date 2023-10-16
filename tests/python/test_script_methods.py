@@ -66,6 +66,19 @@ def test_set_script_from_file(context):
     assert not c.model_exists("test-script-file")
 
 
+def test_set_script_from_file_multigpu(context):
+    sent_script = read_script_from_file()
+    c = Client(None, logger_name=context)
+    c.set_script_from_file_multigpu(
+        "test-script-file", osp.join(file_path, "./data_processing_script.txt"), 0, 2
+    )
+    assert c.model_exists("test-script-file")
+    returned_script = c.get_script("test-script-file")
+    assert sent_script == returned_script
+    c.delete_script("test-script-file")
+    assert not c.model_exists("test-script-file")
+
+
 def test_run_script_str(context):
     data = np.array([[1, 2, 3, 4, 5]])
 
@@ -101,10 +114,10 @@ def test_run_script_list(context):
     not test_gpu,
     reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
 )
-def test_run_script_multigpu_str(use_cluster, context):
+def test_run_script_multigpu_str(context):
     data = np.array([[1, 2, 3, 4, 5]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("script-test-data", data)
     c.set_function_multigpu("one-to-one", one_to_one, 0, 2)
     c.run_script_multigpu("one-to-one", "one_to_one", "script-test-data", "script-test-out", 0, 0, 2)
@@ -115,11 +128,11 @@ def test_run_script_multigpu_str(use_cluster, context):
     not test_gpu,
     reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
 )
-def test_run_script_multigpu_list(use_cluster, context):
+def test_run_script_multigpu_list(context):
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
     c.set_function_multigpu("two-to-one", two_to_one, 0, 2)
