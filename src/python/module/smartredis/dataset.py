@@ -122,6 +122,15 @@ class Dataset(SRObject):
         return self._data.get_tensor(name)
 
     @exception_handler
+    def get_name(self) -> str:
+        """Get the name of a Dataset
+
+        :return: the name of the in-memory dataset
+        :rtype: str
+        """
+        return self._data.get_name()
+
+    @exception_handler
     def add_meta_scalar(self, name: str, data: t.Union[int, float]) -> None:
         """Add scalar (non-string) metadata to a field name if it exists; 
         otherwise, create and add

@@ -115,6 +115,7 @@ Dataset Class Method Overview
     Dataset.get_meta_strings
     Dataset.get_metadata_field_names
     Dataset.get_metadata_field_type
+    Dataset.get_name
     Dataset.get_tensor_type
     Dataset.get_tensor_names
     Dataset.get_tensor_dims
