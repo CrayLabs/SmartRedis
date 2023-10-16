@@ -37,25 +37,25 @@ file_path = osp.dirname(osp.abspath(__file__))
 
 test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
 
-def test_set_get_function(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
+def test_set_get_function(context):
+    c = Client(None, logger_name=context)
     c.set_function("test-set-function", one_to_one)
     script = c.get_script("test-set-function")
     sent_script = inspect.getsource(one_to_one)
     assert script == sent_script
 
 
-def test_set_get_script(use_cluster, context):
-    c = Client(None, use_cluster, logger_name=context)
+def test_set_get_script(context):
+    c = Client(None, logger_name=context)
     sent_script = read_script_from_file()
     c.set_script("test-set-script", sent_script)
     script = c.get_script("test-set-script")
     assert sent_script == script
 
 
-def test_set_script_from_file(use_cluster, context):
+def test_set_script_from_file(context):
     sent_script = read_script_from_file()
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.set_script_from_file(
         "test-script-file", osp.join(file_path, "./data_processing_script.txt")
     )
@@ -66,10 +66,10 @@ def test_set_script_from_file(use_cluster, context):
     assert not c.model_exists("test-script-file")
 
 
-def test_run_script_str(use_cluster, context):
+def test_run_script_str(context):
     data = np.array([[1, 2, 3, 4, 5]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("script-test-data", data)
     c.set_function("one-to-one", one_to_one)
     c.run_script("one-to-one", "one_to_one", "script-test-data", "script-test-out")
@@ -77,11 +77,11 @@ def test_run_script_str(use_cluster, context):
     assert out == 5
 
 
-def test_run_script_list(use_cluster, context):
+def test_run_script_list(context):
     data = np.array([[1, 2, 3, 4]])
     data_2 = np.array([[5, 6, 7, 8]])
 
-    c = Client(None, use_cluster, logger_name=context)
+    c = Client(None, logger_name=context)
     c.put_tensor("srpt-multi-out-data-1", data)
     c.put_tensor("srpt-multi-out-data-2", data_2)
     c.set_function("two-to-one", two_to_one)

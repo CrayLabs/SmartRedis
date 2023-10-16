@@ -111,20 +111,20 @@ SCENARIO("Testing for ConfigOptions", "[CfgOpts]")
     log_data(context, LLDebug, "***End ConfigOptions testing***");
 }
 
-SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
+SCENARIO("Suffix Testing for ConfigOptions", "[CfgOpts]")
 {
-    std::cout << std::to_string(get_time_offset()) << ": Prefix Testing for ConfigOptions" << std::endl;
+    std::cout << std::to_string(get_time_offset()) << ": Suffix Testing for ConfigOptions" << std::endl;
     std::string context("test_configopts");
-    log_data(context, LLDebug, "***Beginning ConfigOptions prefix testing***");
+    log_data(context, LLDebug, "***Beginning ConfigOptions suffix testing***");
 
     GIVEN("A ConfigOptions object")
     {
         // Make sure keys aren't set before we start
         const char* keys[] = {
-            "prefixtest_integer_key_that_is_not_really_present",
-            "prefixtest_string_key_that_is_not_really_present",
-            "prefixtest_integer_key",
-            "prefixtest_string_key"
+            "integer_key_that_is_not_really_present_suffixtest",
+            "string_key_that_is_not_really_present_suffixtest",
+            "integer_key_suffixtest",
+            "string_key_suffixtest"
         };
         INFO("Reserved keys must not be set before running this test.");
         for (size_t i = 0; i < sizeof(keys)/sizeof(keys[0]); i++) {
@@ -132,12 +132,12 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
         }
 
         // Set up keys for testing
-        setenv("prefixtest_integer_key", "42", true);
-        setenv("prefixtest_string_key", "charizard", true);
+        setenv("integer_key_suffixtest", "42", true);
+        setenv("string_key_suffixtest", "charizard", true);
 
-        auto co = ConfigOptions::create_from_environment("prefixtest");
+        auto co = ConfigOptions::create_from_environment("suffixtest");
 
-        THEN("Prefixed options should be configurable")
+        THEN("Suffixed options should be configurable")
         {
             // integer option tests
             CHECK(co->get_integer_option("integer_key") == 42);
@@ -180,9 +180,9 @@ SCENARIO("Prefix Testing for ConfigOptions", "[CfgOpts]")
     }
 
     // Clean up test keys
-    unsetenv("prefixtest_integer_key");
-    unsetenv("prefixtest_string_key");
+    unsetenv("integer_key_suffixtest");
+    unsetenv("string_key_suffixtest");
 
-    log_data(context, LLDebug, "***End ConfigOptions prefix testing***");
+    log_data(context, LLDebug, "***End ConfigOptions suffix testing***");
 }
 

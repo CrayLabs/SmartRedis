@@ -27,13 +27,13 @@
 interface
 
   function create_configoptions_from_environment_c( &
-    db_prefix, db_prefix_len, configoptions) &
+    db_suffix, db_suffix_len, configoptions) &
     bind(c, name="create_configoptions_from_environment")
     use iso_c_binding, only : c_ptr, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: create_configoptions_from_environment_c
-    character(kind=c_char)        :: db_prefix(*)  !< Prefix to add to environment vars
-    integer(kind=c_size_t), value :: db_prefix_len !< How many characters in db_prefix
+    character(kind=c_char)        :: db_suffix(*)  !< Suffix to add to environment vars
+    integer(kind=c_size_t), value :: db_suffix_len !< How many characters in db_suffix
     type(c_ptr)                   :: configoptions !< Receives the constructed configoptions
   end function create_configoptions_from_environment_c
 

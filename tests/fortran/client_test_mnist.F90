@@ -44,7 +44,7 @@ program mnist_test
   character(len=2) :: key_suffix
   integer :: result
 
-  result = client%initialize(use_cluster(), "client_test_mnist")
+  result = client%initialize("client_test_mnist")
   if (result .ne. SRNoError) error stop
 
   result = client%set_model_from_file(model_key, model_file, "TORCH", "CPU")

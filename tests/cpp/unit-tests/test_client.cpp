@@ -101,7 +101,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
     log_data(context, LLDebug, "***Beginning Client testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         THEN("get, rename, and copy DataSet called on "
              "a nonexistent DataSet throws errors")
@@ -111,7 +111,7 @@ SCENARIO("Testing Dataset Functions on Client Object", "[Client]")
                 KeyException);
             CHECK_THROWS_AS(
                 client.rename_dataset("DNE", "rename_DNE"),
-               KeyException);
+                KeyException);
             CHECK_THROWS_AS(
                 client.copy_dataset("src_DNE", "dest_DNE"),
                 KeyException);
@@ -200,7 +200,7 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
     log_data(context, LLDebug, "***Beginning Client tensor testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         AND_WHEN("Tensors of each type are created and put into the Client")
         {
@@ -483,7 +483,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
     log_data(context, LLDebug, "***Beginning Client INFO testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         THEN("The client can be serialized")
         {
@@ -491,7 +491,6 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
             CHECK(serial.length() > 0);
             std::cout << client;
         }
-
         WHEN("INFO or CLUSTER INFO is called on database with "
              "an invalid address")
         {
@@ -510,7 +509,7 @@ SCENARIO("Testing INFO Functions on Client Object", "[Client]")
         {
 
             THEN("No errors with be thrown for both cluster and "
-                 "non-cluster environemnts")
+                 "non-cluster environments")
             {
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
 
@@ -542,7 +541,7 @@ SCENARIO("Testing AI.INFO Functions on Client Object", "[Client]")
     log_data(context, LLDebug, "***Beginning Client AI.INFO testing***");
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         WHEN("AI.INFO called on database with an invalid address")
         {
@@ -595,7 +594,7 @@ SCENARIO("Testing FLUSHDB on empty Client Object", "[Client][FLUSHDB]")
 
     GIVEN("An empty non-cluster Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         WHEN("FLUSHDB is called on database with "
              "an invalid address")
@@ -639,7 +638,7 @@ SCENARIO("Testing FLUSHDB on Client Object", "[Client][FLUSHDB]")
         if (use_cluster())
             return;
 
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
         std::string dataset_name = "test_dataset_name";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_name", "meta_string_val");
@@ -679,7 +678,7 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
 
     GIVEN("A Client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
 
         WHEN("CONFIG GET or CONFIG SET are called on databases with "
              "invalid addresses ")
@@ -728,7 +727,7 @@ SCENARIO("Test CONFIG GET on an unsupported command", "[Client]")
 
     GIVEN("A client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG GET is called with an unsupported command")
@@ -753,7 +752,7 @@ SCENARIO("Test CONFIG SET on an unsupported command", "[Client]")
 
     GIVEN("A client object")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
         std::string address = parse_SSDB(std::getenv("SSDB"));
 
         WHEN("CONFIG SET is called with an unsupported command")
@@ -778,7 +777,7 @@ SCENARIO("Testing SAVE command on Client Object", "[!mayfail][Client][SAVE]")
 
     GIVEN("A client object and some data")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
         std::string dataset_name = "test_save_dataset";
         DataSet dataset(dataset_name);
         dataset.add_meta_string("meta_string_save_name", "meta_string_val");
@@ -825,8 +824,10 @@ SCENARIO("Test that prefixing covers all hash slots of a cluster", "[Client]")
 
     GIVEN("A test RedisCluster test object")
     {
+        ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
         LogContext context("test_client");
-        RedisClusterTestObject redis_cluster(&context);
+        cfgopts->_set_log_context(&context);
+        RedisClusterTestObject redis_cluster(cfgopts);
 
         WHEN("A prefix is requested for a hash slot between 0 and 16384")
         {
@@ -865,7 +866,7 @@ SCENARIO("Testing Multi-GPU Function error cases", "[Client]")
 
     GIVEN("A Client object, a script, and a model")
     {
-        Client client(use_cluster(), "test_client");
+        Client client("test_client");
         std::string model_key = "a_model";
         std::string model_file = "../mnist_data/mnist_cnn.pt";
         std::string script_key = "a_script";

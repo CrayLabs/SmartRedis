@@ -28,6 +28,7 @@
 
 #include <ctype.h>
 #include <algorithm>
+#include <cctype>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -36,28 +37,105 @@
 #include "srexception.h"
 #include "logger.h"
 #include "utility.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
-// Constructor
-Client::Client(bool cluster, const std::string& logger_name)
+// Simple Client constructor
+Client::Client(const char* logger_name)
     : SRObject(logger_name)
 {
+    // Create our ConfigOptions object (default: no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
     // Log that a new client has been instantiated
     log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+}
+
+// Constructor with config options
+Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
+    : SRObject(logger_name), _cfgopts(cfgopts->clone())
+{
+    // Log that a new client has been instantiated
+    _cfgopts->_set_log_context(this);
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+}
+
+// Initialize a connection to the back-end database
+void Client::_establish_server_connection()
+{
+    // See what type of connection the user wants
+    std::string server_type = _cfgopts->_resolve_string_option(
+        "SR_DB_TYPE", "Clustered");
+    std::transform(server_type.begin(), server_type.end(), server_type.begin(),
+        [](unsigned char c){ return std::tolower(c); });
 
     // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
-    _redis_cluster = (cluster ? new RedisCluster(this) : NULL);
-    _redis = (cluster ? NULL : new Redis(this));
+    if (server_type == "clustered") {
+        log_data(LLDeveloper, "Instantiating clustered Redis connection");
+        _redis_cluster = new RedisCluster(_cfgopts);
+        _redis = NULL;
+        _redis_server =  _redis_cluster;
+    }
+    else { // Standalone or Colocated
+        log_data(LLDeveloper, "Instantiating standalone Redis connection");
+        _redis_cluster = NULL;
+        _redis = new Redis(_cfgopts);
+        _redis_server =  _redis;
+    }
+    log_data(LLDeveloper, "Redis connection established");
+
+    // Initialize key prefixing
+    _get_prefix_settings();
+    _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
+    _use_model_prefix = false;
+    _use_list_prefix = true;
+}
+
+// Constructor (deprecated)
+Client::Client(bool cluster, const std::string& logger_name)
+    : SRObject(logger_name)
+{
+    std::cout << "In deprecated constructor" << std::endl;
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
+
+    // Log deprecation warning for this method
+    log_data(
+        LLInfo,
+        "Deprecation Notice: Client::Client(bool, std::string) constructor "
+        "should not be used. Please migrate your code to use the "
+        "Client::Client(ConfigOptions*) constructor and set the server type "
+        "in the SR_DB_TYPE environment variable.");
+
+    // Create our ConfigOptions object (default = no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
+    // Set up Redis server connection
+    // A std::bad_alloc exception on the initializer will be caught
+    // by the call to new for the client
+    _redis_cluster = (cluster ? new RedisCluster(_cfgopts) : NULL);
+    _redis = (cluster ? NULL : new Redis(_cfgopts));
     if (cluster)
         _redis_server =  _redis_cluster;
     else
         _redis_server =  _redis;
 
     // Initialize key prefixing
-    _set_prefixes_from_env();
+    _get_prefix_settings();
     _use_tensor_prefix = true;
     _use_dataset_prefix = true;
     _use_model_prefix = false;
@@ -78,6 +156,8 @@ Client::~Client()
         _redis = NULL;
     }
     _redis_server = NULL;
+    delete _cfgopts;
+    _cfgopts = NULL;
 
     // Log Client destruction
     log_data(LLDebug, "Client destroyed");
@@ -1672,20 +1752,20 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN
-// and SSKEYOUT environment variables.
-void Client::_set_prefixes_from_env()
+// and SSKEYOUT configuration settings
+void Client::_get_prefix_settings()
 {
     // Establish set prefix
-    std::string put_key_prefix;
-    get_config_string(put_key_prefix, "SSKEYOUT", "");
+    std::string put_key_prefix = _cfgopts->_resolve_string_option(
+        "SSKEYOUT", "");
     if (put_key_prefix.length() > 0)
         _put_key_prefix = put_key_prefix;
     else
         _put_key_prefix.clear();
 
     // Establish get prefix(es)
-    std::string get_key_prefixes;
-    get_config_string(get_key_prefixes, "SSKEYIN", "");
+    std::string get_key_prefixes = _cfgopts->_resolve_string_option(
+        "SSKEYIN", "");
     if (get_key_prefixes.length() > 0) {
         const char* a = get_key_prefixes.c_str();
         const char* b = a;

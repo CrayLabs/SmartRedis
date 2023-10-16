@@ -84,21 +84,21 @@ function get_c_pointer(self)
 end function get_c_pointer
 
 !> Instantiate ConfigOptions, getting selections from environment variables
-function create_configoptions_from_environment(self, db_prefix) result(code)
+function create_configoptions_from_environment(self, db_suffix) result(code)
   class(configoptions_type), intent(inout) :: self        !< Receives the configoptions
-  character(len=*),    intent(in)          :: db_prefix   !< Prefix to apply to environment
+  character(len=*),    intent(in)          :: db_suffix   !< Suffix to apply to environment
                                                           !! variables; empty string for none
   integer(kind=enum_kind)                  :: code !< Result of the operation
 
   ! Local variables
-  integer(kind=c_size_t) :: db_prefix_length
-  character(kind=c_char, len=len_trim(db_prefix)) :: c_db_prefix
+  integer(kind=c_size_t) :: db_suffix_length
+  character(kind=c_char, len=len_trim(db_suffix)) :: c_db_suffix
 
-  db_prefix_length = len_trim(db_prefix)
-  c_db_prefix = trim(db_prefix)
+  db_suffix_length = len_trim(db_suffix)
+  c_db_suffix = trim(db_suffix)
 
   code = create_configoptions_from_environment_c( &
-    c_db_prefix, db_prefix_length, self%configoptions_ptr)
+    c_db_suffix, db_suffix_length, self%configoptions_ptr)
 end function create_configoptions_from_environment
 
 !> Retrieve the value of a numeric configuration option
