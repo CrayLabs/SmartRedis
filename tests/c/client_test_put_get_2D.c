@@ -76,6 +76,7 @@ int put_get_2D_tensor(void* client,
                           (void*)tensor, dims, n_dims, type, layout)) {
     return -1;
   }
+
   if (SRNoError != get_tensor(client, key, key_length,
                           result, &g_dims, &g_n_dims,
                           &g_type, layout)) {
@@ -120,7 +121,7 @@ int put_get_2D_tensor_double(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_double";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   double** tensor = (double**)malloc(dims[0]*sizeof(double*));
@@ -169,7 +170,7 @@ int put_get_2D_tensor_float(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_float";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   float** tensor = (float**)malloc(dims[0]*sizeof(float*));
@@ -218,7 +219,7 @@ int put_get_2D_tensor_i8(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_i8";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   int8_t** tensor = (int8_t**)malloc(dims[0]*sizeof(int8_t*));
@@ -271,7 +272,7 @@ int put_get_2D_tensor_i16(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_i16";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   int16_t** tensor = (int16_t**)malloc(dims[0]*sizeof(int16_t*));
@@ -324,7 +325,7 @@ int put_get_2D_tensor_i32(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_i32";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   int32_t** tensor = (int32_t**)malloc(dims[0]*sizeof(int32_t*));
@@ -377,7 +378,7 @@ int put_get_2D_tensor_i64(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_i64";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   int64_t** tensor = (int64_t**)malloc(dims[0]*sizeof(int64_t*));
@@ -430,7 +431,7 @@ int put_get_2D_tensor_ui8(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_ui8";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   uint8_t** tensor = (uint8_t**)malloc(dims[0]*sizeof(uint8_t*));
@@ -481,7 +482,7 @@ int put_get_2D_tensor_ui16(size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_get_2D_tensor_ui16";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
 
   uint16_t** tensor = (uint16_t**)malloc(dims[0]*sizeof(uint16_t*));
@@ -569,11 +570,6 @@ int main(int argc, char* argv[]) {
                       ui16_suffix, strlen(ui16_suffix));
 
   free(dims);
-  printf("%s","Test passed: ");
-  if(result==0)
-    printf("%s", "YES\n");
-  else
-    printf("%s", "NO\n");
-
+  printf("Test passed: %s\n", result == 0 ? "YES" : "NO");
   return result;
 }

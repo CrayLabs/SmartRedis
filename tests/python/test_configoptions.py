@@ -71,10 +71,10 @@ def test_options(monkeypatch):
     assert co.get_string_option(
         "test_string_key_that_is_not_really_present") == "meowth"
 
-def test_options_with_prefix(monkeypatch):
-    monkeypatch.setenv("prefixtest_integer_key", "42")
-    monkeypatch.setenv("prefixtest_string_key", "charizard")
-    co = ConfigOptions.create_from_environment("prefixtest")
+def test_options_with_suffix(monkeypatch):
+    monkeypatch.setenv("integer_key_suffixtest", "42")
+    monkeypatch.setenv("string_key_suffixtest", "charizard")
+    co = ConfigOptions.create_from_environment("suffixtest")
 
     # integer option tests
     assert co.get_integer_option("integer_key") == 42

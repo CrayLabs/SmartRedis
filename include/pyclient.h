@@ -39,6 +39,7 @@
 #include "client.h"
 #include "pydataset.h"
 #include "pysrobject.h"
+#include "pyconfigoptions.h"
 
 ///@file
 
@@ -56,7 +57,24 @@ class PyClient : public PySRObject
     public:
 
         /*!
-        *   \brief PyClient constructor
+        *   \brief Simple constructor that uses default environment variables
+        *          to locate configuration settings
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(const std::string& logger_name);
+
+        /*!
+        *   \brief Constructor that uses a ConfigOptions object
+        *          to locate configuration settings
+        *   \param config_options The ConfigOptions object to use
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(
+            PyConfigOptions& config_options,
+            const std::string& logger_name);
+
+        /*!
+        *   \brief PyClient constructor (deprecated)
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
         *   \param logger_name Identifier for the current client

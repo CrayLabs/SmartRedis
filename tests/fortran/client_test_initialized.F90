@@ -42,7 +42,7 @@ program main
 
   if (client%isinitialized()) error stop 'client not initialized'
 
-  result = client%initialize(use_cluster(), "client_test_initialized")
+  result = client%initialize("client_test_initialized")
   if (result .ne. SRNoError) error stop
 
   if (.not. client%isinitialized()) error stop 'client is initialized'

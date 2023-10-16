@@ -69,18 +69,18 @@ auto c_cfgopt_api(T&& cfgopt_api_func, const char* name)
 // Instantiate ConfigOptions from environment variables
 extern "C"
 SRError create_configoptions_from_environment(
-    const char* db_prefix,
-    const size_t db_prefix_length,
+    const char* db_suffix,
+    const size_t db_suffix_length,
     void** new_configoptions)
 {
   return MAKE_CFGOPT_API({
     try {
       // Sanity check params
-      SR_CHECK_PARAMS(db_prefix != NULL && new_configoptions != NULL);
+      SR_CHECK_PARAMS(db_suffix != NULL && new_configoptions != NULL);
 
-      std::string db_prefix_str(db_prefix, db_prefix_length);
+      std::string db_suffix_str(db_suffix, db_suffix_length);
 
-      auto cfgOpts = ConfigOptions::create_from_environment(db_prefix_str);
+      auto cfgOpts = ConfigOptions::create_from_environment(db_suffix_str);
       ConfigOptions* pCfgOpts = cfgOpts.release();
       *new_configoptions = reinterpret_cast<void*>(pCfgOpts);
     }
