@@ -66,6 +66,10 @@ def test_set_script_from_file(context):
     assert not c.model_exists("test-script-file")
 
 
+@pytest.mark.skipif(
+    not test_gpu,
+    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+)
 def test_set_script_from_file_multigpu(context):
     sent_script = read_script_from_file()
     c = Client(None, logger_name=context)
