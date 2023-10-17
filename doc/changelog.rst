@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Updated docs for Client and Dataset APIs
 - Added coverage to SmartRedis Python API functions
 - Added name retrieval function to the DataSet object
 - Moved testing of examples to on-commit testing in CI/CD pipeline
@@ -23,6 +24,7 @@ Description
 
 Detailed Notes
 
+- Updated docs to specify differences with SmartRedis APIs
 - Added tests to increase Python code coverage
 - Added a function to the DataSet class and added a test
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
@@ -35,6 +37,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR
 .. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
 .. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412

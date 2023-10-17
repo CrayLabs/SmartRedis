@@ -1,10 +1,25 @@
+************
+Fortran APIs
+************
 
-*******
-Fortran
-*******
+The following page provides a comprehensive overview of the SmartRedis Fortran 
+APIs, which include the **Client API** and **Dataset API**. 
+Further explanation and details of each are presented below.
 
 Client API
 ==========
+
+The Client API is purpose-built for interaction with the back-end database, 
+which extends the capabilities of the Redis in-memory data store. 
+It's important to note that the SmartRedis Client API is the exclusive 
+means for altering, transmitting, and receiving data within the in-memory 
+database. More specifically, the Client API is responsible for both 
+creating and modifying data structures, which encompass :ref:`Models <data_structures_model>`, 
+:ref:`Scripts <data_structures_script>`, and :ref:`Tensors <data_structures_tensor:>`.  
+It also handles the transmission and reception of 
+the aforementioned data structures in addition to :ref:`Dataset <data_structures_dataset>` 
+data structure. Creating and modifying the ``DataSet`` object 
+is confined to local operation by the DataSet API.
 
 The following are overloaded interfaces which support
 32/64-bit ``real`` and 8, 16, 32, and 64-bit ``integer`` tensors
@@ -16,6 +31,13 @@ The following are overloaded interfaces which support
 
 Dataset API
 ===========
+
+The C++ DataSet API enables a user to manage a group of tensors 
+and associated metadata within a datastructure called a ``DataSet`` object. 
+The DataSet API operates independently of the database and solely 
+maintains the dataset object **in-memory**. The actual interaction with the Redis database, 
+where a snapshot of the DataSet object is sent, is handled by the Client API. For more 
+information on the ``DataSet`` object, click :ref:`here <data_structures_dataset>`.
 
 The following are overloaded interfaces which support
 32/64-bit ``real`` and 8, 16, 32, and 64-bit

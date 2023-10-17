@@ -37,7 +37,10 @@ and do not require any other data types.
 Datasets
 ========
 
-The Python client can store and retrieve tensors and metadata in datasets.
+The Python ``Client`` API stores and retrieve datasets from the Redis database. The Python
+``DataSet`` API can store and retrieve tensors and metadata from an in-memory ``DataSet`` object.
+To reiterate, the actual interaction with the redis database, 
+where a snapshot of the ``DataSet`` object is sent, is handled by the Client API.
 For further information about datasets, please refer to the :ref:`Dataset
 section of the Data Structures documentation page <data_structures_dataset>`.
 

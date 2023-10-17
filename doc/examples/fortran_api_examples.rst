@@ -107,9 +107,13 @@ into a different array.
 Datasets
 ========
 
-The following code snippet shows how to use the Fortran
-Client to store and retrieve dataset tensors and
-dataset metadata scalars.
+The Fortran ``Client`` API stores and retrieve datasets from the Redis database. The Fortran
+``DataSet`` API can store and retrieve tensors and metadata from an in-memory ``DataSet`` object.
+To reiterate, the actual interaction with the redis database, 
+where a snapshot of the ``DataSet`` object is sent, is handled by the Client API.
+
+The code below shows how to store and retrieve tensors and metadata
+which belong to a ``DataSet``.
 
 .. literalinclude:: ../../examples/serial/fortran/smartredis_dataset.F90
   :linenos:
