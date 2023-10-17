@@ -8,7 +8,7 @@ To be released at some future point in time
 
 Description
 
-- Add code coverage to Python API functions
+- Added coverage to SmartRedis Python API functions
 - Added name retrieval function to the DataSet object
 - Moved testing of examples to on-commit testing in CI/CD pipeline
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline
@@ -23,7 +23,7 @@ Description
 
 Detailed Notes
 
-- Wrote tests to increase the code coverage for SmartRedis Python APIs
+- Added tests to increase Python code coverage
 - Added a function to the DataSet class and added a test
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)

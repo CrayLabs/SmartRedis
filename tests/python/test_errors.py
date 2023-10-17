@@ -110,10 +110,10 @@ def test_missing_script_function(context):
     not test_gpu,
     reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
 )
-def test_bad_function_execution_multigpu(context):
+def test_bad_function_execution_multigpu(use_cluster, context):
     """Error raised inside function"""
 
-    c = Client(None, logger_name=context)
+    c = Client(None, use_cluster, logger_name=context)
     c.set_function_multigpu("bad-function", bad_function, 0, 1)
     data = np.array([1, 2, 3, 4])
     c.put_tensor("bad-func-tensor", data)
