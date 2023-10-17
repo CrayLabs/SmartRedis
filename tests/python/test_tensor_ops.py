@@ -39,7 +39,8 @@ def test_copy_tensor(context):
     client.put_tensor("test_copy", tensor)
 
     client.copy_tensor("test_copy", "test_copied")
-
+    bool_poll_key = client.poll_key(get_prefix() + "test_copy", 100, 100)
+    assert bool_poll_key == True
     assert client.key_exists(get_prefix() + "test_copy")
     assert client.key_exists(get_prefix() + "test_copied")
     returned = client.get_tensor("test_copied")

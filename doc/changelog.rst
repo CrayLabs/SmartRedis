@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Added coverage to SmartRedis Python API functions
 - Added name retrieval function to the DataSet object
 - Moved testing of examples to on-commit testing in CI/CD pipeline
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline
@@ -22,6 +23,7 @@ Description
 
 Detailed Notes
 
+- Added tests to increase Python code coverage
 - Added a function to the DataSet class and added a test
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
@@ -33,6 +35,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
 .. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
 .. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
