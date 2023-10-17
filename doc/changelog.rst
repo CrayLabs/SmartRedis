@@ -8,8 +8,10 @@ To be released at some future point in time
 
 Description
 
+- Added coverage to SmartRedis Python API functions
 - Improved responsiveness of library when attempting connection to missing backend database
 - Moved testing of examples to on-commit testing in CI/CD pipeline
+- Added name retrieval function to the DataSet object
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline
 - Allow strings in Python interface for Client.run_script, Client.run_script_multiGPU
 - Improved support for model execution batching
@@ -22,8 +24,10 @@ Description
 
 Detailed Notes
 
+- Added tests to increase Python code coverage
 - Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR413_)
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
+- Added a function to the DataSet class and added a test
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
 - Allow users to pass single keys for the inputs and outputs parameters as a string for Python run_script and run_script_multigpu
 - Exposed access to the Redis.AI MINBATCHTIMEOUT parameter, which limits the delay in model execution when trying to accumulate multiple executions in a batch (PR406_)
@@ -33,8 +37,10 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
 .. _PR413: https://github.com/CrayLabs/SmartRedis/pull/413
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
+.. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
 .. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
 .. _PR407: https://github.com/CrayLabs/SmartRedis/pull/407
 .. _PR406: https://github.com/CrayLabs/SmartRedis/pull/406

@@ -31,6 +31,7 @@ import pytest
 from os import environ
 from smartredis import *
 from smartredis.error import *
+from smartredis.util import Dtypes
 
 
 test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
@@ -998,6 +999,19 @@ def test_get_metadata_field_type_wrong_type():
     d = Dataset("test_dataset")
     with pytest.raises(TypeError):
         d.get_metadata_field_type(42)
+
+def test_from_string_wrong_type():
+    """A call to Dataset.get_metadata_field_type is made with the wrong type
+    """
+    with pytest.raises(TypeError):
+        Dtypes.from_string("Incorrect input")
+
+def test_metadata_from_numpy_wrong_type():
+    """A call to Dataset.add_meta_scalar is made with the wrong type
+    """
+    array = np.array(["Incorrect Input"])
+    with pytest.raises(TypeError):
+        Dtypes.metadata_from_numpy(array)
 
 def test_get_tensor_names_wrong_type():
     """A call to Dataset.get_tensor_names is made with the wrong type
