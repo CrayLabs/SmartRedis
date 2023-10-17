@@ -2,15 +2,15 @@
 Data Structures
 ***************
 
-RedisAI defines three data structures designed for use within Redis databases: 
+SmartSim defines three data structures designed for use within Redis databases: 
 
 * ``Tensor`` : represents an n-dimensional array of values.
-* ``Model`` : represents a computation graph by one of the supported DL/ML framework backends.
+* ``Model`` : represents a computational ML model for one of the supported backend frameworks.
 * ``Script`` : represents a TorchScript program.
 
 In addition, SmartRedis defines a data
 structure named ``DataSet`` that enables a user to manage a group of tensors 
-and associated metadata **in-memory**. In this section, we will provide an explanation 
+and associated metadata in-memory. In this section, we will provide an explanation 
 of the SmartRedis API used to interact with these four data structures, 
 along with relevant insights on performance and best practices.
 
@@ -243,12 +243,17 @@ to include a tensor in a ``DataSet`` object, use the ``DataSet.add_tensor()``
 function in a supported language. The SmartRedis DataSet API functions 
 are available in C, C++, Python, and Fortran. The DataSet API or ``DataSet.add_tensor()`` function, 
 operates independently of the database and solely 
-maintains the dataset object **in-memory**. The actual interaction with the redis database, 
-where a snapshot of the DataSet object is sent and stored, is handled by the Client API.
+maintains the dataset object. Storing the dataset in the backend 
+databse is done via the Client API ``put_dataset()`` method:
+
+.. code-block:: python
+
+    # Python put_tensor() interface
+    put_tensor(self, name, data)
 
 .. note::
-    The ``DataSet.add_tensor()`` function copies the user-provided 
-    tensor data to prevent potential issues arising from the user's 
+    The ``DataSet.add_tensor()`` function copies user-provided 
+    tensor data; this prevents potential issues arising from the user's 
     data being cleared or deallocated. Any additional memory allocated 
     for this purpose will be released when the DataSet object is deleted
     or no longer in use.
@@ -318,7 +323,7 @@ returns to the user a ``DataSet`` object or a pointer to a
 ``DataSet`` object from the database that is used to access all of the
 dataset tensors and metadata.
 
-The functions for retrieving tensors from an in RAM ``DataSet`` object
+The functions for retrieving tensors from an in-memory ``DataSet`` object
 are identical to the functions provided by ``Client``,
 and the same return values and memory management
 paradigm is followed. As a result, please refer to
@@ -356,8 +361,8 @@ RedisAI supports PyTorch, TensorFlow, TensorFlow Lite, and ONNX
 backends, and specifying the backend to be used is done
 through the ``Client`` function calls.
 
-Sending
--------
+Build and Send a Model
+----------------------
 
 A model is placed in the database through the ``Client.set_model()``
 function.  While data types may differ, the function parameters

@@ -35,7 +35,7 @@ from .util import Dtypes, exception_handler, typecheck
 
 class Dataset(SRObject):
     def __init__(self, name: str) -> None:
-        """Initialize a Dataset object in-memory
+        """Initialize a Dataset object
 
         :param name: name of dataset
         :type name: str
