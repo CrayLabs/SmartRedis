@@ -43,25 +43,6 @@ class SRObject:
             self._srobject = context
 
     @exception_handler
-    def get_srobject(self) -> PySRObject:
-        """Return the PySRObject attribute
-
-        :return: The PySRObject attribute containing the srobject information
-        :rtype: PySRObject
-        """
-        return self._srobject
-
-    @exception_handler
-    def set_srobject(self, srobject: PySRObject) -> None:
-        """Set the PySRObject attribute
-
-        :param srobject: The PySRObject object
-        :type srobject: PySRObject
-        """
-        typecheck(srobject, "srobject", PySRObject)
-        self._srobject = srobject
-
-    @exception_handler
     def log_data(self, level: SRLoggingLevel, data: str) -> None:
         """Conditionally log data if the logging level is high enough
 
