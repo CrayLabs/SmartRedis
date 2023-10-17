@@ -24,7 +24,7 @@ Description
 
 Detailed Notes
 
-- Updated docs to specify differences with SmartRedis APIs
+- Updated docs to specify differences with SmartRedis APIs and data structures
 - Added tests to increase Python code coverage
 - Added a function to the DataSet class and added a test
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
@@ -37,7 +37,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
-.. _PR
+.. _PR416: https://github.com/CrayLabs/SmartRedis/pull/416
 .. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
 .. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412

@@ -22,7 +22,7 @@ the C and Fortran SmartRedis APIs, please consult the respective documentation
 pages.
 
 
-.. _data_structures_tensor:
+.. _data-structures-tensor:
 
 Tensor
 ======
@@ -174,7 +174,7 @@ Note that all of the client ``get_tensor()`` functions will internally
 modify the provided tensor name if the client is being used with
 SmartSim ensemble capabilities.
 
-.. _data_structures_dataset:
+.. _data-structures-dataset:
 
 Dataset
 =======
@@ -344,9 +344,9 @@ Aggregating
 
 SmartRedis also supports an advanced API for working with aggregate
 lists of DataSets; details may be found
-:ref:`here <_advanced_topics_dataset_aggregation>`.
+:ref:`here <advanced-topics-dataset-aggregation>`.
 
-.. _data_structures_model:
+.. _data-structures-model:
 
 Model
 =====
@@ -481,7 +481,7 @@ via ``Client.set_model_multigpu()``.
     it must have been set via ``Client.set_model_multigpu()``. The
     ``first_gpu`` and ``num_gpus`` parameters must be constant across both calls.
 
-.. _data_structures_script:
+.. _data-structures-script:
 
 Script
 ======
