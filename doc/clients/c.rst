@@ -3,13 +3,13 @@ C APIs
 *******
 
 The following page provides a comprehensive overview of the SmartRedis C 
-APIs, which include the ``Client API`` and ``Dataset API``. 
+Client and Dataset APIs. 
 Further explanation and details of each are presented below.
 
 Client API
 ==========
 
-The Client API is purpose-built for interaction with the back-end database, 
+The Client API is purpose-built for interaction with the backend database, 
 which extends the capabilities of the Redis in-memory data store. 
 It's important to note that the SmartRedis Client API is the exclusive 
 means for altering, transmitting, and receiving data within the backend 
@@ -28,10 +28,10 @@ is confined to local operation by the DataSet API.
 Dataset API
 ===========
 
-The C++ DataSet API enables a user to manage a group of tensors 
+The C DataSet API enables a user to manage a group of tensors 
 and associated metadata within a datastructure called a ``DataSet`` object. 
 The DataSet API operates independently of the database and solely 
-maintains the dataset object **in-memory**. The actual interaction with the Redis database, 
+maintains the dataset object in-memory. The actual interaction with the Redis database, 
 where a snapshot of the DataSet object is sent, is handled by the Client API. For more 
 information on the ``DataSet`` object, click :ref:`here <data-structures-dataset>`.
 

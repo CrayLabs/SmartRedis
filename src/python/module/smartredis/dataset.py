@@ -98,7 +98,7 @@ class Dataset(SRObject):
     @exception_handler
     def add_tensor(self, name: str, data: np.ndarray) -> None:
         """Add a named multi-dimensional data array (tensor) to this dataset
-        
+
         :param name: name associated to the tensor data
         :type name: str
         :param data: tensor data
@@ -113,7 +113,7 @@ class Dataset(SRObject):
     def get_tensor(self, name: str) -> np.ndarray:
         """Get a tensor from the Dataset
 
-        :param name: name of the tensor
+        :param name: name of the tensor to get
         :type name: str
         :return: a numpy array of tensor data
         :rtype: np.ndarray
@@ -230,9 +230,6 @@ class Dataset(SRObject):
     @exception_handler
     def get_tensor_names(self) -> t.List[str]:
         """Get the names of all tensors in the DataSet
-
-            Tensor names are used to assign a name to a tensor, 
-            which is distinct from the names of fields.
 
         :return: a list of tensor names
         :rtype: list[str]

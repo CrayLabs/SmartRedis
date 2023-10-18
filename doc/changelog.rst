@@ -8,7 +8,7 @@ To be released at some future point in time
 
 Description
 
-- Updated docs for Client and Dataset APIs
+- Updated Client and Dataset documentation
 - Expanded list of allowed characters in the SSDB address
 - Added coverage to SmartRedis Python API functions
 - Added name retrieval function to the DataSet object
@@ -25,9 +25,7 @@ Description
 
 Detailed Notes
 
-- Updated docs to specify differences with SmartRedis APIs and data structures
-- Added tests to increase Python code coverage
-- Added a function to the DataSet class and added a test
+- Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
 - The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
 - Added tests to increase Python code coverage (PR414_)
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)

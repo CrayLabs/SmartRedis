@@ -17,8 +17,8 @@ SmartRedis ``DataSet`` API is also provided.
 .. note::
 
     The C++ API examples are written
-    to connect to a Redis cluster database.  Update the
-    ``Client`` constructor call to connect to a Redis non-cluster database.
+    to connect to a clustered backend database.  Update the
+    ``Client`` constructor call to connect to a non-clustered backend database.
 
 Tensors
 =======
@@ -33,9 +33,9 @@ SmartRedis C++ client API.
 DataSets
 ========
 
-The C++ ``Client`` API stores and retrieve datasets from the Redis database. The C++
+The C++ ``Client`` API stores and retrieve datasets from the backend database. The C++
 ``DataSet`` API can store and retrieve tensors and metadata from an in-memory ``DataSet`` object.
-To reiterate, the actual interaction with the redis database, 
+To reiterate, the actual interaction with the backend database, 
 where a snapshot of the ``DataSet`` object is sent, is handled by the Client API.
 For further information about datasets, please refer to the :ref:`Dataset
 section of the Data Structures documentation page <data_structures_dataset>`.
