@@ -121,9 +121,10 @@ SRAddress RedisServer::_get_ssdb()
 
 // Check that the SSDB environment variable value does not have any errors
 void RedisServer::_check_ssdb_string(const std::string& env_str) {
+    std::string allowed_specials = ".:,/_-";
     for (size_t i = 0; i < env_str.size(); i++) {
         char c = env_str[i];
-        if (!isalnum(c) && c != '.' && c != ':' && c != ',' && c != '/') {
+        if (!isalnum(c) && (allowed_specials.find(c) == std::string::npos)) {
             throw SRRuntimeException("The provided SSDB value, " + env_str +
                                      " is invalid because of character " + c);
         }

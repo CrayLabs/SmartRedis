@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Expanded list of allowed characters in the SSDB address
 - Added coverage to SmartRedis Python API functions
 - Improved responsiveness of library when attempting connection to missing backend database
 - Moved testing of examples to on-commit testing in CI/CD pipeline
@@ -24,6 +25,7 @@ Description
 
 Detailed Notes
 
+- The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
 - Added tests to increase Python code coverage
 - Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR413_)
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
@@ -37,6 +39,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR415: https://github.com/CrayLabs/SmartRedis/pull/415
 .. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
 .. _PR413: https://github.com/CrayLabs/SmartRedis/pull/413
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
