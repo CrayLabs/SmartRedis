@@ -1079,11 +1079,17 @@ inline void RedisCluster::_connect(SRAddress& db_address)
     // No need to repeat the build on each connection attempt
     // so we do it outside the loop
     sw::redis::ConnectionOptions connectOpts;
-    connectOpts.host = db_address._tcp_host;
-    if (db_address._is_tcp)
+    if (db_address._is_tcp) {
+        connectOpts.host = db_address._tcp_host;
+        std::cout << "Connecting to host: " + connectOpts.host + "; ";
         connectOpts.port = db_address._tcp_port;
-    else
+        std::cout << "Connecting to port: " + std::to_string(connectOpts.port) + "\n";
+        connectOpts.type = sw::redis::ConnectionType::TCP;
+    }
+    else {
         connectOpts.path = db_address._uds_file;
+        connectOpts.type = sw::redis::ConnectionType::UNIX;
+    }
     // connectOpts.socket_timeout = std::chrono::milliseconds(100);
 
     // Connect
