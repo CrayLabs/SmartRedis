@@ -1087,8 +1087,8 @@ inline void RedisCluster::_connect(SRAddress& db_address)
         connectOpts.type = sw::redis::ConnectionType::TCP;
     }
     else {
-        connectOpts.path = db_address._uds_file;
-        connectOpts.type = sw::redis::ConnectionType::UNIX;
+        throw SRInternalException(
+            "RedisCluster encountered a UDS request in _connect()");
     }
     connectOpts.socket_timeout = std::chrono::milliseconds(250);
 
