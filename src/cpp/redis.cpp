@@ -737,7 +737,7 @@ inline void Redis::_connect(SRAddress& db_address)
         connectOpts.path = db_address._uds_file;
         connectOpts.type = sw::redis::ConnectionType::UNIX;
     }
-    // connectOpts.socket_timeout = std::chrono::milliseconds(100);
+    connectOpts.socket_timeout = std::chrono::milliseconds(250);
 
     // Connect
     for (int i = 1; i <= _connection_attempts; i++) {
