@@ -1081,16 +1081,15 @@ inline void RedisCluster::_connect(SRAddress& db_address)
     sw::redis::ConnectionOptions connectOpts;
     if (db_address._is_tcp) {
         connectOpts.host = db_address._tcp_host;
-        std::cout << "Connecting to host: " + connectOpts.host + "; ";
         connectOpts.port = db_address._tcp_port;
-        std::cout << "Connecting to port: " + std::to_string(connectOpts.port) + "\n";
         connectOpts.type = sw::redis::ConnectionType::TCP;
     }
     else {
         throw SRInternalException(
             "RedisCluster encountered a UDS request in _connect()");
     }
-    connectOpts.socket_timeout = std::chrono::milliseconds(250);
+    connectOpts.socket_timeout = std::chrono::milliseconds(
+        _DEFAULT_SOCKET_TIMEOUT);
 
     // Connect
     std::string msg;
