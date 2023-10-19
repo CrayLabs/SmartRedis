@@ -183,7 +183,7 @@ one may have different types of tensors (e.g., images, text embeddings,
 numerical data) and metadata for each data point. Grouping them into a 
 collection represents each data point as a cohesive unit.
 The ``DataSet`` data structure provides this functionality to stage tensors and metadata
- **in-memory** via the ``DataSet API``. After the creation of a 
+in-memory via the ``DataSet API``. After the creation of a 
 ``DataSet`` object, the grouped data can be efficiently stored in the backend database 
 by the ``Client API`` and subsequently retrieved using the assigned ``DataSet`` name. 
 In the upcoming sections, we outline the process of building, sending, and retrieving a ``DataSet``.
@@ -249,8 +249,7 @@ database is done via the Client API ``put_dataset()`` method.
     The ``DataSet.add_tensor()`` function copies user-provided 
     tensor data; this prevents potential issues arising from the user's 
     data being cleared or deallocated. Any additional memory allocated 
-    for this purpose will be released when the DataSet object is destroyed 
-    or no longer in use.
+    for this purpose will be released when the DataSet object is destroyed.
 
 Metadata can be added to an in-memory ``DataSet`` object with the
 ``DataSet.add_meta_scalar()`` and ``DataSet.add_meta_string()``
@@ -320,12 +319,14 @@ paradigm is followed. As a result, please refer to
 the previous section for details on tensor retrieve
 function calls.
 
-There are four functions for retrieving metadata from a ``DataSet`` object in-memory:
-``get_meta_scalars()``, ``get_meta_strings()``, ``get_metadata_field_names()`` and ``get_metadata_field_type()``.
-As the names suggest, the first function
-is used for retrieving numerical metadata values,
-and the second is for retrieving metadata string
-values. The metadata retrieval function prototypes
+There are four functions for retrieving metadata information from a ``DataSet`` object in-memory:
+``get_meta_scalars()``, ``get_meta_strings()``, ``get_metadata_field_names()`` 
+and ``get_metadata_field_type()``. As the names suggest, the ``get_meta_scalars()`` function
+is used for retrieving numerical metadata values, while the ``get_meta_strings()`` function
+is for retrieving metadata string values. The ``get_metadata_field_names()`` function 
+retrieves a list of all metadata field names in the ``DataSet`` object. Lastly, 
+the ``get_metadata_field_type()`` function returns the type (scalar or string) of the metadata
+attached to the specified field name. The metadata retrieval function prototypes
 vary across the clients based on programming language constraints,
 and as a result, please refer to the ``DataSet`` API documentation
 for a description of input parameters and memory management. It is
