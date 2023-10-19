@@ -11,8 +11,9 @@ Description
 - Updated Client and Dataset documentation
 - Expanded list of allowed characters in the SSDB address
 - Added coverage to SmartRedis Python API functions
-- Added name retrieval function to the DataSet object
+- Improved responsiveness of library when attempting connection to missing backend database
 - Moved testing of examples to on-commit testing in CI/CD pipeline
+- Added name retrieval function to the DataSet object
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline
 - Allow strings in Python interface for Client.run_script, Client.run_script_multiGPU
 - Improved support for model execution batching
@@ -27,9 +28,10 @@ Detailed Notes
 
 - Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
 - The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
-- Added tests to increase Python code coverage (PR414_)
+- Added tests to increase Python code coverage
+- Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR413_)
 - Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
-- Added a function to the DataSet class and added a test (PR411_)
+- Added a function to the DataSet class and added a test
 - Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
 - Allow users to pass single keys for the inputs and outputs parameters as a string for Python run_script and run_script_multigpu
 - Exposed access to the Redis.AI MINBATCHTIMEOUT parameter, which limits the delay in model execution when trying to accumulate multiple executions in a batch (PR406_)
@@ -42,6 +44,7 @@ Detailed Notes
 .. _PR416: https://github.com/CrayLabs/SmartRedis/pull/416
 .. _PR415: https://github.com/CrayLabs/SmartRedis/pull/415
 .. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
+.. _PR413: https://github.com/CrayLabs/SmartRedis/pull/413
 .. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
 .. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
 .. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408

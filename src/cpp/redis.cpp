@@ -722,10 +722,27 @@ inline void Redis::_add_to_address_map(SRAddress& db_address)
 
 inline void Redis::_connect(SRAddress& db_address)
 {
+    // Build a connections object for this connection
+    // No need to repeat the build on each connection attempt
+    // so we do it outside the loop
+    sw::redis::ConnectionOptions connectOpts;
+    if (db_address._is_tcp) {
+        connectOpts.host = db_address._tcp_host;
+        connectOpts.port = db_address._tcp_port;
+        connectOpts.type = sw::redis::ConnectionType::TCP;
+    }
+    else {
+        connectOpts.path = db_address._uds_file;
+        connectOpts.type = sw::redis::ConnectionType::UNIX;
+    }
+    connectOpts.socket_timeout = std::chrono::milliseconds(
+        _DEFAULT_SOCKET_TIMEOUT);
+
+    // Connect
     for (int i = 1; i <= _connection_attempts; i++) {
         try {
             // Try to create the sw::redis::Redis object
-            _redis = new sw::redis::Redis(db_address.to_string(true));
+            _redis = new sw::redis::Redis(connectOpts);
 
             // Attempt to have the sw::redis::Redis object
             // make a connection using the PING command

@@ -607,6 +607,11 @@ class RedisServer {
         int _model_chunk_size;
 
         /*!
+        *   \brief Default socket timeout (milliseconds)
+        */
+        static constexpr int _DEFAULT_SOCKET_TIMEOUT = 250;
+
+        /*!
         *   \brief Default value of connection timeout (seconds)
         */
         static constexpr int _DEFAULT_CONN_TIMEOUT = 100;
