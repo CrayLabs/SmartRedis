@@ -5,7 +5,7 @@ Advanced Topics
 This page of documentation is reserved for advanced topics
 that may not be needed for all users.
 
-.. _advanced_topics_dataset_aggregation:
+.. _advanced-topics-dataset-aggregation:
 
 Dataset Aggregation
 ===================
@@ -125,7 +125,7 @@ lead to race conditions:
     // Delete an aggregation list
     void delete_list(const std::string& list_name);
 
-.. _advanced_topics_dataset_aggregation:
+.. _advanced-topics-dataset-aggregation:
 
 Multiple Database Support
 =========================

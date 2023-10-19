@@ -59,15 +59,16 @@ class Dataset(SRObject):
 
     @staticmethod
     def from_pybind(dataset: PyDataset) -> "Dataset":
-        """Initialize a Dataset object from
-        a PyDataset object
+        """Initialize a Dataset object from a PyDataset object
+
+            Create a new Dataset object using the data and properties 
+            of a PyDataset object as the initial values.
 
         :param dataset: The pybind PyDataset object
                         to use for construction
         :type dataset: PyDataset
-        :return: The newly constructed Dataset from
-                 the PyDataset
-        :rtype: Dataset
+        :return: The newly constructed Dataset object
+        :rtype: Dataset object
         """
         typecheck(dataset, "dataset", PyDataset)
         new_dataset = Dataset(dataset.get_name())
@@ -96,9 +97,9 @@ class Dataset(SRObject):
 
     @exception_handler
     def add_tensor(self, name: str, data: np.ndarray) -> None:
-        """Add a named tensor to this dataset
+        """Add a named multi-dimensional data array (tensor) to this dataset
 
-        :param name: tensor name
+        :param name: name associated to the tensor data
         :type name: str
         :param data: tensor data
         :type data: np.ndarray
@@ -131,16 +132,15 @@ class Dataset(SRObject):
 
     @exception_handler
     def add_meta_scalar(self, name: str, data: t.Union[int, float]) -> None:
-        """Add metadata scalar field (non-string) with value to the DataSet
+        """Add scalar (non-string) metadata to a field name if it exists; 
+        otherwise, create and add
 
-            If the field does not exist, it will be created.
-            If the field exists, the value
-            will be appended to existing field.
+            If the field name exists, append the scalar metadata; otherwise, 
+            create the field within the DataSet object and add the scalar metadata.
 
-        :param name: The name used to reference the metadata
-                     field
+        :param name: The name used to reference the scalar metadata field
         :type name: str
-        :param data: a scalar
+        :param data: scalar metadata input
         :type data: int | float
         """
         typecheck(name, "name", str)
@@ -155,15 +155,14 @@ class Dataset(SRObject):
 
     @exception_handler
     def add_meta_string(self, name: str, data: str) -> None:
-        """Add metadata string field with value to the DataSet
+        """Add string metadata to a field name if it exists; otherwise, create and add
 
-        If the field does not exist, it will be created
-        If the field exists the value will
-        be appended to existing field.
+            If the field name exists, append the string metadata; otherwise, 
+            create the field within the DataSet object and add the string metadata.
 
-        :param name: The name used to reference the metadata field
+        :param name: The name used to reference the string metadata field
         :type name: str
-        :param data: The string to add to the field
+        :param data: string metadata input
         :type data: str
         """
         typecheck(name, "name", str)
@@ -172,10 +171,9 @@ class Dataset(SRObject):
 
     @exception_handler
     def get_meta_scalars(self, name: str) -> t.Union[t.List[int], t.List[float]]:
-        """Get the metadata scalar field values from the DataSet
+        """Get the scalar values from the DataSet assigned to a field name
 
-        :param name: The name used to reference the metadata
-                     field in the DataSet
+        :param name: The field name to retrieve from
         :type name: str
         :rtype: list[int] | list[float]
         """
@@ -184,10 +182,9 @@ class Dataset(SRObject):
 
     @exception_handler
     def get_meta_strings(self, name: str) -> t.List[str]:
-        """Get the metadata scalar field values from the DataSet
+        """Get the string values from the DataSet assigned to a field name
 
-        :param name: The name used to reference the metadata
-                     field in the DataSet
+        :param name: The field name to retrieve from
         :type name: str
         :rtype: list[str]
         """
@@ -196,16 +193,16 @@ class Dataset(SRObject):
 
     @exception_handler
     def get_metadata_field_names(self) -> t.List[str]:
-        """Get the names of all metadata scalars and strings from the DataSet
+        """Get all field names from the DataSet
 
-        :return: a list of metadata field names
+        :return: a list of all metadata field names
         :rtype: list[str]
         """
         return self._data.get_metadata_field_names()
 
     @exception_handler
     def get_metadata_field_type(self, name: str) -> t.Type:
-        """Get the names of all metadata scalars and strings from the DataSet
+        """Get the type of metadata for a field name (scalar or string)
 
         :param name: The name used to reference the metadata
                      field in the DataSet
@@ -243,6 +240,8 @@ class Dataset(SRObject):
     def get_tensor_dims(self, name: str) -> t.List[int]:
         """Get the dimensions of a tensor in the DataSet
 
+        :param name: name associated to the tensor data
+        :type name: str
         :return: a list of the tensor dimensions
         :rtype: list[int]
         """
