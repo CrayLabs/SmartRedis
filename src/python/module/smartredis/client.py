@@ -54,12 +54,12 @@ class Client(SRObject):
         SmartRedis library.
 
             Client(config_options: ConfigOptions=None,
-                   logger_name: str="Default")
+                   config_options: str="Default")
             Client(cluster: bool, address: optional(str)=None,
                    logger_name: str="Default") <= Deprecated!
 
         For detailed information on the first signature, please refer
-        to the __new_construction() method below.
+        to the __standard_construction() method below.
 
         For detailed information on the second signature, please refer
         to the __deprecated_construction() method below.
@@ -74,14 +74,31 @@ class Client(SRObject):
         """
         if a:
             if isinstance(a[0], bool):
+                for arg in kw:
+                    if arg not in ["cluster", "address"]:
+                        raise TypeError(
+                            f"__init__() got an unexpected keyword argument '{arg}'"
+                        )
                 pyclient = self.__deprecated_construction(*a, **kw)
             elif isinstance(a[0], ConfigOptions) or a[0] is None:
-                pyclient = self.__new_construction(*a, **kw)
+                config_object = kw.get("config_object", None)
+                logger_name = kw.get("logger_name", "default")
+                for arg in kw:
+                    if arg not in ["config_object", "logger_name"]:
+                        raise TypeError(
+                            f"__init__() got an unexpected keyword argument '{arg}'"
+                        )
+                pyclient = self.__standard_construction(*a, **kw)
             else:
                 raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
         else:
             config_object = kw.get("config_object", None)
             logger_name = kw.get("logger_name", "default")
+            for arg in kw:
+                if arg not in ["config_object", "logger_name"]:
+                    raise TypeError(
+                        f"__init__() got an unexpected keyword argument '{arg}'"
+                    )
             pyclient = self.__new_construction(config_object, logger_name)
         super().__init__(pyclient)
 
@@ -121,7 +138,7 @@ class Client(SRObject):
         except (PybindRedisReplyError, RuntimeError) as e:
             raise RedisConnectionError(str(e)) from None
 
-    def __new_construction(self, config_options=None, logger_name="Default"):  # pylint: disable=no-self-use
+    def __standard_construction(self, config_options=None, logger_name="Default"):  # pylint: disable=no-self-use
         """Initialize a RedisAI client
 
         The address of the Redis database is expected to be found in the
