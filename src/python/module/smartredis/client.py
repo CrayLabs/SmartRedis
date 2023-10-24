@@ -29,7 +29,6 @@ import inspect
 import os
 import os.path as osp
 import typing as t
-import warnings as w
 import numpy as np
 
 from .dataset import Dataset
@@ -43,50 +42,65 @@ from .util import Dtypes, exception_handler, init_default, typecheck
 
 class Client(SRObject):
     def __init__(self, *a: t.Any, **kw: t.Any):
-        """Initialize a RedisAI client
+        """Initialize a SmartRedis client
 
         At this time, the Client can be initialized with one of two
         signatures. The first version is preferred, though the second is
-        still supported. Note that the order was swapped for first two
-        parameters in the second signature relative to previous releases
-        of SmartRedis; this was necessary to remove ambiguity. Support for
-        the second signature will be removed in a future version of the
-        SmartRedis library.
+        supported (primarily for use in driver scripts). Note that the
+        order was swapped for first two parameters in the second signature
+        relative to previous releases of SmartRedis; this was necessary to
+        remove ambiguity.
 
             Client(config_options: ConfigOptions=None,
                    logger_name: str="Default")
             Client(cluster: bool, address: optional(str)=None,
-                   logger_name: str="Default") <= Deprecated!
+                   logger_name: str="Default")
 
         For detailed information on the first signature, please refer
-        to the __new_construction() method below.
+        to the __standard_construction() method below.
 
         For detailed information on the second signature, please refer
-        to the __deprecated_construction() method below.
+        to the __address_construction() method below.
 
-        :param a: The positional arguments supplied to this method; see above for
-                  valid options
+        :param a: The positional arguments supplied to this method;
+                  see above for valid options
         :type a: tuple[any]; see above for valid options
-        :param kw: Keyword arguments supplied to this method; see above for
-                   valid options
+        :param kw: Keyword arguments supplied to this method;
+                   see above for valid options
         :type kw: dict[string, any]; see above for valid options
         :raises RedisConnectionError: if connection initialization fails
         """
         if a:
             if isinstance(a[0], bool):
-                pyclient = self.__deprecated_construction(*a, **kw)
+                for arg in kw:
+                    if arg not in ["cluster", "address", "logger_name"]:
+                        raise TypeError(
+                            f"__init__() got an unexpected keyword argument '{arg}'"
+                        )
+                pyclient = self.__address_construction(*a, **kw)
             elif isinstance(a[0], ConfigOptions) or a[0] is None:
-                pyclient = self.__new_construction(*a, **kw)
+                pyclient = self.__standard_construction(*a, **kw)
             else:
                 raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
         else:
-            config_object = kw.get("config_object", None)
-            logger_name = kw.get("logger_name", "default")
-            pyclient = self.__new_construction(config_object, logger_name)
+            # Only kwargs in the call
+            if "address" in kw:
+                pyclient = self.__address_construction(*a, **kw)
+            else:
+                pyclient = self.__standard_construction(*a, **kw)
         super().__init__(pyclient)
 
-    def __deprecated_construction(self, cluster, address=None, logger_name="Default"):
-        """Initialize a RedisAI client (Deprecated)
+    def __address_construction(
+        self,
+        cluster: bool,
+        address: t.Optional[str] = None,
+        logger_name: str = "Default"
+    ) -> PyClient:
+        """Initialize a SmartRedis client
+
+        This construction method is primarily intended for use by driver
+        scripts. It is preferred to set up configuration via environment
+        variables.
 
         For clusters, the address can be a single tcp/ip address and port
         of a database node. The rest of the cluster will be discovered
@@ -94,9 +108,6 @@ class Client(SRObject):
 
         If an address is not set, the client will look for the environment
         variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
-
-        DEPRECATION NOTICE: This construction method is deprecated and will
-        be removed in the next release of the SmartRedis client.
 
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool
@@ -106,12 +117,6 @@ class Client(SRObject):
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
-        w.warn(
-            'This construction method is deprecated and will be removed in the next ' +
-            'release of the SmartRedis client.',
-            DeprecationWarning,
-            stacklevel=3
-        )
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
@@ -121,7 +126,11 @@ class Client(SRObject):
         except (PybindRedisReplyError, RuntimeError) as e:
             raise RedisConnectionError(str(e)) from None
 
-    def __new_construction(self, config_options=None, logger_name="Default"):  # pylint: disable=no-self-use
+    @staticmethod
+    def __standard_construction(
+        config_options: t.Optional[ConfigOptions] = None,
+        logger_name: str = "Default"
+    ) -> PyClient:
         """Initialize a RedisAI client
 
         The address of the Redis database is expected to be found in the
