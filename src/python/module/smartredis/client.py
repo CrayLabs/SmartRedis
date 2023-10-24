@@ -90,7 +90,12 @@ class Client(SRObject):
                 pyclient = self.__standard_construction(*a, **kw)
         super().__init__(pyclient)
 
-    def __address_construction(self, cluster, address=None, logger_name="Default"):
+    def __address_construction(
+        self,
+        cluster: bool,
+        address: t.Optional[str] = None,
+        logger_name: str = "Default"
+    ) -> PyClient:
         """Initialize a SmartRedis client
 
         This construction method is primarily intended for use by driver
@@ -121,7 +126,11 @@ class Client(SRObject):
         except (PybindRedisReplyError, RuntimeError) as e:
             raise RedisConnectionError(str(e)) from None
 
-    def __standard_construction(self, config_options=None, logger_name="Default"):  # pylint: disable=no-self-use
+    @staticmethod
+    def __standard_construction(
+        config_options: t.Optional[ConfigOptions] = None,
+        logger_name: str = "Default"
+    ) -> PyClient:
         """Initialize a RedisAI client
 
         The address of the Redis database is expected to be found in the
