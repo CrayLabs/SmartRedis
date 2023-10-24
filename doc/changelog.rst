@@ -27,7 +27,7 @@ Description
 
 Detailed Notes
 
-- Improved robustness of Python client construction by adding detection of invalid kwargs (PR417_)
+- Improved robustness of Python client construction by adding detection of invalid kwargs (PR419_)
 - Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
 - The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
 - Added tests to increase Python code coverage
@@ -43,7 +43,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
-.. _PR417: https://github.com/CrayLabs/SmartRedis/pull/417
+.. _PR419: https://github.com/CrayLabs/SmartRedis/pull/419
 .. _PR416: https://github.com/CrayLabs/SmartRedis/pull/416
 .. _PR415: https://github.com/CrayLabs/SmartRedis/pull/415
 .. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
