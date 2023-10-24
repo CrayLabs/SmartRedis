@@ -52,9 +52,9 @@ class Client(SRObject):
         remove ambiguity.
 
             Client(config_options: ConfigOptions=None,
-                   config_options: str="Default")
+                   logger_name: str="Default")
             Client(cluster: bool, address: optional(str)=None,
-                   logger_name: str="Default") <= Deprecated!
+                   logger_name: str="Default")
 
         For detailed information on the first signature, please refer
         to the __standard_construction() method below.
