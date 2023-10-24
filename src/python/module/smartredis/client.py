@@ -42,15 +42,14 @@ from .util import Dtypes, exception_handler, init_default, typecheck
 
 class Client(SRObject):
     def __init__(self, *a: t.Any, **kw: t.Any):
-        """Initialize a RedisAI client
+        """Initialize a SmartRedis client
 
         At this time, the Client can be initialized with one of two
         signatures. The first version is preferred, though the second is
-        still supported. Note that the order was swapped for first two
-        parameters in the second signature relative to previous releases
-        of SmartRedis; this was necessary to remove ambiguity. Support for
-        the second signature will be removed in a future version of the
-        SmartRedis library.
+        supported (primarily for use in driver scripts). Note that the
+        order was swapped for first two parameters in the second signature
+        relative to previous releases of SmartRedis; this was necessary to
+        remove ambiguity.
 
             Client(config_options: ConfigOptions=None,
                    config_options: str="Default")
@@ -63,11 +62,11 @@ class Client(SRObject):
         For detailed information on the second signature, please refer
         to the __address_construction() method below.
 
-        :param a: The positional arguments supplied to this method; see above for
-                  valid options
+        :param a: The positional arguments supplied to this method;
+                  see above for valid options
         :type a: tuple[any]; see above for valid options
-        :param kw: Keyword arguments supplied to this method; see above for
-                   valid options
+        :param kw: Keyword arguments supplied to this method;
+                   see above for valid options
         :type kw: dict[string, any]; see above for valid options
         :raises RedisConnectionError: if connection initialization fails
         """
@@ -92,7 +91,10 @@ class Client(SRObject):
         super().__init__(pyclient)
 
     def __address_construction(self, cluster, address=None, logger_name="Default"):
-        """Initialize a RedisAI client (Deprecated)
+        """Initialize a SmartRedis client
+
+        This construction method is primarily intended for use by driver
+        scripts. It is preferred to set up config
 
         For clusters, the address can be a single tcp/ip address and port
         of a database node. The rest of the cluster will be discovered
