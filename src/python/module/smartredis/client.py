@@ -29,7 +29,6 @@ import inspect
 import os
 import os.path as osp
 import typing as t
-import warnings as w
 import numpy as np
 
 from .dataset import Dataset
@@ -62,7 +61,7 @@ class Client(SRObject):
         to the __standard_construction() method below.
 
         For detailed information on the second signature, please refer
-        to the __deprecated_construction() method below.
+        to the __address_construction() method below.
 
         :param a: The positional arguments supplied to this method; see above for
                   valid options
@@ -75,34 +74,24 @@ class Client(SRObject):
         if a:
             if isinstance(a[0], bool):
                 for arg in kw:
-                    if arg not in ["cluster", "address"]:
+                    if arg not in ["cluster", "address", "logger_name"]:
                         raise TypeError(
                             f"__init__() got an unexpected keyword argument '{arg}'"
                         )
-                pyclient = self.__deprecated_construction(*a, **kw)
+                pyclient = self.__address_construction(*a, **kw)
             elif isinstance(a[0], ConfigOptions) or a[0] is None:
-                config_object = kw.get("config_object", None)
-                logger_name = kw.get("logger_name", "default")
-                for arg in kw:
-                    if arg not in ["config_object", "logger_name"]:
-                        raise TypeError(
-                            f"__init__() got an unexpected keyword argument '{arg}'"
-                        )
                 pyclient = self.__standard_construction(*a, **kw)
             else:
                 raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
         else:
-            config_object = kw.get("config_object", None)
-            logger_name = kw.get("logger_name", "default")
-            for arg in kw:
-                if arg not in ["config_object", "logger_name"]:
-                    raise TypeError(
-                        f"__init__() got an unexpected keyword argument '{arg}'"
-                    )
-            pyclient = self.__new_construction(config_object, logger_name)
+            # Only kwargs in the call
+            if "address" in kw:
+                pyclient = self.__address_construction(*a, **kw)
+            else:
+                pyclient = self.__standard_construction(*a, **kw)
         super().__init__(pyclient)
 
-    def __deprecated_construction(self, cluster, address=None, logger_name="Default"):
+    def __address_construction(self, cluster, address=None, logger_name="Default"):
         """Initialize a RedisAI client (Deprecated)
 
         For clusters, the address can be a single tcp/ip address and port
@@ -112,9 +101,6 @@ class Client(SRObject):
         If an address is not set, the client will look for the environment
         variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
 
-        DEPRECATION NOTICE: This construction method is deprecated and will
-        be removed in the next release of the SmartRedis client.
-
         :param cluster: True if connecting to a redis cluster, defaults to False
         :type cluster: bool
         :param address: Address of the database
@@ -123,12 +109,6 @@ class Client(SRObject):
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
         """
-        w.warn(
-            'This construction method is deprecated and will be removed in the next ' +
-            'release of the SmartRedis client.',
-            DeprecationWarning,
-            stacklevel=3
-        )
         if address:
             self.__set_address(address)
         if "SSDB" not in os.environ:
