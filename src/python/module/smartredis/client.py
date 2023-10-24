@@ -94,7 +94,8 @@ class Client(SRObject):
         """Initialize a SmartRedis client
 
         This construction method is primarily intended for use by driver
-        scripts. It is preferred to set up config
+        scripts. It is preferred to set up configuration via environment
+        variables.
 
         For clusters, the address can be a single tcp/ip address and port
         of a database node. The rest of the cluster will be discovered
