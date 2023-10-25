@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Centralized dependency tracking to setup.cfg
 - Improved robustness of Python client construction
 - Updated Client and Dataset documentation
 - Expanded list of allowed characters in the SSDB address
@@ -27,6 +28,7 @@ Description
 
 Detailed Notes
 
+- Merged dependency lists from requirements.txt and requirements-dev.txt into setup.cfg to have only one set of dependencies going forward (PR420_)
 - Improved robustness of Python client construction by adding detection of invalid kwargs (PR419_)
 - Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
 - The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
@@ -43,6 +45,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR420: https://github.com/CrayLabs/SmartRedis/pull/420
 .. _PR419: https://github.com/CrayLabs/SmartRedis/pull/419
 .. _PR416: https://github.com/CrayLabs/SmartRedis/pull/416
 .. _PR415: https://github.com/CrayLabs/SmartRedis/pull/415
