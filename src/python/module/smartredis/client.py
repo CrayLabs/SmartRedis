@@ -84,7 +84,7 @@ class Client(SRObject):
                 raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
         else:
             # Only kwargs in the call
-            if "address" in kw:
+            if "address" in kw or "cluster" in kw:
                 pyclient = self.__address_construction(*a, **kw)
             else:
                 pyclient = self.__standard_construction(*a, **kw)

@@ -107,17 +107,8 @@ void Client::_establish_server_connection()
 Client::Client(bool cluster, const std::string& logger_name)
     : SRObject(logger_name)
 {
-    std::cout << "In deprecated constructor" << std::endl;
     // Log that a new client has been instantiated
     log_data(LLDebug, "New client created");
-
-    // Log deprecation warning for this method
-    log_data(
-        LLInfo,
-        "Deprecation Notice: Client::Client(bool, std::string) constructor "
-        "should not be used. Please migrate your code to use the "
-        "Client::Client(ConfigOptions*) constructor and set the server type "
-        "in the SR_DB_TYPE environment variable.");
 
     // Create our ConfigOptions object (default = no suffixing)
     auto cfgopts = ConfigOptions::create_from_environment("");
