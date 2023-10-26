@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Added test cases for all Client construction parameter combinations
 - Centralized dependency tracking to setup.cfg
 - Improved robustness of Python client construction
 - Updated Client and Dataset documentation
@@ -28,6 +29,7 @@ Description
 
 Detailed Notes
 
+- Added test cases for all Client construction parameter combinations (PR422_)
 - Merged dependency lists from requirements.txt and requirements-dev.txt into setup.cfg to have only one set of dependencies going forward (PR420_)
 - Improved robustness of Python client construction by adding detection of invalid kwargs (PR419_), (PR421_)
 - Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
@@ -45,6 +47,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR422: https://github.com/CrayLabs/SmartRedis/pull/422
 .. _PR421: https://github.com/CrayLabs/SmartRedis/pull/421
 .. _PR420: https://github.com/CrayLabs/SmartRedis/pull/420
 .. _PR419: https://github.com/CrayLabs/SmartRedis/pull/419
