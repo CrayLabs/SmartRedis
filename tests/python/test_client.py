@@ -73,6 +73,7 @@ co_envt = ConfigOptions.create_from_environment("")
     [(co_envt,), {}, "standard"],
     [(co_envt,), {"logger_name": "log_name"}, "standard"],
     [(co_envt, "log_name"), {}, "standard"],
+    [(), {}, "standard"],
     [(), {"config_options": None}, "standard"],
     [(), {"config_options": None, "logger_name": "log_name"}, "standard"],
     [(), {"config_options": co_envt}, "standard"],
