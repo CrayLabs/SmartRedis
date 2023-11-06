@@ -2,22 +2,22 @@
 Data Structures
 ***************
 
-SmartSim defines primary three data structures designed for use within backend databases: 
+SmartSim defines primary three data structures designed for use within backend databases:
 
 * ``Tensor`` : represents an n-dimensional array of values.
 * ``Model`` : represents a computational ML model for one of the supported backend frameworks.
 * ``Script`` : represents a TorchScript program.
 
 In addition, SmartRedis defines a data
-structure named ``DataSet`` that enables a user to manage a group of tensors 
-and associated metadata in-memory. In this section, we will provide an explanation 
-of the SmartRedis API used to interact with these four data structures, 
+structure named ``DataSet`` that enables a user to manage a group of tensors
+and associated metadata in-memory. In this section, we will provide an explanation
+of the SmartRedis API used to interact with these four data structures,
 along with relevant insights on performance and best practices.
 
-We illustrate concepts and capabilities of the Python 
-and C++ SmartRedis APIs. The C and Fortran function signatures closely 
-mirror the C++ API, and for brevity, we won't delve 
-into them. For full discussion of the C and Fortran APIs, 
+We illustrate concepts and capabilities of the Python
+and C++ SmartRedis APIs. The C and Fortran function signatures closely
+mirror the C++ API, and for brevity, we won't delve
+into them. For full discussion of the C and Fortran APIs,
 please refer to their respective documentation pages.
 
 
@@ -178,14 +178,14 @@ SmartSim ensemble capabilities.
 Dataset
 =======
 
-When dealing with multi-modal data or complex data sets, 
-one may have different types of tensors (e.g., images, text embeddings, 
-numerical data) and metadata for each data point. Grouping them into a 
+When dealing with multi-modal data or complex data sets,
+one may have different types of tensors (e.g., images, text embeddings,
+numerical data) and metadata for each data point. Grouping them into a
 collection represents each data point as a cohesive unit.
 The ``DataSet`` data structure provides this functionality to stage tensors and metadata
-in-memory via the ``DataSet API``. After the creation of a 
-``DataSet`` object, the grouped data can be efficiently stored in the backend database 
-by the ``Client API`` and subsequently retrieved using the assigned ``DataSet`` name. 
+in-memory via the ``DataSet API``. After the creation of a
+``DataSet`` object, the grouped data can be efficiently stored in the backend database
+by the ``Client API`` and subsequently retrieved using the assigned ``DataSet`` name.
 In the upcoming sections, we outline the process of building, sending, and retrieving a ``DataSet``.
 
 Listed below are the supported tensor and metadata types.
@@ -237,31 +237,31 @@ Build and Send a DataSet
 
 When building a ``DataSet`` object in-memory,
 a user can group various combinations of tensors and metadata that
-constrain to the supported data types in the table above. To illustrate, 
-tensors can be inserted into a ``dataset`` object via the ``Dataset.add_tensor()`` method. 
-The SmartRedis DataSet API functions 
-are available in C, C++, Python, and Fortran. The ``DataSet.add_tensor()`` function, 
-operates independently of the database and solely 
-maintains the dataset object. Storing the dataset in the backend 
+constrain to the supported data types in the table above. To illustrate,
+tensors can be inserted into a ``dataset`` object via the ``Dataset.add_tensor()`` method.
+The SmartRedis DataSet API functions
+are available in C, C++, Python, and Fortran. The ``DataSet.add_tensor()`` function,
+operates independently of the database and solely
+maintains the dataset object. Storing the dataset in the backend
 database is done via the Client API ``put_dataset()`` method.
 
 .. note::
-    The ``DataSet.add_tensor()`` function copies user-provided 
-    tensor data; this prevents potential issues arising from the user's 
-    data being cleared or deallocated. Any additional memory allocated 
+    The ``DataSet.add_tensor()`` function copies user-provided
+    tensor data; this prevents potential issues arising from the user's
+    data being cleared or deallocated. Any additional memory allocated
     for this purpose will be released when the DataSet object is destroyed.
 
 Metadata can be added to an in-memory ``DataSet`` object with the
 ``DataSet.add_meta_scalar()`` and ``DataSet.add_meta_string()``
-functions. Methods exist for adding scalar metadata (e.g., double) and string metadata. 
+functions. Methods exist for adding scalar metadata (e.g., double) and string metadata.
 For both functions, the first input
-parameter is the name of the metadata field. 
-The field name serves as an internal identifier within the ``DataSet`` 
-for grouped metadata values. It's used to retrieve metadata in the future. 
-Since it's an internal identifier, users don't need to be concerned 
-about conflicts with keys in the database. In other words, multiple 
-``DataSet`` objects can use the same metadata field names without causing 
-issues because these names are managed within the ``DataSet`` and won't 
+parameter is the name of the metadata field.
+The field name serves as an internal identifier within the ``DataSet``
+for grouped metadata values. It's used to retrieve metadata in the future.
+Since it's an internal identifier, users don't need to be concerned
+about conflicts with keys in the database. In other words, multiple
+``DataSet`` objects can use the same metadata field names without causing
+issues because these names are managed within the ``DataSet`` and won't
 interfere with external database keys. The C++ interface for adding
 metadata is shown below:
 
@@ -280,13 +280,13 @@ metadata is shown below:
 When adding a scalar or string metadata value, the value
 is copied by the ``DataSet``, and as a result, the user
 does not need to ensure that the metadata values provided
-are still in-memory. In other words, 
-the ``DataSet`` handles the memory management of these metadata values, 
-and you don't need to retain or manage the original copies separately 
+are still in-memory. In other words,
+the ``DataSet`` handles the memory management of these metadata values,
+and you don't need to retain or manage the original copies separately
 once they have been included in the ``DataSet`` object.
 Additionally, multiple metadata values can be added to a
 single field name, and the default behavior is to append the value to the
-field name (creating the field if not already present). This behavior allows the ``DataSet`` metadata 
+field name (creating the field if not already present). This behavior allows the ``DataSet`` metadata
 to function like one-dimensional arrays.
 
 Also, note that in the above C++ example,
@@ -296,7 +296,7 @@ requirements exist for C and Fortran ``DataSet`` implementations.
 
 Finally, the ``DataSet`` object is sent to the database using the
 ``Client.put_dataset()`` function, which is uniform across all clients.
-To emphasize once more, all interactions with the backend database are handle by 
+To emphasize once more, all interactions with the backend database are handle by
 the Client API, not the DataSet API.
 
 
@@ -320,11 +320,11 @@ the previous section for details on tensor retrieve
 function calls.
 
 There are four functions for retrieving metadata information from a ``DataSet`` object in-memory:
-``get_meta_scalars()``, ``get_meta_strings()``, ``get_metadata_field_names()`` 
+``get_meta_scalars()``, ``get_meta_strings()``, ``get_metadata_field_names()``
 and ``get_metadata_field_type()``. As the names suggest, the ``get_meta_scalars()`` function
 is used for retrieving numerical metadata values, while the ``get_meta_strings()`` function
-is for retrieving metadata string values. The ``get_metadata_field_names()`` function 
-retrieves a list of all metadata field names in the ``DataSet`` object. Lastly, 
+is for retrieving metadata string values. The ``get_metadata_field_names()`` function
+retrieves a list of all metadata field names in the ``DataSet`` object. Lastly,
 the ``get_metadata_field_type()`` function returns the type (scalar or string) of the metadata
 attached to the specified field name. The metadata retrieval function prototypes
 vary across the clients based on programming language constraints,
@@ -339,8 +339,7 @@ Aggregating
 -----------
 
 SmartRedis also supports an advanced API for working with aggregate
-lists of DataSets; details may be found
-:ref:`here <advanced-topics-dataset-aggregation>`.
+lists of DataSets; details may be found :ref:`here <advanced-topics-dataset-aggregation>`.
 
 .. _data-structures-model:
 

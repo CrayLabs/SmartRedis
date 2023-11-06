@@ -7,6 +7,7 @@ Quick instructions
 ##################
 
 To run the tests, assuming that all requirements have been installed
+
 1. Activate your environment with SmartSim and SmartRedis installed
 2. Modify `SR_DB_TYPE` (`Clustered` or `Standalone`) and
    `SMARTREDIS_TEST_DEVICE` (`gpu` or `cpu`) as necessary in
@@ -14,7 +15,7 @@ To run the tests, assuming that all requirements have been installed
 3. `source setup_test_env.sh`
 4. `pushd utils/create_cluster; python local_cluster.py; popd`
 5. `export SSDB="127.0.0.1:6379,127.0.0.1:6380,127.0.0.1:6381"`
-5. Run the desired tests (see `make help` for more details)
+6. Run the desired tests (see `make help` for more details)
 
 ###################
 Unit Test Framework

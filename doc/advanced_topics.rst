@@ -125,7 +125,7 @@ lead to race conditions:
     // Delete an aggregation list
     void delete_list(const std::string& list_name);
 
-.. _advanced-topics-dataset-aggregation:
+.. _advanced-topics-multi-db:
 
 Multiple Database Support
 =========================
