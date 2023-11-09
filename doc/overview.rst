@@ -3,22 +3,24 @@
 Overview
 ********
 
-SmartRedis is a collection of Redis clients that support
-RedisAI capabilities and include additional
+SmartRedis is a collection of `Redis <https://redis.io>`__ clients that support
+`RedisAI <https://redisai.io>`__ capabilities and include additional
 features for high performance computing (HPC) applications.
 Key features of RedisAI that are supported by SmartRedis include:
 
 -   A tensor data type in Redis
 -   TensorFlow, TensorFlow Lite, Torch,
-    and ONNXRuntime backends for model evaluations
--   TorchScript storage and evaluation
+    and `ONNXRuntime <https://onnxruntime.ai/>`__ backends for model evaluations
+-   `TorchScript <https://pytorch.org/docs/1.11/jit.html>`__ storage and evaluation
 
 In addition to the RedisAI capabilities above,
 SmartRedis includes the following features developed for
 large, distributed HPC architectures:
 
--   Redis cluster support for RedisAI data types (tensors,
-    models, and scripts).
+-   Redis cluster support for RedisAI data types
+    (`tensors <https://oss.redis.com/redisai/intro/#using-redisai-tensors>`__,
+    `models <https://oss.redis.com/redisai/intro/#loading-models>`__,
+    and `scripts <https://oss.redis.com/redisai/intro/#scripting>`__).
 -   Distributed model and script placement for parallel
     evaluation that maximizes hardware utilization and throughput
 -   A ``DataSet`` storage format to aggregate multiple tensors

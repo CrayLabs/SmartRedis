@@ -16,7 +16,7 @@ means for altering, transmitting, and receiving data within the backend
 database. More specifically, the Client API is responsible for both
 creating and modifying data structures, which encompass
 :ref:`Models <data-structures-model>`, :ref:`Scripts <data-structures-script>`,
-and :ref:`Tensors <data-structures-tensor:>`.
+and :ref:`Tensors <data-structures-tensor>`.
 It also handles the transmission and reception of the aforementioned data
 structures in addition to :ref:`Dataset <data-structures-dataset>` data
 structure. Creating and modifying the ``DataSet`` object is confined to local
