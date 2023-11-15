@@ -31,7 +31,7 @@ Description
 
 Detailed Notes
 
-- The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR426_)
+- The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR427_)
 - Some broken links in the documentation were fixed, and the instructions to run the tests were updated (PR423_)
 - Added test cases for all Client construction parameter combinations (PR422_)
 - Merged dependency lists from requirements.txt and requirements-dev.txt into setup.cfg to have only one set of dependencies going forward (PR420_)
@@ -51,7 +51,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
-.. _PR426: https://github.com/CrayLabs/SmartRedis/pull/426
+.. _PR427: https://github.com/CrayLabs/SmartRedis/pull/427
 .. _PR423: https://github.com/CrayLabs/SmartRedis/pull/423
 .. _PR422: https://github.com/CrayLabs/SmartRedis/pull/422
 .. _PR421: https://github.com/CrayLabs/SmartRedis/pull/421
