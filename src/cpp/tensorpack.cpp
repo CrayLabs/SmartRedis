@@ -62,7 +62,7 @@ TensorPack::~TensorPack()
 
 // Add a tensor to the dataset
 void TensorPack::add_tensor(const std::string& name,
-                            void* data,
+                            const void* data,
                             const std::vector<size_t>& dims,
                             const SRTensorType type,
                             const SRMemoryLayout mem_layout)

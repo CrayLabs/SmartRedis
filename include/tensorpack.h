@@ -97,7 +97,7 @@ class TensorPack
         *   \param mem_layout The memory layout of the data
         */
         void add_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout);

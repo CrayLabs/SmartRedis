@@ -95,7 +95,7 @@ class TensorBase{
         *   \param mem_layout The memory layout of the source data
         */
         TensorBase(const std::string& name,
-                   void* data,
+                   const void* data,
                    const std::vector<size_t>& dims,
                    const SRTensorType type,
                    const SRMemoryLayout mem_layout);
@@ -259,7 +259,7 @@ class TensorBase{
         *   \param dims The dimensions of the data
         *   \param mem_layout The memory layout of the source data
         */
-        virtual void _set_tensor_data(void* src_data,
+        virtual void _set_tensor_data(const void* src_data,
                                       const std::vector<size_t>& dims,
                                       const SRMemoryLayout mem_layout) = 0;
 
