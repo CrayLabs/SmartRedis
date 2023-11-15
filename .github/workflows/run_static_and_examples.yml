@@ -96,12 +96,9 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt-get update -y &&
-          sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
-          source /opt/intel/oneapi/setvars.sh &&
-          printenv >> $GITHUB_ENV &&
-          echo "CC=icx" >> $GITHUB_ENV &&
-          echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifort" >> $GITHUB_ENV
+          sudo apt-get install -y intel-oneapi-common-vars &&
+          sudo apt-get install -y intel-oneapi-compiler-fortran &&
+          sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
 
       # Install additional dependencies
       - name: Install Cmake Linux
