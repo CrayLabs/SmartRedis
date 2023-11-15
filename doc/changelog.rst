@@ -27,6 +27,7 @@ Description
 - Add link to contributing guidelines
 - Added link to contributing guidelines
 - Added support for multiple backend databases via a new Client constructor that accepts a ConfigOptions object
+- Update documentation build dependencies
 
 Detailed Notes
 
@@ -48,6 +49,7 @@ Detailed Notes
 - Updated lcov from version 1.15 to 2.0 (PR396_)
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
+- Updated dependencies used in documentation build process (PR426_)
 
 .. _PR423: https://github.com/CrayLabs/SmartRedis/pull/423
 .. _PR422: https://github.com/CrayLabs/SmartRedis/pull/422
@@ -68,6 +70,8 @@ Detailed Notes
 .. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
 .. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
 .. _PR353: https://github.com/CrayLabs/SmartRedis/pull/353
+.. _PR426: https://github.com/CrayLabs/SmartRedis/pull/426
+
 
 0.4.2
 -----
