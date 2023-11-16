@@ -8,7 +8,8 @@ To be released at some future point in time
 
 Description
 
-- Improved const correctness of Dataset
+- Improved const correctness of C++ Client
+- Improved const correctness of C++ Dataset
 - Updated documentation
 - Added test cases for all Client construction parameter combinations
 - Centralized dependency tracking to setup.cfg
@@ -31,6 +32,7 @@ Description
 
 Detailed Notes
 
+- Fields in several C++ API methods are now properly marked as const (PR429_)
 - The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR427_)
 - Some broken links in the documentation were fixed, and the instructions to run the tests were updated (PR423_)
 - Added test cases for all Client construction parameter combinations (PR422_)
@@ -51,6 +53,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR429: https://github.com/CrayLabs/SmartRedis/pull/429
 .. _PR427: https://github.com/CrayLabs/SmartRedis/pull/427
 .. _PR423: https://github.com/CrayLabs/SmartRedis/pull/423
 .. _PR422: https://github.com/CrayLabs/SmartRedis/pull/422

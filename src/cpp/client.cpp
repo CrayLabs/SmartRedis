@@ -293,7 +293,7 @@ void Client::delete_dataset(const std::string& name)
 
 // Put a tensor into the database
 void Client::put_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout)
@@ -1306,7 +1306,7 @@ void Client::use_dataset_ensemble_prefix(bool use_prefix)
 }
 
 // Returns information about the given database node
-parsed_reply_nested_map Client::get_db_node_info(std::string address)
+parsed_reply_nested_map Client::get_db_node_info(const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1326,7 +1326,7 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 }
 
 // Returns the CLUSTER INFO command reply addressed to a single cluster node.
-parsed_reply_map Client::get_db_cluster_info(std::string address)
+parsed_reply_map Client::get_db_cluster_info(const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1351,7 +1351,7 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
 // Returns the AI.INFO command reply
 parsed_reply_map Client::get_ai_info(const std::string& address,
                                      const std::string& key,
-                                     const bool reset_stat)
+                                     bool reset_stat)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1395,7 +1395,8 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
 }
 
 // Delete all the keys of the given database
-void Client::flush_db(std::string address)
+void Client::flush_db(
+    const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1412,7 +1413,9 @@ void Client::flush_db(std::string address)
 
 // Read the configuration parameters of a running server
 std::unordered_map<std::string,std::string>
-Client::config_get(std::string expression, std::string address)
+Client::config_get(
+    const std::string expression,
+    const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1437,7 +1440,10 @@ Client::config_get(std::string expression, std::string address)
 }
 
 // Reconfigure the server
-void Client::config_set(std::string config_param, std::string value, std::string address)
+void Client::config_set(
+    const std::string config_param,
+    const std::string value,
+    const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1452,7 +1458,7 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw SRRuntimeException("CONFIG SET command failed");
 }
 
-void Client::save(std::string address)
+void Client::save(const std::string address)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1728,8 +1734,8 @@ std::vector<DataSet> Client::get_datasets_from_list(const std::string& list_name
 
 // Retrieve a subset of datsets in the aggregation list
 std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name,
-                                                    const int start_index,
-                                                    const int end_index)
+                                                    int start_index,
+                                                    int end_index)
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -1841,8 +1847,8 @@ inline void Client::_add_dataset_tensor(
 
 inline std::vector<DataSet>
 Client::_get_dataset_list_range(const std::string& list_name,
-                                const int start_index,
-                                const int end_index)
+                                int start_index,
+                                int end_index)
 {
     // Build the list key
     std::string list_key = _build_list_key(list_name, true);
@@ -1984,7 +1990,7 @@ Client::_get_dataset_list_range(const std::string& list_name,
 
 // Build full formatted key of a tensor, based on current prefix settings.
 inline std::string Client::_build_tensor_key(const std::string& key,
-                                             const bool on_db)
+                                             bool on_db)
 {
     std::string prefix("");
     if (_use_tensor_prefix)
@@ -1996,7 +2002,7 @@ inline std::string Client::_build_tensor_key(const std::string& key,
 // Build full formatted key of a model or a script,
 // based on current prefix settings.
 inline std::string Client::_build_model_key(const std::string& key,
-                                            const bool on_db)
+                                            bool on_db)
 {
     std::string prefix("");
     if (_use_model_prefix)
@@ -2007,7 +2013,7 @@ inline std::string Client::_build_model_key(const std::string& key,
 
 // Build full formatted key of a dataset, based on current prefix settings.
 inline std::string Client::_build_dataset_key(const std::string& dataset_name,
-                                              const bool on_db)
+                                              bool on_db)
 {
     std::string prefix("");
     if (_use_dataset_prefix)
@@ -2020,7 +2026,7 @@ inline std::string Client::_build_dataset_key(const std::string& dataset_name,
 inline std::string
 Client::_build_dataset_tensor_key(const std::string& dataset_name,
                                   const std::string& tensor_name,
-                                  const bool on_db)
+                                  bool on_db)
 {
     return _build_dataset_key(dataset_name, on_db) + "." + tensor_name;
 }
@@ -2029,7 +2035,7 @@ Client::_build_dataset_tensor_key(const std::string& dataset_name,
 inline std::vector<std::string>
 Client::_build_dataset_tensor_keys(const std::string& dataset_name,
                                    const std::vector<std::string>& tensor_names,
-                                   const bool on_db)
+                                   bool on_db)
 {
     std::vector<std::string> dataset_tensor_keys;
     for (size_t i = 0; i < tensor_names.size(); i++) {
@@ -2043,7 +2049,7 @@ Client::_build_dataset_tensor_keys(const std::string& dataset_name,
 // Create the key for putting or getting DataSet metadata in the database
 inline std::string
 Client::_build_dataset_meta_key(const std::string& dataset_name,
-                                const bool on_db)
+                                bool on_db)
 {
     return _build_dataset_key(dataset_name, on_db) + ".meta";
 }
@@ -2051,7 +2057,7 @@ Client::_build_dataset_meta_key(const std::string& dataset_name,
 // Create the key for putting or getting aggregation list in the dataset
 inline std::string
 Client::_build_list_key(const std::string& list_name,
-                                    const bool on_db)
+                                    bool on_db)
 {
     std::string prefix;
     if (_use_list_prefix)
@@ -2065,7 +2071,7 @@ Client::_build_list_key(const std::string& list_name,
 // dataset has been successfully stored.
 inline std::string
 Client::_build_dataset_ack_key(const std::string& dataset_name,
-                               const bool on_db)
+                               bool on_db)
 {
     return _build_dataset_meta_key(dataset_name, on_db);
 }
@@ -2223,7 +2229,8 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 }
 
 // Determine datset name from aggregation list entry
-std::string Client::_get_dataset_name_from_list_entry(std::string& dataset_key)
+std::string Client::_get_dataset_name_from_list_entry(
+    const std::string& dataset_key)
 {
     size_t open_brace_pos = dataset_key.find_first_of('{');
 

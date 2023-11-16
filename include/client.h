@@ -218,7 +218,7 @@ class Client : public SRObject
         *   \throw SmartRedis::Exception if put tensor command fails
         */
         void put_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout);
@@ -647,8 +647,8 @@ class Client : public SRObject
         *   \throw SmartRedis::Exception if run model command fails
         */
         void run_model(const std::string& name,
-                       std::vector<std::string> inputs,
-                       std::vector<std::string> outputs);
+                       const std::vector<std::string> inputs,
+                       const std::vector<std::string> outputs);
 
         /*!
         *   \brief Run a model in the database using the
@@ -674,8 +674,8 @@ class Client : public SRObject
         *   \throw SmartRedis::Exception if run model command fails
         */
         void run_model_multigpu(const std::string& name,
-                                std::vector<std::string> inputs,
-                                std::vector<std::string> outputs,
+                                const std::vector<std::string> inputs,
+                                const std::vector<std::string> outputs,
                                 int offset,
                                 int first_gpu,
                                 int num_gpus);
@@ -699,8 +699,8 @@ class Client : public SRObject
         */
         void run_script(const std::string& name,
                         const std::string& function,
-                        std::vector<std::string> inputs,
-                        std::vector<std::string> outputs);
+                        const std::vector<std::string> inputs,
+                        const std::vector<std::string> outputs);
 
         /*!
         *   \brief Run a script function in the database using the
@@ -724,8 +724,8 @@ class Client : public SRObject
         */
         void run_script_multigpu(const std::string& name,
                                  const std::string& function,
-                                 std::vector<std::string> inputs,
-                                 std::vector<std::string> outputs,
+                                 const std::vector<std::string> inputs,
+                                 const std::vector<std::string> outputs,
                                  int offset,
                                  int first_gpu,
                                  int num_gpus);
@@ -755,7 +755,8 @@ class Client : public SRObject
         *   \param num_gpus the number of gpus for which the model was stored
         *   \throw SmartRedis::Exception if model deletion fails
         */
-        void delete_model_multigpu(const std::string& name, int first_gpu, int num_gpus);
+        void delete_model_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Remove a script from the database
@@ -782,7 +783,8 @@ class Client : public SRObject
         *   \param num_gpus the number of gpus for which the script was stored
         *   \throw SmartRedis::Exception if script deletion fails
         */
-        void delete_script_multigpu(const std::string& name, int first_gpu, int num_gpus);
+        void delete_script_multigpu(
+            const std::string& name, int first_gpu, int num_gpus);
 
         /*!
         *   \brief Check if a key exists in the database
@@ -1024,7 +1026,7 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        parsed_reply_nested_map get_db_node_info(std::string address);
+        parsed_reply_nested_map get_db_node_info(const std::string address);
 
         /*!
         *   \brief Returns the response from a CLUSTER INFO command
@@ -1041,7 +1043,7 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        parsed_reply_map get_db_cluster_info(std::string address);
+        parsed_reply_map get_db_cluster_info(const std::string address);
 
         /*!
         *   \brief Returns the response from an AI.INFO command sent to
@@ -1063,7 +1065,7 @@ class Client : public SRObject
         */
         parsed_reply_map get_ai_info(const std::string& address,
                                      const std::string& key,
-                                     const bool reset_stat);
+                                     bool reset_stat);
 
         /*!
         *   \brief Flush the database shard at the provided address
@@ -1078,7 +1080,7 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        void flush_db(std::string address);
+        void flush_db(const std::string address);
 
         /*!
         *   \brief Read the configuration parameters of a running server.
@@ -1101,8 +1103,8 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        std::unordered_map<std::string,std::string> config_get(std::string expression,
-                                                               std::string address);
+        std::unordered_map<std::string,std::string> config_get(
+            const std::string expression, const std::string address);
 
         /*!
         *   \brief Reconfigure the server. It can change both trivial
@@ -1123,7 +1125,10 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        void config_set(std::string config_param, std::string value, std::string address);
+        void config_set(
+            const std::string config_param,
+            const std::string value,
+            const std::string address);
 
         /*!
         *   \brief Performs a synchronous save of the database shard,
@@ -1140,7 +1145,7 @@ class Client : public SRObject
         *          CLUSTER SLOTS commands will lead to SmartRedis::Exception
         *          being thrown.
         */
-        void save(std::string address);
+        void save(const std::string address);
 
         /*!
         *   \brief Appends a dataset to the aggregation list
@@ -1305,8 +1310,8 @@ class Client : public SRObject
         *          input parameters are invalid
         */
         std::vector<DataSet> get_dataset_list_range(const std::string& list_name,
-                                                    const int start_index,
-                                                    const int end_index);
+                                                    int start_index,
+                                                    int end_index);
 
         /*!
         *   \brief Reconfigure the chunking size that Redis uses for model
@@ -1466,11 +1471,9 @@ class Client : public SRObject
         */
         inline std::vector<DataSet>
         _get_dataset_list_range(const std::string& list_name,
-                                const int start_index,
-                                const int end_index);
+                                int start_index,
+                                int end_index);
 
-
-        // Add a retrieved tensor to a dataset
         /*!
         *  \brief Add a tensor retrieved via get_tensor() to a dataset
         *  \param dataset The dataset which will receive the tensor
@@ -1579,7 +1582,7 @@ class Client : public SRObject
         *              which is already in the database.
         */
         inline std::string _build_tensor_key(const std::string& name,
-                                             const bool on_db);
+                                             bool on_db);
 
         /*!
         * \brief Build full formatted key of a model or a script,
@@ -1589,7 +1592,7 @@ class Client : public SRObject
         *              which is already in the database.
         */
         inline std::string _build_model_key(const std::string& name,
-                                            const bool on_db);
+                                            bool on_db);
 
         /*!
         *  \brief Build full formatted key of a dataset, based
@@ -1600,7 +1603,7 @@ class Client : public SRObject
         *  \returns Formatted key.
         */
         inline std::string _build_dataset_key(const std::string& dataset_name,
-                                              const bool on_db);
+                                              bool on_db);
 
         /*!
         *  \brief Create the key for putting or getting a DataSet tensor
@@ -1613,7 +1616,7 @@ class Client : public SRObject
         */
         inline std::string _build_dataset_tensor_key(const std::string& dataset_name,
                                                      const std::string& tensor_name,
-                                                     const bool on_db);
+                                                     bool on_db);
 
         /*!
         *  \brief Create keys for putting or getting a DataSet tensors
@@ -1627,7 +1630,7 @@ class Client : public SRObject
         inline std::vector<std::string>
         _build_dataset_tensor_keys(const std::string& dataset_name,
                                    const std::vector<std::string>& tensor_names,
-                                   const bool on_db);
+                                   bool on_db);
 
         /*!
         *  \brief Create the key for putting or getting DataSet metadata
@@ -1638,7 +1641,7 @@ class Client : public SRObject
         *  \returns A string of the key for the metadata
         */
         inline std::string _build_dataset_meta_key(const std::string& dataset_name,
-                                                   const bool on_db);
+                                                   bool on_db);
 
         /*!
         *  \brief Create the key to place an indicator in the database
@@ -1649,7 +1652,7 @@ class Client : public SRObject
         *  \returns A string of the key for the ack key
         */
         inline std::string _build_dataset_ack_key(const std::string& dataset_name,
-                                                  const bool on_db);
+                                                  bool on_db);
 
         /*!
         *  \brief Create the key for putting or getting aggregation list
@@ -1660,7 +1663,7 @@ class Client : public SRObject
         *  \returns A string of the key for aggregation list
         */
         inline std::string _build_list_key(const std::string& list_name,
-                                           const bool on_db);
+                                           bool on_db);
 
         /*!
         *   \brief Append the Command associated with
@@ -1720,7 +1723,7 @@ class Client : public SRObject
         *                      ensemble_member.{dataset_name}
         *   \returns DataSet name
         */
-        std::string _get_dataset_name_from_list_entry(std::string& dataset_key);
+        std::string _get_dataset_name_from_list_entry(const std::string& dataset_key);
 
         /*!
         *   \brief Poll aggregation list length using a custom comparison function
