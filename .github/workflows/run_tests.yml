@@ -108,7 +108,7 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt-get update -y &&
-          sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y intel-oneapi-compiler-fortran=2023.2.2-47 intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh &&
           sudo apt-get install -y intel-oneapi-common-vars &&
           printenv >> $GITHUB_ENV &&
@@ -182,14 +182,11 @@ jobs:
         run: make build-examples SR_LINK=Static SR_FORTRAN=ON
       - name: Test static build -- intel compilers
         if: contains(matrix.os, 'ubuntu') && contains(matrix.compiler, 'intel')
-        run: |
-          echo "/opt/intel/oneapi/compiler/2024.0.0/linux/bin/intel64:/opt/intel/oneapi/compiler/2024.0.0/linux/bin" >> $GITHUB_PATH &&
-          make build-example-serial SR_LINK=Static SR_FORTRAN=ON
+        run: make build-example-serial SR_LINK=Static SR_FORTRAN=ON
 
       # Run the tests using various DB deployments
       - name: Run tests
         run: |
-          echo "/opt/intel/oneapi/compiler/2024.0.0/linux/bin/intel64:/opt/intel/oneapi/compiler/2024.0.0/linux/bin" >> $GITHUB_PATH &&
           make test-verbose-with-coverage \
             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
             SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 \

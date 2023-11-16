@@ -84,8 +84,7 @@ jobs:
           --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
           echo "CC=gcc" >> $GITHUB_ENV &&
           echo "CXX=g++" >> $GITHUB_ENV &&
-          echo "FC=gfortran" >> $GITHUB_ENV &&
-          echo "/opt/intel/oneapi/compiler/2024.0.0/linux/bin/intel64:/opt/intel/oneapi/compiler/2024.0.0/linux/bin" >> $GITHUB_PATH
+          echo "FC=gfortran" >> $GITHUB_ENV
         # Note CC and CXX need to be set otherwise, some Ubuntu images default to
         # a Debian-flavored compiler
 
@@ -97,7 +96,7 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt-get update -y &&
-          sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y intel-oneapi-compiler-fortran=2023.2.2-47 intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh &&
           sudo apt-get install -y intel-oneapi-common-vars &&
           printenv >> $GITHUB_ENV &&
