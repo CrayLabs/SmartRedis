@@ -110,6 +110,7 @@ jobs:
           sudo apt-get update -y &&
           sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh &&
+          sudo apt-get install -y intel-oneapi-common-vars &&
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
