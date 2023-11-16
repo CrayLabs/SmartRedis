@@ -51,7 +51,7 @@ DataSet::~DataSet()
 
 // Add a tensor to the DataSet.
 void DataSet::add_tensor(const std::string& name,
-                         void* data,
+                         const void* data,
                          const std::vector<size_t>& dims,
                          const SRTensorType type,
                          SRMemoryLayout mem_layout)
@@ -321,7 +321,7 @@ SRMetaDataType DataSet::get_metadata_field_type(
 
 // Add a Tensor (not yet allocated) to the TensorPack
 void DataSet::_add_to_tensorpack(const std::string& name,
-                                 void* data,
+                                 const void* data,
                                  const std::vector<size_t>& dims,
                                  const SRTensorType type,
                                  const SRMemoryLayout mem_layout)

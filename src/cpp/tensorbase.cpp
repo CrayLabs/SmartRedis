@@ -34,7 +34,7 @@ using namespace SmartRedis;
 
 // TensorBase constructor
 TensorBase::TensorBase(const std::string& name,
-                       void* data,
+                       const void* data,
                        const std::vector<size_t>& dims,
                        const SRTensorType type,
                        const SRMemoryLayout mem_layout)
