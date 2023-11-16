@@ -96,7 +96,8 @@ jobs:
           --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
           echo "CC=gcc" >> $GITHUB_ENV &&
           echo "CXX=g++" >> $GITHUB_ENV &&
-          echo "FC=gfortran" >> $GITHUB_ENV
+          echo "FC=gfortran" >> $GITHUB_ENV &&
+          echo "/opt/intel/oneapi/compiler/2024.0.0/linux/bin/intel64:/opt/intel/oneapi/compiler/2024.0.0/linux/bin" >> $GITHUB_PATH
         # Note CC and CXX need to be set otherwise, some Ubuntu images default to
         # a Debian-flavored compiler
 
