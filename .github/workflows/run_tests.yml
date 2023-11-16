@@ -113,7 +113,7 @@ jobs:
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifort" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
 
       # Set up perl environment for LCOV
       - uses: actions/checkout@v3
