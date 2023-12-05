@@ -41,7 +41,6 @@
 
 namespace py = pybind11;
 
-
 namespace SmartRedis {
 
 

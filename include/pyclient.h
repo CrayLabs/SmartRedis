@@ -43,9 +43,9 @@
 
 ///@file
 
-namespace SmartRedis {
-
 namespace py = pybind11;
+
+namespace SmartRedis {
 
 /*!
 *   \brief The PyClient class is a wrapper around the

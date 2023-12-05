@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Improved consistency of namespace declarations for C++ pybind interface
 - Improved const correctness of C++ Client
 - Improved const correctness of C++ Dataset
 - Updated documentation
@@ -32,6 +33,7 @@ Description
 
 Detailed Notes
 
+- Made the declaration of the py namespace in py*.h consistenly outside the SmartRedis namespace declaration (PR434_)
 - Fields in several C++ API methods are now properly marked as const (PR430_)
 - The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR427_)
 - Some broken links in the documentation were fixed, and the instructions to run the tests were updated (PR423_)
