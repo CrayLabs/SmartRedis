@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Improved consistency of namespace declarations for C++ pybind interface
 - Improved const correctness of C++ Client
 - Improved const correctness of C++ Dataset
 - Updated documentation
@@ -32,6 +33,7 @@ Description
 
 Detailed Notes
 
+- Made the declaration of the py namespace in py*.h consistently outside the SmartRedis namespace declaration (PR434_)
 - Fields in several C++ API methods are now properly marked as const (PR430_)
 - The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR427_)
 - Some broken links in the documentation were fixed, and the instructions to run the tests were updated (PR423_)
@@ -53,6 +55,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR434: https://github.com/CrayLabs/SmartRedis/pull/434
 .. _PR430: https://github.com/CrayLabs/SmartRedis/pull/430
 .. _PR427: https://github.com/CrayLabs/SmartRedis/pull/427
 .. _PR423: https://github.com/CrayLabs/SmartRedis/pull/423
