@@ -1238,7 +1238,7 @@ void Client::set_data_source(std::string source_id)
     if (!valid_prefix) {
         throw SRRuntimeException("Client error: data source " +
                                  std::string(source_id) +
-                                 "could not be found during client "+
+                                 " could not be found during client "+
                                  "initialization.");
     }
 
