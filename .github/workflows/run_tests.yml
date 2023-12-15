@@ -113,7 +113,7 @@ jobs:
         # a Debian-flavored compiler
 
       - name: Install Intel compiler
-        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+        if: contains( matrix.compiler, 'intel' ) # if using intel compiler
         run: |
           INTEL_V=${COMPILER#intel-} &&
           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
