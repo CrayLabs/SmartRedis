@@ -38,9 +38,9 @@ on:
       - master
       - develop
 
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
@@ -107,7 +107,7 @@ jobs:
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifx" >> $GITHUB_ENV
+          echo "FC=ifort" >> $GITHUB_ENV
 
       # Install additional dependencies
       - name: Install Cmake Linux

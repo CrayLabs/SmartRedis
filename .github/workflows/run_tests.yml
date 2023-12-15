@@ -40,6 +40,10 @@ on:
       - master
       - develop
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
   HOMEBREW_NO_AUTO_UPDATE: "ON"
@@ -101,7 +105,7 @@ jobs:
         # a Debian-flavored compiler
 
       - name: Install Intel compiler
-        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+        if: contains( matrix.compiler, 'intel' ) # if using intel compiler
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
@@ -114,7 +118,7 @@ jobs:
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifx" >> $GITHUB_ENV
+          echo "FC=ifort" >> $GITHUB_ENV
 
       # Set up perl environment for LCOV
       - uses: actions/checkout@v3
