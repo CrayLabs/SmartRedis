@@ -206,7 +206,7 @@ class MetaData
         void get_string_values(const std::string& name,
                                char**& data,
                                size_t& n_strings,
-                               size_t*& lengths);
+                               size_t*& lengths) const;
 
         /*!
         *   \brief This function checks if the DataSet has a
@@ -272,7 +272,7 @@ class MetaData
         void get_field_names(char**& data,
                              size_t& n_strings,
                              size_t*& lengths,
-                             bool skip_internal = false);
+                             bool skip_internal = false) const;
     private:
 
        /*!

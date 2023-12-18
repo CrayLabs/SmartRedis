@@ -259,7 +259,7 @@ class DataSet : public SRObject
         void get_meta_strings(const std::string& name,
                               char**& data,
                               size_t& n_strings,
-                              size_t*& lengths);
+                              size_t*& lengths) const;
 
         /*!
         *   \brief Check whether the dataset contains a field
@@ -310,7 +310,7 @@ class DataSet : public SRObject
         */
         void get_tensor_names(char**& data,
                               size_t& n_strings,
-                              size_t*& lengths);
+                              size_t*& lengths) const;
 
         /*!
         *   \brief Retrieve the data type of a Tensor in the DataSet
@@ -347,7 +347,7 @@ class DataSet : public SRObject
         */
         void get_metadata_field_names(char**& data,
                                       size_t& n_strings,
-                                      size_t*& lengths);
+                                      size_t*& lengths) const;
 
         /*!
         *   \brief Retrieve the data type of a metadata field in the DataSet

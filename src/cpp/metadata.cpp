@@ -270,7 +270,7 @@ std::vector<std::string> MetaData::get_field_names(bool skip_internal) const
 void MetaData::get_field_names(char**& data,
                                size_t& n_strings,
                                size_t*& lengths,
-                               bool skip_internal /*= false*/)
+                               bool skip_internal /*= false*/) const
 {
     // Retrieve the names
     std::vector<std::string> name_strings = get_field_names(skip_internal);
@@ -304,8 +304,7 @@ void MetaData::get_field_names(char**& data,
 void MetaData::get_string_values(const std::string& name,
                                  char**& data,
                                  size_t& n_strings,
-                                 size_t*& lengths)
-
+                                 size_t*& lengths) const
 {
     // Retrieve the strings
     std::vector<std::string> field_strings = get_string_values(name);

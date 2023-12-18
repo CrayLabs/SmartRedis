@@ -180,7 +180,7 @@ void DataSet::get_meta_scalars(const std::string& name,
 void DataSet::get_meta_strings(const std::string& name,
                                char**& data,
                                size_t& n_strings,
-                               size_t*& lengths)
+                               size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -221,7 +221,7 @@ std::vector<std::string> DataSet::get_tensor_names() const
 
 // Retrieve tensor names from the DataSet
 void DataSet::get_tensor_names(
-    char**& data, size_t& n_strings, size_t*& lengths)
+    char**& data, size_t& n_strings, size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -235,7 +235,6 @@ void DataSet::get_tensor_names(
         lengths = NULL;
         n_strings = 0;
     }
-
 }
 
 // Get the strings in a metadata string field. Because standard C++
@@ -296,7 +295,7 @@ std::vector<std::string> DataSet::get_metadata_field_names() const
 
 // Retrieve metadata field names from the DataSet
 void DataSet::get_metadata_field_names(
-    char**& data, size_t& n_strings, size_t*& lengths)
+    char**& data, size_t& n_strings, size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
