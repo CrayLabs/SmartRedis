@@ -188,16 +188,20 @@ void MetaData::add_string(const std::string& field_name,
 void MetaData::get_scalar_values(const std::string& name,
                                 void*& data,
                                 size_t& length,
-                                SRMetaDataType& type)
+                                SRMetaDataType& type) const
 {
     // Make sure the field exists
-    if (_field_map[name] == NULL) {
+    MetadataField* mdf = NULL;
+    try {
+         mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
 
     // Get values for the field
-    type = _field_map[name]->type();
+    type = mdf->type();
     switch (type) {
         case SRMetadataTypeDouble:
             _get_numeric_field_values<double>
@@ -475,11 +479,14 @@ void MetaData::_get_numeric_field_values(
     const std::string& name,
     void*& data,
     size_t& n_values,
-    SharedMemoryList<T>& mem_list)
+    SharedMemoryList<T>& mem_list) const
 {
     // Make sure the field exists
-    MetadataField* mdf = _field_map[name];
-    if (mdf == NULL) {
+    MetadataField* mdf = NULL;
+    try {
+        mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("Field " + name + " does not exist.");
     }
 

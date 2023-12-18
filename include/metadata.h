@@ -171,7 +171,7 @@ class MetaData
         void get_scalar_values(const std::string& name,
                                void*& data,
                                size_t& length,
-                               SRMetaDataType& type);
+                               SRMetaDataType& type) const;
 
         /*!
         *   \brief  Get metadata values string field
@@ -292,56 +292,56 @@ class MetaData
         *          memory allocation associated with retrieving
         *          metadata
         */
-        SharedMemoryList<char*>_char_array_mem_mgr;
+        mutable SharedMemoryList<char*>_char_array_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for c-str memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<char> _char_mem_mgr;
+        mutable SharedMemoryList<char> _char_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for double memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<double> _double_mem_mgr;
+        mutable SharedMemoryList<double> _double_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for float memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<float> _float_mem_mgr;
+        mutable SharedMemoryList<float> _float_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for int64 memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<int64_t> _int64_mem_mgr;
+        mutable SharedMemoryList<int64_t> _int64_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for uint64 memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<uint64_t> _uint64_mem_mgr;
+        mutable SharedMemoryList<uint64_t> _uint64_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for int32 memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<int32_t> _int32_mem_mgr;
+        mutable SharedMemoryList<int32_t> _int32_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for uint32 memory
         *          allocation associated with retrieving metadata
         */
-        SharedMemoryList<uint32_t> _uint32_mem_mgr;
+        mutable SharedMemoryList<uint32_t> _uint32_mem_mgr;
 
         /*!
         *   \brief SharedMemoryList for size_t memory
         *          allocation associated with retrieving
         *          string field sting lengths
         */
-        SharedMemoryList<size_t> _str_len_mem_mgr;
+        mutable SharedMemoryList<size_t> _str_len_mem_mgr;
 
         /*!
         *   \brief Create a new metadata field with the given
@@ -400,7 +400,7 @@ class MetaData
         void _get_numeric_field_values(const std::string& name,
                                        void*& data,
                                        size_t& n_values,
-                                       SharedMemoryList<T>& mem_list);
+                                       SharedMemoryList<T>& mem_list) const;
 
         /*!
         *   \brief Delete the memory associated with all fields

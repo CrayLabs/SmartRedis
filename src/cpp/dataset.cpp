@@ -95,7 +95,7 @@ void DataSet::get_tensor(const std::string& name,
                          void*& data,
                          std::vector<size_t>& dims,
                          SRTensorType& type,
-                         SRMemoryLayout mem_layout)
+                         SRMemoryLayout mem_layout) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -119,7 +119,7 @@ void DataSet::get_tensor(const std::string&  name,
                          size_t*& dims,
                          size_t& n_dims,
                          SRTensorType& type,
-                         SRMemoryLayout mem_layout)
+                         SRMemoryLayout mem_layout) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -164,7 +164,7 @@ void DataSet::unpack_tensor(const std::string& name,
 void DataSet::get_meta_scalars(const std::string& name,
                                void*& data,
                                size_t& length,
-                               SRMetaDataType& type)
+                               SRMetaDataType& type) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -370,7 +370,7 @@ void DataSet::_add_serialized_field(const std::string& name,
 }
 
 // Check and enforce that a tensor must exist or throw an error.
-inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
+inline void DataSet::_enforce_tensor_exists(const std::string& tensorname) const
 {
     if (!_tensorpack.tensor_exists(tensorname)) {
         throw SRKeyException("The tensor \"" + std::string(tensorname) +
@@ -383,7 +383,7 @@ inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
 // can be used to return tensor information to the user. The returned TensorBase
 // object has been dynamically allocated, but not yet tracked for memory
 // management in any object.
-TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
+TensorBase* DataSet::_get_tensorbase_obj(const std::string& name) const
 {
     _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();

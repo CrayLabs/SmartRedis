@@ -6,6 +6,16 @@ Development branch
 
 To be released at some future point in time
 
+Description
+
+- Use mutable fields to enable get methods that store memory to be marked const
+
+Detailed Notes
+
+- Use mutable fields to enable get methods that store memory to be marked const (PR439_)
+
+.. _PR439: https://github.com/CrayLabs/SmartRedis/pull/439
+
 0.5.0
 -----
 
