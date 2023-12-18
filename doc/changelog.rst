@@ -9,7 +9,7 @@ To be released at some future point in time
 0.5.0
 -----
 
-Released on December XX, 2023
+Released on December 18, 2023
 
 Description
 
