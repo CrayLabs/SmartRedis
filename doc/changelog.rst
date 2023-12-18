@@ -6,6 +6,16 @@ Development branch
 
 To be released at some future point in time
 
+Description
+
+- Use mutable fields to enable Dataset get methods that store memory to be marked const
+
+Detailed Notes
+
+- Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
+
+.. _PR443: https://github.com/CrayLabs/SmartRedis/pull/443
+
 0.5.0
 -----
 
