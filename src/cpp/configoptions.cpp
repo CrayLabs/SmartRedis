@@ -40,12 +40,22 @@ ConfigOptions::ConfigOptions(
     cfgSrc source,
     const std::string& string)
     : _source(source), _string(string), _lazy(source == cs_envt),
-      _log_context("")
+      _log_context(NULL)
 {
     // Read in options if needed
     if (!_lazy) {
         _populate_options();
     }
+}
+
+// Deep copy a ConfigOptions object
+ConfigOptions* ConfigOptions::clone()
+{
+    ConfigOptions* result = new ConfigOptions(_source, _string);
+    result->_log_context = _log_context;
+    result->_int_options = _int_options;
+    result->_string_options = _string_options;
+    return result;
 }
 
 // ConfigOptions destructor
@@ -59,12 +69,20 @@ ConfigOptions::~ConfigOptions()
 
 // Instantiate ConfigOptions, getting selections from environment variables
 std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
-    const std::string& db_prefix)
+    const std::string& db_suffix)
 {
     // NOTE: We can't use std::make_unique<> here because our constructor
     // is private
     return std::unique_ptr<ConfigOptions>(
-        new ConfigOptions(cs_envt, db_prefix));
+        new ConfigOptions(cs_envt, db_suffix));
+}
+
+// Instantiate ConfigOptions, getting selections from environment variables
+std::unique_ptr<ConfigOptions> ConfigOptions::create_from_environment(
+    const char* db_suffix)
+{
+    std::string str_suffix(db_suffix != NULL ? db_suffix : "");
+    return create_from_environment(str_suffix);
 }
 
 // Retrieve the value of a numeric configuration option
@@ -81,7 +99,7 @@ int64_t ConfigOptions::get_integer_option(const std::string& option_name)
     if (_lazy) {
         int temp = 0;
         get_config_integer(
-            temp, _prefixed(option_name), default_value, throw_on_absent);
+            temp, _suffixed(option_name), default_value, throw_on_absent);
         result = (int64_t)temp;
     }
 
@@ -103,7 +121,7 @@ std::string ConfigOptions::get_string_option(const std::string& option_name)
     std::string result(default_value);
     if (_lazy) {
         get_config_string(
-            result, _prefixed(option_name), default_value, throw_on_absent);
+            result, _suffixed(option_name), default_value, throw_on_absent);
     }
 
     // Store the final value before we exit
@@ -124,7 +142,7 @@ int64_t ConfigOptions::_resolve_integer_option(
     int64_t result = default_value;
     if (_lazy) {
         int temp = 0;
-        get_config_integer(temp, _prefixed(option_name), default_value);
+        get_config_integer(temp, _suffixed(option_name), default_value);
         result = (int64_t)temp;
     }
 
@@ -145,7 +163,7 @@ std::string ConfigOptions::_resolve_string_option(
     // If we're doing lazy evaluation of option names, fetch the value
     std::string result(default_value);
     if (_lazy) {
-        get_config_string(result, _prefixed(option_name), default_value);
+        get_config_string(result, _suffixed(option_name), default_value);
     }
 
     // Store the final value before we exit
@@ -165,8 +183,8 @@ bool ConfigOptions::is_configured(const std::string& option_name)
     // Check to see if the value is available and we just haven't
     // seen it yet
     if (_lazy) {
-        std::string prefixed = _prefixed(option_name);
-        char* environment_string = std::getenv(prefixed.c_str());
+        std::string suffixed = _suffixed(option_name);
+        char* environment_string = std::getenv(suffixed.c_str());
         return NULL != environment_string;
     }
 
@@ -197,9 +215,9 @@ void ConfigOptions::_populate_options()
     );
 }
 
-// Apply a prefix to a option_name if the source is environment
-// variables and the prefix is nonempty
-std::string ConfigOptions::_prefixed(const std::string& option_name)
+// Apply a suffix to a option_name if the source is environment
+// variables and the suffix is nonempty
+std::string ConfigOptions::_suffixed(const std::string& option_name)
 {
     // Sanity check
     if ("" == option_name) {
@@ -208,7 +226,13 @@ std::string ConfigOptions::_prefixed(const std::string& option_name)
     }
     std::string result(option_name);
     if (_source == cs_envt && _string != "")
-        result = _string + + "_" + option_name;
+        result = option_name + + "_" + _string;
     return result;
 }
 
+// Clear a configuration option from the cache
+void ConfigOptions::_clear_option_from_cache(const std::string& option_name)
+{
+    _int_options.erase(option_name);
+    _string_options.erase(option_name);
+}

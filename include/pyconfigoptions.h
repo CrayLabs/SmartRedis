@@ -41,7 +41,6 @@
 
 namespace py = pybind11;
 
-
 namespace SmartRedis {
 
 
@@ -85,17 +84,17 @@ class PyConfigOptions
 
         /*!
         *   \brief Instantiate ConfigOptions, getting selections from
-        *          environment variables. If \p db_prefix is non-empty,
-        *          then "{db_prefix}_" will be prepended to the name of
+        *          environment variables. If \p db_suffix is non-empty,
+        *          then "_{db_suffix}" will be appended to the name of
         *          each environment variable that is read.
-        *   \param db_prefix The prefix to use with environment variables,
-        *                    or an empty string to disable prefixing
+        *   \param db_suffix The suffix to use with environment variables,
+        *                    or an empty string to disable suffixing
         *   \returns The constructed ConfigOptions object
-        *   \throw SmartRedis::Exception if db_prefix contains invalid
+        *   \throw SmartRedis::Exception if db_suffix contains invalid
         *          characters
         */
         static PyConfigOptions* create_from_environment(
-            const std::string& db_prefix);
+            const std::string& db_suffix);
 
         /////////////////////////////////////////////////////////////
         // Option access

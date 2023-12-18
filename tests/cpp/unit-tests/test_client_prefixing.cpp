@@ -65,11 +65,11 @@ SCENARIO("Testing Client prefixing")
         std::vector<size_t> g_dims;
         void* g_result;
 
-        THEN(" Client prefixing can be tested")
+        THEN("Client prefixing can be tested")
         {
             setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
             setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
-            Client client(use_cluster(), context);
+            Client client(context);
             client.use_dataset_ensemble_prefix(true);
             client.use_tensor_ensemble_prefix(true);
 

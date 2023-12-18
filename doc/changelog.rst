@@ -1,6 +1,94 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+0.5.0
+-----
+
+Released on December 18, 2023
+
+Description
+
+- Unpin the Intel Fortran compiler in CI/CD
+- Added a missing space in an error message
+- Improved consistency of namespace declarations for C++ pybind interface
+- Improved const correctness of C++ Client
+- Improved const correctness of C++ Dataset
+- Updated documentation
+- Added test cases for all Client construction parameter combinations
+- Centralized dependency tracking to setup.cfg
+- Improved robustness of Python client construction
+- Updated Client and Dataset documentation
+- Expanded list of allowed characters in the SSDB address
+- Added coverage to SmartRedis Python API functions
+- Improved responsiveness of library when attempting connection to missing backend database
+- Moved testing of examples to on-commit testing in CI/CD pipeline
+- Added name retrieval function to the DataSet object
+- Updated RedisAI version used in post-commit check-in testing in Github pipeline
+- Allow strings in Python interface for Client.run_script, Client.run_script_multiGPU
+- Improved support for model execution batching
+- Added support for model chunking
+- Updated the third-party RedisAI component
+- Updated the third-party lcov component
+- Add link to contributing guidelines
+- Added link to contributing guidelines
+- Added support for multiple backend databases via a new Client constructor that accepts a ConfigOptions object
+
+Detailed Notes
+
+- Unpin the Intel Fortran compiler in CI/CD. This requires running the compiler setup script twice, once for Fortran and once for other languages, since they're on different releases  (PR436_)
+- Added a missing space in an error message (PR435_)
+- Made the declaration of the py namespace in py*.h consistently outside the SmartRedis namespace declaration (PR434_)
+- Fields in several C++ API methods are now properly marked as const (PR430_)
+- The Dataset add_tensor method is now const correct, as are all internal the methods it calls (PR427_)
+- Some broken links in the documentation were fixed, and the instructions to run the tests were updated (PR423_)
+- Added test cases for all Client construction parameter combinations (PR422_)
+- Merged dependency lists from requirements.txt and requirements-dev.txt into setup.cfg to have only one set of dependencies going forward (PR420_)
+- Improved robustness of Python client construction by adding detection of invalid kwargs (PR419_), (PR421_)
+- Updated the Client and Dataset API documentation to clarify which interacts with the backend db (PR416_)
+- The SSDB address can now include '-' and '_' as special characters in the name. This gives users more options for naming the UDS socket file (PR415_)
+- Added tests to increase Python code coverage
+- Employed a Redis++ ConnectionsObject in the connection process to establish a TCP timeout of 100ms during connection attempts (PR413_)
+- Moved testing of examples to on-commit testing in CI/CD pipeline (PR412_)
+- Added a function to the DataSet class and added a test
+- Updated RedisAI version used in post-commit check-in testing in Github pipeline to a version that supports fetch of model chunking size (PR408_)
+- Allow users to pass single keys for the inputs and outputs parameters as a string for Python run_script and run_script_multigpu
+- Exposed access to the Redis.AI MINBATCHTIMEOUT parameter, which limits the delay in model execution when trying to accumulate multiple executions in a batch (PR406_)
+- Models will now be automatically chunked when sent to/received from the backed database. This allows use of models greater than 511MB in size. (PR404_)
+- Updated from RedisAI v1.2.3 (test target)/v1.2.4 and v1.2.5 (CI/CD pipeline) to v1.2.7 (PR402_)
+- Updated lcov from version 1.15 to 2.0 (PR396_)
+- Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
+- Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
+
+.. _PR436: https://github.com/CrayLabs/SmartRedis/pull/436
+.. _PR435: https://github.com/CrayLabs/SmartRedis/pull/435
+.. _PR434: https://github.com/CrayLabs/SmartRedis/pull/434
+.. _PR430: https://github.com/CrayLabs/SmartRedis/pull/430
+.. _PR427: https://github.com/CrayLabs/SmartRedis/pull/427
+.. _PR423: https://github.com/CrayLabs/SmartRedis/pull/423
+.. _PR422: https://github.com/CrayLabs/SmartRedis/pull/422
+.. _PR421: https://github.com/CrayLabs/SmartRedis/pull/421
+.. _PR420: https://github.com/CrayLabs/SmartRedis/pull/420
+.. _PR419: https://github.com/CrayLabs/SmartRedis/pull/419
+.. _PR416: https://github.com/CrayLabs/SmartRedis/pull/416
+.. _PR415: https://github.com/CrayLabs/SmartRedis/pull/415
+.. _PR414: https://github.com/CrayLabs/SmartRedis/pull/414
+.. _PR413: https://github.com/CrayLabs/SmartRedis/pull/413
+.. _PR412: https://github.com/CrayLabs/SmartRedis/pull/412
+.. _PR411: https://github.com/CrayLabs/SmartRedis/pull/411
+.. _PR408: https://github.com/CrayLabs/SmartRedis/pull/408
+.. _PR407: https://github.com/CrayLabs/SmartRedis/pull/407
+.. _PR406: https://github.com/CrayLabs/SmartRedis/pull/406
+.. _PR404: https://github.com/CrayLabs/SmartRedis/pull/404
+.. _PR402: https://github.com/CrayLabs/SmartRedis/pull/402
+.. _PR396: https://github.com/CrayLabs/SmartRedis/pull/396
+.. _PR395: https://github.com/CrayLabs/SmartRedis/pull/395
+.. _PR353: https://github.com/CrayLabs/SmartRedis/pull/353
+
 0.4.2
 -----
 
@@ -97,7 +185,7 @@ Detailed Notes
 - Enable parallel build for the SmartRedis examples by moving utility Fortran code into a small static library (PR349_)
 - For the NVidia toolchain only: Replaces the assumed rank feature of F2018 used in the Fortran client with assumed shape arrays, making it possible to compile SmartRedis with the Nvidia toolchain. (PR346_)
 - Rework the build and test system to improve maintainability of the library. There have been several significant changes, including that Python and Fortran clients are no longer built by defaults and that there are Make variables that customize the build process. Please review the build documentation and ``make help`` to see all that has changed. (PR341_)
-- Many Fortran  routines were returning logical kind = c_bool which turns out not to be the same default kind of most Fortran compilers. These have now been refactored so that users need not import `iso_c_binding` in their own applications (PR340_)
+- Many Fortran routines were returning logical kind = c_bool which turns out not to be the same default kind of most Fortran compilers. These have now been refactored so that users need not import `iso_c_binding` in their own applications (PR340_)
 - Update MacOS version in CI/CD tests from 10.15 to 12.0 (PR339_)
 - Correct the spelling of the C DataSet destruction interface from DeallocateeDataSet to DeallocateDataSet (PR338_)
 - Updated the version of Redis++ to v1.3.8 to pull in a change that ensures the redis++.pc file properly points to the generated libraries (PR334_)

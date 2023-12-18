@@ -69,6 +69,24 @@ auto pb_client_api(T&& client_api_func, const char* name)
 #define MAKE_CLIENT_API(stuff)\
     pb_client_api([&] { stuff }, __func__)()
 
+PyClient::PyClient(const std::string& logger_name)
+    : PySRObject(logger_name)
+{
+    MAKE_CLIENT_API({
+        _client = new Client(logger_name);
+    });
+}
+
+PyClient::PyClient(
+    PyConfigOptions& config_options,
+    const std::string& logger_name)
+    : PySRObject(logger_name)
+{
+    MAKE_CLIENT_API({
+        ConfigOptions* co = config_options.get();
+        _client = new Client(co, logger_name);
+    });
+}
 
 PyClient::PyClient(bool cluster, const std::string& logger_name)
     : PySRObject(logger_name)
@@ -326,14 +344,15 @@ void PyClient::set_model(const std::string& name,
                  const std::string& device,
                  int batch_size,
                  int min_batch_size,
+                 int min_batch_timeout,
                  const std::string& tag,
                  const std::vector<std::string>& inputs,
                  const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model(name, model, backend, device,
-                           batch_size, min_batch_size, tag,
-                           inputs, outputs);
+                           batch_size, min_batch_size, min_batch_timeout,
+                           tag, inputs, outputs);
     });
 }
 
@@ -344,14 +363,15 @@ void PyClient::set_model_multigpu(const std::string& name,
                                   int num_gpus,
                                   int batch_size,
                                   int min_batch_size,
+                                  int min_batch_timeout,
                                   const std::string& tag,
                                   const std::vector<std::string>& inputs,
                                   const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model_multigpu(name, model, backend, first_gpu, num_gpus,
-                                    batch_size, min_batch_size, tag,
-                                    inputs, outputs);
+                                    batch_size, min_batch_size, min_batch_timeout,
+                                    tag, inputs, outputs);
     });
 }
 
@@ -361,14 +381,15 @@ void PyClient::set_model_from_file(const std::string& name,
                                    const std::string& device,
                                    int batch_size,
                                    int min_batch_size,
+                                   int min_batch_timeout,
                                    const std::string& tag,
                                    const std::vector<std::string>& inputs,
                                    const std::vector<std::string>& outputs)
 {
     MAKE_CLIENT_API({
         _client->set_model_from_file(name, model_file, backend, device,
-                                           batch_size, min_batch_size, tag,
-                                           inputs, outputs);
+                                           batch_size, min_batch_size, min_batch_timeout,
+                                           tag, inputs, outputs);
     });
 }
 
@@ -379,6 +400,7 @@ void PyClient::set_model_from_file_multigpu(const std::string& name,
                                             int num_gpus,
                                             int batch_size,
                                             int min_batch_size,
+                                            int min_batch_timeout,
                                             const std::string& tag,
                                             const std::vector<std::string>& inputs,
                                             const std::vector<std::string>& outputs)
@@ -386,7 +408,7 @@ void PyClient::set_model_from_file_multigpu(const std::string& name,
     MAKE_CLIENT_API({
         _client->set_model_from_file_multigpu(
             name, model_file, backend, first_gpu, num_gpus, batch_size,
-            min_batch_size, tag, inputs, outputs);
+            min_batch_size, min_batch_timeout, tag, inputs, outputs);
     });
 }
 
@@ -707,6 +729,14 @@ py::list PyClient::get_dataset_list_range(
         }
         py::list result_list = py::cast(result);
         return result_list;
+    });
+}
+
+// Configure the Redis module chunk size
+void PyClient::set_model_chunk_size(int chunk_size)
+{
+    return MAKE_CLIENT_API({
+        return _client->set_model_chunk_size(chunk_size);
     });
 }
 

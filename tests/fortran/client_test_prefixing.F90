@@ -50,7 +50,7 @@ prefix = "prefix_test"
 call setenv("SSKEYIN", prefix)
 call setenv("SSKEYOUT", prefix)
 
-result = client%initialize(use_cluster(), "client_test_prefixing")
+result = client%initialize("client_test_prefixing")
 if (result .ne. SRNoError) error stop
 result = client%use_tensor_ensemble_prefix(.true.)
 if (result .ne. SRNoError) error stop

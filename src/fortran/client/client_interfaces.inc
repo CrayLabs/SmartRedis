@@ -25,16 +25,41 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  function c_constructor(cluster, logger_name, logger_name_length, new_client) bind(c, name="SmartRedisCClient")
+  function c_simple_constructor(logger_name, logger_name_length, new_client) &
+    bind(c, name="SimpleCreateClient")
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)       :: c_simple_constructor
+    character(kind=c_char)        :: logger_name(*)
+    integer(kind=c_size_t), value :: logger_name_length
+    type(c_ptr)                   :: new_client !< Receives the newly constructed client
+  end function c_simple_constructor
+end interface
+
+interface
+  function c_constructor(cfgopts, logger_name, logger_name_length, new_client) &
+    bind(c, name="CreateClient")
     use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
     integer(kind=enum_kind)       :: c_constructor
+    type(c_ptr), value            :: cfgopts
+    character(kind=c_char)        :: logger_name(*)
+    integer(kind=c_size_t), value :: logger_name_length
+    type(c_ptr)                   :: new_client !< Receives the newly constructed client
+  end function c_constructor
+end interface
+
+interface
+  function c_deprecated_constructor(cluster, logger_name, logger_name_length, new_client) &
+    bind(c, name="SmartRedisCClient")
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)       :: c_deprecated_constructor
     logical(kind=c_bool), value   :: cluster !< True if a database cluster is being used
     character(kind=c_char)        :: logger_name(*)
     integer(kind=c_size_t), value :: logger_name_length
-
     type(c_ptr)                   :: new_client !< Receives the newly constructed client
-  end function c_constructor
+  end function c_deprecated_constructor
 end interface
 
 interface

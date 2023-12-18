@@ -26,16 +26,17 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-name: run_post_merge_tests
-
-# This file is for tests that are to be run rarely, once on each merge.
+name: run_static_and_examples
 
 on:
   push:
     branches:
       - master
       - develop
-
+  pull_request:
+    branches:
+      - master
+      - develop
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
   HOMEBREW_NO_AUTO_UPDATE: "ON"
@@ -43,8 +44,6 @@ env:
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SSDB: "127.0.0.1:6379"
-  SMARTREDIS_TEST_CLUSTER: False
 
 jobs:
 
@@ -56,7 +55,7 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
-        rai_v: [1.2.4, 1.2.5] # versions of RedisAI
+        rai_v: [1.2.7] # version(s) of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x', '3.10.x'] # versions of Python
     env:
       FC: gfortran-${{ matrix.compiler }}
@@ -97,12 +96,15 @@ jobs:
           rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
           echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt-get update -y &&
-          sudo apt-get install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y intel-oneapi-compiler-fortran &&
           source /opt/intel/oneapi/setvars.sh &&
+          sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y intel-oneapi-common-vars &&
+          source /opt/intel/oneapi/setvars.sh --force &&
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifort" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
 
       # Install additional dependencies
       - name: Install Cmake Linux

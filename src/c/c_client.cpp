@@ -67,8 +67,55 @@ auto c_client_api(T&& client_api_func, const char* name)
 #define MAKE_CLIENT_API(stuff)\
     c_client_api([&] { stuff }, __func__)()
 
+// Create a simple Client
+SRError SimpleCreateClient(
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client)
+{
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(new_client != NULL && logger_name != NULL);
 
-// Return a pointer to a new Client
+    std::string _logger_name(logger_name, logger_name_length);
+    try {
+      *new_client = NULL;
+      Client* s = new Client(_logger_name);
+      *new_client = reinterpret_cast<void*>(s);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("client allocation");
+    }
+  });
+}
+
+// Create a Client that uses a ConfigOptions object
+SRError CreateClient(
+    void* config_options,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client)
+{
+  return MAKE_CLIENT_API({
+    // Sanity check params
+    SR_CHECK_PARAMS(
+      config_options != NULL && new_client != NULL && logger_name != NULL);
+
+    ConfigOptions* cfgopts = reinterpret_cast<ConfigOptions*>(config_options);
+
+    std::string _logger_name(logger_name, logger_name_length);
+    try {
+      *new_client = NULL;
+      Client* s = new Client(cfgopts, _logger_name);
+      *new_client = reinterpret_cast<void*>(s);
+    }
+    catch (const std::bad_alloc& e) {
+      throw SRBadAllocException("client allocation");
+    }
+  });
+}
+
+// Return a pointer to a new Client (deprecated)
 extern "C" SRError SmartRedisCClient(
   bool cluster,
   const char* logger_name,
@@ -392,6 +439,7 @@ extern "C" SRError set_model_from_file(
   const char* device, const size_t device_length,
   const int batch_size,
   const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths, const size_t n_inputs,
   const char** outputs, const size_t* output_lengths, const size_t n_outputs)
@@ -430,8 +478,8 @@ extern "C" SRError set_model_from_file(
     }
 
     s->set_model_from_file(name_str, model_file_str, backend_str, device_str,
-                            batch_size, min_batch_size, tag_str, input_vec,
-                            output_vec);
+                            batch_size, min_batch_size, min_batch_timeout,
+                            tag_str, input_vec, output_vec);
   });
 }
 
@@ -443,6 +491,7 @@ extern "C" SRError set_model_from_file_multigpu(
   const char* backend, const size_t backend_length,
   const int first_gpu, const int num_gpus,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs, const char** outputs,
@@ -481,8 +530,8 @@ extern "C" SRError set_model_from_file_multigpu(
     }
 
     s->set_model_from_file_multigpu(name_str, model_file_str, backend_str, first_gpu,
-                                    num_gpus, batch_size, min_batch_size, tag_str,
-                                    input_vec, output_vec);
+                                    num_gpus, batch_size, min_batch_size, min_batch_timeout,
+                                    tag_str, input_vec, output_vec);
   });
 }
 
@@ -494,6 +543,7 @@ extern "C" SRError set_model(
   const char* backend, const size_t backend_length,
   const char* device, const size_t device_length,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs,
@@ -534,8 +584,8 @@ extern "C" SRError set_model(
     }
 
     s->set_model(name_str, model_str, backend_str, device_str,
-                batch_size, min_batch_size, tag_str, input_vec,
-                output_vec);
+                batch_size, min_batch_size, min_batch_timeout,
+                tag_str, input_vec, output_vec);
   });
 }
 
@@ -547,6 +597,7 @@ extern "C" SRError set_model_multigpu(
   const char* backend, const size_t backend_length,
   const int first_gpu, const int num_gpus,
   const int batch_size, const int min_batch_size,
+  const int min_batch_timeout,
   const char* tag, const size_t tag_length,
   const char** inputs, const size_t* input_lengths,
   const size_t n_inputs,
@@ -586,8 +637,8 @@ extern "C" SRError set_model_multigpu(
     }
 
     s->set_model_multigpu(name_str, model_str, backend_str, first_gpu, num_gpus,
-                          batch_size, min_batch_size, tag_str, input_vec,
-                          output_vec);
+                          batch_size, min_batch_size, min_batch_timeout,
+                          tag_str, input_vec, output_vec);
   });
 }
 

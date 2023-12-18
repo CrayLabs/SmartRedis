@@ -39,12 +39,13 @@
 #include "client.h"
 #include "pydataset.h"
 #include "pysrobject.h"
+#include "pyconfigoptions.h"
 
 ///@file
 
-namespace SmartRedis {
-
 namespace py = pybind11;
+
+namespace SmartRedis {
 
 /*!
 *   \brief The PyClient class is a wrapper around the
@@ -56,7 +57,24 @@ class PyClient : public PySRObject
     public:
 
         /*!
-        *   \brief PyClient constructor
+        *   \brief Simple constructor that uses default environment variables
+        *          to locate configuration settings
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(const std::string& logger_name);
+
+        /*!
+        *   \brief Constructor that uses a ConfigOptions object
+        *          to locate configuration settings
+        *   \param config_options The ConfigOptions object to use
+        *   \param logger_name Identifier for the current client
+        */
+        PyClient(
+            PyConfigOptions& config_options,
+            const std::string& logger_name);
+
+        /*!
+        *   \brief PyClient constructor (deprecated)
         *   \param cluster Flag to indicate if a database cluster
         *                  is being used
         *   \param logger_name Identifier for the current client
@@ -285,6 +303,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -299,6 +318,7 @@ class PyClient : public PySRObject
                         const std::string& device,
                         int batch_size = 0,
                         int min_batch_size = 0,
+                        int min_batch_timeout = 0,
                         const std::string& tag = "",
                         const std::vector<std::string>& inputs
                             = std::vector<std::string>(),
@@ -317,6 +337,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -332,6 +353,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -350,6 +372,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -364,6 +387,7 @@ class PyClient : public PySRObject
                                 const std::string& device,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -382,6 +406,7 @@ class PyClient : public PySRObject
         *   \param batch_size The batch size for model execution
         *   \param min_batch_size The minimum batch size for model
         *                         execution
+        *   \param min_batch_timeout Max time (ms) to wait for min batch size
         *   \param tag A tag to attach to the model for
         *              information purposes
         *   \param inputs One or more names of model input nodes
@@ -397,6 +422,7 @@ class PyClient : public PySRObject
                                 int num_gpus,
                                 int batch_size = 0,
                                 int min_batch_size = 0,
+                                int min_batch_timeout = 0,
                                 const std::string& tag = "",
                                 const std::vector<std::string>& inputs
                                     = std::vector<std::string>(),
@@ -924,6 +950,21 @@ class PyClient : public PySRObject
         py::list get_dataset_list_range(const std::string& list_name,
                                         const int start_index,
                                         const int end_index);
+
+        /*!
+        *   \brief Reconfigure the chunking size that Redis uses for model
+        *          serialization, replication, and the model_get command.
+        *   \details This method triggers the AI.CONFIG method in the Redis
+        *            database to change the model chunking size.
+        *
+        *            NOTE: The default size of 511MB should be fine for most
+        *            applications, so it is expected to be very rare that a
+        *            client calls this method. It is not necessary to call
+        *            this method a model to be chunked.
+        *   \param chunk_size The new chunk size in bytes
+        *   \throw SmartRedis::Exception if the command fails.
+        */
+        void set_model_chunk_size(int chunk_size);
 
         /*!
         *   \brief Create a string representation of the Client

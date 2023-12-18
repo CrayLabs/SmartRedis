@@ -104,8 +104,7 @@ int main(int argc, char* argv[]) {
     logger_name += std::to_string(rank);
 
     // Initialize a Client object
-    bool cluster_mode = true; // Set to false if not using a clustered database
-    SmartRedis::Client client(cluster_mode, logger_name);
+    SmartRedis::Client client(logger_name);
 
     // Set the model and script that will be used by all ranks
     // from MPI rank 0.

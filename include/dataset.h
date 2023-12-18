@@ -105,7 +105,7 @@ class DataSet : public SRObject
         *   \throw SmartRedis::Exception if add_tensor operation fails
         */
         void add_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout);
@@ -423,7 +423,7 @@ class DataSet : public SRObject
         *   \param mem_layout The memory layout for the provided tensor data
         */
         void _add_to_tensorpack(const std::string& name,
-                                void* data,
+                                const void* data,
                                 const std::vector<size_t>& dims,
                                 const SRTensorType type,
                                 const SRMemoryLayout mem_layout);

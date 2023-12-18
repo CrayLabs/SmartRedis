@@ -43,7 +43,51 @@ extern "C" {
 #endif
 
 /*!
+*   \brief C-client simple constructor that uses default environment variables
+*          to locate configuration settings
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError SimpleCreateClient(
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
+*   \brief C-client constructor that uses a ConfigOptions object
+*          to locate configuration settings
+*   \param config_options The ConfigOptions object to use
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError CreateClient(
+    void* config_options,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void** new_client);
+
+/*!
 *   \brief C-client constructor
+*   \param cluster Flag to indicate if a database cluster is being used
+*   \param logger_name Identifier for the current client
+*   \param logger_name_length Length in characters of the logger_name string
+*   \param new_client Receives the new client
+*   \return Returns SRNoError on success or an error code on failure
+*/
+SRError SmartRedisCClient(
+    bool cluster,
+    const char* logger_name,
+    const size_t logger_name_length,
+    void **new_client);
+
+
+
+/*!
+*   \brief C-client constructor (deprecated)
 *   \param cluster Flag to indicate if a database cluster is being used
 *   \param logger_name Identifier for the current client
 *   \param logger_name_length Length in characters of the logger_name string
@@ -323,7 +367,7 @@ bool _isTensorFlow(const char* backend);
 /*!
 *   \brief Check parameters for all parameters common to set_model methods
 *   \details Make sure that all pointers are not void and that the size
-*            of the inputs and outputs is not zero 
+*            of the inputs and outputs is not zero
 *   \param c_client The client object to use for communication
 *   \param name The name to associate with the model
 *   \param backend The name of the backend (TF, TFLITE, TORCH, ONNX)
@@ -372,6 +416,7 @@ void _check_params_set_model(void* c_client,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -396,6 +441,7 @@ SRError set_model_from_file(void* c_client,
                             const size_t device_length,
                             const int batch_size,
                             const int min_batch_size,
+                            const int min_batch_timeout,
                             const char* tag,
                             const size_t tag_length,
                             const char** inputs,
@@ -428,6 +474,7 @@ SRError set_model_from_file(void* c_client,
 *   \param num_gpus the number of gpus to use with the model
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -452,6 +499,7 @@ SRError set_model_from_file_multigpu(void* c_client,
                                      const int num_gpus,
                                      const int batch_size,
                                      const int min_batch_size,
+                                     const int min_batch_timeout,
                                      const char* tag,
                                      const size_t tag_length,
                                      const char** inputs,
@@ -486,6 +534,7 @@ SRError set_model_from_file_multigpu(void* c_client,
 *                        excluding null terminating character
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -510,6 +559,7 @@ SRError set_model(void* c_client,
                   const size_t device_length,
                   const int batch_size,
                   const int min_batch_size,
+                  const int min_batch_timeout,
                   const char* tag,
                   const size_t tag_length,
                   const char** inputs,
@@ -542,6 +592,7 @@ SRError set_model(void* c_client,
 *   \param num_gpus The number of GPUs to use with the model
 *   \param batch_size The batch size for model execution
 *   \param min_batch_size The minimum batch size for model execution
+*   \param min_batch_timeout Max time (ms) to wait for min batch size
 *   \param tag A tag to attach to the model for information purposes
 *   \param tag_length The length of the tag string,
 *                     excluding null terminating character
@@ -566,6 +617,7 @@ SRError set_model_multigpu(void* c_client,
                   const int num_gpus,
                   const int batch_size,
                   const int min_batch_size,
+                  const int min_batch_timeout,
                   const char* tag,
                   const size_t tag_length,
                   const char** inputs,

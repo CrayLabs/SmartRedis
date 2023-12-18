@@ -34,7 +34,7 @@
 // Tensor constructor
 template <class T>
 Tensor<T>::Tensor(const std::string& name,
-                  void* data,
+                  const void* data,
                   const std::vector<size_t>& dims,
                   const SRTensorType type,
                   const SRMemoryLayout mem_layout) :
@@ -218,7 +218,7 @@ void Tensor<T>::fill_mem_space(void* data,
 
 // copy values from nested memory structure to contiguous memory structure
 template <class T>
-void* Tensor<T>::_copy_nested_to_contiguous(void* src_data,
+void* Tensor<T>::_copy_nested_to_contiguous(const void* src_data,
                                             const size_t* dims,
                                             const size_t n_dims,
                                             void* dest_data)
@@ -293,7 +293,7 @@ T* Tensor<T>::_build_nested_memory(void** data,
 
 // Set the tensor data from a src memory location.
 template <class T>
-void Tensor<T>::_set_tensor_data(void* src_data,
+void Tensor<T>::_set_tensor_data(const void* src_data,
                                  const std::vector<size_t>& dims,
                                  const SRMemoryLayout mem_layout)
 {
@@ -311,7 +311,7 @@ void Tensor<T>::_set_tensor_data(void* src_data,
             std::memcpy(_data, src_data, n_bytes);
             break;
         case SRMemLayoutFortranContiguous:
-            _f_to_c_memcpy((T*)_data, (T*) src_data, dims);
+            _f_to_c_memcpy((T*)_data, (const T*)src_data, dims);
             break;
         case SRMemLayoutNested:
             _copy_nested_to_contiguous(
@@ -333,7 +333,7 @@ size_t Tensor<T>::_n_data_bytes()
 // c-style array memory space (row major)
 template <class T>
 void Tensor<T>::_f_to_c_memcpy(T* c_data,
-                               T* f_data,
+                               const T* f_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
@@ -347,7 +347,7 @@ void Tensor<T>::_f_to_c_memcpy(T* c_data,
 // fortran memory space layout (col major)
 template <class T>
 void Tensor<T>::_c_to_f_memcpy(T* f_data,
-                               T* c_data,
+                               const T* c_data,
                                const std::vector<size_t>& dims)
 {
     if (c_data == NULL || f_data == NULL) {
@@ -360,7 +360,7 @@ void Tensor<T>::_c_to_f_memcpy(T* f_data,
 // Copy fortran column major memory to c-style row major memory recursively
 template <class T>
 void Tensor<T>::_f_to_c(T* c_data,
-                        T* f_data,
+                        const T* f_data,
                         const std::vector<size_t>& dims,
                         std::vector<size_t> dim_positions,
                         size_t current_dim)
@@ -388,7 +388,7 @@ void Tensor<T>::_f_to_c(T* c_data,
 // Copy c-style row major memory to fortran column major memory recursively
 template <class T>
 void Tensor<T>::_c_to_f(T* f_data,
-                        T* c_data,
+                        const T* c_data,
                         const std::vector<size_t>& dims,
                         std::vector<size_t> dim_positions,
                         size_t current_dim)

@@ -49,7 +49,7 @@ int put_unpack_1D_tensor(void* tensor, size_t* dims, size_t n_dims,
   void* client = NULL;
   const char* logger_name = "put_unpack_1D_tensor";
   size_t cid_len = strlen(logger_name);
-  if (SRNoError != SmartRedisCClient(use_cluster(), logger_name, cid_len, &client))
+  if (SRNoError != SimpleCreateClient(logger_name, cid_len, &client))
     return -1;
   char* prefix_str = "1D_tensor_test";
 
@@ -364,11 +364,6 @@ int main(int argc, char* argv[]) {
                       ui16_suffix, strlen(ui16_suffix));
 
   free(dims);
-  printf("%s","Test passed: ");
-  if(result==0)
-    printf("%s", "YES\n");
-  else
-    printf("%s", "NO\n");
-
+  printf("Test passed: %s\n", result == 0 ? "YES" : "NO");
   return result;
 }

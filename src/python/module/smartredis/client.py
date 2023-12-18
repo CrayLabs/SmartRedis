@@ -29,10 +29,10 @@ import inspect
 import os
 import os.path as osp
 import typing as t
-
 import numpy as np
 
 from .dataset import Dataset
+from .configoptions import ConfigOptions
 from .error import RedisConnectionError
 from .smartredisPy import PyClient
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
@@ -41,13 +41,66 @@ from .util import Dtypes, exception_handler, init_default, typecheck
 
 
 class Client(SRObject):
-    def __init__(
+    def __init__(self, *a: t.Any, **kw: t.Any):
+        """Initialize a SmartRedis client
+
+        At this time, the Client can be initialized with one of two
+        signatures. The first version is preferred, though the second is
+        supported (primarily for use in driver scripts). Note that the
+        order was swapped for first two parameters in the second signature
+        relative to previous releases of SmartRedis; this was necessary to
+        remove ambiguity.
+
+            Client(config_options: ConfigOptions=None,
+                   logger_name: str="Default")
+            Client(cluster: bool, address: optional(str)=None,
+                   logger_name: str="Default")
+
+        For detailed information on the first signature, please refer
+        to the __standard_construction() method below.
+
+        For detailed information on the second signature, please refer
+        to the __address_construction() method below.
+
+        :param a: The positional arguments supplied to this method;
+                  see above for valid options
+        :type a: tuple[any]; see above for valid options
+        :param kw: Keyword arguments supplied to this method;
+                   see above for valid options
+        :type kw: dict[string, any]; see above for valid options
+        :raises RedisConnectionError: if connection initialization fails
+        """
+        if a:
+            if isinstance(a[0], bool):
+                for arg in kw:
+                    if arg not in ["cluster", "address", "logger_name"]:
+                        raise TypeError(
+                            f"__init__() got an unexpected keyword argument '{arg}'"
+                        )
+                pyclient = self.__address_construction(*a, **kw)
+            elif isinstance(a[0], ConfigOptions) or a[0] is None:
+                pyclient = self.__standard_construction(*a, **kw)
+            else:
+                raise TypeError(f"Invalid type for argument 0: {type(a[0])}")
+        else:
+            # Only kwargs in the call
+            if "address" in kw or "cluster" in kw:
+                pyclient = self.__address_construction(*a, **kw)
+            else:
+                pyclient = self.__standard_construction(*a, **kw)
+        super().__init__(pyclient)
+
+    def __address_construction(
         self,
+        cluster: bool,
         address: t.Optional[str] = None,
-        cluster: bool = False,
-        logger_name: str = "default",
-    ) -> None:
-        """Initialize a RedisAI client
+        logger_name: str = "Default"
+    ) -> PyClient:
+        """Initialize a SmartRedis client
+
+        This construction method is primarily intended for use by driver
+        scripts. It is preferred to set up configuration via environment
+        variables.
 
         For clusters, the address can be a single tcp/ip address and port
         of a database node. The rest of the cluster will be discovered
@@ -56,9 +109,10 @@ class Client(SRObject):
         If an address is not set, the client will look for the environment
         variable ``SSDB`` (e.g. SSDB="127.0.0.1:6379;")
 
-        :param address: Address of the database
         :param cluster: True if connecting to a redis cluster, defaults to False
-        :type cluster: bool, optional
+        :type cluster: bool
+        :param address: Address of the database
+        :type address: str, optional
         :param logger_name: Identifier for the current client
         :type logger_name: str
         :raises RedisConnectionError: if connection initialization fails
@@ -68,7 +122,32 @@ class Client(SRObject):
         if "SSDB" not in os.environ:
             raise RedisConnectionError("Could not connect to database. $SSDB not set")
         try:
-            super().__init__(PyClient(cluster, logger_name))
+            return PyClient(cluster, logger_name)
+        except (PybindRedisReplyError, RuntimeError) as e:
+            raise RedisConnectionError(str(e)) from None
+
+    @staticmethod
+    def __standard_construction(
+        config_options: t.Optional[ConfigOptions] = None,
+        logger_name: str = "Default"
+    ) -> PyClient:
+        """Initialize a RedisAI client
+
+        The address of the Redis database is expected to be found in the
+        SSDB environment variable (or a suffixed variable if a suffix was
+        used when building the config_options object).
+
+        :param config_options: Source for configuration data
+        :type config_options: ConfigOptions, optional
+        :param logger_name: Identifier for the current client
+        :type logger_name: str
+        :raises RedisConnectionError: if connection initialization fails
+        """
+        try:
+            if config_options:
+                pybind_config_options = config_options.get_data()
+                return PyClient(pybind_config_options, logger_name)
+            return PyClient(logger_name)
         except PybindRedisReplyError as e:
             raise RedisConnectionError(str(e)) from None
         except RuntimeError as e:
@@ -466,7 +545,11 @@ class Client(SRObject):
 
     @exception_handler
     def run_script(
-        self, name: str, fn_name: str, inputs: t.List[str], outputs: t.List[str]
+        self,
+        name: str,
+        fn_name: str,
+        inputs: t.Union[str, t.List[str]],
+        outputs: t.Union[str, t.List[str]]
     ) -> None:
         """Execute TorchScript stored inside the database
 
@@ -482,15 +565,13 @@ class Client(SRObject):
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
         :param inputs: database tensor names to use as script inputs
-        :type inputs: list[str]
+        :type inputs: str | list[str]
         :param outputs: database tensor names to receive script outputs
-        :type outputs: list[str]
+        :type outputs: str | list[str]
         :raises RedisReplyError: if script execution fails
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        typecheck(inputs, "inputs", list)
-        typecheck(outputs, "outputs", list)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
         self._client.run_script(name, fn_name, inputs, outputs)
 
@@ -499,8 +580,8 @@ class Client(SRObject):
         self,
         name: str,
         fn_name: str,
-        inputs: t.List[str],
-        outputs: t.List[str],
+        inputs: t.Union[str, t.List[str]],
+        outputs: t.Union[str, t.List[str]],
         offset: int,
         first_gpu: int,
         num_gpus: int,
@@ -519,9 +600,9 @@ class Client(SRObject):
         :param fn_name: name of a function within the script to execute
         :type fn_name: str
         :param inputs: database tensor names to use as script inputs
-        :type inputs: list[str]
+        :type inputs: str | list[str]
         :param outputs: database tensor names to receive script outputs
-        :type outputs: list[str]
+        :type outputs: str | list[str]
         :param offset: index of the current image, such as a processor ID
                          or MPI rank
         :type offset: int
@@ -533,8 +614,6 @@ class Client(SRObject):
         """
         typecheck(name, "name", str)
         typecheck(fn_name, "fn_name", str)
-        typecheck(inputs, "inputs", list)
-        typecheck(outputs, "outputs", list)
         typecheck(offset, "offset", int)
         typecheck(first_gpu, "first_gpu", int)
         typecheck(num_gpus, "num_gpus", int)
@@ -609,6 +688,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -636,6 +716,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -649,6 +731,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -660,6 +743,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -675,6 +759,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -703,6 +788,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -717,6 +804,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         inputs, outputs = self.__check_tensor_args(inputs, outputs)
@@ -728,6 +816,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -742,6 +831,7 @@ class Client(SRObject):
         device: str = "CPU",
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -769,6 +859,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -783,6 +875,7 @@ class Client(SRObject):
         typecheck(device, "device", str)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         device = self.__check_device(device)
         backend = self.__check_backend(backend)
@@ -795,6 +888,7 @@ class Client(SRObject):
             device,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -810,6 +904,7 @@ class Client(SRObject):
         num_gpus: int,
         batch_size: int = 0,
         min_batch_size: int = 0,
+        min_batch_timeout: int = 0,
         tag: str = "",
         inputs: t.Optional[t.Union[str, t.List[str]]] = None,
         outputs: t.Optional[t.Union[str, t.List[str]]] = None,
@@ -838,6 +933,8 @@ class Client(SRObject):
         :type batch_size: int, optional
         :param min_batch_size: minimum batch size for model execution, defaults to 0
         :type min_batch_size: int, optional
+        :param min_batch_timeout: Max time (ms) to wait for min batch size
+        :type min_batch_timeout: int, optional
         :param tag: additional tag for model information, defaults to ""
         :type tag: str, optional
         :param inputs: model inputs (TF only), defaults to None
@@ -853,6 +950,7 @@ class Client(SRObject):
         typecheck(num_gpus, "num_gpus", int)
         typecheck(batch_size, "batch_size", int)
         typecheck(min_batch_size, "min_batch_size", int)
+        typecheck(min_batch_timeout, "min_batch_timeout", int)
         typecheck(tag, "tag", str)
         backend = self.__check_backend(backend)
         m_file = self.__check_file(model_file)
@@ -865,6 +963,7 @@ class Client(SRObject):
             num_gpus,
             batch_size,
             min_batch_size,
+            min_batch_timeout,
             tag,
             inputs,
             outputs,
@@ -1450,6 +1549,26 @@ class Client(SRObject):
         """
         typecheck(addresses, "addresses", list)
         self._client.save(addresses)
+
+    @exception_handler
+    def set_model_chunk_size(self, chunk_size: int) -> None:
+        """Reconfigures the chunking size that Redis uses for model
+           serialization, replication, and the model_get command.
+           This method triggers the AI.CONFIG method in the Redis
+           database to change the model chunking size.
+
+           NOTE: The default size of 511MB should be fine for most
+           applications, so it is expected to be very rare that a
+           client calls this method. It is not necessary to call
+           this method for a model to be chunked.
+
+        :param chunk_size: The new chunk size in bytes
+        :type addresses: int
+        :raises RedisReplyError: if there is an error
+                in command execution.
+        """
+        typecheck(chunk_size, "chunk_size", int)
+        self._client.set_model_chunk_size(chunk_size)
 
     @exception_handler
     def append_to_list(self, list_name: str, dataset: Dataset) -> None:
