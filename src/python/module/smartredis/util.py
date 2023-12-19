@@ -29,7 +29,6 @@ from functools import wraps
 
 import numpy as np
 from . import error
-#from .error import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
