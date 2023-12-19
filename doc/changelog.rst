@@ -8,12 +8,15 @@ To be released at some future point in time
 
 Description
 
+- Resolve a linting issue with pybind-to-python error propagation
 - Use mutable fields to enable Dataset get methods that store memory to be marked const
 
 Detailed Notes
 
+- Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
 
+.. _PR444: https://github.com/CrayLabs/SmartRedis/pull/444
 .. _PR443: https://github.com/CrayLabs/SmartRedis/pull/443
 
 0.5.0
