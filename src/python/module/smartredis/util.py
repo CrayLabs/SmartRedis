@@ -153,7 +153,6 @@ def exception_handler(func: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
                 cpp_error_str = (
                     f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
                 )
-            #raise globals()[exception_name](cpp_error_str, method_name) from None
             raise getattr(error, exception_name)(cpp_error_str, method_name) from None
 
     return smartredis_api_wrapper
