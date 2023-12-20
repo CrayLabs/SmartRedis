@@ -13,8 +13,9 @@ To run the tests, simply execute the following command. Omit ``SR_PYTHON=On`` or
 Running single tests
 ####################
 
-With the increased automation in the SmartRedis test system, it is now more complex to run
-an individual test case. The steps to follow are as follows:
+When running the full test suite through the automated SmartRedis test system, several
+steps, are performed on your behalf that must be done manually in order to run an
+individual test case. These steps are as follows:
 
 1. Identify the test you wish to run.
 
@@ -35,7 +36,9 @@ from within ``test_nonkeyed_cmd.py``, we'll save off the path:
 
 Here, we'll set up a small Redis cluster with three nodes on the local
 host at ports `6390`, `6391`, and `6392`, using the ``launch_redis.py`` script located in
-the ``utils`` folder. If the ``nodes`` argument is not one, the launched nodes will be
+the ``utils`` folder.
+
+.. note:: If the ``nodes`` argument is not one, the launched nodes will be
 clustered together; otherwise a standalone backend will be created.
 
 .. code-block:: bash
@@ -57,7 +60,7 @@ For this example, we would do:
 
    $ export SR_TEST_DEVICE=CPU
    $ export SR_DB_TYPE=Clustered
-   $ export SSDB="127.0.0.1:6390;127.0.0.1:6391;127.0.0.1:6391"
+   $ export SSDB="127.0.0.1:6390,127.0.0.1:6391,127.0.0.1:6391"
 
 4. Run the test by passing the path we stored previously to pytest:
 
@@ -65,14 +68,14 @@ For this example, we would do:
 
   $ pytest -vv -s tests/python/test_nonkeyed_cmd.py::test_config_set_command_DNE
 
-For the compiled tests (C, C++, Fortran), this is the easiest way to run them.
-However, it is also possible to run the executables directly. Please note, however,
-that many of these tests contain relative paths that point to shared resources, such
-as AI models and scripts. To run these tests correctly, they need to be run from
-their intended directory so that the relative paths line up correctly (this is done
-on your behalf by the Python test wrappers for them). In particular, the tests
-need to be run with the current working directory being the *SOURCE* directory for
-the test. So for example, to run the test corresponding to ``client_test_delete_dataset.cpp``:
+This is the easiest way to run compiled tests (C, C++, Fortran). However, it is
+also possible to run the executables directly. However, that many of these tests
+contain relative paths that point to shared resources, such as AI models and scripts.
+To run these tests correctly, they need to be run from their intended directory so
+that the relative paths line up correctly (this is done on your behalf by the Python
+test wrappers for them). In particular, the tests need to be run with the current
+working directory being the *SOURCE* directory for the test. So for example, to run
+the test corresponding to ``client_test_delete_dataset.cpp``:
 
 .. code-block:: bash
 

@@ -8,13 +8,13 @@ To be released at some future point in time
 
 Description
 
-- Added developer documentation on how to run a single test case
+- Added developer documentation on how to run a single test case and eliminated duplicative environment variables
 - Resolve a linting issue with pybind-to-python error propagation
 - Use mutable fields to enable Dataset get methods that store memory to be marked const
 
 Detailed Notes
 
-- Added developer documentation on how to run a single test case with the new test/build system (PR445_)
+- Added developer documentation on how to run a single test case with the new test/build system and eliminated use of SMARTREDIS_TEST_DEVICE and SMARTREDIS_TEST_CLUSTER environment variables (PR445_)
 - Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
 
