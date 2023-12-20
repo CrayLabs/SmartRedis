@@ -16,7 +16,9 @@ Running single tests
 With the increased automation in the SmartRedis test system, it is now more complex to run
 an individual test case. The steps to follow are as follows:
 
-1. Identify the test you wish to run. This is most easily done by running the full test suite
+1. Identify the test you wish to run.
+
+This is most easily done by running the full test suite
 and noting the name and path to the test. For example to run the ``test_config_set_command_DNE``
 from within ``test_nonkeyed_cmd.py``, we'll save off the path:
 ``tests/python/test_nonkeyed_cmd.py::test_config_set_command_DNE``
@@ -29,18 +31,21 @@ from within ``test_nonkeyed_cmd.py``, we'll save off the path:
   tests/python/test_nonkeyed_cmd.py::test_config_get_command_DNE PASSED                                          [ 89%]
   tests/python/test_nonkeyed_cmd.py::test_save_command PASSED                                                    [ 89%]
 
-2. Establish a backend. Here, we'll set up a small Redis cluster with three nodes on the local
-host at ports 6390, 6391, and 6392, using the ``launch_redis.py`` script located in the ``utils``
-folder. If the ``nodes`` argument is not one, the launched nodes will be clustered together;
-otherwise a standalone backend will be created.
+2. Launch a backend database.
+
+Here, we'll set up a small Redis cluster with three nodes on the local
+host at ports `6390`, `6391`, and `6392`, using the ``launch_redis.py`` script located in
+the ``utils`` folder. If the ``nodes`` argument is not one, the launched nodes will be
+clustered together; otherwise a standalone backend will be created.
 
 .. code-block:: bash
 
    $ python utils/launch_redis.py --nodes 3 --port 6390 --rai v1.2.7
 
-3. Set up environment variables. These are established on your behalf when running the full
-test suite through the Makefile, but here they must be set up manually. The variables to set
-are as follows:
+3. Set up environment variables.
+
+These are established on your behalf when running the full test suite through the Makefile,
+but here they must be set up manually. The variables to set are as follows:
 
  - SR_TEST_DEVICE={CPU, GPU}: defines the hardware environment in which tests are run
  - SR_DB_TYPE={Clustered, Standalone}: Defines the type of backend database established
