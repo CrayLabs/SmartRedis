@@ -320,7 +320,6 @@ SSDB_STRING := $(shell echo $(SSDB_STRING) | tr -d " ")
 define run_smartredis_tests_with_standalone_server
 	echo "Launching standalone Redis server" && \
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Standalone && \
-	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
@@ -342,7 +341,6 @@ endef
 define run_smartredis_tests_with_clustered_server
 	echo "Launching clustered Redis server" && \
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Clustered && \
-	export SMARTREDIS_TEST_CLUSTER=True SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=$(SSDB_STRING) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
@@ -366,7 +364,6 @@ endef
 define run_smartredis_tests_with_uds_server
 	echo "Launching standalone Redis server with Unix Domain Socket support"
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Standalone && \
-	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=unix://$(SR_TEST_UDS_FILE) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \

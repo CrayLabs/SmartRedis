@@ -49,8 +49,6 @@ but here they must be set up manually. The variables to set are as follows:
 
  - SR_TEST_DEVICE={CPU, GPU}: defines the hardware environment in which tests are run
  - SR_DB_TYPE={Clustered, Standalone}: Defines the type of backend database established
- - SMARTREDIS_TEST_DEVICE={CPU, GPU}: defines the hardware environment in which tests are run
-   (Yes, this is duplicative of SR_TEST_DEVICE. We should fix that.)
  - SSDB: comma delimited list of IP addresses and ports for the nodes in the database
 
 For this example, we would do:
@@ -59,7 +57,6 @@ For this example, we would do:
 
    $ export SR_TEST_DEVICE=CPU
    $ export SR_DB_TYPE=Clustered
-   $ export SMARTREDIS_TEST_DEVICE=CPU
    $ export SSDB="127.0.0.1:6390;127.0.0.1:6391;127.0.0.1:6391"
 
 4. Run the test by passing the path we stored previously to pytest:

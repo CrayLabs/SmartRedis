@@ -171,7 +171,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         ).resolve()
     rediscli = "redis-cli" if is_cicd else os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
-        "SMARTREDIS_TEST_DEVICE","cpu").lower()
+        "SR_TEST_DEVICE","cpu").lower()
     if is_cicd:
         redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so'
         redisai_modules = os.getenv("REDISAI_MODULES")

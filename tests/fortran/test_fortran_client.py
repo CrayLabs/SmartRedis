@@ -31,7 +31,7 @@ from glob import glob
 from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
-test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
+test_gpu = environ.get("SR_TEST_DEVICE","cpu").lower() == "gpu"
 
 RANKS = 1
 TEST_PATH = osp.dirname(osp.abspath(__file__))
@@ -102,7 +102,7 @@ def execute_cmd(cmd_list):
 
 @pytest.mark.skipif(
     not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+    reason="SR_TEST_DEVICE does not specify 'gpu'"
 )
 def test_client_multigpu_mnist():
     """
