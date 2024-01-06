@@ -61,10 +61,9 @@ jobs:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.7.x', '3.8.x', '3.9.x', '3.10.x'] # versions of Python
-        compiler: [intel, 8, 9, 10, 11] # intel compiler, and versions of GNU compiler
+        compiler: [nvidia, intel, gcc-8, gcc-9, gcc-10, gcc-11] # intel compiler, and versions of GNU compiler
     env:
-      FC: gfortran-${{ matrix.compiler }}
-      GCC_V: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
+      COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
     steps:
       # download a copy of SmartRedis before running CI tests
@@ -84,8 +83,9 @@ jobs:
 
       # Install compilers (Intel or GCC)
       - name: Install GCC
-        if: "!contains( matrix.compiler, 'intel' )" # if using GNU compiler
+        if: "contains( matrix.compiler, 'gcc' )" # if using GNU compiler
         run: |
+          echo "GCC_V=${COMPILER#gcc-}" >> $GITHUB_ENV  &&
           sudo apt-get -y update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
           sudo apt-get -y update &&
@@ -97,6 +97,7 @@ jobs:
           echo "CC=gcc" >> $GITHUB_ENV &&
           echo "CXX=g++" >> $GITHUB_ENV &&
           echo "FC=gfortran" >> $GITHUB_ENV
+          sudo apt clean
         # Note CC and CXX need to be set otherwise, some Ubuntu images default to
         # a Debian-flavored compiler
 
@@ -117,6 +118,16 @@ jobs:
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
           echo "FC=ifx" >> $GITHUB_ENV
+
+      - name: Install Nvidia compiler
+        if: "contains( matrix.compiler, 'nvidia' )" # if using intel compiler
+        run: |
+          echo "deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
+          sudo apt update && sudo apt install -y nvhpc &&
+          sudo apt clean &&
+          
+
+
 
       # Set up perl environment for LCOV
       - uses: actions/checkout@v3

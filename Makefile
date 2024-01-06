@@ -32,8 +32,12 @@ CWD := $(shell pwd)
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
 HIREDIS_VER := v1.2.0
+HIREDIS_CC := gcc
+HIREDIS_CXX := g++
 RPP_URL := https://github.com/sewenew/redis-plus-plus.git
 RPP_VER := 1.3.10
+RPP_CC := gcc
+RPP_CXX := g++
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
@@ -100,7 +104,7 @@ help:
 # help: SR_TEST_REDIS_MODE {Clustered, Standalone} -- type of Redis backend launched for tests
 # help: SR_TEST_PORT (Default: 6379) -- first port for Redis server(s)
 # help: SR_TEST_NODES (Default: 3) Number of shards to intantiate for a clustered Redis database
-# help: SR_TEST_REDISAI_VER {v1.2.7, v1.2.5} -- version of RedisAI to use for tests
+# help: SR_TEST_REDISAI_VER {v1.2.7} -- version of RedisAI to use for tests
 # help: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
 # help: SR_TEST_PYTEST_FLAGS (default: "-vv -s"): Verbosity flags to use with pytest
 
@@ -490,14 +494,16 @@ test-examples:
 # Hiredis (hidden build target)
 .PHONY: hiredis
 hiredis: install/lib/libhiredis.a
-install/lib/libhiredis.a:
-	@rm -rf third-party/hiredis
+
+third-party/hiredis:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
+
+install/lib/libhiredis.a: third-party/hiredis
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	LIBRARY_PATH=lib CC=$(HIREDIS_CC) CXX=$(HIREDIS_CXX) make PREFIX="../../install" static -j $(NPROC) && \
+	LIBRARY_PATH=lib CC=$(HIREDIS_CC) CXX=$(HIREDIS_CXX) make PREFIX="../../install" install && \
 	rm -f ../../install/lib/libhiredis*.so* && \
 	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
@@ -505,20 +511,22 @@ install/lib/libhiredis.a:
 # Redis-plus-plus (hidden build target)
 .PHONY: redis-plus-plus
 redis-plus-plus: install/lib/libredis++.a
-install/lib/libredis++.a:
-	@rm -rf third-party/redis-plus-plus
+
+third-party/redis-plus-plus:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
+
+install/lib/libredis++.a: third-party/redis-plus-plus
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
 	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
 		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. )&& \
-	CC=gcc CXX=g++ make -j $(NPROC) && \
-	CC=gcc CXX=g++ make install && \
+		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(RPP_CC) -DCMAKE_CXX_COMPILER=$(RPP_CXX) .. )&& \
+	CC=$(RPP_CC) CXX=$(RPP_CX) make -j $(NPROC) && \
+	CC=$(RPP_CC) CXX=$(RPP_CX) make install && \
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
