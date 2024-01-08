@@ -109,7 +109,7 @@ jobs:
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifort" >> $GITHUB_ENV
+          echo "FC=ifx" >> $GITHUB_ENV
 
       # Install additional dependencies
       - name: Install Cmake Linux
