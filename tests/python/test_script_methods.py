@@ -35,7 +35,7 @@ from smartredis import Client
 file_path = osp.dirname(osp.abspath(__file__))
 
 
-test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
+test_gpu = environ.get("SR_TEST_DEVICE","cpu").lower() == "gpu"
 
 def test_set_get_function(context):
     c = Client(None, logger_name=context)
@@ -99,7 +99,7 @@ def test_run_script_list(context):
 
 @pytest.mark.skipif(
     not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+    reason="SR_TEST_DEVICE does not specify 'gpu'"
 )
 def test_run_script_multigpu_str(use_cluster, context):
     data = np.array([[1, 2, 3, 4, 5]])
@@ -113,7 +113,7 @@ def test_run_script_multigpu_str(use_cluster, context):
 
 @pytest.mark.skipif(
     not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+    reason="SR_TEST_DEVICE does not specify 'gpu'"
 )
 def test_run_script_multigpu_list(use_cluster, context):
     data = np.array([[1, 2, 3, 4]])

@@ -8,6 +8,28 @@ To be released at some future point in time
 
 Description
 
+- Added developer documentation on how to run a single test case and eliminated duplicative environment variables
+- Resolve a linting issue with pybind-to-python error propagation
+- Use mutable fields to enable Dataset get methods that store memory to be marked const
+
+Detailed Notes
+
+- Added developer documentation on how to run a single test case with the new test/build system and eliminated use of SMARTREDIS_TEST_DEVICE and SMARTREDIS_TEST_CLUSTER environment variables (PR445_)
+- Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
+- Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
+
+.. _PR445: https://github.com/CrayLabs/SmartRedis/pull/445
+.. _PR444: https://github.com/CrayLabs/SmartRedis/pull/444
+.. _PR443: https://github.com/CrayLabs/SmartRedis/pull/443
+
+0.5.0
+-----
+
+Released on December 18, 2023
+
+Description
+
+- Unpin the Intel Fortran compiler in CI/CD
 - Added a missing space in an error message
 - Improved consistency of namespace declarations for C++ pybind interface
 - Improved const correctness of C++ Client
@@ -34,6 +56,7 @@ Description
 
 Detailed Notes
 
+- Unpin the Intel Fortran compiler in CI/CD. This requires running the compiler setup script twice, once for Fortran and once for other languages, since they're on different releases  (PR436_)
 - Added a missing space in an error message (PR435_)
 - Made the declaration of the py namespace in py*.h consistently outside the SmartRedis namespace declaration (PR434_)
 - Fields in several C++ API methods are now properly marked as const (PR430_)
@@ -57,6 +80,7 @@ Detailed Notes
 - Create CONTRIBUTIONS.md file that points to the contribution guideline for both SmartSim and SmartRedis (PR395_)
 - Migrated to ConfigOptions-based Client construction, adding multiple database support (PR353_)
 
+.. _PR436: https://github.com/CrayLabs/SmartRedis/pull/436
 .. _PR435: https://github.com/CrayLabs/SmartRedis/pull/435
 .. _PR434: https://github.com/CrayLabs/SmartRedis/pull/434
 .. _PR430: https://github.com/CrayLabs/SmartRedis/pull/430
