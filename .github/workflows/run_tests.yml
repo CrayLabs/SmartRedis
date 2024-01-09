@@ -60,8 +60,8 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.7] # versions of RedisAI
-        py_v: ['3.10.x'] # versions of Python
-        compiler: [nvidia] # intel compiler, and versions of GNU compiler
+        py_v: ['3.8.x', '3.9.x', '3.10.x'] # versions of Python
+        compiler: [nvidia, intel, gcc-8, gcc-9, gcc-10, gcc-11] # intel compiler, and versions of GNU compiler
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
