@@ -539,11 +539,14 @@ third-party/pybind/include/pybind11/pybind11.h:
 
 # Redis (hidden test target)
 .PHONY: redis
-redis: third-party/redis/src/redis-server
-third-party/redis/src/redis-server:
+
+third-party/redis:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
+
+redis: third-party/redis/src/redis-server
+third-party/redis/src/redis-server: third-party/redis
 	@cd third-party/redis && \
 	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
 	echo "Finished installing redis"
@@ -571,17 +574,19 @@ endif
 endif
 
 # RedisAI (hidden test target)
-.PHONY: redisAI
-redisAI: cudann-check
-redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
-third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
-	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
-	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
+third-party/RedisAI:
 	@mkdir -p third-party
 	@cd third-party && \
 	rm -rf RedisAI/$(SR_TEST_REDISAI_VER) && \
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI/$(SR_TEST_REDISAI_VER) \
 		--branch $(SR_TEST_REDISAI_VER) --depth=1
+
+.PHONY: redisAI
+redisAI: cudann-check
+redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
+third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so: third-party/RedisAI
+	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
+	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
 	-@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
 	WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
 		$(SR_TEST_DEVICE) && \
