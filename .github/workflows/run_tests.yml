@@ -60,8 +60,8 @@ jobs:
       matrix:
         os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.7] # versions of RedisAI
-        py_v: ['3.8.x', '3.9.x', '3.10.x'] # versions of Python
-        compiler: [nvidia, intel, gcc-8, gcc-9, gcc-10, gcc-11] # intel compiler, and versions of GNU compiler
+        py_v: ['3.10.x'] # versions of Python
+        compiler: [nvhpc-23-11, intel, gcc-8] # intel compiler, and versions of GNU compiler
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
 
@@ -121,14 +121,16 @@ jobs:
           sudo apt clean
 
       - name: Install Nvidia compiler
-        if: "contains( matrix.compiler, 'nvidia' )" # if using intel compiler
+        if: "contains( matrix.compiler, 'nvhpc' )" # if using intel compiler
         run: |
-          echo "deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /" | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
-          sudo apt update && sudo apt install -y nvhpc-22-11 &&
+          echo "deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64/ /" | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
+          sudo apt update && sudo apt install -y ${COMPILER} &&
           sudo apt clean &&
           echo "CC=nvc" >> $GITHUB_ENV &&
           echo "CXX=nvc++" >> $GITHUB_ENV &&
           echo "FC=nvfortran" >> $GITHUB_ENV &&
+          NVHPC_V=${COMPILER/nvhpc-} &&
+          echo "/opt/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_V/-/.}/compilers/bin" >> $GITHUB_PATH
 
 
       # Set up perl environment for LCOV
