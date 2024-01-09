@@ -32,12 +32,8 @@ CWD := $(shell pwd)
 # Params for third-party software
 HIREDIS_URL := https://github.com/redis/hiredis.git
 HIREDIS_VER := v1.2.0
-HIREDIS_CC := gcc
-HIREDIS_CXX := g++
 RPP_URL := https://github.com/sewenew/redis-plus-plus.git
 RPP_VER := 1.3.10
-RPP_CC := gcc
-RPP_CXX := g++
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
@@ -48,6 +44,8 @@ CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
 LCOV_VER := v2.0
+DEP_CC := gcc
+DEP_CXX := g++
 
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
@@ -502,8 +500,8 @@ third-party/hiredis:
 
 install/lib/libhiredis.a: third-party/hiredis
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=$(HIREDIS_CC) CXX=$(HIREDIS_CXX) make PREFIX="../../install" static -j $(NPROC) && \
-	LIBRARY_PATH=lib CC=$(HIREDIS_CC) CXX=$(HIREDIS_CXX) make PREFIX="../../install" install && \
+	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" static -j $(NPROC) && \
+	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install && \
 	rm -f ../../install/lib/libhiredis*.so* && \
 	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
@@ -524,9 +522,9 @@ install/lib/libredis++.a: third-party/redis-plus-plus
 	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
 		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
 		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(RPP_CC) -DCMAKE_CXX_COMPILER=$(RPP_CXX) .. )&& \
-	CC=$(RPP_CC) CXX=$(RPP_CX) make -j $(NPROC) && \
-	CC=$(RPP_CC) CXX=$(RPP_CX) make install && \
+		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. )&& \
+	make CC=$(DEP_CC) CXX=$(RPP_CX) -j $(NPROC) && \
+	make CC=$(DEP_CC) CXX=$(RPP_CX) install && \
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
@@ -547,7 +545,7 @@ third-party/redis/src/redis-server:
 	@cd third-party && \
 	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
 	@cd third-party/redis && \
-	CC=gcc CXX=g++ make MALLOC=libc -j $(NPROC) && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
 	echo "Finished installing redis"
 
 # cudann-check (hidden test target)
@@ -585,10 +583,10 @@ third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI/$(SR_TEST_REDISAI_VER) \
 		--branch $(SR_TEST_REDISAI_VER) --depth=1
 	-@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
-	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
+	WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
 		$(SR_TEST_DEVICE) && \
-	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
-		WITH_UNIT_TESTS=0 make -j $(NPROC) -C opt clean build && \
+	GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
+		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -j $(NPROC) -C opt clean build && \
 	echo "Finished installing RedisAI"
 
 # Catch2 (hidden test target)
@@ -610,5 +608,7 @@ third-party/lcov/install/bin/lcov:
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
 	@cd third-party/lcov && \
 	mkdir -p install && \
-	CC=gcc CXX=g++ make PREFIX=$(CWD)/third-party/lcov/install/ install && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX=$(CWD)/third-party/lcov/install/ install && \
 	echo "Finished installing LCOV"
+
+
