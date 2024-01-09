@@ -218,7 +218,7 @@ build-example-serial: lib
 build-example-parallel: lib
 	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/$(SR_LINK)/parallel \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parellel
+	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parallel
 
 
 # help: clean-deps                     - remove third-party deps

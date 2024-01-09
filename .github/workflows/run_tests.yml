@@ -89,7 +89,7 @@ jobs:
           sudo apt-get -y update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
           sudo apt-get -y update &&
-          sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} &&
+          sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} mpich &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
           --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
@@ -104,16 +104,13 @@ jobs:
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
         run: |
-          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
-          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
-          rm GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB &&
-          echo "deb https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
-          sudo apt-get update -y &&
-          sudo apt-get install -y intel-oneapi-compiler-fortran &&
+          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null &&
+          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+            | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+          sudo apt install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp \
+            intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl &&
           source /opt/intel/oneapi/setvars.sh &&
-          sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
-          sudo apt-get install -y intel-oneapi-common-vars &&
-          source /opt/intel/oneapi/setvars.sh --force &&
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
           echo "CXX=icpx" >> $GITHUB_ENV &&
@@ -125,13 +122,14 @@ jobs:
         run: |
           echo "deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64/ /" | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
           sudo apt update && sudo apt install -y ${COMPILER} &&
-          sudo apt clean &&
           echo "CC=nvc" >> $GITHUB_ENV &&
           echo "CXX=nvc++" >> $GITHUB_ENV &&
           echo "FC=nvfortran" >> $GITHUB_ENV &&
           NVHPC_V=${COMPILER/nvhpc-} &&
-          echo "/opt/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_V/-/.}/compilers/bin" >> $GITHUB_PATH
-
+          NVHPC_ROOT="/opt/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_V/-/.}" &&
+          echo "${NVHPC_ROOT}/compilers/bin" >> $GITHUB_PATH &&
+          echo "${NVHPC_ROOT}/comm_libs/mpi/bin" >> $GITHUB_PATH &&
+          sudo apt clean
 
       # Set up perl environment for LCOV
       - uses: actions/checkout@v3
@@ -191,15 +189,10 @@ jobs:
 
       # Check the static build by compiling and linking examples
       # Only supported on Linux; static builds are not currently available for MacOS
-      - name: Install MPI for parallel examples -- for GCC, we can just use the std install
-        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
-        run: sudo apt-get install -y mpich
-      - name: Test static build -- GNU compilers
-        if: contains(matrix.os, 'ubuntu') && !contains(matrix.compiler, 'intel')
-        run: make build-examples SR_LINK=Static SR_FORTRAN=ON
-      - name: Test static build -- intel compilers
-        if: contains(matrix.os, 'ubuntu') && contains(matrix.compiler, 'intel')
-        run: make build-example-serial SR_LINK=Static SR_FORTRAN=ON
+      - name: Test static build
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          make build-examples SR_LINK=Static SR_FORTRAN=ON
 
       # Run the tests using various DB deployments
       - name: Run tests
