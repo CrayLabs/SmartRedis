@@ -195,7 +195,7 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
         uds_clause = f"--bind 127.0.0.1 --unixsocket {udsport} --unixsocketperm 777"
     daemonize_clause = "--daemonize yes"
     cluster_clause = "--cluster-enabled yes" if is_cluster else ""
-    prot_clause = "--protected-mode no" if is_cluster or is_uds else ""
+    prot_clause = "--protected-mode no"
     save_clause = '--save ""' if is_cluster else ""
 
     # Start servers
