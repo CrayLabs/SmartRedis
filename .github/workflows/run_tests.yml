@@ -85,7 +85,7 @@ jobs:
       - name: Install GCC
         if: "contains( matrix.compiler, 'gcc' )" # if using GNU compiler
         run: |
-          echo "GCC_V=${COMPILER#gcc-}" >> $GITHUB_ENV  &&
+          GCC_V=${COMPILER#gcc-} &&
           sudo apt-get -y update &&
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
           sudo apt-get -y update &&
