@@ -91,9 +91,9 @@ jobs:
           sudo apt-get -y update &&
           sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} mpich &&
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
-          --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
-          --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
+            --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+            --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
+            --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
           echo "CC=gcc" >> $GITHUB_ENV &&
           echo "CXX=g++" >> $GITHUB_ENV &&
           echo "FC=gfortran" >> $GITHUB_ENV &&
@@ -108,6 +108,7 @@ jobs:
             | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null &&
           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
             | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+          sudo apt update -y && \
           sudo apt install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp \
             intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl &&
           source /opt/intel/oneapi/setvars.sh &&
@@ -120,8 +121,12 @@ jobs:
       - name: Install Nvidia compiler
         if: "contains( matrix.compiler, 'nvhpc' )" # if using intel compiler
         run: |
-          echo "deb [trusted=yes] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64/ /" | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
-          sudo apt update && sudo apt install -y ${COMPILER} &&
+          curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK \
+            | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg &&
+          echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' \
+            | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
+          sudo apt-get update -y &&
+          sudo apt-get install -y ${COMPILER} &&
           echo "CC=nvc" >> $GITHUB_ENV &&
           echo "CXX=nvc++" >> $GITHUB_ENV &&
           echo "FC=nvfortran" >> $GITHUB_ENV &&
@@ -142,13 +147,14 @@ jobs:
       # Install additional perl Modules
       - name: Add perl modules
         run: |
-          sudo apt install libcapture-tiny-perl && \
-          sudo apt install libdatetime-perl && \
-          sudo apt install libdevel-cover-perl && \
-          sudo apt install libdigest-md5-perl && \
-          sudo apt install libfile-spec-perl && \
-          sudo apt install libjson-xs-perl && \
-          sudo apt install libtime-hires-perl
+          sudo apt install -y \
+            libcapture-tiny-perl \
+            libdatetime-perl \
+            libdevel-cover-perl \
+            libdigest-md5-perl \
+            libfile-spec-perl \
+            libjson-xs-perl \
+            libtime-hires-perl
 
       # Install additional dependencies
       - name: Install Cmake Linux

@@ -500,8 +500,7 @@ third-party/hiredis:
 
 install/lib/libhiredis.a: third-party/hiredis
 	@cd third-party/hiredis && \
-	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" static -j $(NPROC) && \
-	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install && \
+	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install -j $(NPROC) && \
 	rm -f ../../install/lib/libhiredis*.so* && \
 	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
