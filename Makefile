@@ -586,11 +586,16 @@ redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/re
 third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so: third-party/RedisAI
 	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
 	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
-	-@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
-	WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
-		$(SR_TEST_DEVICE) && \
-	GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
-		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -j $(NPROC) -C opt clean build && \
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
+		$(SR_TEST_DEVICE)
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
+		WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
+		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -j $(NPROC) -C opt clean
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
+		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -C opt && \
 	echo "Finished installing RedisAI"
 
 # Catch2 (hidden test target)

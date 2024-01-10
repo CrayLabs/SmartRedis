@@ -62,8 +62,11 @@ jobs:
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.8.x', '3.9.x', '3.10.x'] # versions of Python
         compiler: [nvhpc-23-11, intel, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
+        link_type: [Static, Shared]
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
+      LINK_TYPE: ${{ matrix.link_type }}
+
 
     steps:
       # download a copy of SmartRedis before running CI tests
@@ -165,47 +168,23 @@ jobs:
         run: python -m pip install -e .[dev,xarray]
 
       - name: Build and install test dependencies
-        run: make lcov && make catch2
-
-      - name: Install docker, redis-server, and RedisAI
         run: |
-          sudo apt-get -y update && sudo apt-get -y install curl gnupg lsb-release software-properties-common ca-certificates && \
-          # Add latest redis to apt sources
-          sudo echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list && \
-          sudo curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg && \
-          # Add latest docker to apt sources
-          sudo mkdir -m 0755 -p /etc/apt/keyrings &&
-          sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg &&
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-                $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null &&
-          # Install and update
-          sudo apt-get -y update && \
-          sudo apt-get -y install iputils-ping docker-ce docker-ce-cli containerd.io redis-tools redis-server &&
-          CONTAINER_NAME="redisai_$RANDOM" &&
-          sudo docker create --name $CONTAINER_NAME --rm redislabs/redisai:${{ matrix.rai_v }}-cpu-bionic && \
-          sudo mkdir -p /usr/lib/redis/modules/ &&
-          sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/redisai.so /usr/lib/redis/modules &&
-          sudo docker cp $CONTAINER_NAME:/usr/lib/redis/modules/backends/ /usr/lib/redis/modules/ &&
+          make test-deps &&
           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
-          echo "REDISAI_CPU_INSTALL_PATH=/usr/lib/redis/modules/" >> $GITHUB_ENV &&
-          echo "SR_CICD_EXECUTION=True" >> $GITHUB_ENV &&
-          echo "REDISAI_MODULES=/usr/lib/redis/modules/redisai.so \
-                TF /usr/lib/redis/modules/backends/redisai_tensorflow/redisai_tensorflow.so \
-                TORCH /usr/lib/redis/modules/backends/redisai_torch/redisai_torch.so" >> $GITHUB_ENV
+          echo "$PWD/third-party/redis/src" >> $GITHUB_PATH
 
-      # Check the static build by compiling and linking examples
-      # Only supported on Linux; static builds are not currently available for MacOS
-      - name: Test static build
-        if: contains(matrix.os, 'ubuntu')
+      # Make sure the examples work
+      - name: Run examples
         run: |
-          make build-examples SR_LINK=Static SR_FORTRAN=ON
+          make test-examples SR_FORTRAN=ON SR_PYTHON=ON SR_LINK=$LINK_TYPE \
+          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
       # Run the tests using various DB deployments
       - name: Run tests
         run: |
           make test-verbose-with-coverage \
             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
-            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 \
+            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 SR_LINK=$LINK_TYPE \
             SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
       # Process and upload code coverage (Python was collected during pytest)
