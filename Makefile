@@ -37,7 +37,7 @@ RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
-REDIS_VER := 6.0.8
+REDIS_VER := 7.0.5
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 # REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
 CATCH2_URL := https://github.com/catchorg/Catch2.git
@@ -87,9 +87,13 @@ help:
 # help:
 # help: SR_BUILD {Release, Debug, Coverage} -- optimization level for the build
 # help: SR_LINK {Shared, Static} -- linkage for the SmartRedis library
-# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings, currently fails do to warnings
+# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings,
+# help: 					     currently fails due to warnings on newer GNU versions
 # help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
 # help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
+# help: DEP_CC, DEP_CXX -- Set the C and C++ compilers used to compile dependencies.
+# help:					   This will generally be gcc/g++ due to the build system's
+# help:					   assuming the GCC toolchain
 # help:
 # help: Test variables
 # help: --------------
@@ -518,10 +522,10 @@ install/lib/libredis++.a: third-party/redis-plus-plus
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
-	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
-		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
-		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. )&& \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
+		  -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
+		  -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
+		  -DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. && \
 	make CC=$(DEP_CC) CXX=$(RPP_CX) -j $(NPROC) && \
 	make CC=$(DEP_CC) CXX=$(RPP_CX) install && \
 	echo "Finished installing Redis-plus-plus"

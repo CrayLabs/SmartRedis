@@ -220,7 +220,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--nodes', type=int, default=3)
-    parser.add_argument('--rai', type=str, default=None)
+    parser.add_argument('--rai', type=str, default="v1.2.7")
     parser.add_argument('--device', type=str, default="cpu")
     parser.add_argument('--udsport', type=str, default=None)
     parser.add_argument('--stop', action='store_true')
