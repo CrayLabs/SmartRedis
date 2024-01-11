@@ -31,17 +31,35 @@ specify a specific compler users can set the ``CC``, ``CXX``, and ``FC`` variabl
 .. code-block:: bash
 
     # GCC Toolchain
-    make lib-with-fortran CC=gcc CXX=g++ FC=gfortran
+    make lib-with-fortran CC=foo CXX=bar FC=baz
 
-    # Nvidia Toolchain
-    make lib-with-fortran CC=nvc CXX=nvc++ FC=nvfortran
+For reference, the appropriate values for ``CC``, ``CXX``, and ``FC`` for the compiler
+chains we support are:
 
-    # Intel (Classic) Toolchain
-    make lib-with-fortran CC=icc CXX=icpc FC=ifort
+.. list-table:: Values for compiler chains
+    :widths: 20 12 12
+    :header-rows: 1
 
-    # Intel (OneAPI) Toolchain
-    make lib-with-fortran CC=icx CXX=icpx FC=ifx
-
+    * - Compiler Chain
+    - ``CC``
+    - ``CXX``
+    - ``FC``
+    * - GCC
+    - ``gcc``
+    - ``g++``
+    - ``gfortran``
+    * - Intel (Classic)
+    - ``icc``
+    - ``icpc``
+    - ``ifort``
+    * - Intel (OneAPI)
+    - ``icx``
+    - ``icpx``
+    - ``ifx``
+    * - NVHPC
+    - ``nvc``
+    - ``nvc++``
+    - ``nvfortran``
 
 Customizing the library build
 -----------------------------

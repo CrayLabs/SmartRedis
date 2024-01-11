@@ -8,9 +8,9 @@ To be released at some future point in time
 
 Description
 
-- Tweak the build system to enable building SmartRedis with Nvidia's toolchain
+- Tweak the build system to enable building SmartRedis with Nvidia's NVHPC toolchain
 - Improvements/upgrades to the container used for Github actions
-- Rework code to avoid compiler warnings
+- Code updates to avoid compiler warnings
 - Added developer documentation on how to run a single test case and eliminated duplicative environment variables
 - Resolve a linting issue with pybind-to-python error propagation
 - Use mutable fields to enable Dataset get methods that store memory to be marked const
@@ -19,14 +19,14 @@ Detailed Notes
 
 - Change the order of arguments in our MakeFile to ensure that all dependencies are compiled with GCC (PR448_)
 - Add new user-configurable parameters DEP_CC, DEP_CXX to control which compiler is used to build dependencies (PR448_)
-- Bump the container version to Ubuntu 22.04 to be able to start testing GCC 12 (PR448_)
-- Bump the versions of GCC used to only the currently maintained versions (PR448_)
-- Add NVHPC to the testing matrix (PR448_)
-- Test the shared/static compilations and examples with all compilers (PR448_)
-- Compile Redis and RedisAI and use those versions in testing instead of extracting from a container (PR448_)
-- Bump the version of Redis used in testing to 7.0.5, the same version as we use with SmartSim (PR448_)
-- Pin the Torch version to 1.11.0, the same as supported in SmartSim (PR448_)
-- Ameliorate some compiler warnings related that were flagged in GCC 12 (unreachable code blocks, invalid values for the type) (PR448_)
+- Ameliorate some compiler warnings related that were flagged in GCC 12 (unreachable code blocks, signed/unsigned mismatches) (PR448_)
+- CI/CD: Bump the container version used in Github Actions Ubuntu 22.04 to be able to start testing GCC 12 (PR448_)
+- CI/CD: Bump the versions of GCC used in testing to the currently maintained versions (PR448_)
+- CI/CD: Add NVHPC to the testing matrix (PR448_)
+- CI/CD: Test the shared/static compilations and examples with all compilers (PR448_)
+- CI/CD: Compile Redis and RedisAI and use those versions in testing instead of extracting from a container (PR448_)
+- CI/CD: Bump the version of Redis used in testing to 7.0.5, the same version as we use with SmartSim (PR448_)
+- CI/CD: Pin the Torch version to 1.11.0, the same as supported in SmartSim (PR448_)
 - Added developer documentation on how to run a single test case with the new test/build system and eliminated use of SMARTREDIS_TEST_DEVICE and SMARTREDIS_TEST_CLUSTER environment variables (PR445_)
 - Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
