@@ -61,7 +61,7 @@ jobs:
         os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.8.x', '3.9.x', '3.10.x'] # versions of Python
-        compiler: [nvhpc-23-11, intel, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
+        compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
         link_type: [Static, Shared]
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
@@ -107,13 +107,14 @@ jobs:
       - name: Install Intel compiler
         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
         run: |
+          INTEL_V=${COMPILER#intel-} &&
           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
             | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null &&
           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
             | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt update -y && \
-          sudo apt install -y intel-oneapi-compiler-fortran intel-oneapi-compiler-dpcpp-cpp \
-            intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl &&
+          sudo apt install -y intel-oneapi-compiler-fortran-${INTEL_V} intel-oneapi-compiler-dpcpp-cpp-${INTEL_V} &&
+          sudo apt install -y intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl &&
           source /opt/intel/oneapi/setvars.sh &&
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
@@ -170,8 +171,7 @@ jobs:
       - name: Build and install test dependencies
         run: |
           make test-deps &&
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV &&
-          echo "$PWD/third-party/redis/src" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
 
       # Make sure the examples work
       - name: Run examples
