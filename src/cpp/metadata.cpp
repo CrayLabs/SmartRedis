@@ -230,11 +230,9 @@ void MetaData::get_scalar_values(const std::string& name,
         case SRMetadataTypeString:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested invalid MetaDataType.");
-            break;
         default:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested unknown MetaDataType.");
-            break;
     }
 }
 
@@ -548,7 +546,6 @@ void MetaData::_get_numeric_field_values(
         case SRMetadataTypeString:
             throw SRRuntimeException("Invalid MetaDataType used in "\
                                      "MetaData.add_scalar().");
-            break;
         default:
             throw SRRuntimeException("Unknown MetaDataType found in "\
                                      "MetaData.add_scalar().");

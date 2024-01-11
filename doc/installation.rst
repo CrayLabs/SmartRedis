@@ -33,6 +33,7 @@ SmartRedis is tested with the following compilers on a daily basis:
     * - Compilers (tested daily)
     * - GNU (GCC/GFortran)
     * - Intel oneAPI (icx/icpx/ifort)
+    * - NVHPC
     * - Apple Clang
 
 SmartRedis has been tested with the following compiler in the past, but on
@@ -58,7 +59,6 @@ not been tested. We do not imply that these compilers work for certain:
 
     * - Compilers (used in the past, but not tested)
     * - Cray Classic
-    * - NVHPC
     * - PGI
 
 
