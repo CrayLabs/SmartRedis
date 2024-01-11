@@ -25,6 +25,42 @@ installed in ``SmartRedis/install/include/``.  The library installation can be
 used to easily include SmartRedis capabilities in C++, C, and Fortran
 applications.
 
+The above command will build SmartRedis with the system's default compilers. To
+specify a specific compler users can set the ``CC``, ``CXX``, and ``FC`` variables.
+
+.. code-block:: bash
+
+    # GCC Toolchain
+    make lib-with-fortran CC=foo CXX=bar FC=baz
+
+For reference, the appropriate values for ``CC``, ``CXX``, and ``FC`` for the compiler
+chains we support are:
+
+.. list-table:: Values for compiler chains
+    :widths: 20 12 12
+    :header-rows: 1
+
+    * - Compiler Chain
+    - ``CC``
+    - ``CXX``
+    - ``FC``
+    * - GCC
+    - ``gcc``
+    - ``g++``
+    - ``gfortran``
+    * - Intel (Classic)
+    - ``icc``
+    - ``icpc``
+    - ``ifort``
+    * - Intel (OneAPI)
+    - ``icx``
+    - ``icpx``
+    - ``ifx``
+    * - NVHPC
+    - ``nvc``
+    - ``nvc++``
+    - ``nvfortran``
+
 Customizing the library build
 -----------------------------
 

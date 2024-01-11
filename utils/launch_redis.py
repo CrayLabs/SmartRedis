@@ -37,15 +37,10 @@ def check_availability(n_nodes, port, udsport):
     is_uds = udsport is not None
     if is_uds:
         n_nodes = 1
-    cicd = os.getenv('SR_CICD_EXECUTION')
-    is_cicd = False if cicd is None else cicd.lower() == "true"
-    if is_cicd:
-        rediscli = 'redis-cli'
-    else:
-        rediscli = (
-            pathlib.Path(__file__).parent.parent
-            / "third-party/redis/src/redis-cli"
-        ).resolve()
+    rediscli = (
+        pathlib.Path(__file__).parent.parent
+        / "third-party/redis/src/redis-cli"
+    ).resolve()
     for i in range(n_nodes):
         connection = f"-s {udsport}" if is_uds else f"-p {port + i}"
         set_cmd = f"{rediscli} {connection} set __test__ __test__"
@@ -70,17 +65,11 @@ def stop_db(n_nodes, port, udsport):
     is_uds = udsport is not None
     if is_uds:
         n_nodes = 1
-    cicd = os.getenv('SR_CICD_EXECUTION')
-    is_cicd = False if cicd is None else cicd.lower() == "true"
 
-    # It's clobberin' time!
-    if is_cicd:
-        rediscli = 'redis-cli'
-    else:
-        rediscli = (
-            pathlib.Path(__file__).parent.parent
-            / "third-party/redis/src/redis-cli"
-        ).resolve()
+    rediscli = (
+        pathlib.Path(__file__).parent.parent
+        / "third-party/redis/src/redis-cli"
+    ).resolve()
 
     # Clobber the server(s)
     procs = []
@@ -159,43 +148,30 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     if is_uds:
         n_nodes = 1
     is_cluster = n_nodes > 1
-    cicd = os.getenv('SR_CICD_EXECUTION')
-    is_cicd = False if cicd is None else cicd.lower() == "true"
-
-    if is_cicd:
-        redisserver = "redis-server"
-    else:
-        redisserver = (
-            pathlib.Path(__file__).parent.parent
-            / "third-party/redis/src/redis-server"
-        ).resolve()
-    rediscli = "redis-cli" if is_cicd else os.path.dirname(redisserver) + "/redis-cli"
+    redisserver = (
+        pathlib.Path(__file__).parent.parent
+        / "third-party/redis/src/redis-server"
+    ).resolve()
+    rediscli = os.path.dirname(redisserver) + "/redis-cli"
     test_device = device if device is not None else os.environ.get(
         "SR_TEST_DEVICE","cpu").lower()
-    if is_cicd:
-        redisai = os.getenv(f'REDISAI_{test_device.upper()}_INSTALL_PATH') + '/redisai.so'
-        redisai_modules = os.getenv("REDISAI_MODULES")
-        if redisai_modules is None:
-            raise RuntimeError("REDISAI_MODULES environment variable is not set!")
-        rai_clause = f"--loadmodule {redisai_modules}"
-    else:
-        if not rai_ver:
-            raise RuntimeError("RedisAI version not specified")
-        redisai_dir = (
-            pathlib.Path(__file__).parent.parent
-            / f"third-party/RedisAI/{rai_ver}/install-{test_device}"
-        ).resolve()
-        redisai = redisai_dir / "redisai.so"
-        tf_loc = redisai_dir / "backends/redisai_tensorflow/redisai_tensorflow.so"
-        torch_loc = redisai_dir / "backends/redisai_torch/redisai_torch.so"
-        rai_clause = f"--loadmodule {redisai} TF {tf_loc} TORCH {torch_loc}"
+    if not rai_ver:
+        raise RuntimeError("RedisAI version not specified")
+    redisai_dir = (
+        pathlib.Path(__file__).parent.parent
+        / f"third-party/RedisAI/{rai_ver}/install-{test_device}"
+    ).resolve()
+    redisai = redisai_dir / "redisai.so"
+    tf_loc = redisai_dir / "backends/redisai_tensorflow/redisai_tensorflow.so"
+    torch_loc = redisai_dir / "backends/redisai_torch/redisai_torch.so"
+    rai_clause = f"--loadmodule {redisai} TF {tf_loc} TORCH {torch_loc}"
     uds_clause = ""
     if is_uds:
         prepare_uds_socket(udsport)
         uds_clause = f"--bind 127.0.0.1 --unixsocket {udsport} --unixsocketperm 777"
     daemonize_clause = "--daemonize yes"
     cluster_clause = "--cluster-enabled yes" if is_cluster else ""
-    prot_clause = "--protected-mode no" if is_cluster or is_uds else ""
+    prot_clause = "--protected-mode no"
     save_clause = '--save ""' if is_cluster else ""
 
     # Start servers
@@ -244,7 +220,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=6379)
     parser.add_argument('--nodes', type=int, default=3)
-    parser.add_argument('--rai', type=str, default=None)
+    parser.add_argument('--rai', type=str, default="v1.2.7")
     parser.add_argument('--device', type=str, default="cpu")
     parser.add_argument('--udsport', type=str, default=None)
     parser.add_argument('--stop', action='store_true')

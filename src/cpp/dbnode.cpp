@@ -32,7 +32,7 @@ using namespace SmartRedis;
 
 // DBNode constructor
 DBNode::DBNode()
-    : address(), name(""), lower_hash_slot(-1), upper_hash_slot(-1)
+    : address(), name(""), lower_hash_slot(0), upper_hash_slot(0)
 {
    // NOP
 }

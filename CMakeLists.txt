@@ -143,7 +143,7 @@ if (STATIC_BUILD)
     set(DUMMY_FILE ${CMAKE_BINARY_DIR}/merge-dummy.cpp)
     file(
         WRITE ${DUMMY_FILE}
-        "// Life, the universe, and everything!\nstatic int sr_magic_number = 42;\n"
+        "// Life, the universe, and everything!\nstatic int __attribute__((unused)) sr_magic_number = 42;\n"
     )
     add_library(${SMARTREDIS_LIB} STATIC ${DUMMY_FILE})
     set(STATIC_LIB_COMPONENTS ${SR_LIB_INSTALL_PATH}/${TEMP_LIB_FULLNAME} ${EXT_CLIENT_LIBRARIES})
