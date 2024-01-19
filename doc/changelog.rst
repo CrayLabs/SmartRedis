@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Update supported python versions [Add 3.11, remove 3.7]
 - Tweak the build system to enable building SmartRedis with Nvidia's NVHPC toolchain
 - Improvements/upgrades to the container used for Github actions
 - Code updates to avoid compiler warnings
@@ -17,6 +18,8 @@ Description
 
 Detailed Notes
 
+- Deprecate support for Python 3.7 by removing from the allowed Python versions (PR450_)
+- Update Python package dependencies to add support for Python 3.11 (PR450_)
 - Change the order of arguments in our MakeFile to ensure that all dependencies are compiled with GCC (PR448_)
 - Add new user-configurable parameters DEP_CC, DEP_CXX to control which compiler is used to build dependencies (PR448_)
 - Ameliorate some compiler warnings related that were flagged in GCC 12 (unreachable code blocks, signed/unsigned mismatches) (PR448_)
@@ -31,6 +34,7 @@ Detailed Notes
 - Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
 
+.. _PR450: https://github.com/CrayLabs/SmartRedis/pull/450
 .. _PR448: https://github.com/CrayLabs/SmartRedis/pull/448
 .. _PR445: https://github.com/CrayLabs/SmartRedis/pull/445
 .. _PR444: https://github.com/CrayLabs/SmartRedis/pull/444
