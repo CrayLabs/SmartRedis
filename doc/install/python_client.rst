@@ -27,8 +27,7 @@ the ``Client`` from ``smartredis`` as follows:
 
 .. code-block:: python
 
-    Python 3.7.7 (default, May  7 2020, 21:25:33)
-    [GCC 7.3.0] :: Anaconda, Inc. on linux
+    Python 3.11.7 (main, Jan 12 2024, 20:10:36) [GCC 11.4.0] on linux
     Type "help", "copyright", "credits" or "license" for more information.
     >>> from smartredis import Client
     >>>
