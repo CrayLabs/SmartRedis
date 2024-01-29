@@ -33,14 +33,18 @@ from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 
 
+_T = t.TypeVar("_T")
+
+
 class _Managed:
     """Marker class identifying factory-created objects"""
 
 
-def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
-    """Instantiate a managed instance of the class, enabling the use of type 
+def create_managed_instance(base: t.Type[_T]) -> _T:
+    """Instantiate a managed instance of the class, enabling the use of type
     checking to detect if an instance is managed"""
-    def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
+
+    def get_dynamic_class_name(bases: t.Tuple[t.Type[_Managed], t.Type[t.Any]]) -> str:
         """Create a name for the new type by concatenating base names. Appends a
         unique suffix to avoid confusion if dynamic type comparisons occur"""
         unique_key = str(uuid4()).split("-", 1)[0]
@@ -94,7 +98,7 @@ class ConfigOptions:
 
     @exception_handler
     @managed
-    def get_data(self):
+    def get_data(self) -> PyConfigOptions:
         """Return the PyConfigOptions attribute
 
         :return: The PyConfigOptions attribute containing
