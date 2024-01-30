@@ -33,6 +33,11 @@ from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 
 
+if t.TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
+    _PR = ParamSpec("_PR")
+
 _T = t.TypeVar("_T")
 
 
@@ -58,15 +63,15 @@ def create_managed_instance(base: t.Type[_T]) -> _T:
     return managed_class()
 
 
-def managed(func: t.Callable) -> t.Callable:
+def managed(func: "t.Callable[_PR, _T]") -> "t.Callable[_PR, _T]":
     """Decorator to verify that a class was constructed using a factory"""
     not_managed = (
-        "Attempting to call managed method on ConfigOptions object not "
+        "Attempting to call managed method on {} object not "
         "created from a factory method"
     )
 
     @wraps(func)
-    def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
+    def _wrapper(*args: "_PR.args", **kwargs: "_PR.kwargs") -> _T:
         instance = args[0]
         if not isinstance(instance, _Managed):
             msg = not_managed.format(instance.__class__.__name__)
