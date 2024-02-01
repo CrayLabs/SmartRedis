@@ -30,10 +30,12 @@ Detailed Notes
 - CI/CD: Compile Redis and RedisAI and use those versions in testing instead of extracting from a container (PR448_)
 - CI/CD: Bump the version of Redis used in testing to 7.0.5, the same version as we use with SmartSim (PR448_)
 - CI/CD: Pin the Torch version to 1.11.0, the same as supported in SmartSim (PR448_)
+- Update developer documentation to reflect newly supported versions of Python (PR450_) (PR452_)
 - Added developer documentation on how to run a single test case with the new test/build system and eliminated use of SMARTREDIS_TEST_DEVICE and SMARTREDIS_TEST_CLUSTER environment variables (PR445_)
 - Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
 
+.. _PR452: https://github.com/CrayLabs/SmartRedis/pull/452
 .. _PR450: https://github.com/CrayLabs/SmartRedis/pull/450
 .. _PR448: https://github.com/CrayLabs/SmartRedis/pull/448
 .. _PR445: https://github.com/CrayLabs/SmartRedis/pull/445
