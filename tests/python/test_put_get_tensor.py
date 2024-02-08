@@ -24,8 +24,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import numpy as np
+import os
+
+
 from smartredis import Client
 
 # ----- Tests -----------------------------------------------------------
@@ -56,6 +58,79 @@ def test_3D_put_get(mock_data, context):
 
     data = mock_data.create_data((10, 10, 10))
     send_get_arrays(client, data)
+
+
+def test_dim1_modified_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[0, :] for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_dim2_modified_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[:, 0] for i in data]
+    print("True array:\n", data[0])
+    send_get_arrays(client, modified)
+
+
+def test_subset_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[1:3, 5:7] for i in data]
+    print("True array:\n", data[0])
+    send_get_arrays(client, modified)
+
+
+def test_dim2_reverse_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[::-1, ...] for i in data]
+    print("True array:\n", data[0])
+    send_get_arrays(client, modified)
+
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[..., ::-1] for i in data]
+    print("True array:\n", data[0])
+    send_get_arrays(client, modified)
+
+
+def test_2D_transpose_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i.transpose() for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_2D_reshape_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((25, 4)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((100, 1)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((1, 100)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((-1)) for i in data]
+    send_get_arrays(client, reshaped)
+
+
+def test_3D_transpose_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10, 10))
+    modified = [i.transpose() for i in data]
+    send_get_arrays(client, modified)
 
 
 # ------- Helper Functions -----------------------------------------------
