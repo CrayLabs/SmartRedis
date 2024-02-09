@@ -110,18 +110,12 @@ def test_2D_reshape_put_get(mock_data, context):
     reshaped = [i.reshape((25, 4)) for i in data]
     send_get_arrays(client, reshaped)
 
-    client = Client(None, logger_name=context)
-    data = mock_data.create_data((10, 10))
     reshaped = [i.reshape((100, 1)) for i in data]
     send_get_arrays(client, reshaped)
 
-    client = Client(None, logger_name=context)
-    data = mock_data.create_data((10, 10))
     reshaped = [i.reshape((1, 100)) for i in data]
     send_get_arrays(client, reshaped)
 
-    client = Client(None, logger_name=context)
-    data = mock_data.create_data((10, 10))
     reshaped = [i.reshape((-1)) for i in data]
     send_get_arrays(client, reshaped)
 
@@ -156,6 +150,7 @@ def send_get_arrays(client, data):
     for index, array in enumerate(data):
         key = f"array_{str(index)}"
         rarray = client.get_tensor(key)
+        assert rarray.dtype == array.dtype
         np.testing.assert_array_equal(
             rarray, array, "Returned array from get_tensor not equal to sent tensor"
         )
