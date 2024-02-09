@@ -69,6 +69,15 @@ jobs:
 
 
     steps:
+      # Maximize the space in this image
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-docker-images: true
+
       # download a copy of SmartRedis before running CI tests
       - uses: actions/checkout@v3
 
@@ -76,13 +85,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py_v }}
-
-      # Free up some disk space
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet &&
-          sudo rm -rf /opt/ghc &&
-          sudo rm -rf "/usr/local/share/boost"
 
       # Install compilers (Intel or GCC)
       - name: Install GCC
@@ -141,7 +143,6 @@ jobs:
           sudo apt clean
 
       # Set up perl environment for LCOV
-      - uses: actions/checkout@v3
       - name: Setup perl
         uses: shogo82148/actions-setup-perl@v1
         with:
