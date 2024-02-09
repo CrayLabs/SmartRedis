@@ -73,9 +73,11 @@ jobs:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
+          root-reserve-mb: 8096
           remove-dotnet: true
           remove-android: true
           remove-haskell: true
+          remove-codeql: true
           remove-docker-images: true
 
       # download a copy of SmartRedis before running CI tests
