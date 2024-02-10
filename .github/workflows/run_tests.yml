@@ -57,7 +57,7 @@ env:
 jobs:
 
   run_tests:
-    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, RedisAI ${{ matrix.rai_v }}, and compiler ${{ matrix.compiler }}
+    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, and ${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -73,6 +73,17 @@ jobs:
 
 
     steps:
+      # Maximize the space in this image
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 30720
+          remove-dotnet: true
+          remove-android: true
+          remove-haskell: true
+          remove-codeql: true
+          remove-docker-images: true
+
       # download a copy of SmartRedis before running CI tests
       - uses: actions/checkout@v3
 
@@ -80,13 +91,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.py_v }}
-
-      # Free up some disk space
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet &&
-          sudo rm -rf /opt/ghc &&
-          sudo rm -rf "/usr/local/share/boost"
 
       # Install compilers (Intel or GCC)
       - name: Install GCC
@@ -145,7 +149,6 @@ jobs:
           sudo apt clean
 
       # Set up perl environment for LCOV
-      - uses: actions/checkout@v3
       - name: Setup perl
         uses: shogo82148/actions-setup-perl@v1
         with:
