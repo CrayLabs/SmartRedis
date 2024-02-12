@@ -61,7 +61,7 @@ class Dataset(SRObject):
     def from_pybind(dataset: PyDataset) -> "Dataset":
         """Initialize a Dataset object from a PyDataset object
 
-            Create a new Dataset object using the data and properties 
+            Create a new Dataset object using the data and properties
             of a PyDataset object as the initial values.
 
         :param dataset: The pybind PyDataset object
@@ -106,8 +106,13 @@ class Dataset(SRObject):
         """
         typecheck(name, "name", str)
         typecheck(data, "data", np.ndarray)
-        dtype = Dtypes.tensor_from_numpy(data)
-        self._data.add_tensor(name, data, dtype)
+        if data.base is None:
+            dtype = Dtypes.tensor_from_numpy(data)
+            self._data.add_tensor(name, data, dtype)
+        else:
+            view_copy = data.copy(order="K")
+            dtype = Dtypes.tensor_from_numpy(view_copy)
+            self._data.add_tensor(name, view_copy, dtype)
 
     @exception_handler
     def get_tensor(self, name: str) -> np.ndarray:
@@ -132,10 +137,10 @@ class Dataset(SRObject):
 
     @exception_handler
     def add_meta_scalar(self, name: str, data: t.Union[int, float]) -> None:
-        """Add scalar (non-string) metadata to a field name if it exists; 
+        """Add scalar (non-string) metadata to a field name if it exists;
         otherwise, create and add
 
-            If the field name exists, append the scalar metadata; otherwise, 
+            If the field name exists, append the scalar metadata; otherwise,
             create the field within the DataSet object and add the scalar metadata.
 
         :param name: The name used to reference the scalar metadata field
@@ -157,7 +162,7 @@ class Dataset(SRObject):
     def add_meta_string(self, name: str, data: str) -> None:
         """Add string metadata to a field name if it exists; otherwise, create and add
 
-            If the field name exists, append the string metadata; otherwise, 
+            If the field name exists, append the string metadata; otherwise,
             create the field within the DataSet object and add the string metadata.
 
         :param name: The name used to reference the string metadata field
