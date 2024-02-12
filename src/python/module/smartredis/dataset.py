@@ -110,7 +110,7 @@ class Dataset(SRObject):
             dtype = Dtypes.tensor_from_numpy(data)
             self._data.add_tensor(name, data, dtype)
         else:
-            view_copy = data.copy(order="K")
+            view_copy = data.copy()
             dtype = Dtypes.tensor_from_numpy(view_copy)
             self._data.add_tensor(name, view_copy, dtype)
 
