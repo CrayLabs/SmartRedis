@@ -74,6 +74,68 @@ def test_add_get_tensor_3D(mock_data):
     add_get_arrays(dataset, data_3D)
 
 
+def test_dim1_modified_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[0, :] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_dim2_modified_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[:, 0] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_subset_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[1:3, 5:7] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_dim2_reverse_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[::-1, 0] for i in data]
+    modified = [i.copy() for i in modified]
+    add_get_arrays(dataset, modified)
+
+
+def test_2D_transpose_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i.transpose() for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_2D_reshape_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((25, 4)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((100, 1)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((1, 100)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((-1)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+
+def test_3D_transpose_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10, 10))
+    modified = [i.transpose() for i in data]
+    add_get_arrays(dataset, modified)
+
+
 def test_add_get_scalar(mock_data):
     """Test adding and retrieving scalars to
     a dataset and with all datatypes

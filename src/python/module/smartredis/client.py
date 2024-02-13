@@ -184,6 +184,10 @@ class Client(SRObject):
         typecheck(data, "data", np.ndarray)
         dtype = Dtypes.tensor_from_numpy(data)
         self._client.put_tensor(name, dtype, data)
+        if data.base is None:
+            self._client.put_tensor(name, dtype, data)
+        else:
+            self._client.put_tensor(name, dtype, data.copy())
 
     @exception_handler
     def get_tensor(self, name: str) -> np.ndarray:
