@@ -71,7 +71,6 @@ def test_dim2_modified_2D_put_get(mock_data, context):
     client = Client(None, logger_name=context)
     data = mock_data.create_data((10, 10))
     modified = [i[:, 0] for i in data]
-    print("True array:\n", data[0])
     send_get_arrays(client, modified)
 
 
@@ -79,7 +78,6 @@ def test_subset_2D_put_get(mock_data, context):
     client = Client(None, logger_name=context)
     data = mock_data.create_data((10, 10))
     modified = [i[1:3, 5:7] for i in data]
-    print("True array:\n", data[0])
     send_get_arrays(client, modified)
 
 
@@ -87,13 +85,11 @@ def test_dim2_reverse_2D_put_get(mock_data, context):
     client = Client(None, logger_name=context)
     data = mock_data.create_data((10, 10))
     modified = [i[::-1, ...] for i in data]
-    print("True array:\n", data[0])
     send_get_arrays(client, modified)
 
     client = Client(None, logger_name=context)
     data = mock_data.create_data((10, 10))
     modified = [i[..., ::-1] for i in data]
-    print("True array:\n", data[0])
     send_get_arrays(client, modified)
 
 
