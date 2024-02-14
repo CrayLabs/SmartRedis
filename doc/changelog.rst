@@ -1,13 +1,19 @@
 Changelog
 =========
 
-Development branch
-------------------
+0.5.1
+-----
 
-To be released at some future point in time
+Released on February 15, 2024
 
 Description
 
+- Fix bug when sending an array view
+- Add concurrency groups
+- Update license to include 2024
+- Increase build space for Github Actions
+- Update README python versions
+- Expose Typehints
 - Update supported python versions [Add 3.11, remove 3.7]
 - Tweak the build system to enable building SmartRedis with Nvidia's NVHPC toolchain
 - Improvements/upgrades to the container used for Github actions
@@ -18,6 +24,12 @@ Description
 
 Detailed Notes
 
+- Detect whether the tensor the user is sending is a view and if so, make an explicit copy. (PR453_)
+- Add support to concurrency groups in the `run_tests` workflow. (PR456_)
+- Update license to include 2024. (PR454_)
+- Add new Github Action that removes unneeded packages and resizes the root disk space. (PR455_)
+- Update developer documentation to reflect newly supported versions of Python (PR450_) (PR452_)
+- Add and ship `py.typed` marker to expose inline type hints  (PR451_)
 - Deprecate support for Python 3.7 by removing from the allowed Python versions (PR450_)
 - Update Python package dependencies to add support for Python 3.11 (PR450_)
 - Change the order of arguments in our MakeFile to ensure that all dependencies are compiled with GCC (PR448_)
@@ -30,17 +42,23 @@ Detailed Notes
 - CI/CD: Compile Redis and RedisAI and use those versions in testing instead of extracting from a container (PR448_)
 - CI/CD: Bump the version of Redis used in testing to 7.0.5, the same version as we use with SmartSim (PR448_)
 - CI/CD: Pin the Torch version to 1.11.0, the same as supported in SmartSim (PR448_)
-- Update developer documentation to reflect newly supported versions of Python (PR450_) (PR452_)
 - Added developer documentation on how to run a single test case with the new test/build system and eliminated use of SMARTREDIS_TEST_DEVICE and SMARTREDIS_TEST_CLUSTER environment variables (PR445_)
 - Resolve a linting issue with pybind-to-python error propagation by changing import format and narrowing the lookup of pybind error names to the error module (PR444_)
 - Use mutable fields to enable Dataset get methods that store memory to be marked const (PR443_)
 
+
+.. _PR453: https://github.com/CrayLabs/SmartRedis/pull/453
+.. _PR456: https://github.com/CrayLabs/SmartRedis/pull/456
+.. _PR454: https://github.com/CrayLabs/SmartRedis/pull/454
+.. _PR455: https://github.com/CrayLabs/SmartRedis/pull/455
 .. _PR452: https://github.com/CrayLabs/SmartRedis/pull/452
+.. _PR451: https://github.com/CrayLabs/SmartRedis/pull/451
 .. _PR450: https://github.com/CrayLabs/SmartRedis/pull/450
 .. _PR448: https://github.com/CrayLabs/SmartRedis/pull/448
 .. _PR445: https://github.com/CrayLabs/SmartRedis/pull/445
 .. _PR444: https://github.com/CrayLabs/SmartRedis/pull/444
 .. _PR443: https://github.com/CrayLabs/SmartRedis/pull/443
+
 
 0.5.0
 -----
