@@ -9,7 +9,7 @@ Released on February 15, 2024
 Description
 
 - Fix bug when sending an array view
-- Add concurrency groups
+- Add concurrency groups for Github Action testing
 - Update license to include 2024
 - Increase build space for Github Actions
 - Update README python versions

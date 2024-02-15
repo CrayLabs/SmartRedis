@@ -38,8 +38,9 @@ Here, we'll set up a small Redis cluster with three nodes on the local
 host at ports `6390`, `6391`, and `6392`, using the ``launch_redis.py`` script located in
 the ``utils`` folder.
 
-.. note:: If the ``nodes`` argument is not one, the launched nodes will be
-clustered together; otherwise a standalone backend will be created.
+.. note::
+   If the ``nodes`` argument is not one, the launched nodes will be
+   clustered together; otherwise a standalone backend will be created.
 
 .. code-block:: bash
 
