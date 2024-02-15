@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -160,7 +160,7 @@ class DataSet : public SRObject
                         void*& data,
                         std::vector<size_t>& dims,
                         SRTensorType& type,
-                        const SRMemoryLayout mem_layout);
+                        const SRMemoryLayout mem_layout) const;
 
         /*!
         *   \brief Get the tensor data, dimensions, and type for the tensor
@@ -192,7 +192,7 @@ class DataSet : public SRObject
                         size_t*& dims,
                         size_t& n_dims,
                         SRTensorType& type,
-                        const SRMemoryLayout mem_layout);
+                        const SRMemoryLayout mem_layout) const;
 
         /*!
         *   \brief Retrieve tensor data to a caller-supplied buffer.
@@ -227,7 +227,7 @@ class DataSet : public SRObject
         void get_meta_scalars(const std::string& name,
                               void*& data,
                               size_t& length,
-                              SRMetaDataType& type);
+                              SRMetaDataType& type) const;
 
         /*!
         *   \brief Retrieve metadata string field values from the DataSet.
@@ -259,7 +259,7 @@ class DataSet : public SRObject
         void get_meta_strings(const std::string& name,
                               char**& data,
                               size_t& n_strings,
-                              size_t*& lengths);
+                              size_t*& lengths) const;
 
         /*!
         *   \brief Check whether the dataset contains a field
@@ -310,7 +310,7 @@ class DataSet : public SRObject
         */
         void get_tensor_names(char**& data,
                               size_t& n_strings,
-                              size_t*& lengths);
+                              size_t*& lengths) const;
 
         /*!
         *   \brief Retrieve the data type of a Tensor in the DataSet
@@ -347,7 +347,7 @@ class DataSet : public SRObject
         */
         void get_metadata_field_names(char**& data,
                                       size_t& n_strings,
-                                      size_t*& lengths);
+                                      size_t*& lengths) const;
 
         /*!
         *   \brief Retrieve the data type of a metadata field in the DataSet
@@ -450,7 +450,7 @@ class DataSet : public SRObject
         *   \param name  The name used to reference the tensor
         *   \returns A TensorBase object.
         */
-        TensorBase* _get_tensorbase_obj(const std::string& name);
+        TensorBase* _get_tensorbase_obj(const std::string& name) const;
 
     private:
 
@@ -473,20 +473,20 @@ class DataSet : public SRObject
         *   \brief Throw an exception if a tensor does not exist
         *   \throw RuntimeException if the tensor is not in the DataSet
         */
-        inline void _enforce_tensor_exists(const std::string& name);
+        inline void _enforce_tensor_exists(const std::string& name) const;
 
         /*!
         *   \brief SharedMemoryList to manage memory associated
         *          with tensor dimensions from tensor retrieval
         */
-        SharedMemoryList<size_t> _dim_queries;
+        mutable SharedMemoryList<size_t> _dim_queries;
 
         /*!
         *  \brief The _tensor_pack memory is not for querying
         *         by name, but is used to manage memory associated
         *         with get_tensor() function calls.
         */
-        TensorPack _tensor_memory;
+        mutable TensorPack _tensor_memory;
 
 };
 

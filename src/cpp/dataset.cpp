@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ void DataSet::get_tensor(const std::string& name,
                          void*& data,
                          std::vector<size_t>& dims,
                          SRTensorType& type,
-                         SRMemoryLayout mem_layout)
+                         SRMemoryLayout mem_layout) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -119,7 +119,7 @@ void DataSet::get_tensor(const std::string&  name,
                          size_t*& dims,
                          size_t& n_dims,
                          SRTensorType& type,
-                         SRMemoryLayout mem_layout)
+                         SRMemoryLayout mem_layout) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -164,7 +164,7 @@ void DataSet::unpack_tensor(const std::string& name,
 void DataSet::get_meta_scalars(const std::string& name,
                                void*& data,
                                size_t& length,
-                               SRMetaDataType& type)
+                               SRMetaDataType& type) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -180,7 +180,7 @@ void DataSet::get_meta_scalars(const std::string& name,
 void DataSet::get_meta_strings(const std::string& name,
                                char**& data,
                                size_t& n_strings,
-                               size_t*& lengths)
+                               size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -221,7 +221,7 @@ std::vector<std::string> DataSet::get_tensor_names() const
 
 // Retrieve tensor names from the DataSet
 void DataSet::get_tensor_names(
-    char**& data, size_t& n_strings, size_t*& lengths)
+    char**& data, size_t& n_strings, size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -235,7 +235,6 @@ void DataSet::get_tensor_names(
         lengths = NULL;
         n_strings = 0;
     }
-
 }
 
 // Get the strings in a metadata string field. Because standard C++
@@ -296,7 +295,7 @@ std::vector<std::string> DataSet::get_metadata_field_names() const
 
 // Retrieve metadata field names from the DataSet
 void DataSet::get_metadata_field_names(
-    char**& data, size_t& n_strings, size_t*& lengths)
+    char**& data, size_t& n_strings, size_t*& lengths) const
 {
     // Track calls to this API function
     LOG_API_FUNCTION();
@@ -370,7 +369,7 @@ void DataSet::_add_serialized_field(const std::string& name,
 }
 
 // Check and enforce that a tensor must exist or throw an error.
-inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
+inline void DataSet::_enforce_tensor_exists(const std::string& tensorname) const
 {
     if (!_tensorpack.tensor_exists(tensorname)) {
         throw SRKeyException("The tensor \"" + std::string(tensorname) +
@@ -383,7 +382,7 @@ inline void DataSet::_enforce_tensor_exists(const std::string& tensorname)
 // can be used to return tensor information to the user. The returned TensorBase
 // object has been dynamically allocated, but not yet tracked for memory
 // management in any object.
-TensorBase* DataSet::_get_tensorbase_obj(const std::string& name)
+TensorBase* DataSet::_get_tensorbase_obj(const std::string& name) const
 {
     _enforce_tensor_exists(name);
     return _tensorpack.get_tensor(name)->clone();

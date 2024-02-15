@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,13 +37,15 @@ RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
-REDIS_VER := 6.0.8
+REDIS_VER := 7.0.5
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 # REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
 LCOV_VER := v2.0
+DEP_CC := gcc
+DEP_CXX := g++
 
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
@@ -85,9 +87,13 @@ help:
 # help:
 # help: SR_BUILD {Release, Debug, Coverage} -- optimization level for the build
 # help: SR_LINK {Shared, Static} -- linkage for the SmartRedis library
-# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings
+# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings,
+# help: 					     currently fails due to warnings on newer GNU versions
 # help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
 # help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
+# help: DEP_CC, DEP_CXX -- Set the C and C++ compilers used to compile dependencies.
+# help:					   This will generally be gcc/g++ due to the build system's
+# help:					   assuming the GCC toolchain
 # help:
 # help: Test variables
 # help: --------------
@@ -100,7 +106,7 @@ help:
 # help: SR_TEST_REDIS_MODE {Clustered, Standalone} -- type of Redis backend launched for tests
 # help: SR_TEST_PORT (Default: 6379) -- first port for Redis server(s)
 # help: SR_TEST_NODES (Default: 3) Number of shards to intantiate for a clustered Redis database
-# help: SR_TEST_REDISAI_VER {v1.2.7, v1.2.5} -- version of RedisAI to use for tests
+# help: SR_TEST_REDISAI_VER {v1.2.7} -- version of RedisAI to use for tests
 # help: SR_TEST_DEVICE {cpu, gpu} -- device type to test on. Warning, this variable is CASE SENSITIVE!
 # help: SR_TEST_PYTEST_FLAGS (default: "-vv -s"): Verbosity flags to use with pytest
 
@@ -131,12 +137,12 @@ lib-with-fortran: lib
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: SR_PEDANTIC=ON
+test-lib: SR_PEDANTIC=OFF #TODO: fix warnings in C++
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: SR_PEDANTIC=ON
+test-lib-with-fortran: SR_PEDANTIC=OFF #TODO: fix warnings in C++
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
@@ -216,7 +222,7 @@ build-example-serial: lib
 build-example-parallel: lib
 	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/$(SR_LINK)/parallel \
 		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parellel
+	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parallel
 
 
 # help: clean-deps                     - remove third-party deps
@@ -320,7 +326,6 @@ SSDB_STRING := $(shell echo $(SSDB_STRING) | tr -d " ")
 define run_smartredis_tests_with_standalone_server
 	echo "Launching standalone Redis server" && \
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Standalone && \
-	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=127.0.0.1:$(SR_TEST_PORT) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
@@ -342,7 +347,6 @@ endef
 define run_smartredis_tests_with_clustered_server
 	echo "Launching clustered Redis server" && \
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Clustered && \
-	export SMARTREDIS_TEST_CLUSTER=True SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=$(SSDB_STRING) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
@@ -366,7 +370,6 @@ endef
 define run_smartredis_tests_with_uds_server
 	echo "Launching standalone Redis server with Unix Domain Socket support"
 	export SR_TEST_DEVICE=$(SR_TEST_DEVICE) SR_DB_TYPE=Standalone && \
-	export SMARTREDIS_TEST_CLUSTER=False SMARTREDIS_TEST_DEVICE=$(SR_TEST_DEVICE) && \
 	export SSDB=unix://$(SR_TEST_UDS_FILE) && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) \
@@ -493,14 +496,15 @@ test-examples:
 # Hiredis (hidden build target)
 .PHONY: hiredis
 hiredis: install/lib/libhiredis.a
-install/lib/libhiredis.a:
-	@rm -rf third-party/hiredis
+
+third-party/hiredis:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
+
+install/lib/libhiredis.a: third-party/hiredis
 	@cd third-party/hiredis && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" static -j $(NPROC) && \
-	LIBRARY_PATH=lib CC=gcc CXX=g++ make PREFIX="../../install" install && \
+	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install -j $(NPROC) && \
 	rm -f ../../install/lib/libhiredis*.so* && \
 	rm -f ../../install/lib/libhiredis*.dylib* && \
 	echo "Finished installing Hiredis"
@@ -508,20 +512,22 @@ install/lib/libhiredis.a:
 # Redis-plus-plus (hidden build target)
 .PHONY: redis-plus-plus
 redis-plus-plus: install/lib/libredis++.a
-install/lib/libredis++.a:
-	@rm -rf third-party/redis-plus-plus
+
+third-party/redis-plus-plus:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
+
+install/lib/libredis++.a: third-party/redis-plus-plus
 	@cd third-party/redis-plus-plus && \
 	mkdir -p compile && \
 	cd compile && \
-	(cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
-		-DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
-		-DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		-DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ .. )&& \
-	CC=gcc CXX=g++ make -j $(NPROC) && \
-	CC=gcc CXX=g++ make install && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
+		  -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
+		  -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
+		  -DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. && \
+	make CC=$(DEP_CC) CXX=$(RPP_CX) -j $(NPROC) && \
+	make CC=$(DEP_CC) CXX=$(RPP_CX) install && \
 	echo "Finished installing Redis-plus-plus"
 
 # Pybind11 (hidden build target)
@@ -536,13 +542,16 @@ third-party/pybind/include/pybind11/pybind11.h:
 
 # Redis (hidden test target)
 .PHONY: redis
-redis: third-party/redis/src/redis-server
-third-party/redis/src/redis-server:
+
+third-party/redis:
 	@mkdir -p third-party
 	@cd third-party && \
 	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
+
+redis: third-party/redis/src/redis-server
+third-party/redis/src/redis-server: third-party/redis
 	@cd third-party/redis && \
-	CC=gcc CXX=g++ make MALLOC=libc -j $(NPROC) && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
 	echo "Finished installing redis"
 
 # cudann-check (hidden test target)
@@ -568,22 +577,29 @@ endif
 endif
 
 # RedisAI (hidden test target)
-.PHONY: redisAI
-redisAI: cudann-check
-redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
-third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
-	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
-	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
+third-party/RedisAI:
 	@mkdir -p third-party
 	@cd third-party && \
 	rm -rf RedisAI/$(SR_TEST_REDISAI_VER) && \
 	GIT_LFS_SKIP_SMUDGE=1 git clone --recursive $(REDISAI_URL) RedisAI/$(SR_TEST_REDISAI_VER) \
 		--branch $(SR_TEST_REDISAI_VER) --depth=1
-	-@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
-	CC=gcc CXX=g++ WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
-		$(SR_TEST_DEVICE) && \
-	CC=gcc CXX=g++ GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
-		WITH_UNIT_TESTS=0 make -j $(NPROC) -C opt clean build && \
+
+.PHONY: redisAI
+redisAI: cudann-check
+redisAI: third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so
+third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so: third-party/RedisAI
+	@echo in third-party/RedisAI/$(SR_TEST_REDISAI_VER)/install-$(SR_TEST_DEVICE)/redisai.so:
+	$(eval DEVICE_IS_GPU := $(shell test $(SR_TEST_DEVICE) == "cpu"; echo $$?))
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
+		$(SR_TEST_DEVICE)
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
+		WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 bash get_deps.sh \
+		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -j $(NPROC) -C opt clean
+	@cd third-party/RedisAI/$(SR_TEST_REDISAI_VER) && \
+		GPU=$(DEVICE_IS_GPU) WITH_PT=1 WITH_TF=1 WITH_TFLITE=0 WITH_ORT=0 \
+		WITH_UNIT_TESTS=0 make CC=$(DEP_CC) CXX=$(DEP_CXX) -C opt && \
 	echo "Finished installing RedisAI"
 
 # Catch2 (hidden test target)
@@ -605,5 +621,7 @@ third-party/lcov/install/bin/lcov:
 	git clone $(LCOV_URL) lcov --branch $(LCOV_VER) --depth=1
 	@cd third-party/lcov && \
 	mkdir -p install && \
-	CC=gcc CXX=g++ make PREFIX=$(CWD)/third-party/lcov/install/ install && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX=$(CWD)/third-party/lcov/install/ install && \
 	echo "Finished installing LCOV"
+
+

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ import typing as t
 from functools import wraps
 
 import numpy as np
-from .error import *  # pylint: disable=wildcard-import,unused-wildcard-import
+from . import error
 
 from .smartredisPy import RedisReplyError as PybindRedisReplyError
 from .smartredisPy import c_get_last_error_location
@@ -152,7 +152,7 @@ def exception_handler(func: "t.Callable[_PR, _RT]") -> "t.Callable[_PR, _RT]":
                 cpp_error_str = (
                     f"File {error_loc}, in SmartRedis library\n{str(cpp_error)}"
                 )
-            raise globals()[exception_name](cpp_error_str, method_name) from None
+            raise getattr(error, exception_name)(cpp_error_str, method_name) from None
 
     return smartredis_api_wrapper
 

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1226,7 +1226,7 @@ void Client::set_data_source(std::string source_id)
     // Validate the source prefix
     bool valid_prefix = false;
     size_t num_prefix = _get_key_prefixes.size();
-    size_t save_index = -1;
+    size_t save_index = 0;
     for (size_t i = 0; i < num_prefix; i++) {
         if (_get_key_prefixes[i].compare(source_id) == 0) {
             valid_prefix = true;
@@ -1715,7 +1715,6 @@ bool Client::poll_list_length_lte(const std::string& name, int list_length,
     return _poll_list_length(name, list_length, poll_frequency_ms,
                              num_tries, std::less_equal<int>());
 
-    return false;
 }
 
 // Retrieve datasets in aggregation list
@@ -2219,7 +2218,6 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                 throw SRInternalException("The database provided an invalid "\
                                           "TensorType to Client::_get_tensorbase_obj(). "\
                                           "The tensor could not be retrieved.");
-                break;
         }
     }
     catch (std::bad_alloc& e) {

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,23 @@ from .smartredisPy import PyConfigOptions
 from .util import exception_handler, typecheck
 
 
+if t.TYPE_CHECKING:
+    from typing_extensions import ParamSpec
+
+    _PR = ParamSpec("_PR")
+
+_T = t.TypeVar("_T")
+
+
 class _Managed:
     """Marker class identifying factory-created objects"""
 
 
-def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
-    """Instantiate a managed instance of the class, enabling the use of type 
+def create_managed_instance(base: t.Type[_T]) -> _T:
+    """Instantiate a managed instance of the class, enabling the use of type
     checking to detect if an instance is managed"""
-    def get_dynamic_class_name(bases: t.Tuple[t.Type]) -> str:
+
+    def get_dynamic_class_name(bases: t.Tuple[t.Type[_Managed], t.Type[t.Any]]) -> str:
         """Create a name for the new type by concatenating base names. Appends a
         unique suffix to avoid confusion if dynamic type comparisons occur"""
         unique_key = str(uuid4()).split("-", 1)[0]
@@ -54,15 +63,15 @@ def create_managed_instance(base: t.Type[t.Any]) -> t.Any:
     return managed_class()
 
 
-def managed(func: t.Callable) -> t.Callable:
+def managed(func: "t.Callable[_PR, _T]") -> "t.Callable[_PR, _T]":
     """Decorator to verify that a class was constructed using a factory"""
     not_managed = (
-        "Attempting to call managed method on ConfigOptions object not "
+        "Attempting to call managed method on {} object not "
         "created from a factory method"
     )
 
     @wraps(func)
-    def _wrapper(*args: t.Any, **kwargs: t.Any) -> t.Any:
+    def _wrapper(*args: "_PR.args", **kwargs: "_PR.kwargs") -> _T:
         instance = args[0]
         if not isinstance(instance, _Managed):
             msg = not_managed.format(instance.__class__.__name__)
@@ -94,7 +103,7 @@ class ConfigOptions:
 
     @exception_handler
     @managed
-    def get_data(self):
+    def get_data(self) -> PyConfigOptions:
         """Return the PyConfigOptions attribute
 
         :return: The PyConfigOptions attribute containing

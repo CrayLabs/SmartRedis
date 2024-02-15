@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,8 +52,8 @@ SCENARIO("Testing DBNode object", "[DBNode]")
             CHECK(node_1.address._is_tcp);
             CHECK(node_1.address._tcp_host == "");
             CHECK(node_1.address._tcp_port == 0);
-            CHECK(node_1.lower_hash_slot == -1);
-            CHECK(node_1.upper_hash_slot == -1);
+            CHECK(node_1.lower_hash_slot == 0);
+            CHECK(node_1.upper_hash_slot == 0);
         }
 
         AND_THEN("The < operator is overloaded correctly")

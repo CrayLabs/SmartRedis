@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,8 @@ def test_example(test, build, sr_fortran, link):
         test = ".".join(test.split(".")[:-1])
         # . prepend the path to the built test executable
         test = f"{getcwd()}/build/{build}/examples/{link}/{test}"
-        cmd = [test]
+        cmd = ["mpirun", "-n", "2"] if "parallel" in test else []
+        cmd += [test]
         print(f"Running test: {osp.basename(test)}")
         print(f"Test command {' '.join(cmd)}")
         execute_cmd(cmd, test_subdir)

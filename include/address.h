@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <cstdint>
 
 ///@file
 
@@ -89,7 +90,7 @@ class SRAddress
     /*!
     *   \brief  The TCP port (undefined for UDS)
     */
-    uint16_t _tcp_port;
+    std::uint16_t _tcp_port;
 
     /*!
     *   \brief  The UDS filespec (undefined for TCP)

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@ using namespace SmartRedis;
 
 // DBNode constructor
 DBNode::DBNode()
-    : address(), name(""), lower_hash_slot(-1), upper_hash_slot(-1)
+    : address(), name(""), lower_hash_slot(0), upper_hash_slot(0)
 {
    // NOP
 }

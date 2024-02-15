@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,8 +24,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-import os
 import numpy as np
+import os
+
+
 from smartredis import Client
 
 # ----- Tests -----------------------------------------------------------
@@ -58,6 +60,69 @@ def test_3D_put_get(mock_data, context):
     send_get_arrays(client, data)
 
 
+def test_dim1_modified_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[0, :] for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_dim2_modified_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[:, 0] for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_subset_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[1:3, 5:7] for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_dim2_reverse_2D_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[::-1, ...] for i in data]
+    send_get_arrays(client, modified)
+
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i[..., ::-1] for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_2D_transpose_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    modified = [i.transpose() for i in data]
+    send_get_arrays(client, modified)
+
+
+def test_2D_reshape_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((25, 4)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    reshaped = [i.reshape((100, 1)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    reshaped = [i.reshape((1, 100)) for i in data]
+    send_get_arrays(client, reshaped)
+
+    reshaped = [i.reshape((-1)) for i in data]
+    send_get_arrays(client, reshaped)
+
+
+def test_3D_transpose_put_get(mock_data, context):
+    client = Client(None, logger_name=context)
+    data = mock_data.create_data((10, 10, 10))
+    modified = [i.transpose() for i in data]
+    send_get_arrays(client, modified)
+
+
 # ------- Helper Functions -----------------------------------------------
 
 
@@ -81,6 +146,7 @@ def send_get_arrays(client, data):
     for index, array in enumerate(data):
         key = f"array_{str(index)}"
         rarray = client.get_tensor(key)
+        assert rarray.dtype == array.dtype
         np.testing.assert_array_equal(
             rarray, array, "Returned array from get_tensor not equal to sent tensor"
         )

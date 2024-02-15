@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -188,16 +188,20 @@ void MetaData::add_string(const std::string& field_name,
 void MetaData::get_scalar_values(const std::string& name,
                                 void*& data,
                                 size_t& length,
-                                SRMetaDataType& type)
+                                SRMetaDataType& type) const
 {
     // Make sure the field exists
-    if (_field_map[name] == NULL) {
+    MetadataField* mdf = NULL;
+    try {
+         mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("The metadata field " + name +
                                  " does not exist.");
     }
 
     // Get values for the field
-    type = _field_map[name]->type();
+    type = mdf->type();
     switch (type) {
         case SRMetadataTypeDouble:
             _get_numeric_field_values<double>
@@ -226,11 +230,9 @@ void MetaData::get_scalar_values(const std::string& name,
         case SRMetadataTypeString:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested invalid MetaDataType.");
-            break;
         default:
             throw SRRuntimeException("MetaData.get_scalar_values() "\
                                      "requested unknown MetaDataType.");
-            break;
     }
 }
 
@@ -266,7 +268,7 @@ std::vector<std::string> MetaData::get_field_names(bool skip_internal) const
 void MetaData::get_field_names(char**& data,
                                size_t& n_strings,
                                size_t*& lengths,
-                               bool skip_internal /*= false*/)
+                               bool skip_internal /*= false*/) const
 {
     // Retrieve the names
     std::vector<std::string> name_strings = get_field_names(skip_internal);
@@ -300,8 +302,7 @@ void MetaData::get_field_names(char**& data,
 void MetaData::get_string_values(const std::string& name,
                                  char**& data,
                                  size_t& n_strings,
-                                 size_t*& lengths)
-
+                                 size_t*& lengths) const
 {
     // Retrieve the strings
     std::vector<std::string> field_strings = get_string_values(name);
@@ -475,11 +476,14 @@ void MetaData::_get_numeric_field_values(
     const std::string& name,
     void*& data,
     size_t& n_values,
-    SharedMemoryList<T>& mem_list)
+    SharedMemoryList<T>& mem_list) const
 {
     // Make sure the field exists
-    MetadataField* mdf = _field_map[name];
-    if (mdf == NULL) {
+    MetadataField* mdf = NULL;
+    try {
+        mdf = _field_map.at(name);
+    }
+    catch (std::out_of_range& e) {
         throw SRRuntimeException("Field " + name + " does not exist.");
     }
 
@@ -542,7 +546,6 @@ void MetaData::_get_numeric_field_values(
         case SRMetadataTypeString:
             throw SRRuntimeException("Invalid MetaDataType used in "\
                                      "MetaData.add_scalar().");
-            break;
         default:
             throw SRRuntimeException("Unknown MetaDataType found in "\
                                      "MetaData.add_scalar().");

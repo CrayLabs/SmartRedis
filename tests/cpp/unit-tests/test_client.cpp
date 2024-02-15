@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2023, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -703,16 +703,16 @@ SCENARIO("Testing CONFIG GET and CONFIG SET on Client Object", "[Client]")
             THEN("No error is thrown."){
 
                 std::string db_address = parse_SSDB(std::getenv("SSDB"));
-                std::string config_param = "dbfilename";
-                std::string new_filename = "new_file.rdb";
+                std::string config_param = "ignore-warnings";
+                std::string new_value = "ARM64-COW-BUG";
 
-                CHECK_NOTHROW(client.config_set(config_param, new_filename, db_address));
+                CHECK_NOTHROW(client.config_set(config_param, new_value, db_address));
                 std::unordered_map<std::string,std::string> reply =
-                    client.config_get("dbfilename", db_address);
+                    client.config_get(config_param, db_address);
 
                 CHECK(reply.size() == 1);
                 REQUIRE(reply.count(config_param) > 0);
-                CHECK(reply[config_param] == new_filename);
+                CHECK(reply[config_param] == new_value);
             }
         }
     }

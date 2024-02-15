@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@ from os import environ
 from smartredis import Client
 from smartredis.error import *
 
-test_gpu = environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower() == "gpu"
+test_gpu = environ.get("SR_TEST_DEVICE","cpu").lower() == "gpu"
 
 def test_set_model(mock_model, context):
     model = mock_model.create_torch_cnn()
@@ -156,7 +156,7 @@ def test_batch_warning_set_model_from_file(mock_model, context, capfd):
 
 @pytest.mark.skipif(
     not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+    reason="SR_TEST_DEVICE does not specify 'gpu'"
 )
 def test_batch_warning_set_model_from_file_multigpu(mock_model, context, capfd):
     # get model and set into database
@@ -182,7 +182,7 @@ def test_batch_warning_set_model(mock_model, context, capfd):
 
 @pytest.mark.skipif(
     not test_gpu,
-    reason="SMARTREDIS_TEST_DEVICE does not specify 'gpu'"
+    reason="SR_TEST_DEVICE does not specify 'gpu'"
 )
 def test_batch_warning_set_model_multigpu(mock_model, context, capfd):
     # get model and set into database

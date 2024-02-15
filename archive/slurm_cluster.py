@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2023, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ def launch_db(host, port, dpn):
     set log file
     """
 
-    test_device = os.environ.get("SMARTREDIS_TEST_DEVICE","cpu").lower()
+    test_device = os.environ.get("SR_TEST_DEVICE","cpu").lower()
     redis = environ['REDIS_INSTALL_PATH'] + '/redis-server '
     redisai = "--loadmodule " +  environ[f'REDISAI_{test_device.upper()}_INSTALL_PATH'] + "/redisai.so "
     if(dpn < 3):
