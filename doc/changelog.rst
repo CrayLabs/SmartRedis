@@ -1,6 +1,24 @@
 Changelog
 =========
 
+0.5.2
+-----
+
+Released on February 16, 2024
+
+Description
+
+- Fixed bug which was sending tensors to the database twice (Python Client)
+
+Detailed Notes
+
+- A previous bug fix for the Python client which addressed a problem when sending
+  numpy views inadvertently kept the original put_tensor call in place. This 
+  essentially doubles the cost of the operation. (PR464_)
+
+.. _PR464: https://github.com/CrayLabs/SmartRedis/pull/464
+
+
 0.5.1
 -----
 
