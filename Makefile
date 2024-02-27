@@ -37,7 +37,7 @@ RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
-REDIS_VER := 7.0.5
+REDIS_VER := 7.2.4
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 # REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
 CATCH2_URL := https://github.com/catchorg/Catch2.git
