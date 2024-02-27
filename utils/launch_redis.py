@@ -57,6 +57,8 @@ def check_availability(n_nodes, port, udsport):
                 sleep(5)
         if not command_succeeded:
             raise RuntimeError(f"Failed to validate availability for connection {connection}")
+    # add a small sleep after completing availability test to let cluster complete setup
+    sleep(1)
 
 def stop_db(n_nodes, port, udsport):
     """Stop a redis cluster and clear the files
@@ -205,10 +207,11 @@ def create_db(n_nodes, port, device, rai_ver, udsport):
     # Create cluster for clustered Redis request
     if n_nodes > 1:
         cluster_str = " ".join(f"127.0.0.1:{port + i}" for i in range(n_nodes))
-        cmd = f"{rediscli} --cluster create {cluster_str} --cluster-replicas 0"
+        cmd = f"{rediscli} --cluster create {cluster_str} --cluster-replicas 0 --cluster-yes"
         print(cmd)
-        proc = run(cmd.split(), input="yes", encoding="utf-8", shell=False)
+        proc = run(cmd.split(), encoding="utf-8", shell=False)
         if proc.returncode != 0:
+            print(f'{rediscli} returncode: {proc.returncode}')
             raise SubprocessError("Cluster could not be created!")
         sleep(2)
         print("Cluster has been setup!")
