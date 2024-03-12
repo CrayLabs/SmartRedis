@@ -1,6 +1,23 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Update the version of Redis from `7.0.4` to `7.2.4`
+
+Detailed Notes
+
+- Update Redis version to `7.2.4`. This change fixes an issue in the Redis
+  build scripts causing failures on Apple Silicon hosts. (SmartSim-PR507_)
+
+.. _SmartSim-PR507: https://github.com/CrayLabs/SmartSim/pull/507
+
+
 0.5.2
 -----
 
@@ -8,15 +25,13 @@ Released on February 16, 2024
 
 Description
 
-- Fixed bug which was sending tensors to the database twice (Python Client)
+- Fix inconsistency in C-API ConfigOptions is_configured() parameters
 
 Detailed Notes
 
-- A previous bug fix for the Python client which addressed a problem when sending
-  numpy views inadvertently kept the original put_tensor call in place. This 
-  essentially doubles the cost of the operation. (PR464_)
+- Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
-.. _PR464: https://github.com/CrayLabs/SmartRedis/pull/464
+.. _PR448: https://github.com/CrayLabs/SmartRedis/pull/471
 
 
 0.5.1
