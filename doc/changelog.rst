@@ -14,7 +14,7 @@ Detailed Notes
 
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
-.. _SmartSim-PR507: https://github.com/CrayLabs/SmartSim/pull/471
+.. _PR471: https://github.com/CrayLabs/SmartSim/pull/471
 
 
 0.5.2
