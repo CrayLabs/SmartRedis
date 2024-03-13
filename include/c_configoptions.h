@@ -116,8 +116,8 @@ SRError get_string_option(
 */
 SRError is_configured(
     void* c_cfgopts,
-    const char* key,
-    size_t key_len,
+    const char* option_name,
+    size_t option_name_len,
     bool* cfg_result);
 
 /////////////////////////////////////////////////////////////

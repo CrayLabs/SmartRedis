@@ -1,6 +1,22 @@
 Changelog
 =========
 
+Development branch
+------------------
+
+To be released at some future point in time
+
+Description
+
+- Fix inconsistency in C-API ConfigOptions is_configured() parameters
+
+Detailed Notes
+
+- Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
+
+.. _PR471: https://github.com/CrayLabs/SmartRedis/pull/471
+
+
 0.5.2
 -----
 
