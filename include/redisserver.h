@@ -609,7 +609,7 @@ class RedisServer {
         /*!
         *   \brief Default socket timeout (milliseconds)
         */
-        static constexpr int _DEFAULT_SOCKET_TIMEOUT = 250;
+        static constexpr int _DEFAULT_SOCKET_TIMEOUT = 1000;
 
         /*!
         *   \brief Default value of connection timeout (seconds)

@@ -218,85 +218,6 @@ class Tensor : public TensorBase
                                       const SRMemoryLayout mem_layout);
 
         /*!
-        *   \brief This function will copy a fortran array
-        *          memory space (column major) to a c-style
-        *          memory space layout (row major)
-        *   \param c_data A pointer to the row major memory space
-        *   \param f_data A pointer to the col major memory space
-        *   \param dims The dimensions of the tensor
-        */
-        void _f_to_c_memcpy(T* c_data,
-                            const T* f_data,
-                            const std::vector<size_t>& dims);
-
-        /*!
-        *   \brief This function will copy a c-style array
-        *          memory space (row major) to a fortran
-        *          memory space layout (col major)
-        *   \param f_data A pointer to the col major memory space
-        *   \param c_data A pointer to the row major memory space
-        *   \param dims The dimensions of the tensor
-        */
-        void _c_to_f_memcpy(T* f_data,
-                            const T* c_data,
-                            const std::vector<size_t>& dims);
-
-        /*!
-        *   \brief This is a recursive function used to copy
-        *          fortran column major memory to c-style row
-        *          major memory
-        *   \param c_data A pointer to the row major memory space
-        *   \param f_data A pointer to the col major memory space
-        *   \param dims The dimensions of the tensor
-        *   \param dim_positions The current position in each
-        *                        dimension
-        *   \param current_dim The index of the current dimension
-        */
-        void _f_to_c(T* c_data,
-                     const T* f_data,
-                     const std::vector<size_t>& dims,
-                     std::vector<size_t> dim_positions,
-                     size_t current_dim);
-
-        /*!
-        *   \brief This is a recursive function used to
-        *          copy c-style row major memory to fortran
-        *          column major memory
-        *   \param f_data A pointer to the col major memory space
-        *   \param c_data A pointer to the row major memory space
-        *   \param dims The dimensions of the tensor
-        *   \param dim_positions The current position in each
-        *                        dimension
-        *   \param current_dim The index of the current dimension
-        */
-        void _c_to_f(T* f_data,
-                     const T* c_data,
-                     const std::vector<size_t>& dims,
-                     std::vector<size_t> dim_positions,
-                     size_t current_dim);
-
-        /*!
-        *   \brief Calculate the contiguous array position
-        *          for a column major position
-        *   \param dims The tensor dimensions
-        *   \param dim_positions The current position for each
-        *                        dimension
-        *   \returns The contiguous memory index position
-        */
-        inline size_t _f_index(const std::vector<size_t>& dims,
-                               const std::vector<size_t>& dim_positions);
-
-        /*!
-        *   \brief  Calculate the contiguous array position
-        *           for a row major position
-        *   \param dims The tensor dimensions
-        *   \param dim_positions The current position for each dimension
-        *   \returns The contiguous memory index position
-        */
-        inline size_t _c_index(const std::vector<size_t>& dims,
-                               const std::vector<size_t>& dim_positions);
-
-        /*!
         *   \brief Get the total number of bytes of the data
         *   \returns Total number of bytes of the data
         */
@@ -305,12 +226,8 @@ class Tensor : public TensorBase
         /*!
         *   \brief Memory allocated for c nested tensor memory views
         */
-        SharedMemoryList<T*> _c_mem_views;
+        SharedMemoryList<T*> _mem_views;
 
-        /*!
-        *   \brief Memory allocated for f nested tensor memory views
-        */
-        SharedMemoryList<T> _f_mem_views;
 };
 
 #include "tensor.tcc"
