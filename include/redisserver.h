@@ -581,7 +581,7 @@ class RedisServer {
         int _command_timeout;
 
         /*!
-        *   \brief Timeout (in milliseconds) of socket timeout.
+        *   \brief Timeout (in milliseconds) for socket reply.
         */
         int _socket_timeout;
 
