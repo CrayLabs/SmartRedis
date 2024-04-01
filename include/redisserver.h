@@ -581,6 +581,11 @@ class RedisServer {
         int _command_timeout;
 
         /*!
+        *   \brief Timeout (in milliseconds) of socket timeout.
+        */
+        int _socket_timeout;
+
+        /*!
         *   \brief Interval (in milliseconds) between connection attempts.
         */
         int _connection_interval;
@@ -713,6 +718,12 @@ class RedisServer {
         */
         inline static const std::string _MODEL_TIMEOUT_ENV_VAR =
             "SR_MODEL_TIMEOUT";
+
+        /*!
+        *   \brief Environment variable for socket timeout
+        */
+        inline static const std::string _SOCKET_TIMEOUT_ENV_VAR =
+            "SR_SOCKET_TIMEOUT";
 
         /*!
         *   \brief Environment variable for thread count in thread pool
