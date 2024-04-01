@@ -397,6 +397,6 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
-    restore_env_vars(__conn_timeout, __conn_interval, __cmd_timeout, __cmd_interval);
+    restore_env_vars(__conn_timeout, __conn_interval, __cmd_timeout, __cmd_interval, __socket_timeout);
     log_data(context, LLDebug, "***End RedisServer testing***");
 }
