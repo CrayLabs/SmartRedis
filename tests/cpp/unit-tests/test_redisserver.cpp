@@ -136,7 +136,7 @@ void save_env_vars(
     *conn_interval = getenv(CONN_INTERVAL_ENV_VAR);
     *cmd_timeout = getenv(CMD_TIMEOUT_ENV_VAR);
     *cmd_interval = getenv(CMD_INTERVAL_ENV_VAR);
-    *socket_timeout = genenv(SOCKET_TIMEOUT_ENV_VAR);
+    *socket_timeout = getenv(SOCKET_TIMEOUT_ENV_VAR);
 }
 
 // Helper function to restore environment vars
@@ -203,7 +203,7 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
     char* __cmd_timeout;
     char* __cmd_interval;
     char* __socket_timeout;
-    save_env_vars(&__conn_timeout, &__conn_interval, &__cmd_timeout, &__cmd_interval, &__socket_interval);
+    save_env_vars(&__conn_timeout, &__conn_interval, &__cmd_timeout, &__cmd_interval, &__socket_timeout);
 
     GIVEN("A Redis derived object created with all environment variables unset")
     {
