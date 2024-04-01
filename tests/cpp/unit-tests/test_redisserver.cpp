@@ -129,7 +129,7 @@ void save_env_vars(
     char** conn_timeout,
     char** conn_interval,
     char** cmd_timeout,
-    char** cmd_interval
+    char** cmd_interval,
     char** socket_timeout)
 {
     *conn_timeout = getenv(CONN_TIMEOUT_ENV_VAR);
