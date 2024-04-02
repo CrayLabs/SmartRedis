@@ -121,8 +121,7 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
             | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
           sudo apt update -y && \
-          sudo apt install -y intel-oneapi-compiler-fortran-${INTEL_V} intel-oneapi-compiler-dpcpp-cpp-${INTEL_V} &&
-          sudo apt install -y intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-mkl &&
+          sudo apt install -y intel-basekit-${INTEL_V} intel-hpckit-${INTEL_V} &&
           source /opt/intel/oneapi/setvars.sh &&
           printenv >> $GITHUB_ENV &&
           echo "CC=icx" >> $GITHUB_ENV &&
