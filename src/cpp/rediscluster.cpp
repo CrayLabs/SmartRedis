@@ -1089,7 +1089,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
             "RedisCluster encountered a UDS request in _connect()");
     }
     connectOpts.socket_timeout = std::chrono::milliseconds(
-        _DEFAULT_SOCKET_TIMEOUT);
+        _socket_timeout);
 
     // Connect
     std::string msg;

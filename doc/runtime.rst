@@ -195,6 +195,16 @@ The user can set these environment variables to adjust command execution behavio
 and ``SR_CMD_TIMEOUT`` are read during client initialization and not
 before each command execution.
 
+The environment variable ``SR_SOCKET_TIMEOUT`` sets the time that a connection
+will wait for a reply.  The ``SR_SOCKET_TIMEOUT`` parameter is complementary to
+``SR_CONN_TIMEOUT``, ``SR_CONN_INTERVAL``, and ``SR_CMD_INTERVAL``, 
+``SR_CMD_TIMEOUT``.  That is, within each attempt
+to connect to the server or execute a command on the server there may be an
+additional delay of ``SR_SOCKET_TIMEOUT`` if the connection is unresponsive
+or the command takes a long time to execute.  If commands that
+involve large amounts of data fail (e.g. setting a very large ML model),
+the ``SR_SOCKET_TIMEOUT`` should be set to a larger value.
+
 The environment variable ``SR_THREAD_COUNT`` is used by SmartRedis to determine
 the number of threads to initialize when building a worker pool for parallel task
 execution. The default value is four. If the variable is set to zero, SmartRedis
