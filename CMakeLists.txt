@@ -55,7 +55,12 @@ endif()
 # to smartredis_defs.cmake
 if (SR_PEDANTIC)
     if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID STREQUAL "INTEL"))
-        add_compile_options(-Wall -Werror -pedantic)
+        add_compile_options(
+		-Wall
+		-Werror
+		-pedantic
+		-Wextra
+	)
     else()
         message(WARNING "SR_PEDANTIC was specified, but the CMAKE compiler is not GCC")
     endif()
