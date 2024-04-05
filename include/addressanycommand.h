@@ -71,3 +71,4 @@ class AddressAnyCommand : public NonKeyedCommand
 } // namespace SmartRedis
 
 #endif // SMARTREDIS_ADDRESSANYCOMMAND_H
+include/addressanycommand.h
