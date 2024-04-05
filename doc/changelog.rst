@@ -8,16 +8,21 @@ To be released at some future point in time
 
 Description
 
+- Fix C++ cosmetic defects leading to compiler warnings
 - Update CI for Intel suite
 - Fix inconsistency in C-API ConfigOptions is_configured() parameters
 
 Detailed Notes
 
+- Fixes some mainly cosmetic defects in the C++ client that were leading to warnings
+  when pedantic compiler flags were enabled (PR476_)
+- Re-enable SR_PEDANTIC for the `test-lib` and `test-lib-with-fortran` Makefile targets (PR476_)
 - Version numbers changed for the Intel Compiler chain that lead to the C and C++
   compilers not being available. Now, the entirety of the Base and HPC kits are
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR476: https://github.com/CrayLabs/SmartRedis/pull/476
 .. _PR475: https://github.com/CrayLabs/SmartRedis/pull/475
 .. _PR471: https://github.com/CrayLabs/SmartRedis/pull/471
 
@@ -34,7 +39,7 @@ Description
 Detailed Notes
 
 - A previous bug fix for the Python client which addressed a problem when sending
-  numpy views inadvertently kept the original put_tensor call in place. This 
+  numpy views inadvertently kept the original put_tensor call in place. This
   essentially doubles the cost of the operation. (PR464_)
 
 .. _PR464: https://github.com/CrayLabs/SmartRedis/pull/464
