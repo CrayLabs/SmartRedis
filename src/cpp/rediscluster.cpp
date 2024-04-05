@@ -238,7 +238,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     volatile size_t pipeline_completion_count = 0;
     size_t num_shards = shard_cmd_index_list.size();
     Exception error_response = Exception("no error");
-    bool success_status[num_shards];
+    std::vector<bool> success_status(num_shards, false);
     std::mutex results_mutex;
 
     // Loop over all shards and execute pipelines
@@ -1552,3 +1552,5 @@ std::string RedisCluster::to_string() const
     result += RedisServer::to_string();
     return result;
 }
+
+
