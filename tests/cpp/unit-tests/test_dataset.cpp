@@ -146,6 +146,23 @@ SCENARIO("Testing DataSet object", "[DataSet]")
                     SmartRedis::KeyException
                 );
             }
+
+            THEN("The tensor cannot be retrieved via unpack_tensor() "
+                 "if the specified type does not match")
+            {
+                void* retrieved_data =
+                    malloc(dims[0] * dims[1] * dims[2] * sizeof(float));
+
+                SRTensorType wrong_type = SRTensorTypeDouble;
+
+                CHECK_THROWS_AS(
+                    dataset.unpack_tensor(tensor_name, retrieved_data,
+                                          dims, wrong_type, mem_layout),
+                    SmartRedis::RuntimeException
+                );
+
+                free(retrieved_data);
+            }
         }
 
         AND_WHEN("A meta scalar is added to the DataSet")

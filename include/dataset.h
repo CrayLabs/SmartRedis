@@ -476,6 +476,15 @@ class DataSet : public SRObject
         inline void _enforce_tensor_exists(const std::string& name) const;
 
         /*!
+        *   \brief Throw an exception if the provided tensor type does not match
+        *          the internal tensor type
+        *   \throw RuntimeException if the provided tensor type does not match
+        *          the internal tensor type
+        */
+        inline void _enforce_tensor_type(const std::string& tensorname,
+                                         const SRTensorType& type) const;
+
+        /*!
         *   \brief SharedMemoryList to manage memory associated
         *          with tensor dimensions from tensor retrieval
         */
