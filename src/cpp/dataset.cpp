@@ -153,6 +153,7 @@ void DataSet::unpack_tensor(const std::string& name,
     LOG_API_FUNCTION();
 
     _enforce_tensor_exists(name);
+    _enforce_tensor_type(name, type);
     _tensorpack.get_tensor(name)->fill_mem_space(data, dims, mem_layout);
 }
 
@@ -375,6 +376,22 @@ inline void DataSet::_enforce_tensor_exists(const std::string& tensorname) const
         throw SRKeyException("The tensor \"" + std::string(tensorname) +
                              "\" does not exist in dataset \"" +
                              _dsname + "\".");
+    }
+}
+
+// Check that the provided tensor type matches the internal tensor type
+inline void DataSet::_enforce_tensor_type(const std::string& tensorname,
+                                          const SRTensorType& type) const
+{
+    _enforce_tensor_exists(tensorname);
+
+    SRTensorType known_type = _tensorpack.get_tensor(tensorname)->type();
+
+    if (known_type != type) {
+        throw SRRuntimeException("The tensor \"" + std::string(tensorname) +
+                                 "\" has type \"" + TENSOR_STR_MAP.at(known_type) +
+                                 "\" in dataset \"" + _dsname + "\" but the provided " +
+                                 "type is " "\"" + TENSOR_STR_MAP.at(type) + "\".");
     }
 }
 
