@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,24 +27,108 @@
  */
 
 #include <ctype.h>
+#include <algorithm>
+#include <cctype>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "client.h"
 #include "srexception.h"
+#include "logger.h"
+#include "utility.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
-// Constructor
-Client::Client(bool cluster)
-    : _redis_cluster(cluster ? new RedisCluster() : NULL),
-      _redis(cluster ? NULL : new Redis())
+// Simple Client constructor
+Client::Client(const char* logger_name)
+    : SRObject(logger_name)
 {
+    // Create our ConfigOptions object (default: no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+}
+
+// Constructor with config options
+Client::Client(ConfigOptions* cfgopts, const std::string& logger_name)
+    : SRObject(logger_name), _cfgopts(cfgopts->clone())
+{
+    // Log that a new client has been instantiated
+    _cfgopts->_set_log_context(this);
+    log_data(LLDebug, "New client created");
+
+    // Establish our server connection
+    _establish_server_connection();
+}
+
+// Initialize a connection to the back-end database
+void Client::_establish_server_connection()
+{
+    // See what type of connection the user wants
+    std::string server_type = _cfgopts->_resolve_string_option(
+        "SR_DB_TYPE", "Clustered");
+    std::transform(server_type.begin(), server_type.end(), server_type.begin(),
+        [](unsigned char c){ return std::tolower(c); });
+
+    // Set up Redis server connection
     // A std::bad_alloc exception on the initializer will be caught
     // by the call to new for the client
+    if (server_type == "clustered") {
+        log_data(LLDeveloper, "Instantiating clustered Redis connection");
+        _redis_cluster = new RedisCluster(_cfgopts);
+        _redis = NULL;
+        _redis_server =  _redis_cluster;
+    }
+    else { // Standalone or Colocated
+        log_data(LLDeveloper, "Instantiating standalone Redis connection");
+        _redis_cluster = NULL;
+        _redis = new Redis(_cfgopts);
+        _redis_server =  _redis;
+    }
+    log_data(LLDeveloper, "Redis connection established");
+
+    // Initialize key prefixing
+    _get_prefix_settings();
+    _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
+    _use_model_prefix = false;
+    _use_list_prefix = true;
+}
+
+// Constructor (deprecated)
+Client::Client(bool cluster, const std::string& logger_name)
+    : SRObject(logger_name)
+{
+    // Log that a new client has been instantiated
+    log_data(LLDebug, "New client created");
+
+    // Create our ConfigOptions object (default = no suffixing)
+    auto cfgopts = ConfigOptions::create_from_environment("");
+    _cfgopts = cfgopts.release();
+    _cfgopts->_set_log_context(this);
+
+    // Set up Redis server connection
+    // A std::bad_alloc exception on the initializer will be caught
+    // by the call to new for the client
+    _redis_cluster = (cluster ? new RedisCluster(_cfgopts) : NULL);
+    _redis = (cluster ? NULL : new Redis(_cfgopts));
     if (cluster)
         _redis_server =  _redis_cluster;
     else
         _redis_server =  _redis;
-    _set_prefixes_from_env();
+
+    // Initialize key prefixing
+    _get_prefix_settings();
     _use_tensor_prefix = true;
+    _use_dataset_prefix = true;
     _use_model_prefix = false;
     _use_list_prefix = true;
 }
@@ -63,21 +147,32 @@ Client::~Client()
         _redis = NULL;
     }
     _redis_server = NULL;
+    delete _cfgopts;
+    _cfgopts = NULL;
+
+    // Log Client destruction
+    log_data(LLDebug, "Client destroyed");
 }
 
 // Put a DataSet object into the database
 void Client::put_dataset(DataSet& dataset)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     CommandList cmds;
     _append_dataset_metadata_commands(cmds, dataset);
     _append_dataset_tensor_commands(cmds, dataset);
     _append_dataset_ack_command(cmds, dataset);
-    _run(cmds);
+    _redis_server->run_in_pipeline(cmds);
 }
 
 // Retrieve a DataSet object from the database
 DataSet Client::get_dataset(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(name);
 
@@ -90,15 +185,25 @@ DataSet Client::get_dataset(const std::string& name)
     DataSet dataset(name);
     _unpack_dataset_metadata(dataset, reply);
 
+    // Build the tensor keys
     std::vector<std::string> tensor_names = dataset.get_tensor_names();
+    if (tensor_names.size() == 0)
+        return dataset; // If no tensors, we're done
+    std::vector<std::string> tensor_keys;
+    std::transform(
+        tensor_names.cbegin(),
+        tensor_names.cend(),
+        std::back_inserter(tensor_keys),
+        [this, name](std::string s){
+            return _build_dataset_tensor_key(name, s, true);
+        });
 
-    // Retrieve DataSet tensors and fill the DataSet object
-    for(size_t i = 0; i < tensor_names.size(); i++) {
-        // Build the tensor key
-        std::string tensor_key =
-            _build_dataset_tensor_key(name, tensor_names[i], true);
-        // Retrieve tensor and add it to the dataset
-        _get_and_add_dataset_tensor(dataset, tensor_names[i], tensor_key);
+    // Retrieve DataSet tensors
+    PipelineReply tensors = _redis_server->get_tensors(tensor_keys);
+
+    // Put them into the dataset
+    for (size_t i = 0; i < tensor_names.size(); i++) {
+        _add_dataset_tensor(dataset, tensor_names[i], tensors[i]);
     }
 
     return dataset;
@@ -108,6 +213,9 @@ DataSet Client::get_dataset(const std::string& name)
 void Client::rename_dataset(const std::string& old_name,
                             const std::string& new_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     copy_dataset(old_name, new_name);
     delete_dataset(old_name);
 }
@@ -116,6 +224,9 @@ void Client::rename_dataset(const std::string& old_name,
 void Client::copy_dataset(const std::string& src_name,
                           const std::string& dest_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Get the metadata message and construct DataSet
     CommandReply reply = _get_dataset_metadata(src_name);
     if (reply.n_elements() == 0) {
@@ -142,13 +253,16 @@ void Client::copy_dataset(const std::string& src_name,
     CommandList put_meta_cmds;
     _append_dataset_metadata_commands(put_meta_cmds, dataset);
     _append_dataset_ack_command(put_meta_cmds, dataset);
-    (void)_run(put_meta_cmds);
+    (void)_redis_server->run_in_pipeline(put_meta_cmds);
 }
 
 // Delete a DataSet from the database.
 // All tensors and metdata in the DataSet will be deleted.
 void Client::delete_dataset(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     CommandReply reply = _get_dataset_metadata(name);
     if (reply.n_elements() == 0) {
         throw SRRuntimeException("The requested DataSet " +
@@ -179,11 +293,14 @@ void Client::delete_dataset(const std::string& name)
 
 // Put a tensor into the database
 void Client::put_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_tensor_key(name, false);
 
     TensorBase* tensor = NULL;
@@ -240,6 +357,9 @@ void Client::get_tensor(const std::string& name,
                         SRTensorType& type,
                         const SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Retrieve the TensorBase from the database
     TensorBase* ptr = _get_tensorbase_obj(name);
 
@@ -263,6 +383,8 @@ void Client::get_tensor(const std::string& name,
                         SRTensorType& type,
                         const SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
 
     std::vector<size_t> dims_vec;
     get_tensor(name, data, dims_vec, type, mem_layout);
@@ -287,6 +409,9 @@ void Client::unpack_tensor(const std::string& name,
                            const SRTensorType type,
                            const SRMemoryLayout mem_layout)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (mem_layout == SRMemLayoutContiguous && dims.size() > 1) {
         throw SRRuntimeException("The destination memory space "\
                                  "dimension vector should only "\
@@ -405,6 +530,9 @@ void Client::unpack_tensor(const std::string& name,
 void Client::rename_tensor(const std::string& old_name,
                            const std::string& new_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string old_key = _build_tensor_key(old_name, true);
     std::string new_key = _build_tensor_key(new_name, false);
     CommandReply reply = _redis_server->rename_tensor(old_key, new_key);
@@ -415,6 +543,9 @@ void Client::rename_tensor(const std::string& old_name,
 // Delete a tensor from the database
 void Client::delete_tensor(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_tensor_key(name, true);
     CommandReply reply = _redis_server->delete_tensor(key);
     if (reply.has_error())
@@ -425,6 +556,9 @@ void Client::delete_tensor(const std::string& name)
 void Client::copy_tensor(const std::string& src_name,
                          const std::string& dest_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string src_key = _build_tensor_key(src_name, true);
     std::string dest_key = _build_tensor_key(dest_name, false);
     CommandReply reply = _redis_server->copy_tensor(src_key, dest_key);
@@ -439,10 +573,14 @@ void Client::set_model_from_file(const std::string& name,
                                  const std::string& device,
                                  int batch_size,
                                  int min_batch_size,
+                                 int min_batch_timeout,
                                  const std::string& tag,
                                  const std::vector<std::string>& inputs,
                                  const std::vector<std::string>& outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (model_file.size() == 0) {
         throw SRParameterException("model_file is a required "
                                    "parameter of set_model_from_file.");
@@ -456,7 +594,7 @@ void Client::set_model_from_file(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model(name, model, backend, device, batch_size,
-              min_batch_size, tag, inputs, outputs);
+              min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
 
 // Set a model from file in the database for future execution in a multi-GPU system
@@ -467,10 +605,14 @@ void Client::set_model_from_file_multigpu(const std::string& name,
                                           int num_gpus,
                                           int batch_size,
                                           int min_batch_size,
+                                          int min_batch_timeout,
                                           const std::string& tag,
                                           const std::vector<std::string>& inputs,
                                           const std::vector<std::string>& outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (model_file.size() == 0) {
         throw SRParameterException("model_file is a required "
                                    "parameter of set_model_from_file_multigpu.");
@@ -484,8 +626,42 @@ void Client::set_model_from_file_multigpu(const std::string& name,
     std::string_view model(tmp.data(), tmp.length());
 
     set_model_multigpu(name, model, backend, first_gpu, num_gpus, batch_size,
-                       min_batch_size, tag, inputs, outputs);
+                       min_batch_size, min_batch_timeout, tag, inputs, outputs);
 }
+
+// Validate batch settings for the set_model calls
+inline void __check_batch_settings(
+    int batch_size, int min_batch_size, int min_batch_timeout)
+{
+    // Throw a usage exception if batch_size is zero but one of the other
+    // parameters is non-zero
+    if (batch_size == 0 && (min_batch_size > 0 || min_batch_timeout > 0)) {
+        throw SRRuntimeException(
+            "batch_size must be non-zero if min_batch_size or "
+            "min_batch_timeout is used; otherwise batching will "
+            "not be performed."
+        );
+    }
+
+    // Throw a usage exception if min_batch_timeout is nonzero and
+    // min_batch_size is zero. (batch_size also has to be non-zero, but
+    // this was caught in the previous clause.)
+    if (min_batch_timeout > 0 && min_batch_size == 0) {
+        throw SRRuntimeException(
+            "min_batch_size must be non-zero if min_batch_timeout "
+            "is used; otherwise the min_batch_timeout parameter is ignored."
+        );
+    }
+
+    // Issue a warning if min_batch_size is non-zero but min_batch_timeout is zero
+    if (min_batch_size > 0 && min_batch_timeout == 0) {
+        std::cerr << "WARNING: min_batch_timeout was not set when a non-zero "
+                  << "min_batch_size was selected. " << std::endl
+                  << "Setting a small value (~10ms) for min_batch_timeout "
+                  << "may improve performance" << std::endl;
+    }
+}
+
 // Set a model from a string buffer in the database for future execution
 void Client::set_model(const std::string& name,
                        const std::string_view& model,
@@ -493,10 +669,14 @@ void Client::set_model(const std::string& name,
                        const std::string& device,
                        int batch_size,
                        int min_batch_size,
+                       int min_batch_timeout,
                        const std::string& tag,
                        const std::vector<std::string>& inputs,
                        const std::vector<std::string>& outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (name.size() == 0) {
         throw SRParameterException("name is a required parameter of set_model.");
     }
@@ -534,10 +714,29 @@ void Client::set_model(const std::string& name,
         throw SRRuntimeException(device + " is not a valid device.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
-    _redis_server->set_model(key, model, backend, device,
-                             batch_size, min_batch_size,
-                             tag, inputs, outputs);
+    auto response = _redis_server->set_model(
+        key, model_segments, backend, device,
+        batch_size, min_batch_size, min_batch_timeout,
+        tag, inputs, outputs);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the model");
+    }
 }
 
 void Client::set_model_multigpu(const std::string& name,
@@ -547,10 +746,14 @@ void Client::set_model_multigpu(const std::string& name,
                                 int num_gpus,
                                 int batch_size,
                                 int min_batch_size,
+                                int min_batch_timeout,
                                 const std::string& tag,
                                 const std::vector<std::string>& inputs,
                                 const std::vector<std::string>& outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (name.size() == 0) {
         throw SRParameterException("name is a required parameter of set_model.");
     }
@@ -585,10 +788,24 @@ void Client::set_model_multigpu(const std::string& name,
         throw SRParameterException(backend + " is not a valid backend.");
     }
 
+    __check_batch_settings(batch_size, min_batch_size, min_batch_timeout);
+
+    // Split model into chunks
+    size_t offset = 0;
+    std::vector<std::string_view> model_segments;
+    size_t chunk_size = _redis_server->get_model_chunk_size();
+    size_t remaining = model.length();
+    for (offset = 0; offset < model.length(); offset += chunk_size) {
+        size_t this_chunk_size = remaining > chunk_size ? chunk_size : remaining;
+        std::string_view chunk(model.data() + offset, this_chunk_size);
+        model_segments.push_back(chunk);
+        remaining -= this_chunk_size;
+    }
+
     std::string key = _build_model_key(name, false);
     _redis_server->set_model_multigpu(
-        key, model, backend, first_gpu, num_gpus,
-        batch_size, min_batch_size,
+        key, model_segments, backend, first_gpu, num_gpus,
+        batch_size, min_batch_size, min_batch_timeout,
         tag, inputs, outputs);
 }
 
@@ -596,16 +813,38 @@ void Client::set_model_multigpu(const std::string& name,
 // Retrieve the model from the database
 std::string_view Client::get_model(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Get the model from the server
     std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_model(get_key);
     if (reply.has_error())
         throw SRRuntimeException("failed to get model from server");
 
-    char* model = _model_queries.allocate(reply.str_len());
+    // In most cases, the reply will be a single string
+    // consisting of the serialized model
+    if (!reply.is_array()) {
+        char* model = _model_queries.allocate(reply.str_len());
+        if (model == NULL)
+            throw SRBadAllocException("model query");
+        std::memcpy(model, reply.str(), reply.str_len());
+        return std::string_view(model, reply.str_len());
+    }
+
+    // Otherwise, we need to concatenate the segments together
+    size_t model_length = 0;
+    size_t offset = 0;
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        model_length += reply[i].str_len();
+    }
+    char* model = _model_queries.allocate(model_length);
     if (model == NULL)
         throw SRBadAllocException("model query");
-    std::memcpy(model, reply.str(), reply.str_len());
-    return std::string_view(model, reply.str_len());
+    for (size_t i = 0; i < reply.n_elements(); i++) {
+        std::memcpy(model + offset, reply[i].str(), reply[i].str_len());
+    }
+    return std::string_view(model, model_length);
 }
 
 // Set a script from file in the database for future execution
@@ -613,6 +852,9 @@ void Client::set_script_from_file(const std::string& name,
                                   const std::string& device,
                                   const std::string& script_file)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Read the script from the file
     std::ifstream fin(script_file);
     std::ostringstream ostream;
@@ -632,6 +874,9 @@ void Client::set_script_from_file_multigpu(const std::string& name,
                                            int first_gpu,
                                            int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Read the script from the file
     std::ifstream fin(script_file);
     std::ostringstream ostream;
@@ -649,6 +894,9 @@ void Client::set_script(const std::string& name,
                         const std::string& device,
                         const std::string_view& script)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (device.size() == 0) {
         throw SRParameterException("device is a required "
                                    "parameter of set_script.");
@@ -659,7 +907,11 @@ void Client::set_script(const std::string& name,
     }
 
     std::string key = _build_model_key(name, false);
-    _redis_server->set_script(key, device, script);
+    auto response = _redis_server->set_script(key, device, script);
+    if (response.has_error()) {
+        throw SRInternalException(
+            "An unknown error occurred while setting the script");
+    }
 }
 
 // Set a script in the database for future execution in a multi-GPU system
@@ -668,6 +920,9 @@ void Client::set_script_multigpu(const std::string& name,
                                  int first_gpu,
                                  int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (first_gpu < 0) {
         throw SRParameterException("first_gpu must be a non-negative integer.");
     }
@@ -696,6 +951,9 @@ void Client::run_model(const std::string& name,
                        std::vector<std::string> inputs,
                        std::vector<std::string> outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
@@ -714,6 +972,9 @@ void Client::run_model_multigpu(const std::string& name,
                                 int first_gpu,
                                 int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (first_gpu < 0) {
         throw SRParameterException("first_gpu must be a non-negative integer.");
     }
@@ -737,6 +998,9 @@ void Client::run_script(const std::string& name,
                         std::vector<std::string> inputs,
                         std::vector<std::string> outputs)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_model_key(name, true);
 
     if (_use_tensor_prefix) {
@@ -756,6 +1020,9 @@ void Client::run_script_multigpu(const std::string& name,
                                  int first_gpu,
                                  int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (first_gpu < 0) {
         throw SRParameterException("first_gpu must be a non-negative integer");
     }
@@ -776,6 +1043,9 @@ void Client::run_script_multigpu(const std::string& name,
 // Delete a model from the database
 void Client::delete_model(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_model_key(name, true);
     CommandReply reply = _redis_server->delete_model(key);
 
@@ -787,6 +1057,9 @@ void Client::delete_model(const std::string& name)
 void Client::delete_model_multigpu(
     const std::string& name, int first_gpu, int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (first_gpu < 0) {
         throw SRParameterException("first_gpu must be a non-negative integer");
     }
@@ -801,6 +1074,9 @@ void Client::delete_model_multigpu(
 // Delete a script from the database
 void Client::delete_script(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_model_key(name, true);
     CommandReply reply = _redis_server->delete_script(key);
 
@@ -812,6 +1088,9 @@ void Client::delete_script(const std::string& name)
 void Client::delete_script_multigpu(
     const std::string& name, int first_gpu, int num_gpus)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (first_gpu < 0) {
         throw SRParameterException("first_gpu must be a non-negative integer");
     }
@@ -826,12 +1105,18 @@ void Client::delete_script_multigpu(
 // Check if the key exists in the database
 bool Client::key_exists(const std::string& key)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     return _redis_server->key_exists(key);
 }
 
 // Check if the tensor (or the dataset) exists in the database
 bool Client::tensor_exists(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_tensor_key(name, true);
     return _redis_server->key_exists(key);
 }
@@ -839,6 +1124,9 @@ bool Client::tensor_exists(const std::string& name)
 // Check if the dataset exists in the database
 bool Client::dataset_exists(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_dataset_ack_key(name, true);
     return _redis_server->hash_field_exists(key, _DATASET_ACK_FIELD);
 }
@@ -846,6 +1134,9 @@ bool Client::dataset_exists(const std::string& name)
 // Check if the model (or the script) exists in the database
 bool Client::model_exists(const std::string& name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     std::string key = _build_model_key(name, true);
     return _redis_server->model_key_exists(key);
 }
@@ -855,6 +1146,9 @@ bool Client::poll_key(const std::string& key,
                       int poll_frequency_ms,
                       int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Check for the key however many times requested
     for (int i = 0; i < num_tries; i++) {
         if (key_exists(key))
@@ -871,6 +1165,9 @@ bool Client::poll_model(const std::string& name,
                         int poll_frequency_ms,
                         int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Check for the model/script however many times requested
     for (int i = 0; i < num_tries; i++) {
         if (model_exists(name))
@@ -887,6 +1184,9 @@ bool Client::poll_tensor(const std::string& name,
                          int poll_frequency_ms,
                          int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Check for the tensor however many times requested
     for (int i = 0; i < num_tries; i++) {
         if (tensor_exists(name))
@@ -903,6 +1203,9 @@ bool Client::poll_dataset(const std::string& name,
                           int poll_frequency_ms,
                           int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Check for the dataset however many times requested
     for (int i = 0; i < num_tries; i++) {
         if (dataset_exists(name))
@@ -917,10 +1220,13 @@ bool Client::poll_dataset(const std::string& name,
 // Establish a datasource
 void Client::set_data_source(std::string source_id)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Validate the source prefix
     bool valid_prefix = false;
     size_t num_prefix = _get_key_prefixes.size();
-    size_t save_index = -1;
+    size_t save_index = 0;
     for (size_t i = 0; i < num_prefix; i++) {
         if (_get_key_prefixes[i].compare(source_id) == 0) {
             valid_prefix = true;
@@ -932,7 +1238,7 @@ void Client::set_data_source(std::string source_id)
     if (!valid_prefix) {
         throw SRRuntimeException("Client error: data source " +
                                  std::string(source_id) +
-                                 "could not be found during client "+
+                                 " could not be found during client "+
                                  "initialization.");
     }
 
@@ -948,6 +1254,9 @@ void Client::set_data_source(std::string source_id)
 // prefix model and script keys.
 void Client::use_model_ensemble_prefix(bool use_prefix)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _use_model_prefix = use_prefix;
 }
 
@@ -959,11 +1268,14 @@ void Client::use_model_ensemble_prefix(bool use_prefix)
 // aggregation list keys.
 void Client::use_list_ensemble_prefix(bool use_prefix)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _use_list_prefix = use_prefix;
 }
 
 
-// Set whether names of tensor and dataset entities should be prefixed
+// Set whether names of tensor entities should be prefixed
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
 // and SSKEYIN. Keys of entities created before this function is called
@@ -972,18 +1284,37 @@ void Client::use_list_ensemble_prefix(bool use_prefix)
 // environment variables.
 void Client::use_tensor_ensemble_prefix(bool use_prefix)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     _use_tensor_prefix = use_prefix;
 }
 
-// Returns information about the given database node
-parsed_reply_nested_map Client::get_db_node_info(std::string address)
+// Set whether names of dataset entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be used
+// if they were previously set through the environment variables SSKEYOUT
+// and SSKEYIN. Keys of entities created before this function is called
+// will not be affected. By default, the client prefixes dataset
+// keys with the first prefix specified with the SSKEYIN and SSKEYOUT
+// environment variables.
+void Client::use_dataset_ensemble_prefix(bool use_prefix)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_dataset_prefix = use_prefix;
+}
+
+// Returns information about the given database node
+parsed_reply_nested_map Client::get_db_node_info(const std::string address)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Run an INFO EVERYTHING command to get node info
     DBInfoCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "INFO" << "EVERYTHING";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
@@ -995,17 +1326,18 @@ parsed_reply_nested_map Client::get_db_node_info(std::string address)
 }
 
 // Returns the CLUSTER INFO command reply addressed to a single cluster node.
-parsed_reply_map Client::get_db_cluster_info(std::string address)
+parsed_reply_map Client::get_db_cluster_info(const std::string address)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (_redis_cluster == NULL)
         throw SRRuntimeException("Cannot run on non-cluster environment");
 
     // Run the CLUSTER INFO command
     ClusterInfoCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CLUSTER" << "INFO";
     CommandReply reply = _run(cmd);
     if (reply.has_error())
@@ -1019,8 +1351,11 @@ parsed_reply_map Client::get_db_cluster_info(std::string address)
 // Returns the AI.INFO command reply
 parsed_reply_map Client::get_ai_info(const std::string& address,
                                      const std::string& key,
-                                     const bool reset_stat)
+                                     bool reset_stat)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Run the command
     CommandReply reply =
         _redis_server->get_model_script_ai_info(address, key, reset_stat);
@@ -1060,16 +1395,15 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
 }
 
 // Delete all the keys of the given database
-void Client::flush_db(std::string address)
+void Client::flush_db(
+    const std::string address)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
-    if (host.empty() or port == 0){
-        throw SRRuntimeException(std::string(address) +
-                                 "is not a valid database node address.");
-    }
-    cmd.set_exec_address_port(host, port);
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "FLUSHDB";
 
     CommandReply reply = _run(cmd);
@@ -1079,13 +1413,16 @@ void Client::flush_db(std::string address)
 
 // Read the configuration parameters of a running server
 std::unordered_map<std::string,std::string>
-Client::config_get(std::string expression, std::string address)
+Client::config_get(
+    const std::string expression,
+    const std::string address)
 {
-    AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    // Track calls to this API function
+    LOG_API_FUNCTION();
 
-    cmd.set_exec_address_port(host, port);
+    AddressAtCommand cmd;
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CONFIG" << "GET" << expression;
 
     CommandReply reply = _run(cmd);
@@ -1103,13 +1440,17 @@ Client::config_get(std::string expression, std::string address)
 }
 
 // Reconfigure the server
-void Client::config_set(std::string config_param, std::string value, std::string address)
+void Client::config_set(
+    const std::string config_param,
+    const std::string value,
+    const std::string address)
 {
-    AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    // Track calls to this API function
+    LOG_API_FUNCTION();
 
-    cmd.set_exec_address_port(host, port);
+    AddressAtCommand cmd;
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "CONFIG" << "SET" << config_param << value;
 
     CommandReply reply = _run(cmd);
@@ -1117,13 +1458,14 @@ void Client::config_set(std::string config_param, std::string value, std::string
         throw SRRuntimeException("CONFIG SET command failed");
 }
 
-void Client::save(std::string address)
+void Client::save(const std::string address)
 {
-    AddressAtCommand cmd;
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    // Track calls to this API function
+    LOG_API_FUNCTION();
 
-    cmd.set_exec_address_port(host, port);
+    AddressAtCommand cmd;
+    SRAddress db_address(address);
+    cmd.set_exec_address(db_address);
     cmd << "SAVE";
 
     CommandReply reply = _run(cmd);
@@ -1135,6 +1477,9 @@ void Client::save(std::string address)
 void Client::append_to_list(const std::string& list_name,
                             const DataSet& dataset)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Build the list key
     std::string list_key = _build_list_key(list_name, false);
 
@@ -1155,6 +1500,9 @@ void Client::append_to_list(const std::string& list_name,
 // Delete an aggregation list
 void Client::delete_list(const std::string& list_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Build the list key
     std::string list_key = _build_list_key(list_name, true);
 
@@ -1172,6 +1520,9 @@ void Client::delete_list(const std::string& list_name)
 void Client::copy_list(const std::string& src_name,
                        const std::string& dest_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Check for empty string inputs
     if (src_name.size() == 0) {
         throw SRParameterException("The src_name parameter cannot "\
@@ -1248,7 +1599,7 @@ void Client::copy_list(const std::string& src_name,
         copy_cmd.add_field_ptr(reply[i].str(), reply[i].str_len());
     }
 
-    CommandReply copy_reply = this->_run(copy_cmd);
+    CommandReply copy_reply = _run(copy_cmd);
 
     if (reply.has_error() > 0)
         throw SRRuntimeException("Dataset aggregation list copy "
@@ -1259,6 +1610,9 @@ void Client::copy_list(const std::string& src_name,
 void Client::rename_list(const std::string& src_name,
                          const std::string& dest_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (src_name.size() == 0) {
         throw SRParameterException("The src_name parameter cannot "\
                                    "be an empty string.");
@@ -1280,8 +1634,11 @@ void Client::rename_list(const std::string& src_name,
 // Get the length of the list
 int Client::get_list_length(const std::string& list_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Build the list key
-    std::string list_key = _build_list_key(list_name, false);
+    std::string list_key = _build_list_key(list_name, true);
 
     // Build the command
     SingleKeyCommand cmd;
@@ -1312,6 +1669,9 @@ int Client::get_list_length(const std::string& list_name)
 bool Client::poll_list_length(const std::string& name, int list_length,
                               int poll_frequency_ms, int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Enforce positive list length
     if (list_length < 0) {
         throw SRParameterException("A positive value for list_length "\
@@ -1326,6 +1686,9 @@ bool Client::poll_list_length(const std::string& name, int list_length,
 bool Client::poll_list_length_gte(const std::string& name, int list_length,
                                  int poll_frequency_ms, int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Enforce positive list length
     if (list_length < 0) {
         throw SRParameterException("A positive value for list_length "\
@@ -1340,6 +1703,9 @@ bool Client::poll_list_length_gte(const std::string& name, int list_length,
 bool Client::poll_list_length_lte(const std::string& name, int list_length,
                                  int poll_frequency_ms, int num_tries)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     // Enforce positive list length
     if (list_length < 0) {
         throw SRParameterException("A positive value for list_length "\
@@ -1349,12 +1715,14 @@ bool Client::poll_list_length_lte(const std::string& name, int list_length,
     return _poll_list_length(name, list_length, poll_frequency_ms,
                              num_tries, std::less_equal<int>());
 
-    return false;
 }
 
 // Retrieve datasets in aggregation list
 std::vector<DataSet> Client::get_datasets_from_list(const std::string& list_name)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (list_name.size() == 0) {
         throw SRParameterException("The list name must have length "\
                                    "greater than zero");
@@ -1365,9 +1733,12 @@ std::vector<DataSet> Client::get_datasets_from_list(const std::string& list_name
 
 // Retrieve a subset of datsets in the aggregation list
 std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name,
-                                                    const int start_index,
-                                                    const int end_index)
+                                                    int start_index,
+                                                    int end_index)
 {
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
     if (list_name.size() == 0) {
         throw SRParameterException("The list name must have length "\
                                    "greater than zero");
@@ -1377,21 +1748,23 @@ std::vector<DataSet> Client::get_dataset_list_range(const std::string& list_name
 }
 
 // Set the prefixes that are used for set and get methods using SSKEYIN
-// and SSKEYOUT environment variables.
-void Client::_set_prefixes_from_env()
+// and SSKEYOUT configuration settings
+void Client::_get_prefix_settings()
 {
     // Establish set prefix
-    const char* keyout_p = std::getenv("SSKEYOUT");
-    if (keyout_p != NULL)
-        _put_key_prefix = keyout_p;
+    std::string put_key_prefix = _cfgopts->_resolve_string_option(
+        "SSKEYOUT", "");
+    if (put_key_prefix.length() > 0)
+        _put_key_prefix = put_key_prefix;
     else
         _put_key_prefix.clear();
 
     // Establish get prefix(es)
-    char* keyin_p = std::getenv("SSKEYIN");
-    if (keyin_p != NULL) {
-        char* a = keyin_p;
-        char* b = a;
+    std::string get_key_prefixes = _cfgopts->_resolve_string_option(
+        "SSKEYIN", "");
+    if (get_key_prefixes.length() > 0) {
+        const char* a = get_key_prefixes.c_str();
+        const char* b = a;
         char parse_char = ',';
         while (*b != '\0') {
             if (*b == parse_char) {
@@ -1455,18 +1828,16 @@ inline CommandReply Client::_get_dataset_metadata(const std::string& name)
     return _run(cmd);
 }
 
-// Retrieve a tensor and add it to the dataset
-inline void Client::_get_and_add_dataset_tensor(DataSet& dataset,
-                                                const std::string& name,
-                                                const std::string& key)
+// Add a retrieved tensor to a dataset
+inline void Client::_add_dataset_tensor(
+    DataSet& dataset,
+    const std::string& name,
+    CommandReply tensor_data)
 {
-    // Run tensor retrieval command
-    CommandReply reply = _redis_server->get_tensor(key);
-
     // Extract tensor properties from command reply
-    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
-    std::string_view blob = GetTensorCommand::get_data_blob(reply);
-    SRTensorType type = GetTensorCommand::get_data_type(reply);
+    std::vector<size_t> reply_dims = GetTensorCommand::get_dims(tensor_data);
+    std::string_view blob = GetTensorCommand::get_data_blob(tensor_data);
+    SRTensorType type = GetTensorCommand::get_data_type(tensor_data);
 
     // Add tensor to the dataset
     dataset._add_to_tensorpack(name, (void*)blob.data(), reply_dims,
@@ -1475,8 +1846,8 @@ inline void Client::_get_and_add_dataset_tensor(DataSet& dataset,
 
 inline std::vector<DataSet>
 Client::_get_dataset_list_range(const std::string& list_name,
-                                const int start_index,
-                                const int end_index)
+                                int start_index,
+                                int end_index)
 {
     // Build the list key
     std::string list_key = _build_list_key(list_name, true);
@@ -1618,9 +1989,9 @@ Client::_get_dataset_list_range(const std::string& list_name,
 
 // Build full formatted key of a tensor, based on current prefix settings.
 inline std::string Client::_build_tensor_key(const std::string& key,
-                                             const bool on_db)
+                                             bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_tensor_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1630,9 +2001,9 @@ inline std::string Client::_build_tensor_key(const std::string& key,
 // Build full formatted key of a model or a script,
 // based on current prefix settings.
 inline std::string Client::_build_model_key(const std::string& key,
-                                            const bool on_db)
+                                            bool on_db)
 {
-    std::string prefix;
+    std::string prefix("");
     if (_use_model_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
@@ -1641,10 +2012,10 @@ inline std::string Client::_build_model_key(const std::string& key,
 
 // Build full formatted key of a dataset, based on current prefix settings.
 inline std::string Client::_build_dataset_key(const std::string& dataset_name,
-                                              const bool on_db)
+                                              bool on_db)
 {
-    std::string prefix;
-    if (_use_tensor_prefix)
+    std::string prefix("");
+    if (_use_dataset_prefix)
         prefix = on_db ? _get_prefix() : _put_prefix();
 
     return prefix + "{" + dataset_name + "}";
@@ -1654,7 +2025,7 @@ inline std::string Client::_build_dataset_key(const std::string& dataset_name,
 inline std::string
 Client::_build_dataset_tensor_key(const std::string& dataset_name,
                                   const std::string& tensor_name,
-                                  const bool on_db)
+                                  bool on_db)
 {
     return _build_dataset_key(dataset_name, on_db) + "." + tensor_name;
 }
@@ -1663,7 +2034,7 @@ Client::_build_dataset_tensor_key(const std::string& dataset_name,
 inline std::vector<std::string>
 Client::_build_dataset_tensor_keys(const std::string& dataset_name,
                                    const std::vector<std::string>& tensor_names,
-                                   const bool on_db)
+                                   bool on_db)
 {
     std::vector<std::string> dataset_tensor_keys;
     for (size_t i = 0; i < tensor_names.size(); i++) {
@@ -1677,7 +2048,7 @@ Client::_build_dataset_tensor_keys(const std::string& dataset_name,
 // Create the key for putting or getting DataSet metadata in the database
 inline std::string
 Client::_build_dataset_meta_key(const std::string& dataset_name,
-                                const bool on_db)
+                                bool on_db)
 {
     return _build_dataset_key(dataset_name, on_db) + ".meta";
 }
@@ -1685,7 +2056,7 @@ Client::_build_dataset_meta_key(const std::string& dataset_name,
 // Create the key for putting or getting aggregation list in the dataset
 inline std::string
 Client::_build_list_key(const std::string& list_name,
-                                    const bool on_db)
+                                    bool on_db)
 {
     std::string prefix;
     if (_use_list_prefix)
@@ -1699,7 +2070,7 @@ Client::_build_list_key(const std::string& list_name,
 // dataset has been successfully stored.
 inline std::string
 Client::_build_dataset_ack_key(const std::string& dataset_name,
-                               const bool on_db)
+                               bool on_db)
 {
     return _build_dataset_meta_key(dataset_name, on_db);
 }
@@ -1847,7 +2218,6 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
                 throw SRInternalException("The database provided an invalid "\
                                           "TensorType to Client::_get_tensorbase_obj(). "\
                                           "The tensor could not be retrieved.");
-                break;
         }
     }
     catch (std::bad_alloc& e) {
@@ -1857,7 +2227,8 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
 }
 
 // Determine datset name from aggregation list entry
-std::string Client::_get_dataset_name_from_list_entry(std::string& dataset_key)
+std::string Client::_get_dataset_name_from_list_entry(
+    const std::string& dataset_key)
 {
     size_t open_brace_pos = dataset_key.find_first_of('{');
 
@@ -1907,4 +2278,36 @@ bool Client::_poll_list_length(const std::string& name, int list_length,
     }
 
     return false;
+}
+
+// Reconfigure the model chunk size for the database
+void Client::set_model_chunk_size(int chunk_size)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+    std::cout << cmd.to_string() << std::endl;
+
+    // Run it
+    CommandReply reply = _run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+
+    // Remember the new chunk size
+    _redis_server->store_model_chunk_size(chunk_size);
+}
+
+// Create a string representation of the client
+std::string Client::to_string() const
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string result;
+    result = "Client (" + _lname + "):\n";
+    result += _redis_server->to_string();
+    return result;
 }

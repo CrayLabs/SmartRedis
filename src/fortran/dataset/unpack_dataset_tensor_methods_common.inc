@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2024, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,7 @@
 
   !** Beginning of code common to all unpack_dataset_tensor subroutines
 
-  class(dataset_type),                  intent(in) :: self !< Pointer to the initialized dataset
-  character(len=*),                     intent(in) :: name !< The name to use to place the tensor
-  integer, dimension(:),                intent(in) :: dims !< Length along each dimension of the tensor
-  integer(kind=enum_kind)                          :: code
-
   ! Local variables
-  integer(kind=c_size_t) :: ndim ! Number of dimensions
   type(c_ptr) :: data_ptr, c_dims_ptr
   character(kind=c_char, len=len_trim(name)) :: c_name !< Transformed fortran 'name' to a c-string
   integer(kind=c_size_t) :: name_length, c_n_dims

@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,116 +24,119 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-project(FortranClientTester)
-
+# Project definition for the SmartRedis-Tests-Fortran project
 cmake_minimum_required(VERSION 3.13)
+project(SmartRedis-Tests-Fortran)
 
+# Enable language support for the tests
 enable_language(Fortran)
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_BUILD_TYPE Debug)
+# Configure the build
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 99)
+SET(CMAKE_C_STANDARD 99)
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../..")
+include(smartredis_defs)
 
-set(ftn_client_src
-    ../../../src/fortran/fortran_c_interop.F90
-    ../../../src/fortran/dataset.F90
-    ../../../src/fortran/client.F90
+# Assume by default that users should link against the
+# install directory in this repository
+if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
+  set(SMARTREDIS_INSTALL_PATH "../../install/")
+endif()
+
+# Locate dependencies
+#  . Main SmartRedis Library (C/C++ based)
+add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
+find_library(SR_LIB ${SMARTREDIS_LIB}
+    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+    REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+set_target_properties(smartredis-main PROPERTIES
+    IMPORTED_LOCATION ${SR_LIB}
+)
+#  . SmartRedis Fortran Library (Fortran based)
+add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
+find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
+	PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
+	REQUIRED
+    ${SMARTREDIS_LINK_MODE}
+)
+set_target_properties(smartredis-fortran PROPERTIES
+    IMPORTED_LOCATION ${SR_FTN_LIB}
 )
 
-find_library(SR_LIB smartredis PATHS ../../install/lib NO_DEFAULT_PATH REQUIRED)
+# Select libraries for build
+if (STATIC_BUILD)
+	# The CMake "preferred" approach only seems to work with the GNU
+	# compiler. We will streamline this in the future
+	if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+		# Mark that SmartRedis requires the C++ linker
+		set_target_properties(smartredis-main PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+		)
+		set_target_properties(smartredis-fortran PROPERTIES
+			IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
+		)
+	else() # Tested with PGI, Intel
+		# For other compilers, don't set languages so that CMake will use the Fortran linker (default)
 
+		# Add the stdc++ linker flag
+		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
+	endif()
+
+	# Static builds have an extra dependency on the Pthreads library
+	# The order of libraries here is crucial to get dependencies covered
+	find_package(Threads REQUIRED)
+	set(SMARTREDIS_LIBRARIES
+		smartredis-fortran
+		smartredis-main
+		Threads::Threads
+	)
+else()
+    # Shared builds only need the SmartRedis libraries
+    set(SMARTREDIS_LIBRARIES
+		smartredis-fortran
+		smartredis-main
+    )
+endif()
+
+# Define include directories for header files
 include_directories(SYSTEM
     /usr/local/include
-    ../../install/include
+    ${SMARTREDIS_INSTALL_PATH}/include
 )
 
-add_executable(client_test_put_get_1D
-	client_test_put_get_1D.F90
-	${ftn_client_src}
-	test_utils.F90
-)
-target_link_libraries(client_test_put_get_1D
-	${SR_LIB}
+# Stuff the test_utils into a library to enable parallel builds
+add_library(test-utils STATIC test_utils.F90)
+
+# Define all the tests to be built
+list(APPEND EXECUTABLES
+	 client_test_dataset_aggregation
+	 client_test_dataset
+	 client_test_ensemble
+	 client_test_initialized
+	 client_test_misc_tensor
+	 client_test_mnist_multigpu
+	 client_test_mnist
+	 client_test_prefixing
+	 client_test_put_get_1D
+	 client_test_put_get_2D
+	 client_test_put_get_3D
+	 client_test_put_get_unpack_dataset
+	 client_test_logging
+	 client_test_errors
+	 client_test_configoptions
 )
 
-add_executable(client_test_put_get_2D
-	client_test_put_get_2D.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_2D
-	${SR_LIB}
-)
-
-add_executable(client_test_put_get_3D
-	client_test_put_get_3D.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_3D
-	${SR_LIB}
-)
-
-add_executable(client_test_mnist
-	client_test_mnist.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_mnist
-	${SR_LIB}
-)
-
-add_executable(client_test_mnist_multigpu
-	client_test_mnist_multigpu.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_mnist_multigpu
-	${SR_LIB}
-)
-
-add_executable(client_test_dataset
-	client_test_dataset.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_dataset
-	${SR_LIB}
-)
-
-add_executable(client_test_put_get_unpack_dataset
-	client_test_put_get_unpack_dataset.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_put_get_unpack_dataset
-	${SR_LIB}
-)
-
-add_executable(client_test_misc_tensor
-	client_test_misc_tensor.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_misc_tensor
-	${SR_LIB}
-)
-
-add_executable(client_test_ensemble
-	client_test_ensemble.F90
-	${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_ensemble
-	${SR_LIB}
-)
-
-add_executable(client_test_initialized
-        client_test_initialized.F90
-        ${ftn_client_src}
-        test_utils.F90
-)
-target_link_libraries(client_test_initialized
-	${SR_LIB}
-)
+# Build the tests
+foreach(EXECUTABLE ${EXECUTABLES})
+	add_executable(${EXECUTABLE}_fortran_test
+		${EXECUTABLE}.F90
+	)
+    set_target_properties(${EXECUTABLE}_fortran_test PROPERTIES
+        OUTPUT_NAME ${EXECUTABLE}
+    )
+	target_link_libraries(${EXECUTABLE}_fortran_test
+		${SMARTREDIS_LIBRARIES} test-utils
+	)
+endforeach()

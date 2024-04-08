@@ -8,7 +8,8 @@ can be compiled as a library that is linked with an application
 at compile time. For Python, the clients can be used just like
 any other pip library.
 
-Before installation, it is recommended to use an OS and compiler that are known to be reliable with SmartRedis.
+Before installation, it is recommended to use an OS and compiler that are
+known to be reliable with SmartRedis.
 
 SmartRedis is tested with the following operating systems on a daily basis:
 
@@ -31,11 +32,12 @@ SmartRedis is tested with the following compilers on a daily basis:
 
     * - Compilers (tested daily)
     * - GNU (GCC/GFortran)
-    * - Intel (icc/icpc/ifort)
+    * - Intel oneAPI (icx/icpx/ifort)
+    * - NVHPC
     * - Apple Clang
 
-
-SmartRedis has been tested with the following compiler in the past, but on a less regular basis as the compilers listed above:
+SmartRedis has been tested with the following compiler in the past, but on
+a less regular basis as the compilers listed above:
 
 .. list-table::
     :widths: 50
@@ -44,9 +46,11 @@ SmartRedis has been tested with the following compiler in the past, but on a les
 
     * - Compilers (irregularly tested in the past)
     * - Cray Clang
+    * - Intel Classic (icc/icpc)
 
 
-SmartRedis has been used with the following compilers in the past, but they have not been tested. We do not imply that these compilers work for certain:
+SmartRedis has been used with the following compilers in the past, but they have
+not been tested. We do not imply that these compilers work for certain:
 
 .. list-table::
     :widths: 50
@@ -55,7 +59,6 @@ SmartRedis has been used with the following compilers in the past, but they have
 
     * - Compilers (used in the past, but not tested)
     * - Cray Classic
-    * - NVHPC
     * - PGI
 
 
@@ -69,19 +72,10 @@ Build and Install SmartRedis Python Client from Release
 
 .. include:: ./install/python_client.rst
 
-----------------------------------------------
-
-Build SmartRedis Library from Release
-=====================================
+Build SmartRedis Library from Source
+====================================
 
 .. include:: ./install/lib.rst
-
------------------------------------------------
-
-Build SmartRedis from Source
-============================
-
-.. include:: ./install/from_source.rst
 
 Build SmartRedis Docker Image
 =============================

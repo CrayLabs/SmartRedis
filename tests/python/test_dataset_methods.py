@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,19 @@
 
 import numpy as np
 from smartredis import Dataset
+
+def test_serialize_dataset():
+    """Test serializing a dataset
+    """
+    dataset = Dataset("test-dataset")
+    data = np.uint8([2,4,8])
+    dataset.add_tensor("u8_tensor", data)
+    data = np.double([2.0,4.1,8.3, 5.6])
+    dataset.add_tensor("double_tensor", data)
+    dataset.add_meta_scalar("float2_scalar", float(3.1415926535))
+    dataset.add_meta_scalar("float_scalar", np.double(3.1415926535))
+    dataset.add_meta_string("metastring", "metavalue")
+    assert str(dataset) != repr(dataset)
 
 
 def test_add_get_tensor(mock_data):
@@ -61,6 +74,68 @@ def test_add_get_tensor_3D(mock_data):
     add_get_arrays(dataset, data_3D)
 
 
+def test_dim1_modified_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[0, :] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_dim2_modified_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[:, 0] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_subset_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[1:3, 5:7] for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_dim2_reverse_2D_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i[::-1, 0] for i in data]
+    modified = [i.copy() for i in modified]
+    add_get_arrays(dataset, modified)
+
+
+def test_2D_transpose_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    modified = [i.transpose() for i in data]
+    add_get_arrays(dataset, modified)
+
+
+def test_2D_reshape_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10))
+    reshaped = [i.reshape((25, 4)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((100, 1)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((1, 100)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+    dataset = Dataset("test-dataset")
+    reshaped = [i.reshape((-1)) for i in data]
+    add_get_arrays(dataset, reshaped)
+
+
+def test_3D_transpose_put_get(mock_data, context):
+    dataset = Dataset("test-dataset")
+    data = mock_data.create_data((10, 10, 10))
+    modified = [i.transpose() for i in data]
+    add_get_arrays(dataset, modified)
+
+
 def test_add_get_scalar(mock_data):
     """Test adding and retrieving scalars to
     a dataset and with all datatypes
@@ -82,6 +157,38 @@ def test_add_get_strings(mock_data):
     data = mock_data.create_metadata_strings(10)
     add_get_strings(dataset, data)
 
+
+def test_dataset_inspection(context):
+    d = Dataset(context)
+    data = np.uint8([[2, 4, 6, 8], [1, 3, 5, 7]])
+    d.add_tensor("u8_tensor", data)
+    data = np.int16([1, 1, 2, 3, 5, 8])
+    d.add_tensor("i16_tensor", data)
+    d.add_meta_string("metastring", "metavalue")
+    d.add_meta_scalar("u32_scalar", np.uint32(42))
+    d.add_meta_scalar("double_scalar", np.double(3.1415926535))
+    dims = d.get_tensor_dims("u8_tensor")
+    assert len(dims) == 2
+    assert dims[0] == 2
+    assert dims[1] == 4
+
+    tensornames = d.get_tensor_names()
+    assert 2 == len(tensornames)
+    tensornames.sort()
+    assert "i16_tensor" == tensornames[0]
+    assert "u8_tensor" == tensornames[1]
+    assert np.uint8 == d.get_tensor_type("u8_tensor")
+    assert np.int16 == d.get_tensor_type("i16_tensor")
+
+    metanames = d.get_metadata_field_names()
+    assert 3 == len(metanames)
+    metanames.sort()
+    assert "double_scalar" == metanames[0]
+    assert "metastring" == metanames[1]
+    assert "u32_scalar" == metanames[2]
+    assert np.float64 == d.get_metadata_field_type("double_scalar")
+    assert str == d.get_metadata_field_type("metastring")
+    assert np.uint32 == d.get_metadata_field_type("u32_scalar")
 
 # ------- Helper Functions -----------------------------------------------
 

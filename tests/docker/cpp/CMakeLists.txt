@@ -1,7 +1,7 @@
 #
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,9 +26,9 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-project(DockerTester)
-
 cmake_minimum_required(VERSION 3.13)
+project(DockerTesterCpp)
+enable_language(CXX)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
@@ -42,7 +42,10 @@ include_directories(SYSTEM
 
 # Build executables
 
-add_executable(docker_test
+add_executable(docker_test_cpp
 	docker_test.cpp
 )
-target_link_libraries(docker_test ${SR_LIB} pthread)
+set_target_properties(docker_test_cpp PROPERTIES
+    OUTPUT_NAME docker_test
+)
+target_link_libraries(docker_test_cpp ${SR_LIB} pthread)

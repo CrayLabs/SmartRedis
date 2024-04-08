@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,9 @@
 #include <vector>
 #include <queue>
 
-namespace SmartRedis {
+///@file
 
-class CommandReply;
+namespace SmartRedis {
 
 /*!
 *   \brief Redis++ command reply type
@@ -45,7 +45,6 @@ class CommandReply;
 typedef std::unique_ptr<redisReply, sw::redis::ReplyDeleter>
         RedisReplyUPtr;
 
-///@file
 /*!
 *   \brief The CommandReply class stores and processes Command
 *          replies.
@@ -269,6 +268,14 @@ class CommandReply {
         std::string redis_reply_type();
 
         /*!
+        *   \brief Determine whether the response is an array
+        *   \returns true iff the response is of type REDIS_REPLY_ARRAY
+        */
+        bool is_array() {
+            return _reply->type == REDIS_REPLY_ARRAY;
+        }
+
+        /*!
         *   \brief Print the reply structure of the CommandReply
         */
         void print_reply_structure(std::string index_tracker="reply[0]");
@@ -311,6 +318,6 @@ class CommandReply {
                                            std::string index_tracker);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_COMMANDREPLY_H
+#endif // SMARTREDIS_COMMANDREPLY_H

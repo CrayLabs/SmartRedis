@@ -1,6 +1,6 @@
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,8 +53,7 @@ torch.jit.save(module, buffer)
 model = buffer.getvalue()
 
 # Connect a SmartRedis client and set the model in the database
-db_address = "127.0.0.1:6379"
-client = Client(address=db_address, cluster=True)
+client = Client(logger_name="example_model_torch.py")
 client.set_model("torch_cnn", model, "TORCH", "CPU")
 
 # Retrieve the model and verify that the retrieved

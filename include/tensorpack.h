@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSORPACK_H
 #define SMARTREDIS_TENSORPACK_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -40,8 +40,6 @@
 ///@file
 
 namespace SmartRedis {
-
-class TensorPack;
 
 /*!
 *   \brief The TensorPack class is a container that
@@ -99,7 +97,7 @@ class TensorPack
         *   \param mem_layout The memory layout of the data
         */
         void add_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout);
@@ -135,7 +133,7 @@ class TensorPack
         *   \param name The name used to reference the tensor
         *   \returns A pointer to the TensorBase object
         */
-        TensorBase* get_tensor(const std::string& name);
+        TensorBase* get_tensor(const std::string& name) const;
 
         /*!
         *   \brief Return a pointer to the tensor data memory space
@@ -151,7 +149,7 @@ class TensorPack
         *   \returns True if the name corresponds to a tensor
         *            in the TensorPack, otherwise False.
         */
-        bool tensor_exists(const std::string& name);
+        bool tensor_exists(const std::string& name) const;
 
         /*!
         *   \brief Returns an iterator pointing to the
@@ -216,6 +214,6 @@ class TensorPack
         void _copy_tensor_inventory(const TensorPack& tp);
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSORPACK_H
+#endif // SMARTREDIS_TENSORPACK_H

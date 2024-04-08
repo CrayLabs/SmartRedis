@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@ TensorPack::~TensorPack()
 
 // Add a tensor to the dataset
 void TensorPack::add_tensor(const std::string& name,
-                            void* data,
+                            const void* data,
                             const std::vector<size_t>& dims,
                             const SRTensorType type,
                             const SRMemoryLayout mem_layout)
@@ -129,7 +129,7 @@ void TensorPack::add_tensor(TensorBase* tensor)
 }
 
 // Return a TensorBase pointer based on name.
-TensorBase* TensorPack::get_tensor(const std::string& name)
+TensorBase* TensorPack::get_tensor(const std::string& name) const
 {
     return _tensorbase_inventory.at(name);
 }
@@ -144,7 +144,7 @@ void* TensorPack::get_tensor_data(const std::string& name)
 }
 
 // Check whether a tensor with a given name exists in the TensorPack
-bool TensorPack::tensor_exists(const std::string& name)
+bool TensorPack::tensor_exists(const std::string& name) const
 {
     return (_tensorbase_inventory.count(name) > 0);
 }

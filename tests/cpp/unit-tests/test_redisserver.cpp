@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,11 @@
 #include "rediscluster.h"
 #include "redis.h"
 #include "srexception.h"
+#include "logger.h"
+#include "srobject.h"
+#include "logcontext.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -52,31 +57,37 @@ using namespace SmartRedis;
 class RedisTest : public Redis
 {
     public:
+        RedisTest(ConfigOptions* c) : Redis(c) {}
         int get_connection_timeout() {return _connection_timeout;}
         int get_connection_interval() {return _connection_interval;}
         int get_command_timeout() {return _command_timeout;}
         int get_command_interval() {return _command_interval;}
+        int get_socket_timeout() {return _socket_timeout;}
         int get_connection_attempts() {return _connection_attempts;}
         int get_command_attempts() {return _command_attempts;}
         int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
         int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
         int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
         int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
+        int get_default_socket_timeout() {return _DEFAULT_SOCKET_TIMEOUT;}
 };
 
 class RedisClusterTest : public RedisCluster
 {
     public:
+        RedisClusterTest(ConfigOptions* c) : RedisCluster(c) {}
         int get_connection_timeout() {return _connection_timeout;}
         int get_connection_interval() {return _connection_interval;}
         int get_command_timeout() {return _command_timeout;}
         int get_command_interval() {return _command_interval;}
+        int get_socket_timeout() {return _socket_timeout;}
         int get_connection_attempts() {return _connection_attempts;}
         int get_command_attempts() {return _command_attempts;}
         int get_default_conn_timeout() {return _DEFAULT_CONN_TIMEOUT;}
         int get_default_conn_interval() {return _DEFAULT_CONN_INTERVAL;}
         int get_default_cmd_timeout() {return _DEFAULT_CMD_TIMEOUT;}
         int get_default_cmd_interval() {return _DEFAULT_CMD_INTERVAL;}
+        int get_default_socket_timeout() {return _DEFAULT_SOCKET_TIMEOUT;}
 };
 
 // For simplicity, define constants for environment variables outside
@@ -85,16 +96,20 @@ const char* CONN_TIMEOUT_ENV_VAR = "SR_CONN_TIMEOUT";
 const char* CONN_INTERVAL_ENV_VAR = "SR_CONN_INTERVAL";
 const char* CMD_TIMEOUT_ENV_VAR = "SR_CMD_TIMEOUT";
 const char* CMD_INTERVAL_ENV_VAR = "SR_CMD_INTERVAL";
+const char* SOCKET_TIMEOUT_ENV_VAR = "SR_SOCKET_TIMEOUT";
 
 // Helper method to invoke the constructor when we expect an
 // error to be thrown
 void invoke_constructor()
 {
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
+    LogContext context("test_redisserver");
+    cfgopts->_set_log_context(&context);
     if (use_cluster()) {
-        RedisClusterTest cluster_obj;
+        RedisClusterTest cluster_obj(cfgopts);
     }
     else {
-        RedisTest non_cluster_obj;
+        RedisTest non_cluster_obj(cfgopts);
     }
 }
 
@@ -106,6 +121,52 @@ void unset_all_env_vars()
         unsetenv(CONN_INTERVAL_ENV_VAR);
         unsetenv(CMD_TIMEOUT_ENV_VAR);
         unsetenv(CMD_INTERVAL_ENV_VAR);
+        unsetenv(SOCKET_TIMEOUT_ENV_VAR);
+}
+
+// Helper function to retrieve original versions of environment vars
+void save_env_vars(
+    char** conn_timeout,
+    char** conn_interval,
+    char** cmd_timeout,
+    char** cmd_interval,
+    char** socket_timeout)
+{
+    *conn_timeout = getenv(CONN_TIMEOUT_ENV_VAR);
+    *conn_interval = getenv(CONN_INTERVAL_ENV_VAR);
+    *cmd_timeout = getenv(CMD_TIMEOUT_ENV_VAR);
+    *cmd_interval = getenv(CMD_INTERVAL_ENV_VAR);
+    *socket_timeout = getenv(SOCKET_TIMEOUT_ENV_VAR);
+}
+
+// Helper function to restore environment vars
+void restore_env_vars(
+    char* conn_timeout,
+    char* conn_interval,
+    char* cmd_timeout,
+    char* cmd_interval,
+    char* socket_timeout)
+{
+    if (conn_timeout != NULL)
+        setenv(CONN_TIMEOUT_ENV_VAR, conn_timeout, 1);
+    else
+        unsetenv(CONN_TIMEOUT_ENV_VAR);
+    if (conn_interval != NULL)
+        setenv(CONN_INTERVAL_ENV_VAR, conn_interval, 1);
+    else
+        unsetenv(CONN_INTERVAL_ENV_VAR);
+    if (cmd_timeout != NULL)
+        setenv(CMD_TIMEOUT_ENV_VAR, cmd_timeout, 1);
+    else
+        unsetenv(CMD_TIMEOUT_ENV_VAR);
+    if (cmd_interval != NULL)
+        setenv(CMD_INTERVAL_ENV_VAR, cmd_interval, 1);
+    else
+        unsetenv(CMD_INTERVAL_ENV_VAR);
+    if (socket_timeout != NULL)
+        setenv(SOCKET_TIMEOUT_ENV_VAR, socket_timeout, 1);
+    else
+        unsetenv(SOCKET_TIMEOUT_ENV_VAR);
 }
 
 // Helper function to check that all default values being used
@@ -123,22 +184,39 @@ void check_all_defaults(T& server)
 
     CHECK(server.get_command_interval() ==
           server.get_default_cmd_interval());
+
+    CHECK(server.get_socket_timeout() ==
+          server.get_default_socket_timeout());
 }
 
 SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Test runtime settings are initialized correctly" << std::endl;
+    std::string context("test_redisserver");
+    log_data(context, LLDebug, "***Beginning RedisServer testing***");
+    LogContext lc("test_redisserver");
+    ConfigOptions* cfgopts = ConfigOptions::create_from_environment("").release();
+    cfgopts->_set_log_context(&lc);
+
+    char* __conn_timeout;
+    char* __conn_interval;
+    char* __cmd_timeout;
+    char* __cmd_interval;
+    char* __socket_timeout;
+    save_env_vars(&__conn_timeout, &__conn_interval, &__cmd_timeout, &__cmd_interval, &__socket_timeout);
+
     GIVEN("A Redis derived object created with all environment variables unset")
     {
         unset_all_env_vars();
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(cfgopts);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(cfgopts);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
@@ -152,16 +230,17 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         setenv(CONN_INTERVAL_ENV_VAR, "", true);
         setenv(CMD_TIMEOUT_ENV_VAR, "", true);
         setenv(CMD_INTERVAL_ENV_VAR, "", true);
+        setenv(SOCKET_TIMEOUT_ENV_VAR, "", true);
 
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(cfgopts);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(cfgopts);
             THEN("Default member variable values are used")
             {
                 check_all_defaults(redis_server);
@@ -176,15 +255,17 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
         int cmd_interval = 250; //milliseconds
         int expected_conn_attempts = 11;
         int expected_cmd_attempts = 9;
+        int socket_timeout = 10; //milliseconds
 
         unset_all_env_vars();
         setenv(CONN_TIMEOUT_ENV_VAR, std::to_string(conn_timeout).c_str(), true);
         setenv(CONN_INTERVAL_ENV_VAR, std::to_string(conn_interval).c_str(), true);
         setenv(CMD_TIMEOUT_ENV_VAR, std::to_string(cmd_timeout).c_str(), true);
         setenv(CMD_INTERVAL_ENV_VAR, std::to_string(cmd_interval).c_str(), true);
+        setenv(SOCKET_TIMEOUT_ENV_VAR, std::to_string(socket_timeout).c_str(), true);
 
         if (use_cluster()) {
-            RedisClusterTest redis_server;
+            RedisClusterTest redis_server(cfgopts);
             THEN("Environment variables are used for member variables")
             {
                 CHECK(redis_server.get_connection_timeout() ==
@@ -200,10 +281,13 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
                       cmd_interval);
                 CHECK(redis_server.get_command_attempts() ==
                       expected_cmd_attempts);
+
+                CHECK(redis_server.get_socket_timeout() ==
+                      socket_timeout);
             }
         }
         else {
-            RedisTest redis_server;
+            RedisTest redis_server(cfgopts);
             THEN("Environment variables are used for member variables")
             {
                 CHECK(redis_server.get_connection_timeout() ==
@@ -219,6 +303,9 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
                       cmd_interval);
                 CHECK(redis_server.get_command_attempts() ==
                       expected_cmd_attempts);
+
+                CHECK(redis_server.get_socket_timeout() ==
+                      socket_timeout);
             }
         }
     }
@@ -249,7 +336,15 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
-
+    GIVEN("A negative value of " +  std::string(SOCKET_TIMEOUT_ENV_VAR))
+    {
+        unset_all_env_vars();
+        setenv(SOCKET_TIMEOUT_ENV_VAR, "-3", true);
+        THEN("Constructor throws an exception")
+        {
+            CHECK_THROWS_AS(invoke_constructor(), ParameterException);
+        }
+    }
     GIVEN("A negative value of " + std::string(CMD_INTERVAL_ENV_VAR))
     {
         unset_all_env_vars();
@@ -302,4 +397,6 @@ SCENARIO("Test runtime settings are initialized correctly", "[RedisServer]")
             CHECK_THROWS_AS(invoke_constructor(), ParameterException);
         }
     }
+    restore_env_vars(__conn_timeout, __conn_interval, __cmd_timeout, __cmd_interval, __socket_timeout);
+    log_data(context, LLDebug, "***End RedisServer testing***");
 }

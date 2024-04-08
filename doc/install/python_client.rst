@@ -23,12 +23,8 @@ dependencies for testing and documentation with:
     pip install smartredis\[dev\]
 
 Now, when inside your virtual environment, you should be able to import
-the ``Client`` from ``smartredis`` as follows
+the ``Client`` from ``smartredis`` as follows:
 
-.. code-block:: python
+.. code-block:: bash
 
-    Python 3.7.7 (default, May  7 2020, 21:25:33)
-    [GCC 7.3.0] :: Anaconda, Inc. on linux
-    Type "help", "copyright", "credits" or "license" for more information.
-    >>> from smartredis import Client
-    >>>
+    python -c 'from smartredis import Client'

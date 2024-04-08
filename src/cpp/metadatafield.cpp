@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,13 @@ MetadataField::MetadataField(const std::string& name, SRMetaDataType type)
 }
 
 // Retrieve the MetadataField name
-std::string MetadataField::name()
+std::string MetadataField::name() const
 {
     return _name;
 }
 
 // Retrieve the MetadataField name
-SRMetaDataType MetadataField::type()
+SRMetaDataType MetadataField::type() const
 {
     return _type;
 }

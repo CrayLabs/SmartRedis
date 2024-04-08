@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ void ScalarField<T>::append(const void* value)
 
 // Retrieve the number of values in a scalar
 template <class T>
-size_t ScalarField<T>::size()
+size_t ScalarField<T>::size() const
 {
     return _vals.size();
 }
@@ -101,4 +101,4 @@ const std::vector<T>& ScalarField<T>::immutable_values()
     return _vals;
 }
 
-#endif //SMARTREDIS_SCALARFIELD_TCC
+#endif // SMARTREDIS_SCALARFIELD_TCC

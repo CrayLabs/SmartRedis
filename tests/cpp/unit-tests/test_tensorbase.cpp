@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,15 +26,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensorbase.h"
 #include "tensorpack.h"
 #include "srexception.h"
 
+unsigned long get_time_offset();
+
 using namespace SmartRedis;
 
 SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing TensorBase through TensorPack" << std::endl;
+    std::string context("test_tensorbase");
+    log_data(context, LLDebug, "***Beginning TensorBase testing***");
+
     SRTensorType tensor_type = GENERATE(SRTensorTypeDouble, SRTensorTypeFloat,
                                         SRTensorTypeInt64, SRTensorTypeInt32,
                                         SRTensorTypeInt16, SRTensorTypeInt8,
@@ -51,7 +58,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
             tp.add_tensor(name, data, dims,
                           tensor_type,
@@ -153,7 +160,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -175,7 +182,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
             std::vector<double> tensor(tensor_size, 0);
             for (size_t i=0; i<tensor_size; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -195,7 +202,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             std::vector<size_t> dims = {};
             std::vector<double> tensor(5, 0);
             for (size_t i=0; i<5; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -216,7 +223,7 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             std::vector<size_t> dims = {1, 0, 3};
             std::vector<double> tensor(5, 0);
             for (size_t i=0; i<5; i++)
-                tensor[i] = 2.0*rand()/RAND_MAX - 1.0;
+                tensor[i] = 2.0*rand()/(double)RAND_MAX - 1.0;
             void* data = tensor.data();
 
             THEN("A runtime error is thrown")
@@ -230,4 +237,5 @@ SCENARIO("Testing TensorBase through TensorPack", "[TensorBase]")
             }
         }
     }
+    log_data(context, LLDebug, "***End TensorBase testing***");
 }

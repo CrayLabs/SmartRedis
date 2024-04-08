@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2024, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -25,13 +25,41 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 interface
-  function c_constructor(cluster, new_client) bind(c, name="SmartRedisCClient")
-    use iso_c_binding, only : c_ptr, c_bool
+  function c_simple_constructor(logger_name, logger_name_length, new_client) &
+    bind(c, name="SimpleCreateClient")
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
     import :: enum_kind
-    integer(kind=enum_kind)     :: c_constructor
-    logical(kind=c_bool), value :: cluster !< True if a database cluster is being used
-    type(c_ptr)                 :: new_client !< Receives the newly constructed client
+    integer(kind=enum_kind)       :: c_simple_constructor
+    character(kind=c_char)        :: logger_name(*)
+    integer(kind=c_size_t), value :: logger_name_length
+    type(c_ptr)                   :: new_client !< Receives the newly constructed client
+  end function c_simple_constructor
+end interface
+
+interface
+  function c_constructor(cfgopts, logger_name, logger_name_length, new_client) &
+    bind(c, name="CreateClient")
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)       :: c_constructor
+    type(c_ptr), value            :: cfgopts
+    character(kind=c_char)        :: logger_name(*)
+    integer(kind=c_size_t), value :: logger_name_length
+    type(c_ptr)                   :: new_client !< Receives the newly constructed client
   end function c_constructor
+end interface
+
+interface
+  function c_deprecated_constructor(cluster, logger_name, logger_name_length, new_client) &
+    bind(c, name="SmartRedisCClient")
+    use iso_c_binding, only : c_ptr, c_bool, c_char, c_size_t
+    import :: enum_kind
+    integer(kind=enum_kind)       :: c_deprecated_constructor
+    logical(kind=c_bool), value   :: cluster !< True if a database cluster is being used
+    character(kind=c_char)        :: logger_name(*)
+    integer(kind=c_size_t), value :: logger_name_length
+    type(c_ptr)                   :: new_client !< Receives the newly constructed client
+  end function c_deprecated_constructor
 end interface
 
 interface
@@ -148,4 +176,12 @@ interface
     integer(kind=c_int),    value :: num_tries
     logical(kind=c_bool)          :: exists
   end function poll_key_c
+end interface
+
+interface
+  function client_to_string_c(client) bind(c, name="client_to_string")
+    use iso_c_binding, only : c_ptr, c_char
+    type(c_ptr)                   :: client_to_string_c
+    type(c_ptr), value            :: client
+  end function client_to_string_c
 end interface

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSORBASE_H
 #define SMARTREDIS_TENSORBASE_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -77,8 +77,6 @@ static const std::unordered_map<SRTensorType, std::string>
         {SRTensorTypeUint16, DATATYPE_TENSOR_STR_UINT16},
         {SRTensorTypeUint8, DATATYPE_TENSOR_STR_UINT8} };
 
-class TensorBase;
-
 /*!
 *   \brief  The TensorBase class is a base class that
 *           defines an interface for templated classes
@@ -97,7 +95,7 @@ class TensorBase{
         *   \param mem_layout The memory layout of the source data
         */
         TensorBase(const std::string& name,
-                   void* data,
+                   const void* data,
                    const std::vector<size_t>& dims,
                    const SRTensorType type,
                    const SRMemoryLayout mem_layout);
@@ -153,13 +151,13 @@ class TensorBase{
         *   \brief Retrieve the name of the TensorBase
         *   \returns The name of the TensorBase
         */
-        std::string name();
+        std::string name() const;
 
         /*!
         *   \brief Retrieve the type of the TensorBase
         *   \returns The type of the TensorBase
         */
-        SRTensorType type();
+        SRTensorType type() const;
 
         /*!
         *   \brief Retrieve a string representation of
@@ -172,13 +170,13 @@ class TensorBase{
         *   \brief Retrieve the dimensions of the TensorBase
         *   \returns TensorBase dimensions
         */
-        std::vector<size_t> dims();
+        std::vector<size_t> dims() const;
 
         /*!
         *   \brief Retrieve number of values in the TensorBase
         *   \returns The number values in the TensorBase
         */
-        size_t num_values();
+        size_t num_values() const;
 
         /*!
         *   \brief Retrieve a pointer to the TensorBase data
@@ -261,7 +259,7 @@ class TensorBase{
         *   \param dims The dimensions of the data
         *   \param mem_layout The memory layout of the source data
         */
-        virtual void _set_tensor_data(void* src_data,
+        virtual void _set_tensor_data(const void* src_data,
                                       const std::vector<size_t>& dims,
                                       const SRMemoryLayout mem_layout) = 0;
 
@@ -272,6 +270,6 @@ class TensorBase{
         virtual size_t _n_data_bytes() = 0;
 };
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSORBASE_H
+#endif // SMARTREDIS_TENSORBASE_H

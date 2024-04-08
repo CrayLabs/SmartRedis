@@ -1,7 +1,7 @@
 #
 # BSD 2-Clause License
 #
-# Copyright (c) 2021-2022, Hewlett Packard Enterprise
+# Copyright (c) 2021-2024, Hewlett Packard Enterprise
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,13 +27,13 @@
 #
 
 ## Builder image
-FROM ubuntu:21.04 as builder
+FROM ubuntu:20.04 as builder
 
 # Install tooling
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
     ca-certificates git \
-    make cmake gcc g++ libc6-dev python3 libpython3-dev pip && \
+    make cmake gcc g++ libc6-dev python3 libpython3-dev pip gfortran && \
     rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
@@ -49,7 +49,8 @@ COPY . /usr/local/src/SmartRedis
 
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
-RUN make clobber && make lib && pip install . && rm -rf ~/.cache/pip \
+RUN pip3 install --upgrade pip
+RUN make clobber && make lib SR_FORTRAN=ON SR_PYTHON=ON && pip install . && rm -rf ~/.cache/pip \
     && rm -rf build tests examples images utils third-party doc images
 
 # Copy install files and directories to /usr/local/lib and

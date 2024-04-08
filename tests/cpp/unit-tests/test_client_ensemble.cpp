@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,10 @@
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "client.h"
 #include "dataset.h"
+#include "logger.h"
 #include "../client_test_utils.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
@@ -38,25 +41,13 @@ using namespace SmartRedis;
 void reset_env_vars(const char* old_keyin, const char* old_keyout)
 {
     if (old_keyin != nullptr) {
-        std::string reset_keyin =
-            std::string("SSKEYIN=") + std::string(old_keyin);
-        char* reset_keyin_c = new char[reset_keyin.size() + 1];
-        std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
-        reset_keyin_c[reset_keyin.size()] = '\0';
-        putenv( reset_keyin_c);
-        delete [] reset_keyin_c;
+        setenv("SSKEYIN", old_keyin, 1);
     }
     else {
         unsetenv("SSKEYIN");
     }
     if (old_keyout != nullptr) {
-        std::string reset_keyout =
-            std::string("SSKEYOUT=") + std::string(old_keyout);
-        char* reset_keyout_c = new char[reset_keyout.size() + 1];
-        std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
-        reset_keyout_c[reset_keyout.size()] = '\0';
-        putenv( reset_keyout_c);
-        delete [] reset_keyout_c;
+        setenv("SSKEYOUT", old_keyout, 1);
     }
     else {
         unsetenv("SSKEYOUT");
@@ -66,7 +57,7 @@ void reset_env_vars(const char* old_keyin, const char* old_keyout)
 // helper function for loading mnist
 void load_mnist_image_to_array(float**** img)
 {
-    std::string image_file = "../../mnist_data/one.raw";
+    std::string image_file = "../mnist_data/one.raw";
     std::ifstream fin(image_file, std::ios::binary);
     std::ostringstream ostream;
     ostream << fin.rdbuf();
@@ -87,15 +78,18 @@ void load_mnist_image_to_array(float**** img)
 
 SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Client ensemble using a producer/consumer paradigm" << std::endl;
+    std::string context("test_client_ensemble");
+    log_data(context, LLDebug, "***Beginning Client Ensemble testing***");
 
     GIVEN("Variables that will be used by the producer and consumer")
     {
         const char* old_keyin = std::getenv("SSKEYIN");
         const char* old_keyout = std::getenv("SSKEYOUT");
-        char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
-        char keyout_env_put[] = "SSKEYOUT=producer_0";
-        char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";
-        char keyout_env_get[] = "SSKEYOUT=producer_1";
+        char keyin_env_put[] = "producer_0,producer_1";
+        char keyout_env_put[] = "producer_0";
+        char keyin_env_get[] = "producer_1,producer_0";
+        char keyout_env_get[] = "producer_1";
         size_t dim1 = 10;
         std::vector<size_t> dims = {dim1};
         std::string producer_keyout = "producer_0";
@@ -106,11 +100,11 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         std::string tensor_key = "ensemble_test";
         // for model
         std::string model_key = "mnist_model";
-        std::string model_file = "./../../mnist_data/mnist_cnn.pt";
+        std::string model_file = "./../mnist_data/mnist_cnn.pt";
         // for script
         std::string script_key = "mnist_script";
         std::string script_file =
-            "./../../mnist_data/data_processing_script.txt";
+            "./../mnist_data/data_processing_script.txt";
         // for setup mnist
         std::string in_key = "mnist_input";
         std::string out_key = "mnist_output";
@@ -131,12 +125,15 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
         THEN("The Client ensemble can be tested with "
              "a producer/consumer relationship")
         {
+            ////////////////////////////////////////////////////////////
             // do producer stuff
-            putenv(keyin_env_put);
-            putenv(keyout_env_put);
+            log_data(context, LLDebug, "***Beginning producer operations***");
+            setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
+            setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
 
-            Client producer_client(use_cluster());
+            Client producer_client("test_client_ensemble::producer");
             producer_client.use_model_ensemble_prefix(true);
+            producer_client.set_model_chunk_size(1024 * 1024);
 
             // Tensors
             float* array = (float*)malloc(dims[0]*sizeof(float));
@@ -180,13 +177,15 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
             producer_client.run_model(model_name, {script_out_key_ds},
                                      {out_key_ds});
             free_4D_array(mnist_array, 1, 1, 28);
+            log_data(context, LLDebug, "***End producer operations***");
 
-
+            ////////////////////////////////////////////////////////////
             // do consumer stuff
-            putenv(keyin_env_get);
-            putenv(keyout_env_get);
+            log_data(context, LLDebug, "***Beginning consumer operations***");
+            setenv("SSKEYIN", keyin_env_get, 1);
+            setenv("SSKEYOUT", keyout_env_get, 1);
 
-            Client consumer_client(use_cluster());
+            Client consumer_client("test_client_ensemble::consumer");
             consumer_client.use_model_ensemble_prefix(true);
 
             // Tensors
@@ -249,6 +248,8 @@ SCENARIO("Testing Client ensemble using a producer/consumer paradigm")
 
             // reset environment variables to their original state
             reset_env_vars(old_keyin, old_keyout);
+            log_data(context, LLDebug, "***End consumer operations***");
         }
     }
+    log_data(context, LLDebug, "***End Client Ensemble testing***");
 }

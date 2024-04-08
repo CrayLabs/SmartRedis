@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,12 @@
 
 #ifndef SMARTREDIS_DATASET_H
 #define SMARTREDIS_DATASET_H
+
 #ifdef __cplusplus
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <vector>
+#include "srobject.h"
 #include "tensor.h"
 #include "tensorpack.h"
 #include "metadata.h"
@@ -40,11 +42,8 @@
 
 ///@file
 
-namespace SmartRedis{
+namespace SmartRedis {
 
-class DataSet;
-
-///@file
 /*!
 *   \brief The DataSet class aggregates tensors
 *          and metadata into a nested data structure
@@ -56,7 +55,7 @@ class DataSet;
 *            the DataSet name
 *            (e.g. {dataset_name}.tensor_name).
 */
-class DataSet
+class DataSet : public SRObject
 {
     public:
 
@@ -91,6 +90,11 @@ class DataSet
         DataSet& operator=(DataSet&& dataset) = default;
 
         /*!
+        *   \brief DataSet destructor
+        */
+        virtual ~DataSet();
+
+        /*!
         *   \brief Add a tensor to the DataSet.
         *   \param name The name used to reference the tensor
         *               within the DataSet
@@ -101,7 +105,7 @@ class DataSet
         *   \throw SmartRedis::Exception if add_tensor operation fails
         */
         void add_tensor(const std::string& name,
-                        void* data,
+                        const void* data,
                         const std::vector<size_t>& dims,
                         const SRTensorType type,
                         const SRMemoryLayout mem_layout);
@@ -156,7 +160,7 @@ class DataSet
                         void*& data,
                         std::vector<size_t>& dims,
                         SRTensorType& type,
-                        const SRMemoryLayout mem_layout);
+                        const SRMemoryLayout mem_layout) const;
 
         /*!
         *   \brief Get the tensor data, dimensions, and type for the tensor
@@ -188,7 +192,7 @@ class DataSet
                         size_t*& dims,
                         size_t& n_dims,
                         SRTensorType& type,
-                        const SRMemoryLayout mem_layout);
+                        const SRMemoryLayout mem_layout) const;
 
         /*!
         *   \brief Retrieve tensor data to a caller-supplied buffer.
@@ -223,7 +227,7 @@ class DataSet
         void get_meta_scalars(const std::string& name,
                               void*& data,
                               size_t& length,
-                              SRMetaDataType& type);
+                              SRMetaDataType& type) const;
 
         /*!
         *   \brief Retrieve metadata string field values from the DataSet.
@@ -236,7 +240,8 @@ class DataSet
         *           metadata field name
         *   \throw SmartRedis::Exception if metadata retrieval fails
         */
-        std::vector<std::string> get_meta_strings(const std::string& name);
+        std::vector<std::string> get_meta_strings(
+            const std::string& name) const;
 
         /*!
         *   \brief Retrieve metadata string field values from the DataSet.
@@ -254,14 +259,14 @@ class DataSet
         void get_meta_strings(const std::string& name,
                               char**& data,
                               size_t& n_strings,
-                              size_t*& lengths);
+                              size_t*& lengths) const;
 
         /*!
         *   \brief Check whether the dataset contains a field
         *   \param field_name The name of the field to check
         *   \returns True iff the DataSet contains the field
         */
-        bool has_field(const std::string& field_name);
+        bool has_field(const std::string& field_name) const;
 
 
         /*!
@@ -269,13 +274,6 @@ class DataSet
         *   \param field_name The name of the field to clear
         */
         void clear_field(const std::string& field_name);
-
-        /*!
-        *   \brief Retrieve the names of tensors in the DataSet
-        *   \returns The name of the tensors in the DataSet
-        *   \throw SmartRedis::Exception if metadata retrieval fails
-        */
-        std::vector<std::string> get_tensor_names();
 
         /*!
         *   \brief Retrieve the name of the DataSet
@@ -287,7 +285,83 @@ class DataSet
         *   \brief Change the name for the DataSet
         *   \param name The name for the DataSet
         */
-        void set_name(std::string name) { _dsname = name; }
+        void set_name(std::string name) {
+            if (name.length() > 0)
+                _dsname = name;
+            else
+                throw SRParameterException("Name must be non-zero length");
+        }
+
+        /*!
+        *   \brief Retrieve the names of tensors in the DataSet
+        *   \returns The name of the tensors in the DataSet
+        *   \throw SmartRedis::Exception if metadata retrieval fails
+        */
+        std::vector<std::string> get_tensor_names() const;
+
+        /*!
+        *   \brief Retrieve tensor names from the DataSet.
+        *   \details The memory of the data pointer is valid until the
+        *            DataSet is destroyed.
+        *   \param data Receives an array of tensor names
+        *   \param n_strings Receives the number of tensor names
+        *   \param lengths Receives an array of the lengths of the tensor names
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        void get_tensor_names(char**& data,
+                              size_t& n_strings,
+                              size_t*& lengths) const;
+
+        /*!
+        *   \brief Retrieve the data type of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns The data type for the tensor
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        SRTensorType get_tensor_type(const std::string& name) const;
+
+        /*!
+        *   \brief Retrieve the dimensions of a Tensor in the DataSet
+        *   \param name The name of the tensor
+        *   \returns A vector of the tensor's dimensions
+        *   \throw SmartRedis::Exception if tensor name retrieval fails
+        */
+        const std::vector<size_t> get_tensor_dims(
+            const std::string& name) const;
+
+        /*!
+        *   \brief Retrieve the names of all metadata fields in the DataSet
+        *   \returns A vector of metadata field names
+        */
+        std::vector<std::string> get_metadata_field_names() const;
+
+        /*!
+        *   \brief Retrieve metadata field names from the DataSet.
+        *   \details The memory of the data pointer is valid until the
+        *            DataSet is destroyed.
+        *   \param data Receives an array of metadata field names
+        *   \param n_strings Receives the number of metadata field names
+        *   \param lengths Receives an array of the lengths of the metadata
+        *                  field names
+        *   \throw SmartRedis::Exception if metadata field name retrieval fails
+        */
+        void get_metadata_field_names(char**& data,
+                                      size_t& n_strings,
+                                      size_t*& lengths) const;
+
+        /*!
+        *   \brief Retrieve the data type of a metadata field in the DataSet
+        *   \param name The name of the metadata field
+        *   \returns The data type for the metadata field
+        *   \throw SmartRedis::Exception if metadata field name retrieval fails
+        */
+        SRMetaDataType get_metadata_field_type(const std::string& name) const;
+
+        /*!
+        *   \brief Create a string representation of the DataSet
+        *   \returns A string containing DataSet details
+        */
+        std::string to_string() const;
 
         friend class Client;
         friend class PyDataset;
@@ -331,13 +405,6 @@ class DataSet
         const_tensor_iterator tensor_cend();
 
         /*!
-        *   \brief Retrieve the data type of a Tensor in the DataSet
-        *   \param name The name of the tensor
-        *   \returns The data type for the tensor
-        */
-        SRTensorType get_tensor_type(const std::string& name);
-
-        /*!
         *   \brief Returns a vector of std::pair with
         *          the field name and the field serialization
         *          for all fields in the MetaData set.
@@ -356,7 +423,7 @@ class DataSet
         *   \param mem_layout The memory layout for the provided tensor data
         */
         void _add_to_tensorpack(const std::string& name,
-                                void* data,
+                                const void* data,
                                 const std::vector<size_t>& dims,
                                 const SRTensorType type,
                                 const SRMemoryLayout mem_layout);
@@ -383,7 +450,7 @@ class DataSet
         *   \param name  The name used to reference the tensor
         *   \returns A TensorBase object.
         */
-        TensorBase* _get_tensorbase_obj(const std::string& name);
+        TensorBase* _get_tensorbase_obj(const std::string& name) const;
 
     private:
 
@@ -406,24 +473,46 @@ class DataSet
         *   \brief Throw an exception if a tensor does not exist
         *   \throw RuntimeException if the tensor is not in the DataSet
         */
-        inline void _enforce_tensor_exists(const std::string& name);
+        inline void _enforce_tensor_exists(const std::string& name) const;
+
+        /*!
+        *   \brief Throw an exception if the provided tensor type does not match
+        *          the internal tensor type
+        *   \throw RuntimeException if the provided tensor type does not match
+        *          the internal tensor type
+        */
+        inline void _enforce_tensor_type(const std::string& tensorname,
+                                         const SRTensorType& type) const;
 
         /*!
         *   \brief SharedMemoryList to manage memory associated
         *          with tensor dimensions from tensor retrieval
         */
-        SharedMemoryList<size_t> _dim_queries;
+        mutable SharedMemoryList<size_t> _dim_queries;
 
         /*!
         *  \brief The _tensor_pack memory is not for querying
         *         by name, but is used to manage memory associated
         *         with get_tensor() function calls.
         */
-        TensorPack _tensor_memory;
+        mutable TensorPack _tensor_memory;
 
 };
 
-} //namespace SmartRedis
+/*!
+*   \brief Serialize a dataset
+*   \param stream The stream onto which to serialize the dataset
+*   \param dataset The dataset to serialize
+*   \returns The output stream, for chaining
+*/
+inline
+std::ostream& operator<<(std::ostream& stream, const DataSet& dataset)
+{
+    stream << dataset.to_string();
+    return stream;
+}
+
+} // namespace SmartRedis
 
 #endif
-#endif //SMARTREDIS_DATASET_H
+#endif // SMARTREDIS_DATASET_H

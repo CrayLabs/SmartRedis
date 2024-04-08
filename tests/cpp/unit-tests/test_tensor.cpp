@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,13 +26,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
 #include "../../../third-party/catch/single_include/catch2/catch.hpp"
 #include "tensor.h"
+#include "logger.h"
+
+unsigned long get_time_offset();
 
 using namespace SmartRedis;
 
 SCENARIO("Testing Tensor", "[Tensor]")
 {
+    std::cout << std::to_string(get_time_offset()) << ": Testing Tensor" << std::endl;
+    std::string context("test_tensor");
+    log_data(context, LLDebug, "***Beginning Tensor testing***");
 
     GIVEN("Two Tensors")
     {
@@ -43,7 +50,7 @@ SCENARIO("Testing Tensor", "[Tensor]")
         size_t tensor_size = dims.at(0) * dims.at(1) * dims.at(2);
         std::vector<float> tensor(tensor_size, 0);
         for (size_t i=0; i<tensor_size; i++)
-            tensor[i] = 2.0*rand()/RAND_MAX -1.0;
+            tensor[i] = 2.0*rand()/(float)RAND_MAX -1.0;
         void* data = tensor.data();
         SRMemoryLayout mem_layout = SRMemLayoutContiguous;
         Tensor<float> t(name, data, dims, type, mem_layout);
@@ -55,7 +62,7 @@ SCENARIO("Testing Tensor", "[Tensor]")
         size_t tensor_size_2 = dims_2.at(0) * dims_2.at(1) * dims_2.at(2);
         std::vector<float> tensor_2(tensor_size_2, 0);
         for (size_t i=0; i<tensor_size_2; i++)
-            tensor_2[i] = 2.0*rand()/RAND_MAX -1.0;
+            tensor_2[i] = 2.0*rand()/(float)RAND_MAX -1.0;
         void* data_2 = tensor_2.data();
         SRMemoryLayout mem_layout_2 = SRMemLayoutContiguous;
         Tensor<float> t_2(name_2, data_2, dims_2, type_2, mem_layout_2);
@@ -132,4 +139,5 @@ SCENARIO("Testing Tensor", "[Tensor]")
             }
         }
     }
+    log_data(context, LLDebug, "***End Tensor testing***");
 }

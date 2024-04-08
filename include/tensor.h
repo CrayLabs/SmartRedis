@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_TENSOR_H
 #define SMARTREDIS_TENSOR_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string>
 #include <stdexcept>
 #include "tensorbase.h"
@@ -59,7 +59,7 @@ class Tensor : public TensorBase
         *   \param mem_layout The memory layout of the source data
         */
         Tensor(const std::string& name,
-               void* data,
+               const void* data,
                const std::vector<size_t>& dims,
                const SRTensorType type,
                const SRMemoryLayout mem_layout);
@@ -157,7 +157,7 @@ class Tensor : public TensorBase
         *            only.  The initial caller SHOULD NOT use
         *            this pointer.
         */
-        void* _copy_nested_to_contiguous(void* src_data,
+        void* _copy_nested_to_contiguous(const void* src_data,
                                          const size_t* dims,
                                          const size_t n_dims,
                                          void* dest_data);
@@ -213,7 +213,7 @@ class Tensor : public TensorBase
         *   \param mem_layout The layout of the source data
         *                     memory structure
         */
-        virtual void _set_tensor_data(void* src_data,
+        virtual void _set_tensor_data(const void* src_data,
                                       const std::vector<size_t>& dims,
                                       const SRMemoryLayout mem_layout);
 
@@ -226,7 +226,7 @@ class Tensor : public TensorBase
         *   \param dims The dimensions of the tensor
         */
         void _f_to_c_memcpy(T* c_data,
-                            T* f_data,
+                            const T* f_data,
                             const std::vector<size_t>& dims);
 
         /*!
@@ -238,7 +238,7 @@ class Tensor : public TensorBase
         *   \param dims The dimensions of the tensor
         */
         void _c_to_f_memcpy(T* f_data,
-                            T* c_data,
+                            const T* c_data,
                             const std::vector<size_t>& dims);
 
         /*!
@@ -253,7 +253,7 @@ class Tensor : public TensorBase
         *   \param current_dim The index of the current dimension
         */
         void _f_to_c(T* c_data,
-                     T* f_data,
+                     const T* f_data,
                      const std::vector<size_t>& dims,
                      std::vector<size_t> dim_positions,
                      size_t current_dim);
@@ -270,7 +270,7 @@ class Tensor : public TensorBase
         *   \param current_dim The index of the current dimension
         */
         void _c_to_f(T* f_data,
-                     T* c_data,
+                     const T* c_data,
                      const std::vector<size_t>& dims,
                      std::vector<size_t> dim_positions,
                      size_t current_dim);
@@ -315,6 +315,6 @@ class Tensor : public TensorBase
 
 #include "tensor.tcc"
 
-} //namespace SmartRedis
+} // namespace SmartRedis
 
-#endif //SMARTREDIS_TENSOR_H
+#endif // SMARTREDIS_TENSOR_H

@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,15 @@ void to_lower(char* s, int maxchars) {
 
 bool use_cluster()
 {
-    /* This function determines if a cluster
-    configuration should be used in the test
-    when creating a Client.
+    /* This function determines if a cluster configuration should be used in
+    the test when creating a Client.
+    (deprecated)
     */
-    char* smartredis_test_cluster = getenv("SMARTREDIS_TEST_CLUSTER");
-    to_lower(smartredis_test_cluster, 256);
+    char* server_type = getenv("SR_DB_TYPE");
+    to_lower(server_type, 256);
 
-    if(smartredis_test_cluster) {
-        if(strcmp(smartredis_test_cluster, "true")==0)
+    if(server_type) {
+        if(strcmp(server_type, "clustered")==0)
             return true;
     }
     return false;

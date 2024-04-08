@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,21 +26,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <sw/redis++/redis++.h>
 #include "rediscluster.h"
 #include "nonkeyedcommand.h"
 #include "keyedcommand.h"
 #include "srexception.h"
+#include "utility.h"
+#include "srobject.h"
+#include "configoptions.h"
 
 using namespace SmartRedis;
 
 // RedisCluster constructor
-RedisCluster::RedisCluster() : RedisServer()
+RedisCluster::RedisCluster(ConfigOptions* cfgopts)
+    : RedisServer(cfgopts)
 {
-    std::string address_port = _get_ssdb();
-    _connect(address_port);
+    SRAddress db_address(_get_ssdb());
+    if (!db_address._is_tcp) {
+        throw SRRuntimeException("Unix Domain Socket is not supported with clustered Redis");
+    }
+    _is_domain_socket = false;
+    _connect(db_address);
     _map_cluster();
-    if (_address_node_map.count(address_port) > 0)
-        _last_prefix = _address_node_map.at(address_port)->prefix;
+    if (_address_node_map.count(db_address.to_string()) > 0)
+        _last_prefix = _address_node_map.at(db_address.to_string())->prefix;
     else if (_db_nodes.size() > 0)
         _last_prefix = _db_nodes[0].prefix;
     else
@@ -49,12 +58,14 @@ RedisCluster::RedisCluster() : RedisServer()
 
 // RedisCluster constructor. Uses address provided to constructor instead of
 // environment variables
-RedisCluster::RedisCluster(std::string address_port) : RedisServer()
+RedisCluster::RedisCluster(ConfigOptions* cfgopts, std::string address_spec)
+    : RedisServer(cfgopts)
 {
-    _connect(address_port);
+    SRAddress db_address(address_spec);
+    _connect(db_address);
     _map_cluster();
-    if (_address_node_map.count(address_port) > 0)
-        _last_prefix = _address_node_map.at(address_port)->prefix;
+    if (_address_node_map.count(db_address.to_string()) > 0)
+        _last_prefix = _address_node_map.at(db_address.to_string())->prefix;
     else if (_db_nodes.size() > 0)
         _last_prefix = _db_nodes[0].prefix;
     else
@@ -111,9 +122,9 @@ CommandReply RedisCluster::run(MultiKeyCommand& cmd)
 CommandReply RedisCluster::run(AddressAtCommand& cmd)
 {
     std::string db_prefix;
-    if (is_addressable(cmd.get_address(), cmd.get_port()))
-        db_prefix = _address_node_map.at(cmd.get_address() + ":"
-                    + std::to_string(cmd.get_port()))->prefix;
+    SRAddress address(cmd.get_address());
+    if (is_addressable(address))
+        db_prefix = _address_node_map.at(address.to_string())->prefix;
     else
         throw SRRuntimeException("Redis has failed to find database");
 
@@ -155,7 +166,7 @@ CommandReply RedisCluster::run(AddressAllCommand &cmd)
         cmd.set_field_at(new_field, cmd.key_index, true);
 
         // Execute the updated command
-        cmd.set_exec_address_port(node->ip, node->port);
+        cmd.set_exec_address(node->address);
         reply = _run(cmd, node->prefix);
         if (reply.has_error() > 0)
             break; // Short-circuit failure on error
@@ -348,11 +359,10 @@ bool RedisCluster::hash_field_exists(const std::string& key,
 }
 
 // Check if a key exists in the database
-bool RedisCluster::is_addressable(const std::string& address,
-                                  const uint64_t& port)
+bool RedisCluster::is_addressable(const SRAddress& address) const
 {
-    std::string addr = address + ":" + std::to_string(port);
-    return _address_node_map.find(addr) != _address_node_map.end();
+    return _address_node_map.find(address.to_string()) !=
+        _address_node_map.end();
 }
 
 // Put a Tensor on the server
@@ -376,6 +386,26 @@ CommandReply RedisCluster::get_tensor(const std::string& key)
 
     // Run it
     return run(cmd);
+}
+
+// Get a list of Tensor from the server
+PipelineReply RedisCluster::get_tensors(const std::vector<std::string>& keys)
+{
+    // Build up the commands to get the tensors
+    CommandList cmdlist; // This just holds the memory
+    std::vector<Command*> cmds;
+    for (auto it = keys.begin(); it != keys.end(); ++it) {
+        GetTensorCommand* cmd = cmdlist.add_command<GetTensorCommand>();
+        (*cmd) << "AI.TENSORGET" << Keyfield(*it) << "META" << "BLOB";
+        cmds.push_back(cmd);
+    }
+
+    // Get the shard index for the first key
+    size_t db_index = _get_db_node_index(keys[0]);
+    std::string shard_prefix = _db_nodes[db_index].prefix;
+
+    // Run them via pipeline
+    return _run_pipeline(cmds, shard_prefix);
 }
 
 // Rename a tensor in the database
@@ -477,11 +507,12 @@ CommandReply RedisCluster::copy_tensors(const std::vector<std::string>& src,
 
 // Set a model from a string buffer in the database for future execution
 CommandReply RedisCluster::set_model(const std::string& model_name,
-                                     std::string_view model,
+                                     const std::vector<std::string_view>& model,
                                      const std::string& backend,
                                      const std::string& device,
                                      int batch_size,
                                      int min_batch_size,
+                                     int min_batch_timeout,
                                      const std::string& tag,
                                      const std::vector<std::string>& inputs,
                                      const std::vector<std::string>& outputs)
@@ -501,6 +532,9 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
     }
     if (min_batch_size > 0) {
         cmd << "MINBATCHSIZE" << std::to_string(min_batch_size);
+    }
+    if (min_batch_timeout > 0) {
+        cmd << "MINBATCHTIMEOUT" << std::to_string(min_batch_timeout);
     }
     if ( inputs.size() > 0) {
         cmd << "INPUTS" << std::to_string(inputs.size()) << inputs;
@@ -523,12 +557,13 @@ CommandReply RedisCluster::set_model(const std::string& model_name,
 // Set a model from std::string_view buffer in the
 // database for future execution in a multi-GPU system
 void RedisCluster::set_model_multigpu(const std::string& name,
-                                      const std::string_view& model,
+                                      const std::vector<std::string_view>& model,
                                       const std::string& backend,
                                       int first_gpu,
                                       int num_gpus,
                                       int batch_size,
                                       int min_batch_size,
+                                      int min_batch_timeout,
                                       const std::string& tag,
                                       const std::vector<std::string>& inputs,
                                       const std::vector<std::string>& outputs)
@@ -542,7 +577,7 @@ void RedisCluster::set_model_multigpu(const std::string& name,
         // Store it
         CommandReply result = set_model(
             model_key, model, backend, device, batch_size, min_batch_size,
-            tag, inputs, outputs);
+            min_batch_timeout, tag, inputs, outputs);
         if (result.has_error() > 0) {
             throw SRRuntimeException("Failed to set model for " + device);
         }
@@ -551,7 +586,7 @@ void RedisCluster::set_model_multigpu(const std::string& name,
     // Add a version for get_model to find
     CommandReply result = set_model(
         name, model, backend, "GPU", batch_size, min_batch_size,
-        tag, inputs, outputs);
+        min_batch_timeout, tag, inputs, outputs);
     if (result.has_error() > 0) {
         throw SRRuntimeException("Failed to set general model");
     }
@@ -612,8 +647,8 @@ CommandReply RedisCluster::run_model(const std::string& model_name,
 {
     // Check for a non-default timeout setting
     int run_timeout;
-    _init_integer_from_env(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
-                           _DEFAULT_MODEL_TIMEOUT);
+    get_config_integer(run_timeout, _MODEL_TIMEOUT_ENV_VAR,
+                       _DEFAULT_MODEL_TIMEOUT);
 
     /*  For this version of run model, we have to copy all
         input and output tensors, so we will randomly select
@@ -889,24 +924,19 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
                                                     const bool reset_stat)
 {
     AddressAtCommand cmd;
-
-    // Parse the host and port
-    std::string host = cmd.parse_host(address);
-    uint64_t port = cmd.parse_port(address);
+    SRAddress db_address(address);
 
     // Determine the prefix we need for the model or script
-    if (!is_addressable(host, port)) {
-        throw SRRuntimeException("The provided host and port does "\
+    if (!is_addressable(db_address)) {
+        throw SRRuntimeException("The provided address does "\
                                  "not match a cluster shard address.");
     }
 
-    std::string host_port = host + ":" + std::to_string(port);
-    std::string db_prefix = _address_node_map.at(host_port)->prefix;
-
+    std::string db_prefix = _address_node_map.at(db_address.to_string())->prefix;
     std::string prefixed_key = "{" + db_prefix + "}." + key;
 
     // Build the Command
-    cmd.set_exec_address_port(host, port);
+    cmd.set_exec_address(db_address);
     cmd << "AI.INFO" << Keyfield(prefixed_key);
 
     // Optionally add RESETSTAT to the command
@@ -915,6 +945,57 @@ CommandReply RedisCluster::get_model_script_ai_info(const std::string& address,
     }
 
     return run(cmd);
+}
+
+// Retrieve the current model chunk size
+int RedisCluster::get_model_chunk_size()
+{
+    // If we've already set a chunk size, just return it
+    if (_model_chunk_size != _UNKNOWN_MODEL_CHUNK_SIZE)
+        return _model_chunk_size;
+
+    // Build the command
+    AddressAnyCommand cmd;
+    cmd << "AI.CONFIG" << "GET" << "MODEL_CHUNK_SIZE";
+
+    CommandReply reply = run(cmd);
+    if (reply.has_error() > 0)
+        throw SRRuntimeException("AI.CONFIG GET MODEL_CHUNK_SIZE command failed");
+
+    if (reply.redis_reply_type() != "REDIS_REPLY_INTEGER")
+        throw SRRuntimeException("An unexpected type was returned for "
+                                 "for the model chunk size.");
+
+    int chunk_size = reply.integer();
+
+    if (chunk_size < 0)
+        throw SRRuntimeException("An invalid, negative value was "
+                                 "returned for the model chunk size.");
+
+    return chunk_size;
+}
+
+// Reconfigure the model chunk size for the database
+void RedisCluster::set_model_chunk_size(int chunk_size)
+{
+    // Repeat for each server node:
+    auto node = _db_nodes.cbegin();
+    for ( ; node != _db_nodes.cend(); node++) {
+        // Pick a node for the command
+        AddressAtCommand cmd;
+        cmd.set_exec_address(node->address);
+        // Build the command
+        cmd << "AI.CONFIG" << "MODEL_CHUNK_SIZE" << std::to_string(chunk_size);
+
+        // Run it
+        CommandReply reply = run(cmd);
+        if (reply.has_error() > 0) {
+            throw SRRuntimeException("set_model_chunk_size failed for node " + node->name);
+        }
+    }
+
+    // Store the new model chunk size for later
+    _model_chunk_size = chunk_size;
 }
 
 inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix)
@@ -942,21 +1023,27 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
         }
         catch (sw::redis::IoError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis IO error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis IO error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::ClosedError &e) {
             // For an error from Redis, retry unless we're out of chances
+            std::string message("Redis Closed error when executing command: ");
+            message += e.what();
             if (i == _command_attempts) {
-                throw SRDatabaseException(
-                    std::string("Redis Closed error when executing command: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // else, Fall through for a retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (sw::redis::Error &e) {
             // For other errors from Redis, report them immediately
@@ -986,31 +1073,60 @@ inline CommandReply RedisCluster::_run(const Command& cmd, std::string db_prefix
 }
 
 // Connect to the cluster at the address and port
-inline void RedisCluster::_connect(std::string address_port)
+inline void RedisCluster::_connect(SRAddress& db_address)
 {
+    // Build a connections object for this connection
+    // No need to repeat the build on each connection attempt
+    // so we do it outside the loop
+    sw::redis::ConnectionOptions connectOpts;
+    if (db_address._is_tcp) {
+        connectOpts.host = db_address._tcp_host;
+        connectOpts.port = db_address._tcp_port;
+        connectOpts.type = sw::redis::ConnectionType::TCP;
+    }
+    else {
+        throw SRInternalException(
+            "RedisCluster encountered a UDS request in _connect()");
+    }
+    connectOpts.socket_timeout = std::chrono::milliseconds(
+        _socket_timeout);
+
+    // Connect
+    std::string msg;
     for (int i = 1; i <= _connection_attempts; i++) {
+        msg = "Connection attempt " + std::to_string(i) + " of " +
+            std::to_string(_connection_attempts);
+        _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
+
         try {
             // Attempt the connection
-            _redis_cluster = new sw::redis::RedisCluster(address_port);
-            return;
+            _redis_cluster = new sw::redis::RedisCluster(connectOpts);            return;
         }
         catch (std::bad_alloc& e) {
             // On a memory error, bail immediately
             _redis_cluster = NULL;
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, "Memory error");
             throw SRBadAllocException("RedisCluster connection");
         }
         catch (sw::redis::Error& e) {
             // For an error from Redis, retry unless we're out of chances
+            msg = "redis error: "; msg += e.what();
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
             _redis_cluster = NULL;
+            std::string message("Unable to connect to backend database: ");
+            message += e.what();
             if (i == _connection_attempts) {
-                throw SRDatabaseException(
-                    std::string("Unable to connect to backend database: ") +
-                    e.what());
+                throw SRDatabaseException(message);
             }
-            // Else, fall through to retry
+            // Else log, retry, and fall through for a retry
+            else {
+                _context->log_error(LLInfo, message);
+            }
         }
         catch (std::exception& e) {
             // Should never hit this, so bail immediately if we do
+            msg = "std::exception: "; msg += e.what();
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, msg);
             _redis_cluster = NULL;
             throw SRInternalException(
                 std::string("Unexpected exception while connecting: ") +
@@ -1018,6 +1134,7 @@ inline void RedisCluster::_connect(std::string address_port)
         }
         catch (...) {
             // Should never hit this, so bail immediately if we do
+            _cfgopts->_get_log_context()->log_data(LLDeveloper, "unknown exception");
             _redis_cluster = NULL;
             throw SRInternalException(
                 "A non-standard exception was encountered during client "\
@@ -1047,8 +1164,7 @@ inline void RedisCluster::_map_cluster()
     cmd << "CLUSTER" << "SLOTS";
 
     // Run it
-    CommandReply reply(_redis_cluster->
-                 command(cmd.begin(), cmd.end()));
+    CommandReply reply = run(cmd);
     if (reply.has_error() > 0) {
         throw SRRuntimeException("CLUSTER SLOTS command failed");
     }
@@ -1101,7 +1217,7 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
     0) (integer) min slot
     1) (integer) max slot
     2) 0) "ip address"
-       1) (integer) port
+       1) (integer) port   (note that for clustered Redis, this will always be a TCP address)
        2) "name"
     */
     size_t n_db_nodes = reply.n_elements();
@@ -1110,15 +1226,15 @@ inline void RedisCluster::_parse_reply_for_slots(CommandReply& reply)
     for (size_t i = 0; i < n_db_nodes; i++) {
         _db_nodes[i].lower_hash_slot = reply[i][0].integer();
         _db_nodes[i].upper_hash_slot = reply[i][1].integer();
-        _db_nodes[i].ip = std::string(reply[i][2][0].str(),
+        _db_nodes[i].address._is_tcp = true;
+        _db_nodes[i].address._tcp_host = std::string(reply[i][2][0].str(),
                                             reply[i][2][0].str_len());
-        _db_nodes[i].port = reply[i][2][1].integer();
+        _db_nodes[i].address._tcp_port = reply[i][2][1].integer();
         _db_nodes[i].name = std::string(reply[i][2][2].str(),
                                               reply[i][2][2].str_len());
         _db_nodes[i].prefix = _get_crc16_prefix(_db_nodes[i].lower_hash_slot);
-        _address_node_map.insert({_db_nodes[i].ip + ":"
-                                    + std::to_string(_db_nodes[i].port),
-                                    &_db_nodes[i]});
+        _address_node_map.insert({_db_nodes[i].address.to_string(),
+                                  &_db_nodes[i]});
     }
 
     //Put the vector of db nodes in order based on lower hash slot
@@ -1294,14 +1410,13 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
     (void)run(cmd);
 }
 
-// Retrieve the optimum model prefix for the set of inputs
-DBNode* RedisCluster::_get_model_script_db(const std::string& name,
-                                           std::vector<std::string>& inputs,
+// Retrieve the optimum db node for model and script execution
+DBNode* RedisCluster::_get_model_script_db(std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
 {
-    /* This function calculates the optimal model name to use
-    to run the provided inputs.  If a cluster is not being used,
-    the model name is returned, else a prefixed model name is returned.
+    /* This function determines which db node in the cluster
+    contains the most input and output tensors and 
+    returns a pointer to that db node. 
     */
 
     // TODO we should randomly choose the max if there are multiple maxes
@@ -1332,10 +1447,30 @@ DBNode* RedisCluster::_get_model_script_db(const std::string& name,
     return db;
 }
 
+// Run a CommandList via a Pipeline
+PipelineReply RedisCluster::run_in_pipeline(CommandList& cmdlist)
+{
+    // Convert from CommandList to vector and grab the shard along
+    // the way
+    std::vector<Command*> cmds;
+    std::string shard_prefix = _db_nodes[0].prefix;
+    bool shard_found = false;
+    for (auto it = cmdlist.begin(); it != cmdlist.end(); ++it) {
+        cmds.push_back(*it);
+        if (!shard_found && (*it)->has_keys()) {
+            shard_prefix = _get_db_node_prefix(*(*it));
+            shard_found = true;
+        }
+    }
+
+    // Run the commands
+    return _run_pipeline(cmds, shard_prefix);
+}
+
 // Build and run unordered pipeline
-PipelineReply
-RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
-                            std::string& shard_prefix)
+PipelineReply RedisCluster::_run_pipeline(
+    std::vector<Command*>& cmds,
+    std::string& shard_prefix)
 {
     PipelineReply reply;
     for (int i = 1; i <= _command_attempts; i++) {
@@ -1357,6 +1492,9 @@ RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
             if (reply.has_error()) {
                 throw SRRuntimeException("Redis failed to execute the pipeline");
             }
+
+            // If we get here, it all worked
+            return reply;
         }
         catch (SmartRedis::Exception& e) {
             // Exception is already prepared, just propagate it
@@ -1400,14 +1538,16 @@ RedisCluster::_run_pipeline(std::vector<Command*>& cmds,
 
         // Sleep before the next attempt
         std::this_thread::sleep_for(std::chrono::milliseconds(_command_interval));
-
-        // Return the reply
-        return reply;
     }
 
     // If we get here, we've run out of retry attempts
     throw SRTimeoutException("Unable to execute pipeline");
+}
 
-    // Return the reply
-    return reply;
+// Create a string representation of the Redis connection
+std::string RedisCluster::to_string() const
+{
+    std::string result("Clustered Redis connection:\n");
+    result += RedisServer::to_string();
+    return result;
 }

@@ -1,6 +1,6 @@
 ! BSD 2-Clause License
 !
-! Copyright (c) 2021-2022, Hewlett Packard Enterprise
+! Copyright (c) 2021-2024, Hewlett Packard Enterprise
 ! All rights reserved.
 !
 ! Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ program main
   call random_number(recv_array_real_64)
 
   ! Initialize a client
-  result = client%initialize(.true.) ! Change .false. to .true. if not using a clustered database
+  result = client%initialize("smartredis_put_get_3D")
   if (result .ne. SRNoError) error stop 'client%initialize failed'
 
   ! Add a tensor to the database and verify that we can retrieve it

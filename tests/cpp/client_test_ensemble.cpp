@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 void load_mnist_image_to_array(float**** img)
 {
-  std::string image_file = "../mnist_data/one.raw";
+  std::string image_file = "mnist_data/one.raw";
   std::ifstream fin(image_file, std::ios::binary);
   std::ostringstream ostream;
   ostream << fin.rdbuf();
@@ -54,11 +54,11 @@ void load_mnist_image_to_array(float**** img)
 }
 
 void produce(
-            std::vector<size_t> dims,
-        std::string keyout="",
-        std::string keyin="")
+  std::vector<size_t> dims,
+  std::string keyout="",
+  std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client("client_test_ensemble::producer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors
@@ -77,7 +77,7 @@ void produce(
 
   // Models
   std::string model_key = "mnist_model";
-  std::string model_file = "./../mnist_data/mnist_cnn.pt";
+  std::string model_file = "mnist_data/mnist_cnn.pt";
   client.set_model_from_file(model_key, model_file, "TORCH", "CPU");
 
 
@@ -86,7 +86,7 @@ void produce(
 
   // Scripts
   std::string script_key = "mnist_script";
-  std::string script_file = "./../mnist_data/data_processing_script.txt";
+  std::string script_file = "mnist_data/data_processing_script.txt";
   client.set_script_from_file(script_key, "CPU", script_file);
 
   if(!client.model_exists(script_key))
@@ -128,7 +128,7 @@ void consume(std::vector<size_t> dims,
              std::string keyout="",
              std::string keyin="")
 {
-  SmartRedis::Client client(use_cluster());
+  SmartRedis::Client client("client_test_ensemble::consumer");
   client.use_model_ensemble_prefix(true);
 
   // Tensors
@@ -216,50 +216,35 @@ int main(int argc, char* argv[]) {
 
   const char* old_keyin = std::getenv("SSKEYIN");
   const char* old_keyout = std::getenv("SSKEYOUT");
-  char keyin_env_put[] = "SSKEYIN=producer_0,producer_1";
-  char keyout_env_put[] = "SSKEYOUT=producer_0";
-  putenv( keyin_env_put );
-  putenv( keyout_env_put );
+  char keyin_env_put[] = "producer_0,producer_1";
+  char keyout_env_put[] = "producer_0";
+  setenv("SSKEYIN", keyin_env_put, (NULL != old_keyin));
+  setenv("SSKEYOUT", keyout_env_put, (NULL != old_keyout));
   size_t dim1 = 10;
   std::vector<size_t> dims = {dim1};
 
-  produce(dims,
-          std::string("producer_0"),
-          std::string("producer_0"));
+  produce(dims, std::string("producer_0"), std::string("producer_0"));
 
-  char keyin_env_get[] = "SSKEYIN=producer_1,producer_0";
-  char keyout_env_get[] = "SSKEYOUT=producer_1";
-  putenv(keyin_env_get);
-  putenv(keyout_env_get);
-  consume(dims,
-          std::string("producer_1"),
-          std::string("producer_0"));
+  char keyin_env_get[] = "producer_1,producer_0";
+  char keyout_env_get[] = "producer_1";
+  setenv("SSKEYIN", keyin_env_get, 1);
+  setenv("SSKEYOUT", keyout_env_get, 1);
+
+  consume(dims, std::string("producer_1"), std::string("producer_0"));
 
   if (old_keyin != nullptr) {
-    std::string reset_keyin = std::string("SSKEYIN=") + std::string(old_keyin);
-    char* reset_keyin_c = new char[reset_keyin.size() + 1];
-    std::copy(reset_keyin.begin(), reset_keyin.end(), reset_keyin_c);
-    reset_keyin_c[reset_keyin.size()] = '\0';
-    putenv( reset_keyin_c);
-    delete[] reset_keyin_c;
+    setenv("SSKEYIN", old_keyin, 1);
   }
   else {
     unsetenv("SSKEYIN");
   }
   if (old_keyout != nullptr) {
-    std::string reset_keyout = std::string("SSKEYOUT=") + std::string(old_keyout);
-    char* reset_keyout_c = new char[reset_keyout.size() + 1];
-    std::copy(reset_keyout.begin(), reset_keyout.end(), reset_keyout_c);
-    reset_keyout_c[reset_keyout.size()] = '\0';
-    putenv( reset_keyout_c);
-    delete[] reset_keyout_c;
+    setenv("SSKEYOUT", old_keyout, 1);
   }
   else {
     unsetenv("SSKEYOUT");
   }
 
-
   std::cout<<"Ensemble test complete"<<std::endl;
-
   return 0;
 }

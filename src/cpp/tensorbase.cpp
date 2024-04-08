@@ -1,7 +1,7 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2021-2022, Hewlett Packard Enterprise
+ * Copyright (c) 2021-2024, Hewlett Packard Enterprise
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@ using namespace SmartRedis;
 
 // TensorBase constructor
 TensorBase::TensorBase(const std::string& name,
-                       void* data,
+                       const void* data,
                        const std::vector<size_t>& dims,
                        const SRTensorType type,
                        const SRMemoryLayout mem_layout)
@@ -139,13 +139,13 @@ TensorBase& TensorBase::operator=(TensorBase&& tb)
 }
 
 // Retrieve the tensor name.
-std::string TensorBase::name()
+std::string TensorBase::name() const
 {
     return _name;
 }
 
 // Retrieve the tensor type.
-SRTensorType TensorBase::type()
+SRTensorType TensorBase::type() const
 {
    return _type;
 }
@@ -157,13 +157,13 @@ std::string TensorBase::type_str()
 }
 
 // Retrieve the tensor dims.
-std::vector<size_t> TensorBase::dims()
+std::vector<size_t> TensorBase::dims() const
 {
    return _dims;
 }
 
 // Retrieve the total number of values in the tensor.
-size_t TensorBase::num_values()
+size_t TensorBase::num_values() const
 {
     if (_dims.size() == 0)
         throw SRRuntimeException("Invalid dimensionality for tensor detected");
