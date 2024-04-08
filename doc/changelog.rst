@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Enforce changelog updates
 - Enforce matching TensorType for DataSet::unpack_tensor()
 - Remove unused parameter in internal redis cluster method
 - Update CI for Intel suite
@@ -15,6 +16,8 @@ Description
 
 Detailed Notes
 
+- Add Github Actions workflow that checks if changelog is edited
+  on pull requests into develop. (SmartSim-PR480_)
 - Client::unpack_tensor() enforces that the user-provided TensorType matches the
   known tensor type.  Now DataSet::unpack_tensor() enforces the same condition. (PR478_)
 - Removes an unused parameter in the RedisCluster::_get_model_script_db()
@@ -24,6 +27,7 @@ Detailed Notes
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR480: https://github.com/CrayLabs/SmartRedis/pull/480
 .. _PR478: https://github.com/CrayLabs/SmartRedis/pull/478
 .. _PR477: https://github.com/CrayLabs/SmartRedis/pull/477
 .. _PR475: https://github.com/CrayLabs/SmartRedis/pull/475
