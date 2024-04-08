@@ -1410,14 +1410,13 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
     (void)run(cmd);
 }
 
-// Retrieve the optimum model prefix for the set of inputs
-DBNode* RedisCluster::_get_model_script_db(const std::string& name,
-                                           std::vector<std::string>& inputs,
+// Retrieve the optimum db node for model and script execution
+DBNode* RedisCluster::_get_model_script_db(std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
 {
-    /* This function calculates the optimal model name to use
-    to run the provided inputs.  If a cluster is not being used,
-    the model name is returned, else a prefixed model name is returned.
+    /* This function determines which db node in the cluster
+    contains the most input and output tensors and 
+    returns a pointer to that db node. 
     */
 
     // TODO we should randomly choose the max if there are multiple maxes

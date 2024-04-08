@@ -9,6 +9,8 @@ To be released at some future point in time
 Description
 
 - Removed unused TensorBase constructor parameter
+- Remove unused parameter in internal redis cluster method
+- Enforce matching TensorType for DataSet::unpack_tensor()
 - Update CI for Intel suite
 - Fix inconsistency in C-API ConfigOptions is_configured() parameters
 
@@ -17,12 +19,18 @@ Detailed Notes
 - The TensorBase constructor SRMemoryLayout parameter was removed because it was
   not used.  It is not needed as a member variable because all Tensor<T> objects
   store internal representations in contiguous memory. (PR479_)
+- Client::unpack_tensor() enforces that the user-provided TensorType matches the
+  known tensor type.  Now DataSet::unpack_tensor() enforces the same condition. (PR478_)
+- Removes an unused parameter in the RedisCluster::_get_model_script_db()
+  method. (PR477_)
 - Version numbers changed for the Intel Compiler chain that lead to the C and C++
   compilers not being available. Now, the entirety of the Base and HPC kits are
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
 .. _PR479: https://github.com/CrayLabs/SmartRedis/pull/479
+.. _PR478: https://github.com/CrayLabs/SmartRedis/pull/478
+.. _PR477: https://github.com/CrayLabs/SmartRedis/pull/477
 .. _PR475: https://github.com/CrayLabs/SmartRedis/pull/475
 .. _PR471: https://github.com/CrayLabs/SmartRedis/pull/471
 

@@ -738,16 +738,17 @@ class RedisCluster : public RedisServer
                                 std::vector<std::string> outputs);
 
         /*!
-        *   \brief  Retrieve the optimum model prefix for
-        *           the set of inputs
-        *   \param name The name of the model
+        *   \brief  Retrieve the db node in the cluster that contains
+        *           the most input and output tensors.  If multiple
+        *           db nodes contain the same amount of input and
+        *           output tensors, the first db node in the internal
+        *           data structure is returned.
         *   \param inputs The keys of inputs tensors to use
         *                 in the model
         *   \param outputs The keys of output tensors that
         *                 will be used to save model results
         */
-        DBNode* _get_model_script_db(const std::string& name,
-                                     std::vector<std::string>& inputs,
+        DBNode* _get_model_script_db(std::vector<std::string>& inputs,
                                      std::vector<std::string>& outputs);
 
         /*!
