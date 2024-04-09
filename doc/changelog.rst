@@ -9,8 +9,9 @@ To be released at some future point in time
 Description
 
 - Enforce changelog updates
-- Enforce matching TensorType for DataSet::unpack_tensor()
+- Removed unused TensorBase constructor parameter
 - Remove unused parameter in internal redis cluster method
+- Enforce matching TensorType for DataSet::unpack_tensor()
 - Update CI for Intel suite
 - Fix inconsistency in C-API ConfigOptions is_configured() parameters
 
@@ -18,6 +19,9 @@ Detailed Notes
 
 - Add Github Actions workflow that checks if changelog is edited
   on pull requests into develop. (SmartSim-PR480_)
+- The TensorBase constructor SRMemoryLayout parameter was removed because it was
+  not used.  It is not needed as a member variable because all Tensor<T> objects
+  store internal representations in contiguous memory. (PR479_)
 - Client::unpack_tensor() enforces that the user-provided TensorType matches the
   known tensor type.  Now DataSet::unpack_tensor() enforces the same condition. (PR478_)
 - Removes an unused parameter in the RedisCluster::_get_model_script_db()
@@ -28,6 +32,7 @@ Detailed Notes
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
 .. _PR480: https://github.com/CrayLabs/SmartRedis/pull/480
+.. _PR479: https://github.com/CrayLabs/SmartRedis/pull/479
 .. _PR478: https://github.com/CrayLabs/SmartRedis/pull/478
 .. _PR477: https://github.com/CrayLabs/SmartRedis/pull/477
 .. _PR475: https://github.com/CrayLabs/SmartRedis/pull/475
