@@ -97,8 +97,7 @@ class TensorBase{
         TensorBase(const std::string& name,
                    const void* data,
                    const std::vector<size_t>& dims,
-                   const SRTensorType type,
-                   const SRMemoryLayout mem_layout);
+                   const SRTensorType type);
 
         /*!
         *   \brief TensorBase copy constructor
