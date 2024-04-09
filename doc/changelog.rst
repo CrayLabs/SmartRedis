@@ -18,7 +18,7 @@ Description
 Detailed Notes
 
 - Add Github Actions workflow that checks if changelog is edited
-  on pull requests into develop. (SmartSim-PR480_)
+  on pull requests into develop. (PR480_)
 - The TensorBase constructor SRMemoryLayout parameter was removed because it was
   not used.  It is not needed as a member variable because all Tensor<T> objects
   store internal representations in contiguous memory. (PR479_)
