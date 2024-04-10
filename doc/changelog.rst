@@ -8,7 +8,7 @@ To be released at some future point in time
 
 Description
 
-- Drop Python 3.8 support.
+- Drop Python 3.8 support
 - Enforce changelog updates
 - Removed unused TensorBase constructor parameter
 - Remove unused parameter in internal redis cluster method
