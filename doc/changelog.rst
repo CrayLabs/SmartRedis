@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Drop Python 3.8 support.
 - Enforce changelog updates
 - Removed unused TensorBase constructor parameter
 - Remove unused parameter in internal redis cluster method
@@ -17,6 +18,8 @@ Description
 
 Detailed Notes
 
+- Python 3.8 is reaching its end-of-life in October, 2024, so it will
+  no longer continue to be supported. (PR482_)
 - Add Github Actions workflow that checks if changelog is edited
   on pull requests into develop. (PR480_)
 - The TensorBase constructor SRMemoryLayout parameter was removed because it was
@@ -31,6 +34,7 @@ Detailed Notes
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR482: https://github.com/CrayLabs/SmartRedis/pull/482
 .. _PR480: https://github.com/CrayLabs/SmartRedis/pull/480
 .. _PR479: https://github.com/CrayLabs/SmartRedis/pull/479
 .. _PR478: https://github.com/CrayLabs/SmartRedis/pull/478
