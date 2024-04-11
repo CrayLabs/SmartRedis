@@ -35,7 +35,7 @@ RUN apt-get update && \
     ca-certificates git \
     make cmake gcc g++ libc6-dev python3 libpython3-dev pip gfortran && \
     rm -rf /var/lib/apt/lists/*
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -s /usr/bin/python3.9 /usr/bin/python
 
 # Get source code from current clone
 COPY . /usr/local/src/SmartRedis
