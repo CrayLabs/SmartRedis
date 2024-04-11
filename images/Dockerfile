@@ -50,7 +50,7 @@ COPY . /usr/local/src/SmartRedis
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
 RUN pip3 install --upgrade pip
-RUN make clobber && make lib SR_FORTRAN=ON SR_PYTHON=ON && pip3 install . && rm -rf ~/.cache/pip \
+RUN make clobber && make lib SR_FORTRAN=ON SR_PYTHON=ON && pip install . && rm -rf ~/.cache/pip \
     && rm -rf build tests examples images utils third-party doc images
 
 # Copy install files and directories to /usr/local/lib and
