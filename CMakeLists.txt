@@ -59,8 +59,8 @@ if (SR_PEDANTIC)
         (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
         (CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC")
     )
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
-        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -Werror")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -Wextra")
+	set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -Werror -Wextra")
     elseif(
         (CMAKE_CXX_COMPILER_ID STREQUAL "Intel") OR
         (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")

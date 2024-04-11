@@ -53,11 +53,6 @@ class SRAddress
     SRAddress() : _is_tcp(true), _tcp_host(""), _tcp_port(0) {}
 
     /*!
-    *   \brief SRAddress default destructor
-    */
-    virtual ~SRAddress() {}
-
-    /*!
     *   \brief SRAddress constructor
     *   \param addr_spec The address (string form) of a server
     */
