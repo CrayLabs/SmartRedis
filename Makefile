@@ -137,12 +137,12 @@ lib-with-fortran: lib
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: SR_PEDANTIC=OFF #TODO: fix warnings in C++
+test-lib: SR_PEDANTIC=ON
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: SR_PEDANTIC=OFF #TODO: fix warnings in C++
+test-lib-with-fortran: SR_PEDANTIC=ON
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies

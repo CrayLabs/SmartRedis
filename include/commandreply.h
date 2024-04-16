@@ -29,7 +29,7 @@
 #ifndef SMARTREDIS_COMMANDREPLY_H
 #define SMARTREDIS_COMMANDREPLY_H
 
-#include "stdlib.h"
+#include <stdlib.h>
 #include <sw/redis++/redis++.h>
 #include <iostream>
 #include <vector>
