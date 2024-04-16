@@ -53,11 +53,23 @@ endif()
 # For now, we only support Pedantic on the main library build.
 # If/when we fine-tune the examples and test cases, move this block
 # to smartredis_defs.cmake
+# Note: -Wextra can be added after unused parameters are addressed
 if (SR_PEDANTIC)
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-        add_compile_options(-Wall -Werror)
+    if(
+        (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+        (CMAKE_CXX_COMPILER_ID STREQUAL "NVHPC")
+    )
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic -Wextra")
+	set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wall -Werror -Wextra")
+    elseif(
+        (CMAKE_CXX_COMPILER_ID STREQUAL "Intel") OR
+        (CMAKE_CXX_COMPILER_ID STREQUAL "IntelLLVM")
+    )
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -pedantic")
+        set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -warn all -warn error")
     else()
-        message(WARNING "SR_PEDANTIC was specified, but the CMAKE compiler is not GCC")
+        message(WARNING "SR_PEDANTIC not supported for ${CMAKE_CXX_COMPILER_ID}")
+        message(WARNING ${CMAKE_CXX_COMPILER_ID})
     endif()
     if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-maybe-uninitialized")

@@ -31,7 +31,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
-#include "stdlib.h"
+#include <stdlib.h>
 
 void load_mnist_image_to_array(float**** img)
 {

@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Fix C++ cosmetic defects leading to compiler warnings
 - Enforce changelog updates
 - Removed unused TensorBase constructor parameter
 - Remove unused parameter in internal redis cluster method
@@ -17,6 +18,9 @@ Description
 
 Detailed Notes
 
+- Fixes some mainly cosmetic defects in the C++ client that were leading to warnings
+  when pedantic compiler flags were enabled (PR476_)
+- Re-enable SR_PEDANTIC for the `test-lib` and `test-lib-with-fortran` Makefile targets (PR476_)
 - Add Github Actions workflow that checks if changelog is edited
   on pull requests into develop. (PR480_)
 - The TensorBase constructor SRMemoryLayout parameter was removed because it was
@@ -31,6 +35,7 @@ Detailed Notes
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR476: https://github.com/CrayLabs/SmartRedis/pull/476
 .. _PR480: https://github.com/CrayLabs/SmartRedis/pull/480
 .. _PR479: https://github.com/CrayLabs/SmartRedis/pull/479
 .. _PR478: https://github.com/CrayLabs/SmartRedis/pull/478
@@ -51,7 +56,7 @@ Description
 Detailed Notes
 
 - A previous bug fix for the Python client which addressed a problem when sending
-  numpy views inadvertently kept the original put_tensor call in place. This 
+  numpy views inadvertently kept the original put_tensor call in place. This
   essentially doubles the cost of the operation. (PR464_)
 
 .. _PR464: https://github.com/CrayLabs/SmartRedis/pull/464
