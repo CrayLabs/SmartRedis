@@ -267,10 +267,12 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
             PipelineReply reply;
             try {
                 reply = _run_pipeline(shard_cmds[s], shard_prefix);
+                std::cout<<"Shard "<<std::to_string(s)<<"succeeded"<<std::endl;
                 success_status[s] = true;
             }
             catch (Exception& e) {
                 error_response = e;
+                std::cout<<"AN ERROR WAS FOUND !!!!!! "<<e.what()<<std::endl;
                 success_status[s] = false;
             }
 
@@ -301,7 +303,14 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
 
     // Throw an exception if one was generated in processing the threads
     for (size_t i = 0; i < num_shards; i++) {
+        std::cout<<"Checking shard "<<i<<std::endl;
         if (!success_status[i]) {
+            for(int j = 0; j < num_shards; j++) {
+                std::cout<<"The size of the shard command list " << j << "is "<<shard_cmd_index_list[j].size()<<std::endl;
+                std::cout<<"Shard "<<j<<" is "<<success_status[j]<<std::endl;
+            }
+            throw "Shard " + std::to_string(i) + " failed.";
+            std::cout<<"The error response is "<<error_response.what()<<std::endl;
             throw error_response;
         }
     }
