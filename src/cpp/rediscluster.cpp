@@ -238,7 +238,11 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     volatile size_t pipeline_completion_count = 0;
     size_t num_shards = shard_cmd_index_list.size();
     Exception error_response = Exception("no error");
-    std::vector<bool> success_status(num_shards, false);
+
+    bool* success_status = new bool[num_shards];
+    for (size_t s = 0; s < num_shards; s++) {
+        success_status[s] = false;
+    }
     std::mutex results_mutex;
 
     // Loop over all shards and execute pipelines
@@ -310,6 +314,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     // with order of execution
     all_replies.reorder(cmd_list_index_ooe);
 
+    delete[] success_status;
     return all_replies;
 }
 
@@ -1415,8 +1420,8 @@ DBNode* RedisCluster::_get_model_script_db(std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
 {
     /* This function determines which db node in the cluster
-    contains the most input and output tensors and 
-    returns a pointer to that db node. 
+    contains the most input and output tensors and
+    returns a pointer to that db node.
     */
 
     // TODO we should randomly choose the max if there are multiple maxes
