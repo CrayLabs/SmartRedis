@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Drop Python 3.8 support
 - Fix C++ cosmetic defects leading to compiler warnings
 - Enforce changelog updates
 - Removed unused TensorBase constructor parameter
@@ -18,6 +19,8 @@ Description
 
 Detailed Notes
 
+- Python 3.8 is reaching its end-of-life in October, 2024, so it will
+  no longer continue to be supported. (PR482_)
 - Fixes some mainly cosmetic defects in the C++ client that were leading to warnings
   when pedantic compiler flags were enabled (PR476_)
 - Re-enable SR_PEDANTIC for the `test-lib` and `test-lib-with-fortran` Makefile targets (PR476_)
@@ -35,6 +38,7 @@ Detailed Notes
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR482: https://github.com/CrayLabs/SmartRedis/pull/482
 .. _PR476: https://github.com/CrayLabs/SmartRedis/pull/476
 .. _PR480: https://github.com/CrayLabs/SmartRedis/pull/480
 .. _PR479: https://github.com/CrayLabs/SmartRedis/pull/479

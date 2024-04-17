@@ -37,8 +37,8 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-              os: [ubuntu-20.04] # cannot test on macOS as docker isn't supported on Mac
-              rai_v: [1.2.4, 1.2.5] # verisons of RedisAI
+              os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
+              rai_v: [1.2.5] # verisons of RedisAI
 
         # Service containers to run with docker tests
         services:

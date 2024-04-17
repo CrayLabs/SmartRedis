@@ -34,7 +34,7 @@ SmartRedis provides clients in the following languages:
 
 | Language   | Version/Standard                               |
 |------------|:----------------------------------------------:|
-| Python     |   3.8, 3.9, 3.10, 3.11                         |
+| Python     |   3.9, 3.10, 3.11                              |
 | C++        |   C++17                                        |
 | C          |   C99                                          |
 | Fortran    |   Fortran 2018 (GNU/Intel), 2003 (PGI/Nvidia)  |
