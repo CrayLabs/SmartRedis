@@ -51,8 +51,14 @@ int main(int argc, char* argv[]) {
 
   std::vector<char> output_bytes(n_bytes, 0);
 
-  std::cout<<"UNPACKING BYTES"<<std::endl;
   client.unpack_bytes(key, output_bytes.data(), n_bytes);
+
+  for(int i = 0; i < n_bytes; i++) {
+    if (output_bytes[i] != input_bytes[i]) {
+      std::cout<<"Byte "<<i<<" does not match."<<std::endl;
+      throw std::exception();
+    }
+  }
 
   std::cout<<"Put bytes test complete"<<std::endl;
 
