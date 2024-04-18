@@ -224,6 +224,34 @@ class Client : public SRObject
                         const SRMemoryLayout mem_layout);
 
         /*!
+        *   \brief Puts a raw byte string into the database
+        *   \details The provided byte string is placed into the database
+        *            without any type associated with the bytes.
+        *   \param name The name for referencing the bytes in the database
+        *   \param data The data
+        *   \param n_bytes The number of bytes in the provided data
+        *   \throw SmartRedis::Exception if put bytes command fails
+        */
+        void put_bytes(const std::string& name,
+                       const void* bytes,
+                       const size_t n_bytes);
+
+        /*!
+        *   \brief Retrieve bytes from the database and place into memory
+        *          provided by the caller
+        *   \details The key used to locate the stored bytes
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
+        *            and use_tensor_ensemble_prefix() for more details.
+        *   \param name The name for referencing the bytes in the database
+        *   \param data A buffer into which to place byte data
+        *   \param n_bytes The number of bytes in the provided data
+        *   \throw SmartRedis::Exception if unpack bytes command fails
+        */
+        void unpack_bytes(const std::string& name,
+                          void* data,
+                          const size_t n_bytes);
+        /*!
         *   \brief Retrieve the tensor data, dimensions, and type for the
         *          provided tensor key. This function will allocate and retain
         *          management of the memory for the tensor data.

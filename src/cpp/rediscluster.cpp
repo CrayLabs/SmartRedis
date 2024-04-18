@@ -377,6 +377,31 @@ CommandReply RedisCluster::put_tensor(TensorBase& tensor)
     return run(cmd);
 }
 
+// Put bytes on the server
+CommandReply RedisCluster::put_bytes(const std::string& key,
+                                     const void* bytes,
+                                     const size_t n_bytes)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "SET" << Keyfield(key) 
+        << std::string_view((char*)bytes, n_bytes);
+
+    // Run it
+    return run(cmd);
+}
+
+// Get bytes from the server
+CommandReply RedisCluster::get_bytes(const std::string& key)
+{
+    // Build the command
+    SingleKeyCommand cmd;
+    cmd << "GET" << Keyfield(key);
+
+    // Run it
+    return run(cmd);
+}
+
 // Get a Tensor from the server
 CommandReply RedisCluster::get_tensor(const std::string& key)
 {

@@ -348,6 +348,39 @@ void Client::put_tensor(const std::string& name,
         throw SRRuntimeException("put_tensor failed");
 }
 
+// Put bytes into the database
+void Client::put_bytes(const std::string& name,
+                       const void* bytes,
+                       const size_t n_bytes)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string key = _build_tensor_key(name, false);
+
+    // Send the tensor
+    CommandReply reply = _redis_server->put_bytes(key, bytes, n_bytes);
+
+    if (reply.has_error())
+        throw SRRuntimeException("put_bytes failed");
+}
+
+// Get byte data and fill an already allocated array memory space that
+// has the specified size. This method is the most memory 
+// efficient way to retrieve tensor data.
+void Client::unpack_bytes(const std::string& name,
+                          void* data,
+                          const size_t n_bytes)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string get_key = _build_tensor_key(name, true);
+    CommandReply reply = _redis_server->get_bytes(get_key);
+
+    std::memcpy(data, reply.str(), reply.str_len());
+}
+
 // Get the tensor data, dimensions, and type for the provided tensor name.
 // This function will allocate and retain management of the memory for the
 // tensor data.

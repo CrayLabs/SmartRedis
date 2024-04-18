@@ -202,6 +202,26 @@ class RedisServer {
         virtual CommandReply put_tensor(TensorBase& tensor) = 0;
 
         /*!
+        *   \brief Put bytes on the server
+        *   \param tensor The bytes to put on the server
+        *   \returns The CommandReply from the put bytes
+        *            command execution
+        *   \throw SmartRedis::Exception if bytes storage fails
+        */
+        virtual CommandReply put_bytes(const std::string& key, 
+                                       const void* bytes,
+                                       const size_t n_bytes) = 0;
+        
+        /*!
+        *   \brief Get bytes from the server
+        *   \param key The name of the bytes to retrieve
+        *   \returns The CommandReply from the get bytes server
+        *            command execution
+        *   \throw SmartRedis::Exception if bytes retrieval fails
+        */
+        virtual CommandReply get_bytes(const std::string& key) = 0;
+
+        /*!
         *   \brief Get a Tensor from the server
         *   \param key The name of the tensor to retrieve
         *   \returns The CommandReply from the get tensor server
