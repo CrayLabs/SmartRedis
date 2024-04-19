@@ -125,6 +125,17 @@ void PyClient::put_tensor(
     });
 }
 
+void PyClient::put_bytes(std::string& name, py::object data)
+{
+    MAKE_CLIENT_API({
+
+        // This does an implicit copy but it's not clear 
+        // how we can get access to only the data
+        std::string bytes_data = data.attr("getvalue")().cast<std::string>();
+        _client->put_bytes(name, bytes_data.data(), bytes_data.size());
+    });
+}
+
 py::array PyClient::get_tensor(const std::string& name)
 {
     return MAKE_CLIENT_API({
@@ -181,6 +192,25 @@ py::array PyClient::get_tensor(const std::string& name)
                 throw SRRuntimeException("Could not infer type in "\
                                         "PyClient::get_tensor().");
         }
+    });
+}
+
+// Get a py::bytes object pointing to the underlying bytes data
+py::bytes PyClient::get_bytes(const std::string& name)
+{
+    return MAKE_CLIENT_API({
+        
+        void* data = NULL;
+        size_t n_bytes = 0;
+
+        // Get the bytes and store in data pointer and update n_bytes
+        _client->_get_bytes_no_mem_handling(name, data, n_bytes);
+
+        // TODO by using py::bytes we are doing another explicit deep copy 
+        // and _get_bytes_no_mem_handling has already done a deep copy
+        py::bytes py_bytes = py::bytes((char*)data, n_bytes);
+        free(data);
+        return py_bytes;
     });
 }
 

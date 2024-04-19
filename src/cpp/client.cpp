@@ -2259,6 +2259,25 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     return ptr;
 }
 
+// Get the bytes stored in the database and allocate memory via malloc 
+// to hold it (deep copy)
+void Client::_get_bytes_no_mem_handling(const std::string& name,
+                                        void*& data, 
+                                        size_t& n_bytes)
+{
+    std::string get_key = _build_tensor_key(name, true);
+    CommandReply reply = _redis_server->get_bytes(get_key);
+
+    // TODO We don't have a way with CommandReply to transfer ownership of a str() reply
+    // to an outside pointer.  For now we do a naive memcopy, 
+    // but we really shouldn't have to do that
+    // We could set the internal str reply value to NULL and the redisreply destructor
+    // which calls free on it will likely do a no-op, but this isn't proven.
+    n_bytes = reply.str_len();
+    data = malloc(n_bytes);
+    std::memcpy(data, (void*)(reply.str()), n_bytes);
+}
+
 // Determine datset name from aggregation list entry
 std::string Client::_get_dataset_name_from_list_entry(
     const std::string& dataset_key)

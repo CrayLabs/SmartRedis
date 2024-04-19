@@ -62,6 +62,8 @@ PYBIND11_MODULE(smartredisPy, m) {
         .def(py::init<const std::string&>())
         .def(py::init<PyConfigOptions&, const std::string&>())
         .CLIENT_METHOD(put_tensor)
+        .CLIENT_METHOD(put_bytes)
+        .CLIENT_METHOD(get_bytes)
         .CLIENT_METHOD(get_tensor)
         .CLIENT_METHOD(delete_tensor)
         .CLIENT_METHOD(copy_tensor)

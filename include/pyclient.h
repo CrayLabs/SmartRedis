@@ -101,6 +101,16 @@ class PyClient : public PySRObject
                         py::array data);
 
         /*!
+        *   \brief Put bytes into the database
+        *   \param name The name to associate with the bytes
+        *              in the database
+        *   \param data The bytes to store
+        *   \throw RuntimeException for all client errors
+        */
+        void put_bytes(std::string& name,
+                       py::object data);
+
+        /*!
         *   \brief  Retrieve a tensor from the database.
         *   \details The memory of the data pointer used
         *            to construct the Numpy array is valid
@@ -116,6 +126,13 @@ class PyClient : public PySRObject
         *   \throw RuntimeException for all client errors
         */
         py::array get_tensor(const std::string& name);
+
+        /*!
+        *   \brief  Retrieve bytes from the database.
+        *   \param name The name used to reference the bytes
+        *   \throw RuntimeException for all client errors
+        */
+        py::bytes get_bytes(const std::string& name);
 
         /*!
         *   \brief delete a tensor stored in the database

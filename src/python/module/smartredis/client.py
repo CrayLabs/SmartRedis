@@ -30,6 +30,7 @@ import os
 import os.path as osp
 import typing as t
 import numpy as np
+import io
 
 from .dataset import Dataset
 from .configoptions import ConfigOptions
@@ -189,6 +190,24 @@ class Client(SRObject):
             self._client.put_tensor(name, dtype, data.copy())
 
     @exception_handler
+    def put_bytes(self, name: str, data: io.BytesIO) -> None:
+        """Put bytes to a Redis database
+
+        The final key under which the bytes are stored
+        may be formed by applying a prefix to the supplied
+        name. See use_tensor_ensemble_prefix() for more details.
+
+        :param name: name for bytes to be stored at
+        :type name: str
+        :param data: bytes to be stored
+        :type data: io.BytesIO
+        :raises RedisReplyError: if put fails
+        """
+        typecheck(name, "name", str)
+        typecheck(data, "data", io.BytesIO)
+        self._client.put_bytes(name, data)
+
+    @exception_handler
     def get_tensor(self, name: str) -> np.ndarray:
         """Get a tensor from the database
 
@@ -205,6 +224,26 @@ class Client(SRObject):
         """
         typecheck(name, "name", str)
         return self._client.get_tensor(name)
+
+    @exception_handler
+    def get_bytes(self, name: str) -> str:
+        """Get bytes from the database
+
+        The key used to locate the bytes
+        may be formed by applying a prefix to the supplied
+        name. See set_data_source()
+        and use_tensor_ensemble_prefix() for more details.
+
+        :param name: name associated with the bytes
+        :type name: str
+        :raises RedisReplyError: if get fails
+        :return: data bytes
+        :rtype: io.BytesIO
+        """
+
+        typecheck(name, "name", str)
+        # TODO this is a deep copy of the returned bytes object
+        return io.BytesIO(self._client.get_bytes(name))
 
     @exception_handler
     def delete_tensor(self, name: str) -> None:

@@ -73,7 +73,7 @@ class RedisRuntimeError(RedisReplyError):
         if method:
             msg = f"{method} execution failed\n"
         if "REDIS_REPLY_NIL" in cpp_error:
-            msg += f"No Dataset stored at key: {key}"
+            msg += f"No data stored at key: {key}"
             return msg
         msg += cpp_error
         return msg

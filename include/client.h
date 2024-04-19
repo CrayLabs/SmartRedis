@@ -1531,6 +1531,19 @@ class Client : public SRObject
         TensorBase* _get_tensorbase_obj(const std::string& name);
 
         /*!
+        *   \brief This function retrieves bytes stored in the database
+        *          and attaches them to the provided void* pointer.
+        *          The provided n_bytes is modified (by reference) to 
+        *          inform the caller the number of bytes associated 
+        *          with the pointer.  The caller is responsible
+        *          for freeing the memory with free.
+        *   \param name  The name used to reference the bytes
+        */
+        void _get_bytes_no_mem_handling(const std::string& name,
+                                        void*& data, 
+                                        size_t& n_bytes);
+
+        /*!
         *   \brief The name of the hash field used to confirm that the
         *          DataSet placement operation was successfully completed.
         */
