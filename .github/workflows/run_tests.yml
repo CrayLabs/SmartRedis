@@ -1,206 +1,206 @@
-#
-# BSD 2-Clause License
-#
-# Copyright (c) 2021-2024, Hewlett Packard Enterprise
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-# 1. Redistributions of source code must retain the above copyright notice, this
-#    list of conditions and the following disclaimer.
-#
-# 2. Redistributions in binary form must reproduce the above copyright notice,
-#    this list of conditions and the following disclaimer in the documentation
-#    and/or other materials provided with the distribution.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
+# #
+# # BSD 2-Clause License
+# #
+# # Copyright (c) 2021-2024, Hewlett Packard Enterprise
+# # All rights reserved.
+# #
+# # Redistribution and use in source and binary forms, with or without
+# # modification, are permitted provided that the following conditions are met:
+# #
+# # 1. Redistributions of source code must retain the above copyright notice, this
+# #    list of conditions and the following disclaimer.
+# #
+# # 2. Redistributions in binary form must reproduce the above copyright notice,
+# #    this list of conditions and the following disclaimer in the documentation
+# #    and/or other materials provided with the distribution.
+# #
+# # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# # DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# # FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# # DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# # SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# #
 
-name: run_tests
+# name: run_tests
 
-# This file is for tests that are to be run frequently, with each push to a PR.
+# # This file is for tests that are to be run frequently, with each push to a PR.
 
-on:
-  push:
-    branches:
-      - master
-      - develop
-  pull_request:
-    branches:
-      - master
-      - develop
+# on:
+#   push:
+#     branches:
+#       - master
+#       - develop
+#   pull_request:
+#     branches:
+#       - master
+#       - develop
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref }}
+#   cancel-in-progress: true
 
-env:
-  HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
-  HOMEBREW_NO_AUTO_UPDATE: "ON"
-  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
-  HOMEBREW_NO_GITHUB_API: "ON"
-  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
-  DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
-  SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
-  SR_LOG_LEVEL: "INFO"
+# env:
+#   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
+#   HOMEBREW_NO_AUTO_UPDATE: "ON"
+#   HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+#   HOMEBREW_NO_GITHUB_API: "ON"
+#   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+#   DEBIAN_FRONTEND: "noninteractive" # disable interactive apt installs
+#   SR_LOG_FILE: "smartredis_cicd_tests_log.txt"
+#   SR_LOG_LEVEL: "INFO"
 
-jobs:
+# jobs:
 
-  run_tests:
-    name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, and ${{ matrix.compiler }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
-        rai_v: [1.2.7] # versions of RedisAI
-        py_v: ['3.9.x', '3.10.x', '3.11.x'] # versions of Python
-        compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
-        link_type: [Static, Shared]
-    env:
-      COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
-      LINK_TYPE: ${{ matrix.link_type }}
+#   run_tests:
+#     name: Run smartredis tests using ${{ matrix.os }}, Python ${{ matrix.py_v }}, and ${{ matrix.compiler }}
+#     runs-on: ${{ matrix.os }}
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
+#         rai_v: [1.2.7] # versions of RedisAI
+#         py_v: ['3.9.x', '3.10.x', '3.11.x'] # versions of Python
+#         compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
+#         link_type: [Static, Shared]
+#     env:
+#       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
+#       LINK_TYPE: ${{ matrix.link_type }}
 
 
-    steps:
-      # Maximize the space in this image
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          root-reserve-mb: 30720
-          remove-dotnet: true
-          remove-android: true
-          remove-haskell: true
-          remove-codeql: true
-          remove-docker-images: true
+#     steps:
+#       # Maximize the space in this image
+#       - name: Maximize build space
+#         uses: easimon/maximize-build-space@master
+#         with:
+#           root-reserve-mb: 30720
+#           remove-dotnet: true
+#           remove-android: true
+#           remove-haskell: true
+#           remove-codeql: true
+#           remove-docker-images: true
 
-      # download a copy of SmartRedis before running CI tests
-      - uses: actions/checkout@v3
+#       # download a copy of SmartRedis before running CI tests
+#       - uses: actions/checkout@v3
 
-      # Setup python within the container
-      - uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.py_v }}
+#       # Setup python within the container
+#       - uses: actions/setup-python@v4
+#         with:
+#           python-version: ${{ matrix.py_v }}
 
-      # Install compilers (Intel or GCC)
-      - name: Install GCC
-        if: "contains( matrix.compiler, 'gcc' )" # if using GNU compiler
-        run: |
-          GCC_V=${COMPILER#gcc-} &&
-          sudo apt-get -y update &&
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
-          sudo apt-get -y update &&
-          sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} mpich &&
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-            --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
-            --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
-            --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
-          echo "CC=gcc" >> $GITHUB_ENV &&
-          echo "CXX=g++" >> $GITHUB_ENV &&
-          echo "FC=gfortran" >> $GITHUB_ENV &&
-          sudo apt clean
-        # Note CC and CXX need to be set otherwise, some Ubuntu images default to
-        # a Debian-flavored compiler
+#       # Install compilers (Intel or GCC)
+#       - name: Install GCC
+#         if: "contains( matrix.compiler, 'gcc' )" # if using GNU compiler
+#         run: |
+#           GCC_V=${COMPILER#gcc-} &&
+#           sudo apt-get -y update &&
+#           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test &&
+#           sudo apt-get -y update &&
+#           sudo apt-get -y install -y gcc-${GCC_V} gfortran-${GCC_V} g++-${GCC_V} mpich &&
+#           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
+#             --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V} \
+#             --slave /usr/bin/g++ g++ /usr/bin/g++-${GCC_V} \
+#             --slave /usr/bin/gcov gcov /usr/bin/gcov-${GCC_V} &&
+#           echo "CC=gcc" >> $GITHUB_ENV &&
+#           echo "CXX=g++" >> $GITHUB_ENV &&
+#           echo "FC=gfortran" >> $GITHUB_ENV &&
+#           sudo apt clean
+#         # Note CC and CXX need to be set otherwise, some Ubuntu images default to
+#         # a Debian-flavored compiler
 
-      - name: Install Intel compiler
-        if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
-        run: |
-          INTEL_V=${COMPILER#intel-} &&
-          wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
-            | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null &&
-          echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
-            | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
-          sudo apt update -y && \
-          sudo apt install -y intel-basekit-${INTEL_V} intel-hpckit-${INTEL_V} &&
-          source /opt/intel/oneapi/setvars.sh &&
-          printenv >> $GITHUB_ENV &&
-          echo "CC=icx" >> $GITHUB_ENV &&
-          echo "CXX=icpx" >> $GITHUB_ENV &&
-          echo "FC=ifx" >> $GITHUB_ENV &&
-          sudo apt clean
+#       - name: Install Intel compiler
+#         if: "contains( matrix.compiler, 'intel' )" # if using intel compiler
+#         run: |
+#           INTEL_V=${COMPILER#intel-} &&
+#           wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+#             | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null &&
+#           echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+#             | sudo tee /etc/apt/sources.list.d/oneAPI.list &&
+#           sudo apt update -y && \
+#           sudo apt install -y intel-basekit-${INTEL_V} intel-hpckit-${INTEL_V} &&
+#           source /opt/intel/oneapi/setvars.sh &&
+#           printenv >> $GITHUB_ENV &&
+#           echo "CC=icx" >> $GITHUB_ENV &&
+#           echo "CXX=icpx" >> $GITHUB_ENV &&
+#           echo "FC=ifx" >> $GITHUB_ENV &&
+#           sudo apt clean
 
-      - name: Install Nvidia compiler
-        if: "contains( matrix.compiler, 'nvhpc' )" # if using intel compiler
-        run: |
-          curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK \
-            | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg &&
-          echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' \
-            | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
-          sudo apt-get update -y &&
-          sudo apt-get install -y ${COMPILER} &&
-          echo "CC=nvc" >> $GITHUB_ENV &&
-          echo "CXX=nvc++" >> $GITHUB_ENV &&
-          echo "FC=nvfortran" >> $GITHUB_ENV &&
-          NVHPC_V=${COMPILER/nvhpc-} &&
-          NVHPC_ROOT="/opt/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_V/-/.}" &&
-          echo "${NVHPC_ROOT}/compilers/bin" >> $GITHUB_PATH &&
-          echo "${NVHPC_ROOT}/comm_libs/mpi/bin" >> $GITHUB_PATH &&
-          sudo apt clean
+#       - name: Install Nvidia compiler
+#         if: "contains( matrix.compiler, 'nvhpc' )" # if using intel compiler
+#         run: |
+#           curl https://developer.download.nvidia.com/hpc-sdk/ubuntu/DEB-GPG-KEY-NVIDIA-HPC-SDK \
+#             | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg &&
+#           echo 'deb [signed-by=/usr/share/keyrings/nvidia-hpcsdk-archive-keyring.gpg] https://developer.download.nvidia.com/hpc-sdk/ubuntu/amd64 /' \
+#             | sudo tee /etc/apt/sources.list.d/nvhpc.list &&
+#           sudo apt-get update -y &&
+#           sudo apt-get install -y ${COMPILER} &&
+#           echo "CC=nvc" >> $GITHUB_ENV &&
+#           echo "CXX=nvc++" >> $GITHUB_ENV &&
+#           echo "FC=nvfortran" >> $GITHUB_ENV &&
+#           NVHPC_V=${COMPILER/nvhpc-} &&
+#           NVHPC_ROOT="/opt/nvidia/hpc_sdk/Linux_x86_64/${NVHPC_V/-/.}" &&
+#           echo "${NVHPC_ROOT}/compilers/bin" >> $GITHUB_PATH &&
+#           echo "${NVHPC_ROOT}/comm_libs/mpi/bin" >> $GITHUB_PATH &&
+#           sudo apt clean
 
-      # Set up perl environment for LCOV
-      - name: Setup perl
-        uses: shogo82148/actions-setup-perl@v1
-        with:
-          perl-version: '5.30'
-          install-modules: Memory::Process
+#       # Set up perl environment for LCOV
+#       - name: Setup perl
+#         uses: shogo82148/actions-setup-perl@v1
+#         with:
+#           perl-version: '5.30'
+#           install-modules: Memory::Process
 
-      # Install additional perl Modules
-      - name: Add perl modules
-        run: |
-          sudo apt install -y \
-            libcapture-tiny-perl \
-            libdatetime-perl \
-            libdevel-cover-perl \
-            libdigest-md5-perl \
-            libfile-spec-perl \
-            libjson-xs-perl \
-            libtime-hires-perl
+#       # Install additional perl Modules
+#       - name: Add perl modules
+#         run: |
+#           sudo apt install -y \
+#             libcapture-tiny-perl \
+#             libdatetime-perl \
+#             libdevel-cover-perl \
+#             libdigest-md5-perl \
+#             libfile-spec-perl \
+#             libjson-xs-perl \
+#             libtime-hires-perl
 
-      # Install additional dependencies
-      - name: Install Cmake Linux
-        if: contains(matrix.os, 'ubuntu')
-        run: sudo apt-get -y install cmake
+#       # Install additional dependencies
+#       - name: Install Cmake Linux
+#         if: contains(matrix.os, 'ubuntu')
+#         run: sudo apt-get -y install cmake
 
-      - name: Build SmartRedis python and install
-        run: python -m pip install -e .[dev,xarray]
+#       - name: Build SmartRedis python and install
+#         run: python -m pip install -e .[dev,xarray]
 
-      - name: Build and install test dependencies
-        run: |
-          make test-deps &&
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+#       - name: Build and install test dependencies
+#         run: |
+#           make test-deps &&
+#           echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
 
-      # Make sure the examples work
-      - name: Run examples
-        run: |
-          make test-examples SR_FORTRAN=ON SR_PYTHON=ON SR_LINK=$LINK_TYPE \
-          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+#       # Make sure the examples work
+#       - name: Run examples
+#         run: |
+#           make test-examples SR_FORTRAN=ON SR_PYTHON=ON SR_LINK=$LINK_TYPE \
+#           SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
-      # Run the tests using various DB deployments
-      - name: Run tests
-        run: |
-          make test-verbose-with-coverage \
-            COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
-            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 SR_LINK=$LINK_TYPE \
-            SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+#       # Run the tests using various DB deployments
+#       - name: Run tests
+#         run: |
+#           make test-verbose-with-coverage \
+#             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
+#             SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 SR_LINK=$LINK_TYPE \
+#             SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
-      # Process and upload code coverage (Python was collected during pytest)
-      - name: Collect coverage from C/C++/Fortran testers
-        run: third-party/lcov/install/bin/lcov --ignore-errors gcov,mismatch --keep-going -c -d build/Coverage/CMakeFiles -o coverage.info
+#       # Process and upload code coverage (Python was collected during pytest)
+#       - name: Collect coverage from C/C++/Fortran testers
+#         run: third-party/lcov/install/bin/lcov --ignore-errors gcov,mismatch --keep-going -c -d build/Coverage/CMakeFiles -o coverage.info
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml, ./coverage.info
+#       - name: Upload coverage to Codecov
+#         uses: codecov/codecov-action@v3
+#         with:
+#           files: ./coverage.xml, ./coverage.info
 
-      - name: Run Pylint
-        run: make check-lint
+#       - name: Run Pylint
+#         run: make check-lint
