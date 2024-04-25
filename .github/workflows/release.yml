@@ -29,10 +29,8 @@
 name: deploy-release
 
 on:
-  pull_request:
-  push:
-    branches:
-      - develop
+  release:
+    types: [published]
 
 env:
   HOMEBREW_NO_ANALYTICS: "ON" # Make Homebrew installation a little quicker
@@ -44,94 +42,94 @@ env:
   CIBW_ARCHES: x86_64
 
 jobs:
-#   build_wheels:
-#     name: Build wheels on ${{ matrix.os }}
-#     runs-on: ${{ matrix.os }}
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         os: [ubuntu-22.04, macos-12]
-#         gcc_v: [11] # Version of GFortran we want to use.
-#     env:
-#       FC: gfortran-${{ matrix.gcc_v }}
-#       GCC_V: ${{ matrix.gcc_v }}
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-12]
+        gcc_v: [11] # Version of GFortran we want to use.
+    env:
+      FC: gfortran-${{ matrix.gcc_v }}
+      GCC_V: ${{ matrix.gcc_v }}
 
-#     steps:
-#       - uses: actions/checkout@v2
-#       - uses: actions/setup-python@v2
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
 
-#       - name: Install cibuildwheel
-#         run: python -m pip install cibuildwheel>=2.12.3
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel>=2.12.3
 
-#       - name: Install GFortran Linux
-#         if: contains(matrix.os, 'ubuntu')
-#         run: |
-#           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-#           sudo apt-get update
-#           sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V}
-#           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
-#           --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
-#           sudo apt-get install -y libtool automake
+      - name: Install GFortran Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-${GCC_V} gfortran-${GCC_V}
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${GCC_V} 100 \
+          --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-${GCC_V}
+          sudo apt-get install -y libtool automake
 
-#       - name: Install Cmake Linux
-#         if: contains(matrix.os, 'ubuntu')
-#         run: sudo apt-get install cmake
+      - name: Install Cmake Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: sudo apt-get install cmake
 
-#       - name: Install GFortran macOS
-#         if: contains(matrix.os, 'macos')
-#         run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
+      - name: Install GFortran macOS
+        if: contains(matrix.os, 'macos')
+        run: brew install gcc@${GCC_V} || brew upgrade gcc@${GCC_V} || true
 
-#       - name: Install automake macOS
-#         if: contains(matrix.os, 'macos')
-#         run: brew install automake || true
+      - name: Install automake macOS
+        if: contains(matrix.os, 'macos')
+        run: brew install automake || true
 
-#       - name: Install cmake macOS
-#         if: contains(matrix.os, 'macos')
-#         run: brew install cmake || true
+      - name: Install cmake macOS
+        if: contains(matrix.os, 'macos')
+        run: brew install cmake || true
 
-#       - name: Build wheels
-#         run: python -m cibuildwheel --output-dir wheelhouse
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
 
-#       - uses: actions/upload-artifact@v2
-#         with:
-#           path: ./wheelhouse/*.whl
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./wheelhouse/*.whl
 
-#   build_sdist:
-#     name: Build source distribution
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
-#       - uses: actions/setup-python@v2
-#         name: Install Python
-#         with:
-#           python-version: '3.9'
+      - uses: actions/setup-python@v2
+        name: Install Python
+        with:
+          python-version: '3.9'
 
-#       - name: Build sdist
-#         run: |
-#           sudo apt-get install cmake
-#           python setup.py sdist
+      - name: Build sdist
+        run: |
+          sudo apt-get install cmake
+          python setup.py sdist
 
-#       - uses: actions/upload-artifact@v2
-#         with:
-#           path: dist/*.tar.gz
+      - uses: actions/upload-artifact@v2
+        with:
+          path: dist/*.tar.gz
 
 
-#   upload_pypi:
-#     needs: [build_wheels, build_sdist]
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/download-artifact@v2
-#         with:
-#           name: artifact
-#           path: dist
+  upload_pypi:
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifact
+          path: dist
 
-#       - uses: pypa/gh-action-pypi-publish@master
-#         with:
-#           user: __token__
-#           password: ${{ secrets.PYPI }}
-#           #password: ${{ secrets.TEST_PYPI }}
-#           #repository_url: https://test.pypi.org/legacy/
+      - uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI }}
+          #password: ${{ secrets.TEST_PYPI }}
+          #repository_url: https://test.pypi.org/legacy/
 
 
   createPullRequest:
@@ -143,3 +141,5 @@ jobs:
       - name: Create pull request
         run: |
           gh pr create -B develop -H master --title 'Merge master into develop' --body 'This PR brings develop up to date with master for release.'
+        env:
+            GH_TOKEN: ${{ github.token }}
