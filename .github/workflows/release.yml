@@ -43,7 +43,7 @@ env:
   CIBW_SKIP: "pp* *i686*" # skip building for PyPy
   CIBW_ARCHES: x86_64
 
-# jobs:
+jobs:
 #   build_wheels:
 #     name: Build wheels on ${{ matrix.os }}
 #     runs-on: ${{ matrix.os }}
