@@ -6,6 +6,7 @@ To be released at some future point in time
 
 Description
 
+-   Automate the creation of release notes
 -   Upgrade ubuntu to 22.04 and gcc to 11
 -   Drop Python 3.8 support
 -   Fix C++ cosmetic defects leading to compiler warnings
@@ -18,6 +19,9 @@ Description
 
 Detailed Notes
 
+-   Add a configuration file to the root of .github/ to configure
+    the generated release notes.
+    ([PR487](https://github.com/CrayLabs/SmartRedis/pull/487))
 -   After dropping support for Python 3.8, ubuntu and gcc need to be
     upgraded. ([PR484](https://github.com/CrayLabs/SmartRedis/pull/484))
 -   Python 3.8 is reaching its end-of-life in October, 2024, so it will
