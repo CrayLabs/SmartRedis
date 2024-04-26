@@ -8,6 +8,7 @@ To be released at some future point in time
 
 Description
 
+- Auto-post release PR to develop from master
 - Upgrade ubuntu to 22.04 and gcc to 11
 - Drop Python 3.8 support
 - Fix C++ cosmetic defects leading to compiler warnings
@@ -20,6 +21,8 @@ Description
 
 Detailed Notes
 
+- Add to github release workflow to auto generate a pull request from master
+  into develop for release. (PR486_)
 - After dropping support for Python 3.8, ubuntu and gcc need to be upgraded.
   (PR484_)
 - Python 3.8 is reaching its end-of-life in October, 2024, so it will
@@ -41,6 +44,7 @@ Detailed Notes
   installed to ensure consistent versions. (PR475_)
 - Fix an inconsistency in the C-API ConfigOptions is_configured() parameter names. (PR471_)
 
+.. _PR486: https://github.com/CrayLabs/SmartRedis/pull/486
 .. _PR484: https://github.com/CrayLabs/SmartRedis/pull/484
 .. _PR482: https://github.com/CrayLabs/SmartRedis/pull/482
 .. _PR476: https://github.com/CrayLabs/SmartRedis/pull/476
