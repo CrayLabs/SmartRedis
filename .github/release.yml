@@ -51,6 +51,6 @@ changelog:
       exclude:
         labels:
           - non-user-facing
-    - title: Miscellaneous improvements
+    - title: Miscellaneous Improvements
       labels:
         - "*"
