@@ -11,12 +11,17 @@ Description
 -   Upgrade ubuntu to 22.04 and gcc to 11
 -   Drop Python 3.8 support
 -   Fix C++ cosmetic defects leading to compiler warnings
+-   Re-enable SR_PEDANTIC for the Makefile targets
 -   Enforce changelog updates
 -   Removed unused TensorBase constructor parameter
 -   Remove unused parameter in internal redis cluster method
 -   Enforce matching TensorType for DataSet::unpack_tensor()
 -   Update CI for Intel suite
+-   Add socket time out environment variable
 -   Fix inconsistency in C-API ConfigOptions is_configured() parameters
+-   Bump redis dep to 7.2.4
+-   Fix widths field for list-table in install documentation
+-   Remove a vestigial requirements.txt file
 
 Detailed Notes
 
@@ -56,9 +61,19 @@ Detailed Notes
     the C and C++ compilers not being available. Now, the entirety of
     the Base and HPC kits are installed to ensure consistent versions.
     ([PR475](https://github.com/CrayLabs/SmartRedis/pull/475))
+-   Add the socket timeout parameter as a user-configurable option via
+    environment variables.
+    ([PR474](https://github.com/CrayLabs/SmartRedis/pull/474))
 -   Fix an inconsistency in the C-API ConfigOptions is_configured()
     parameter names.
     ([PR471](https://github.com/CrayLabs/SmartRedis/pull/471))
+-   Fix an issue where incorrect compiler flags are defined and result
+    in build failures due to the redis_fstat macro.
+    ([PR470](https://github.com/CrayLabs/SmartRedis/pull/470))
+-   Fix wrong widths value which was preventing table from displaying.
+    ([PR468](https://github.com/CrayLabs/SmartRedis/pull/468))
+-   The requirements.txt file is unused, therefore removing.
+    ([PR462](https://github.com/CrayLabs/SmartRedis/pull/462))
 
 ## 0.5.2
 
