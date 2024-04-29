@@ -704,7 +704,7 @@ Detailed Notes
 
 ## 0.3.0
 
-Released on Febuary 11, 2022
+Released on February 11, 2022
 
 Description
 
@@ -714,15 +714,14 @@ Description
     ([PR199](https://github.com/CrayLabs/SmartRedis/pull/199))
     ([PR205](https://github.com/CrayLabs/SmartRedis/pull/205))
     ([PR206](https://github.com/CrayLabs/SmartRedis/pull/206))
-    -   Includes changes to C and Fortran function prototypes that are
-        not backwards compatible
-    -   Includes changes to error class names and enum type names that
-        are not backwards compatible
+    Includes changes to C and Fortran function prototypes that are
+    not backwards compatible. Includes changes to error class names
+    and enum type names that are not backwards compatible
 -   Add `poll_dataset` functionality to all SmartRedis clients
     ([PR184](https://github.com/CrayLabs/SmartRedis/pull/184))
-    -   Due to other breaking changes made in this release, applications
-        using methods other than `poll_dataset` to check for the
-        existence of a dataset should now use `poll_dataset`
+    Due to other breaking changes made in this release, applications
+    using methods other than `poll_dataset` to check for the
+    existence of a dataset should now use `poll_dataset`
 -   Add environment variables to control client connection and command
     timeout behavior
     ([PR194](https://github.com/CrayLabs/SmartRedis/pull/194))
