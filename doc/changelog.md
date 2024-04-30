@@ -6,6 +6,7 @@ To be released at some future point in time
 
 Description
 
+-   Fix header styling issue
 -   Correct changelog indention
 -   Automate the creation of release notes
 -   Auto-post release PR to develop from master
@@ -26,6 +27,9 @@ Description
 
 Detailed Notes
 
+-   Incorrect lineup of the changelog page index. This fixes the header
+    sizes to avoid this issue.
+    ([PR489](https://github.com/CrayLabs/SmartRedis/pull/489))
 -   After converting from rst to md, readthedocs began throwing indention
     errors in old release info. This fixes the styling.
     ([PR488](https://github.com/CrayLabs/SmartRedis/pull/488))
