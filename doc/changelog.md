@@ -1,11 +1,12 @@
 # Changelog
 
-## Development branch
+### Development branch
 
 To be released at some future point in time
 
 Description
 
+-   Fix header styling issue
 -   Correct changelog indention
 -   Automate the creation of release notes
 -   Auto-post release PR to develop from master
@@ -26,6 +27,9 @@ Description
 
 Detailed Notes
 
+-   Incorrect lineup of the changelog page index. This fixes the header
+    sizes to avoid this issue.
+    ([PR489](https://github.com/CrayLabs/SmartRedis/pull/489))
 -   After converting from rst to md, readthedocs began throwing indention
     errors in old release info. This fixes the styling.
     ([PR488](https://github.com/CrayLabs/SmartRedis/pull/488))
@@ -79,7 +83,7 @@ Detailed Notes
 -   The requirements.txt file is unused, therefore removing.
     ([PR462](https://github.com/CrayLabs/SmartRedis/pull/462))
 
-## 0.5.2
+### 0.5.2
 
 Released on February 16, 2024
 
@@ -95,7 +99,7 @@ Detailed Notes
     call in place. This essentially doubles the cost of the operation.
     ([PR464](https://github.com/CrayLabs/SmartRedis/pull/464))
 
-## 0.5.1
+### 0.5.1
 
 Released on February 15, 2024
 
@@ -178,7 +182,7 @@ Detailed Notes
     to be marked const
     ([PR443](https://github.com/CrayLabs/SmartRedis/pull/443))
 
-## 0.5.0
+### 0.5.0
 
 Released on December 18, 2023
 
@@ -281,7 +285,7 @@ Detailed Notes
     database support
     ([PR353](https://github.com/CrayLabs/SmartRedis/pull/353))
 
-## 0.4.2
+### 0.4.2
 
 Released on September 13, 2023
 
@@ -336,7 +340,7 @@ Detailed Notes
 -   Reuse existing redis connection when mapping the Redis cluster
     ([PR364](https://github.com/CrayLabs/SmartRedis/pull/364))
 
-## 0.4.1
+### 0.4.1
 
 Released on July 5, 2023
 
@@ -432,7 +436,7 @@ Detailed Notes
     multiDB support
     ([PR303](https://github.com/CrayLabs/SmartRedis/pull/303))
 
-## 0.4.0
+### 0.4.0
 
 Released on April 12, 2023
 
@@ -583,7 +587,7 @@ Detailed Notes
     applications can link against
     ([PR245](https://github.com/CrayLabs/SmartRedis/pull/245))
 
-## 0.3.1
+### 0.3.1
 
 Released on June 24, 2022
 
@@ -706,7 +710,7 @@ Detailed Notes
     ([PR213](https://github.com/CrayLabs/SmartRedis/pull/213)) This
     change should not be visible to clients.
 
-## 0.3.0
+### 0.3.0
 
 Released on February 11, 2022
 
@@ -766,7 +770,7 @@ Description
     ([PR208](https://github.com/CrayLabs/SmartRedis/pull/208))
     ([PR210](https://github.com/CrayLabs/SmartRedis/pull/210))
 
-## 0.2.0
+### 0.2.0
 
 Released on August, 5, 2021
 
@@ -801,7 +805,7 @@ Description
 -   Add Redis CLUSTER INFO command execution to the Python client
     ([PR105](https://github.com/CrayLabs/SmartRedis/pull/105))
 
-## 0.1.1
+### 0.1.1
 
 Released on May 5, 2021
 
@@ -813,7 +817,7 @@ Description
 -   Pip install for Python client
     ([PR45](https://github.com/CrayLabs/SmartRedis/pull/45))
 
-## 0.1.0
+### 0.1.0
 
 Released on April 1, 2021
 
