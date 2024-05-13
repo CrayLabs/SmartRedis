@@ -2296,6 +2296,10 @@ void Client::set_model_chunk_size(int chunk_size)
     if (reply.has_error() > 0)
         throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
 
+
+
+
+
     // Remember the new chunk size
     _redis_server->store_model_chunk_size(chunk_size);
 }
