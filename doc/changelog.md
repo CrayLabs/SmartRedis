@@ -6,6 +6,7 @@ To be released at some future point in time
 
 Description
 
+-   Improve client error logging
 -   Fix pylint regression error
 -   Fix build wheel error
 -   Fix header styling issue
@@ -29,6 +30,8 @@ Description
 
 Detailed Notes
 
+-   Ensure errors raised from client include details
+    ([PR485](https://github.com/CrayLabs/SmartRedis/pull/485))
 -   Pin pylint to fix regression error
     ([PR492](https://github.com/CrayLabs/SmartRedis/pull/492))
 -   Add cstdint import to fix ubuntu with gcc wheel build

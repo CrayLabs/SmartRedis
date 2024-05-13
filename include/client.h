@@ -1751,6 +1751,13 @@ class Client : public SRObject
         */
        void _establish_server_connection();
 
+       /*!
+        *   \brief Augment exceptions with underlying connection errors
+        *   \param reply The CommandReply to inspect for errors
+        *   \param error_message The base error message to raise
+        *   \throw SmartRedis::Exception if poll list length command fails
+        */
+       void _report_reply_errors(CommandReply &reply, std::string error_message);
 };
 
 /*!
