@@ -2,7 +2,7 @@
 
 ### 0.5.3
 
-To be released at some future point in time
+Released on 14 May 2024
 
 Description
 
