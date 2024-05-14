@@ -6,6 +6,7 @@ To be released at some future point in time
 
 Description
 
+-   Fix build wheel error
 -   Fix header styling issue
 -   Correct changelog indention
 -   Automate the creation of release notes
@@ -27,6 +28,8 @@ Description
 
 Detailed Notes
 
+-   Add cstdint import to fix ubuntu with gcc wheel build
+    ([PR491](https://github.com/CrayLabs/SmartRedis/pull/491))
 -   Incorrect lineup of the changelog page index. This fixes the header
     sizes to avoid this issue.
     ([PR489](https://github.com/CrayLabs/SmartRedis/pull/489))
