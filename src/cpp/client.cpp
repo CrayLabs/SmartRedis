@@ -285,10 +285,8 @@ void Client::delete_dataset(const std::string& name)
     // Run the command
     reply = _run(cmd);
 
-    if (reply.has_error()) {
-        throw SRRuntimeException("An error was encountered when executing "\
-                                 "DataSet " + name + " deletion.");
-    }
+    _report_reply_errors(reply, "An error was encountered when executing "\
+                                "DataSet " + name + " deletion.");
 }
 
 // Put a tensor into the database
@@ -344,8 +342,7 @@ void Client::put_tensor(const std::string& name,
     // Cleanup
     delete tensor;
     tensor = NULL;
-    if (reply.has_error())
-        throw SRRuntimeException("put_tensor failed");
+    _report_reply_errors(reply, "put_tensor failed");
 }
 
 // Get the tensor data, dimensions, and type for the provided tensor name.
@@ -536,8 +533,7 @@ void Client::rename_tensor(const std::string& old_name,
     std::string old_key = _build_tensor_key(old_name, true);
     std::string new_key = _build_tensor_key(new_name, false);
     CommandReply reply = _redis_server->rename_tensor(old_key, new_key);
-    if (reply.has_error())
-        throw SRRuntimeException("rename_tensor failed");
+    _report_reply_errors(reply, "rename_tensor failed");
 }
 
 // Delete a tensor from the database
@@ -548,8 +544,7 @@ void Client::delete_tensor(const std::string& name)
 
     std::string key = _build_tensor_key(name, true);
     CommandReply reply = _redis_server->delete_tensor(key);
-    if (reply.has_error())
-        throw SRRuntimeException("delete_tensor failed");
+    _report_reply_errors(reply, "delete_tensor failed");
 }
 
 // Copy the tensor from the source name to the destination name
@@ -562,8 +557,7 @@ void Client::copy_tensor(const std::string& src_name,
     std::string src_key = _build_tensor_key(src_name, true);
     std::string dest_key = _build_tensor_key(dest_name, false);
     CommandReply reply = _redis_server->copy_tensor(src_key, dest_key);
-    if (reply.has_error())
-        throw SRRuntimeException("copy_tensor failed");
+    _report_reply_errors(reply, "copy_tensor failed");
 }
 
 // Set a model from file in the database for future execution
@@ -819,8 +813,7 @@ std::string_view Client::get_model(const std::string& name)
     // Get the model from the server
     std::string get_key = _build_model_key(name, true);
     CommandReply reply = _redis_server->get_model(get_key);
-    if (reply.has_error())
-        throw SRRuntimeException("failed to get model from server");
+    _report_reply_errors(reply, "failed to get model from server");
 
     // In most cases, the reply will be a single string
     // consisting of the serialized model
@@ -1049,8 +1042,7 @@ void Client::delete_model(const std::string& name)
     std::string key = _build_model_key(name, true);
     CommandReply reply = _redis_server->delete_model(key);
 
-    if (reply.has_error())
-        throw SRRuntimeException("AI.MODELDEL command failed on server");
+    _report_reply_errors(reply, "AI.MODELDEL command failed on server");
 }
 
 // Delete a multiGPU model from the database
@@ -1080,8 +1072,7 @@ void Client::delete_script(const std::string& name)
     std::string key = _build_model_key(name, true);
     CommandReply reply = _redis_server->delete_script(key);
 
-    if (reply.has_error())
-        throw SRRuntimeException("AI.SCRIPTDEL command failed on server");
+    _report_reply_errors(reply, "AI.SCRIPTDEL command failed on server");
 }
 
 // Delete a multiGPU script from the database
@@ -1317,9 +1308,7 @@ parsed_reply_nested_map Client::get_db_node_info(const std::string address)
     cmd.set_exec_address(db_address);
     cmd << "INFO" << "EVERYTHING";
     CommandReply reply = _run(cmd);
-    if (reply.has_error())
-        throw SRRuntimeException("INFO EVERYTHING command failed on server");
-
+    _report_reply_errors(reply, "INFO EVERYTHING command failed on server");
     // Parse the results
     std::string db_node_info(reply.str(), reply.str_len());
     return DBInfoCommand::parse_db_node_info(db_node_info);
@@ -1340,8 +1329,7 @@ parsed_reply_map Client::get_db_cluster_info(const std::string address)
     cmd.set_exec_address(db_address);
     cmd << "CLUSTER" << "INFO";
     CommandReply reply = _run(cmd);
-    if (reply.has_error())
-        throw SRRuntimeException("CLUSTER INFO command failed on server");
+    _report_reply_errors(reply, "CLUSTER INFO command failed on server");
 
     // Parse the results
     std::string db_cluster_info(reply.str(), reply.str_len());
@@ -1360,8 +1348,7 @@ parsed_reply_map Client::get_ai_info(const std::string& address,
     CommandReply reply =
         _redis_server->get_model_script_ai_info(address, key, reset_stat);
 
-    if (reply.has_error())
-        throw SRRuntimeException("AI.INFO command failed on server");
+    _report_reply_errors(reply, "AI.INFO command failed on server");
 
     if (reply.n_elements() % 2 != 0)
         throw SRInternalException("The AI.INFO reply structure has an "\
@@ -1407,8 +1394,7 @@ void Client::flush_db(
     cmd << "FLUSHDB";
 
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("FLUSHDB command failed");
+    _report_reply_errors(reply, "FLUSHDB command failed");
 }
 
 // Read the configuration parameters of a running server
@@ -1426,8 +1412,7 @@ Client::config_get(
     cmd << "CONFIG" << "GET" << expression;
 
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("CONFIG GET command failed");
+    _report_reply_errors(reply, "CONFIG GET command failed");
 
     // parse reply
     size_t n_dims = reply.n_elements();
@@ -1454,8 +1439,7 @@ void Client::config_set(
     cmd << "CONFIG" << "SET" << config_param << value;
 
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("CONFIG SET command failed");
+    _report_reply_errors(reply, "CONFIG SET command failed");
 }
 
 void Client::save(const std::string address)
@@ -1469,8 +1453,7 @@ void Client::save(const std::string address)
     cmd << "SAVE";
 
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("SAVE command failed");
+    _report_reply_errors(reply, "SAVE command failed");
 }
 
 // Append dataset to aggregation list
@@ -1492,9 +1475,8 @@ void Client::append_to_list(const std::string& list_name,
 
     // Run the command
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("RPUSH command failed. DataSet could not "\
-                                 "be added to the aggregation list.");
+    _report_reply_errors(reply, "RPUSH command failed. DataSet could not "\
+                                "be added to the aggregation list.");
 }
 
 // Delete an aggregation list
@@ -1512,8 +1494,7 @@ void Client::delete_list(const std::string& list_name)
 
     // Run the command
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("DEL command failed.");
+    _report_reply_errors(reply, "DEL command failed.");
 }
 
 // Copy aggregation list
@@ -1553,9 +1534,8 @@ void Client::copy_list(const std::string& src_name,
     CommandReply reply = _run(cmd);
 
     // Check for reply errors and correct type
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("GET command failed. The aggregation "\
-                                 "list could not be retrieved.");
+    _report_reply_errors(reply, "GET command failed. The aggregation "\
+                                "list could not be retrieved.");
 
     if (reply.redis_reply_type() != "REDIS_REPLY_ARRAY")
         throw SRRuntimeException("An unexpected type was returned for "
@@ -1601,9 +1581,8 @@ void Client::copy_list(const std::string& src_name,
 
     CommandReply copy_reply = _run(copy_cmd);
 
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("Dataset aggregation list copy "
-                                 "operation failed.");
+    _report_reply_errors(reply, "Dataset aggregation list copy "
+                                "operation failed.");
 }
 
 // Rename an aggregation list
@@ -1648,9 +1627,8 @@ int Client::get_list_length(const std::string& list_name)
     CommandReply reply = _run(cmd);
 
     // Check for errors and return value
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("LLEN command failed. The list "\
-                                 "length could not be retrieved.");
+    _report_reply_errors(reply, "LLEN command failed. The list "\
+                                "length could not be retrieved.");
 
     if (reply.redis_reply_type() != "REDIS_REPLY_INTEGER")
         throw SRRuntimeException("An unexpected type was returned for "
@@ -1862,9 +1840,8 @@ Client::_get_dataset_list_range(const std::string& list_name,
     CommandReply reply = _run(cmd);
 
     // Check for reply errors and correct type
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("GET command failed. The aggregation "\
-                                 "list could not be retrieved.");
+    _report_reply_errors(reply, "GET command failed. The aggregation "\
+                                "list could not be retrieved.");
 
     if (reply.redis_reply_type() != "REDIS_REPLY_ARRAY")
         throw SRRuntimeException("An unexpected type was returned for "
@@ -1915,10 +1892,8 @@ Client::_get_dataset_list_range(const std::string& list_name,
         CommandReply metadata_reply = metadata_replies[i];
 
         // Check if metadata_reply has any errors
-        if (metadata_reply.has_error() > 0) {
-            throw SRRuntimeException("An error was encountered in "\
-                                        "metdata retrieval.");
-        }
+        _report_reply_errors(metadata_reply, "An error was encountered in "\
+                                             "metdata retrieval.");
 
         std::string dataset_key =
             std::string(reply[i].str(), reply[i].str_len());
@@ -2158,8 +2133,7 @@ TensorBase* Client::_get_tensorbase_obj(const std::string& name)
     // Fetch the tensor
     std::string get_key = _build_tensor_key(name, true);
     CommandReply reply = _redis_server->get_tensor(get_key);
-    if (reply.has_error())
-        throw SRRuntimeException("tensor retrieval failed");
+    _report_reply_errors(reply, "tensor retrieval failed");
 
     std::vector<size_t> dims = GetTensorCommand::get_dims(reply);
     if (dims.size() <= 0)
@@ -2293,8 +2267,7 @@ void Client::set_model_chunk_size(int chunk_size)
 
     // Run it
     CommandReply reply = _run(cmd);
-    if (reply.has_error() > 0)
-        throw SRRuntimeException("AI.CONFIG MODEL_CHUNK_SIZE command failed");
+    _report_reply_errors(reply, "AI.CONFIG MODEL_CHUNK_SIZE command failed");
 
     // Remember the new chunk size
     _redis_server->store_model_chunk_size(chunk_size);
@@ -2310,4 +2283,21 @@ std::string Client::to_string() const
     result = "Client (" + _lname + "):\n";
     result += _redis_server->to_string();
     return result;
+}
+
+// Raise an exception containing available error messages
+void Client::_report_reply_errors(CommandReply &reply, std::string error_message)
+{
+    if (!reply.has_error())
+        return;
+
+    std::vector<std::string> errors = reply.get_reply_errors();
+    std::string combined_error = error_message + " ";
+    for (size_t i = 0; i < errors.size(); i++)
+    {
+        combined_error += errors.at(i);
+        if (i < errors.size() - 1)
+            combined_error += ":";
+    }
+    throw SRRuntimeException(combined_error);
 }
