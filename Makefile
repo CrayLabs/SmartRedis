@@ -37,7 +37,7 @@ RPP_VER := 1.3.10
 PYBIND_URL := https://github.com/pybind/pybind11.git
 PYBIND_VER := v2.11.1
 REDIS_URL := https://github.com/redis/redis.git
-REDIS_VER := 7.0.5
+REDIS_VER := 7.2.4
 REDISAI_URL := https://github.com/RedisAI/RedisAI.git
 # REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
 CATCH2_URL := https://github.com/catchorg/Catch2.git
@@ -137,12 +137,12 @@ lib-with-fortran: lib
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: SR_PEDANTIC=OFF #TODO: fix warnings in C++
+test-lib: SR_PEDANTIC=ON
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: SR_PEDANTIC=OFF #TODO: fix warnings in C++
+test-lib-with-fortran: SR_PEDANTIC=ON
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies

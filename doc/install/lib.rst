@@ -37,29 +37,30 @@ For reference, the appropriate values for ``CC``, ``CXX``, and ``FC`` for the co
 chains we support are:
 
 .. list-table:: Values for compiler chains
-    :widths: 20 12 12
+    :widths: 20 12 12 12 
     :header-rows: 1
 
     * - Compiler Chain
-    - ``CC``
-    - ``CXX``
-    - ``FC``
+      - ``CC``
+      - ``CXX``
+      - ``FC``
     * - GCC
-    - ``gcc``
-    - ``g++``
-    - ``gfortran``
+      - ``gcc``
+      - ``g++``
+      - ``gfortran``
     * - Intel (Classic)
-    - ``icc``
-    - ``icpc``
-    - ``ifort``
+      - ``icc``
+      - ``icpc``
+      - ``ifort``
     * - Intel (OneAPI)
-    - ``icx``
-    - ``icpx``
-    - ``ifx``
+      - ``icx``
+      - ``icpx``
+      - ``ifx``
     * - NVHPC
-    - ``nvc``
-    - ``nvc++``
-    - ``nvfortran``
+      - ``nvc``
+      - ``nvc++``
+      - ``nvfortran``
+
 
 Customizing the library build
 -----------------------------

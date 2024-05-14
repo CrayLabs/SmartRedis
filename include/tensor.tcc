@@ -38,7 +38,7 @@ Tensor<T>::Tensor(const std::string& name,
                   const std::vector<size_t>& dims,
                   const SRTensorType type,
                   const SRMemoryLayout mem_layout) :
-                  TensorBase(name, data, dims, type, mem_layout)
+                  TensorBase(name, data, dims, type)
 {
     _set_tensor_data(data, dims, mem_layout);
 }

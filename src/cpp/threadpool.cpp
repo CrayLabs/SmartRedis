@@ -22,8 +22,7 @@ ThreadPool::ThreadPool(const SRObject* context, unsigned int num_threads)
     shutting_down = false;
 
     // By default, we'll make one thread for each hardware context
-    if (num_threads == 0)
-        num_threads = std::thread::hardware_concurrency();
+    if (num_threads == 0) num_threads = std::thread::hardware_concurrency();
 
     // Create worker threads
 	if (num_threads < 1) num_threads = 1; // Force a minimum of 1 thread

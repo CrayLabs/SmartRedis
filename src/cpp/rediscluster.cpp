@@ -238,7 +238,11 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     volatile size_t pipeline_completion_count = 0;
     size_t num_shards = shard_cmd_index_list.size();
     Exception error_response = Exception("no error");
-    bool success_status[num_shards];
+
+    bool* success_status = new bool[num_shards];
+    for (size_t s = 0; s < num_shards; s++) {
+        success_status[s] = false;
+    }
     std::mutex results_mutex;
 
     // Loop over all shards and execute pipelines
@@ -310,6 +314,7 @@ PipelineReply RedisCluster::run_via_unordered_pipelines(CommandList& cmd_list)
     // with order of execution
     all_replies.reorder(cmd_list_index_ooe);
 
+    delete[] success_status;
     return all_replies;
 }
 
@@ -1089,7 +1094,7 @@ inline void RedisCluster::_connect(SRAddress& db_address)
             "RedisCluster encountered a UDS request in _connect()");
     }
     connectOpts.socket_timeout = std::chrono::milliseconds(
-        _DEFAULT_SOCKET_TIMEOUT);
+        _socket_timeout);
 
     // Connect
     std::string msg;
@@ -1410,14 +1415,13 @@ void RedisCluster::_delete_keys(std::vector<std::string> keys)
     (void)run(cmd);
 }
 
-// Retrieve the optimum model prefix for the set of inputs
-DBNode* RedisCluster::_get_model_script_db(const std::string& name,
-                                           std::vector<std::string>& inputs,
+// Retrieve the optimum db node for model and script execution
+DBNode* RedisCluster::_get_model_script_db(std::vector<std::string>& inputs,
                                            std::vector<std::string>& outputs)
 {
-    /* This function calculates the optimal model name to use
-    to run the provided inputs.  If a cluster is not being used,
-    the model name is returned, else a prefixed model name is returned.
+    /* This function determines which db node in the cluster
+    contains the most input and output tensors and
+    returns a pointer to that db node.
     */
 
     // TODO we should randomly choose the max if there are multiple maxes
@@ -1552,3 +1556,5 @@ std::string RedisCluster::to_string() const
     result += RedisServer::to_string();
     return result;
 }
+
+

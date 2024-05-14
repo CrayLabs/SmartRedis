@@ -47,6 +47,8 @@ RedisServer::RedisServer(ConfigOptions* cfgopts)
         _CONN_INTERVAL_ENV_VAR, _DEFAULT_CONN_INTERVAL);
     _command_timeout = _cfgopts->_resolve_integer_option(
         _CMD_TIMEOUT_ENV_VAR, _DEFAULT_CMD_TIMEOUT);
+    _socket_timeout = _cfgopts->_resolve_integer_option(
+        _SOCKET_TIMEOUT_ENV_VAR, _DEFAULT_SOCKET_TIMEOUT);
     _command_interval = _cfgopts->_resolve_integer_option(
         _CMD_INTERVAL_ENV_VAR, _DEFAULT_CMD_INTERVAL);
     _thread_count = _cfgopts->_resolve_integer_option(
@@ -167,6 +169,11 @@ inline void RedisServer::_check_runtime_variables()
                                    " must be less than "
                                    + std::to_string(INT_MAX / 1000));
     }
+
+    if (_socket_timeout <= 0) {
+        throw SRParameterException(_SOCKET_TIMEOUT_ENV_VAR +
+                                   " must be greater than 0.");
+    }
 }
 
 // Create a string representation of the Redis connection
@@ -201,6 +208,8 @@ std::string RedisServer::to_string() const
            + std::to_string(_connection_interval) + "\n";
     result += "    Attempt timeout (ms): "
            + std::to_string(_connection_timeout) + "\n";
+    result += "    Socket timeout (ms): "
+           + std::to_string(_socket_timeout) + "\n";
 
     // Threadpool
     result += "  Threadpool: " + std::to_string(_thread_count) + " threads\n";

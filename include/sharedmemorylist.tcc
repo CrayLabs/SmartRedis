@@ -29,11 +29,21 @@
 #ifndef SMARTREDIS_SHAREDMEMORYLIST_TCC
 #define SMARTREDIS_SHAREDMEMORYLIST_TCC
 
+// Define memory deletion operator (delete[]) to
+// match the memory allocation operator (new[])
+class PointerDeletion {
+    public:
+        template<class T>
+        void operator()(T* ptr) const {
+            delete[] ptr;
+        }
+};
+
 // Record a memory allocation
 template <class T>
 void SharedMemoryList<T>::add_allocation(size_t bytes, T* ptr)
 {
-    std::shared_ptr<T> s_ptr(ptr);
+    std::shared_ptr<T> s_ptr(ptr, PointerDeletion());
     _inventory.push_front(s_ptr);
 }
 
