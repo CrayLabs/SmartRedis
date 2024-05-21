@@ -52,16 +52,14 @@ Tensor<T>::Tensor(const Tensor<T>& tensor) : TensorBase(tensor)
         return;
 
     _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
-    _c_mem_views = tensor._c_mem_views;
-    _f_mem_views = tensor._f_mem_views;
+    _mem_views = tensor._mem_views;
 }
 
 // Tensor move constructor
 template <class T>
 Tensor<T>::Tensor(Tensor<T>&& tensor) : TensorBase(std::move(tensor))
 {
-    _c_mem_views = std::move(tensor._c_mem_views);
-    _f_mem_views = std::move(tensor._f_mem_views);
+    _mem_views = std::move(tensor._mem_views);
 }
 
 // Tensor copy assignment operator
@@ -75,8 +73,7 @@ Tensor<T>& Tensor<T>::operator=(const Tensor<T>& tensor)
     // Deep copy tensor data
     TensorBase::operator=(tensor);
     _set_tensor_data(tensor._data, tensor._dims, SRMemLayoutContiguous);
-    _c_mem_views = tensor._c_mem_views;
-    _f_mem_views = tensor._f_mem_views;
+    _mem_views = tensor._mem_views;
 
     // Done
     return *this;
@@ -92,8 +89,7 @@ Tensor<T>& Tensor<T>::operator=(Tensor<T>&& tensor)
 
     // Move data
     TensorBase::operator=(std::move(tensor));
-    _c_mem_views = std::move(tensor._c_mem_views);
-    _f_mem_views = std::move(tensor._f_mem_views);
+    _mem_views = std::move(tensor._mem_views);
 
     // Done
     return *this;
@@ -132,11 +128,6 @@ void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
        pointers so that the caller can cast
        to a nested pointer structure and index
        with multiple [] operators.
-    3) MemoryLayout::fortran_contiguous :
-       The internal row major format will
-       be copied into a new allocated memory
-       space that is the transpose (column major)
-       of the row major layout.
     */
 
     void* ptr = NULL;
@@ -144,10 +135,6 @@ void* Tensor<T>::data_view(const SRMemoryLayout mem_layout)
     switch (mem_layout) {
         case SRMemLayoutContiguous:
             ptr = _data;
-            break;
-        case SRMemLayoutFortranContiguous:
-            ptr = _f_mem_views.allocate_bytes(_n_data_bytes());
-            _c_to_f_memcpy((T*)ptr, (T*)_data, _dims);
             break;
         case SRMemLayoutNested:
             _build_nested_memory(&ptr,
@@ -196,9 +183,6 @@ void Tensor<T>::fill_mem_space(void* data,
 
     // Copy over the data
     switch (mem_layout) {
-        case SRMemLayoutFortranContiguous:
-            _c_to_f_memcpy((T*)data, (T*)_data, _dims);
-            break;
         case SRMemLayoutContiguous:
             std::memcpy(data, _data, _n_data_bytes());
             break;
@@ -275,7 +259,7 @@ T* Tensor<T>::_build_nested_memory(void** data,
                                  "_build_nested_memory");
     }
     if (n_dims > 1) {
-        T** new_data = _c_mem_views.allocate(dims[0]);
+        T** new_data = _mem_views.allocate(dims[0]);
         if (new_data == NULL)
             throw SRBadAllocException("nested memory for tensor");
         (*data) = reinterpret_cast<void*>(new_data);
@@ -310,9 +294,6 @@ void Tensor<T>::_set_tensor_data(const void* src_data,
         case SRMemLayoutContiguous:
             std::memcpy(_data, src_data, n_bytes);
             break;
-        case SRMemLayoutFortranContiguous:
-            _f_to_c_memcpy((T*)_data, (const T*)src_data, dims);
-            break;
         case SRMemLayoutNested:
             _copy_nested_to_contiguous(
                 src_data, dims.data(), dims.size(), _data);
@@ -328,124 +309,6 @@ template <class T>
 size_t Tensor<T>::_n_data_bytes()
 {
     return num_values() * sizeof(T);
-}
-// Copy a fortran memory space layout (col major) to a
-// c-style array memory space (row major)
-template <class T>
-void Tensor<T>::_f_to_c_memcpy(T* c_data,
-                               const T* f_data,
-                               const std::vector<size_t>& dims)
-{
-    if (c_data == NULL || f_data == NULL) {
-        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c_memcpy");
-    }
-    std::vector<size_t> dim_positions(dims.size(), 0);
-    _f_to_c(c_data, f_data, dims, dim_positions, 0);
-}
-
-// Copy a c-style array memory space (row major) to a
-// fortran memory space layout (col major)
-template <class T>
-void Tensor<T>::_c_to_f_memcpy(T* f_data,
-                               const T* c_data,
-                               const std::vector<size_t>& dims)
-{
-    if (c_data == NULL || f_data == NULL) {
-        throw SRRuntimeException("Invalid buffer suppplied to _c_to_f_memcpy");
-    }
-    std::vector<size_t> dim_positions(dims.size(), 0);
-    _c_to_f(f_data, c_data, dims, dim_positions, 0);
-}
-
-// Copy fortran column major memory to c-style row major memory recursively
-template <class T>
-void Tensor<T>::_f_to_c(T* c_data,
-                        const T* f_data,
-                        const std::vector<size_t>& dims,
-                        std::vector<size_t> dim_positions,
-                        size_t current_dim)
-{
-    if (c_data == NULL || f_data == NULL) {
-        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
-    }
-    size_t start = dim_positions[current_dim];
-    size_t end = dims[current_dim];
-    bool more_dims = (current_dim + 1 != dims.size());
-
-    for (size_t i = start; i < end; i++) {
-        if (more_dims)
-            _f_to_c(c_data, f_data, dims, dim_positions,
-                          current_dim + 1);
-        else {
-            size_t f_index = _f_index(dims, dim_positions);
-            size_t c_index = _c_index(dims, dim_positions);
-            c_data[c_index] = f_data[f_index];
-        }
-        dim_positions[current_dim]++;
-    }
-}
-
-// Copy c-style row major memory to fortran column major memory recursively
-template <class T>
-void Tensor<T>::_c_to_f(T* f_data,
-                        const T* c_data,
-                        const std::vector<size_t>& dims,
-                        std::vector<size_t> dim_positions,
-                        size_t current_dim)
-{
-    if (c_data == NULL || f_data == NULL) {
-        throw SRRuntimeException("Invalid buffer suppplied to _f_to_c");
-    }
-    size_t start = dim_positions[current_dim];
-    size_t end = dims[current_dim];
-    bool more_dims = (current_dim + 1 != dims.size());
-
-    for (size_t i = start; i < end; i++) {
-        if (more_dims) {
-            _c_to_f(f_data, c_data, dims, dim_positions,
-                          current_dim + 1);
-        }
-        else {
-            size_t f_index = _f_index(dims, dim_positions);
-            size_t c_index = _c_index(dims, dim_positions);
-            f_data[f_index] = c_data[c_index];
-        }
-        dim_positions[current_dim]++;
-    }
-}
-
-// Calculate the contiguous array position for a column major position
-template <class T>
-inline size_t Tensor<T>::_f_index(const std::vector<size_t>& dims,
-                                  const std::vector<size_t>& dim_positions)
-{
-    size_t position = 0;
-
-    for (size_t k = 0; k < dims.size(); k++) {
-        size_t sum_product = dim_positions[k];
-        for (size_t m = 0; m < k; m++) {
-            sum_product *= dims[m];
-        }
-        position += sum_product;
-    }
-    return position;
-}
-
-// Calculate the contiguous array position for a row major position
-template <class T>
-inline size_t Tensor<T>::_c_index(const std::vector<size_t>& dims,
-                                  const std::vector<size_t>& dim_positions)
-{
-    size_t position = 0;
-
-    for(size_t k = 0; k < dims.size(); k++) {
-        size_t sum_product = dim_positions[k];
-        for(size_t m = k + 1; m < dims.size(); m++) {
-            sum_product *= dims[m];
-        }
-        position += sum_product;
-    }
-    return position;
 }
 
 #endif // SMARTREDIS_TENSOR_TCC

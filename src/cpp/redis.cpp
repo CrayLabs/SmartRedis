@@ -648,6 +648,7 @@ void Redis::set_model_chunk_size(int chunk_size)
 inline CommandReply Redis::_run(const Command& cmd)
 {
     for (int i = 1; i <= _command_attempts; i++) {
+        std::cout<<"Attempt # "<<i<<std::endl;
         try {
             // Run the command
             CommandReply reply = _redis->command(cmd.cbegin(), cmd.cend());
