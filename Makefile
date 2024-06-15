@@ -29,24 +29,6 @@ MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
 CWD := $(shell pwd)
 
-# Params for third-party software
-HIREDIS_URL := https://github.com/redis/hiredis.git
-HIREDIS_VER := v1.2.0
-RPP_URL := https://github.com/sewenew/redis-plus-plus.git
-RPP_VER := 1.3.10
-PYBIND_URL := https://github.com/pybind/pybind11.git
-PYBIND_VER := v2.11.1
-REDIS_URL := https://github.com/redis/redis.git
-REDIS_VER := 7.2.4
-REDISAI_URL := https://github.com/RedisAI/RedisAI.git
-# REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
-CATCH2_URL := https://github.com/catchorg/Catch2.git
-CATCH2_VER := v2.13.6
-LCOV_URL := https://github.com/linux-test-project/lcov.git
-LCOV_VER := v2.0
-DEP_CC := gcc
-DEP_CXX := g++
-
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
 SR_BUILD := Release
@@ -114,16 +96,9 @@ help:
 # help: Build targets
 # help: -------------
 
-# help: deps                           - Make SmartRedis dependencies
-.PHONY: deps
-deps: hiredis
-deps: redis-plus-plus
-deps: pybind
-deps:
-
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
-lib: deps
+lib:
 lib:
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
 		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
@@ -492,53 +467,6 @@ test-examples:
 
 ############################################################################
 # hidden build targets for third-party software
-
-# Hiredis (hidden build target)
-.PHONY: hiredis
-hiredis: install/lib/libhiredis.a
-
-third-party/hiredis:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
-
-install/lib/libhiredis.a: third-party/hiredis
-	@cd third-party/hiredis && \
-	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install -j $(NPROC) && \
-	rm -f ../../install/lib/libhiredis*.so* && \
-	rm -f ../../install/lib/libhiredis*.dylib* && \
-	echo "Finished installing Hiredis"
-
-# Redis-plus-plus (hidden build target)
-.PHONY: redis-plus-plus
-redis-plus-plus: install/lib/libredis++.a
-
-third-party/redis-plus-plus:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
-
-install/lib/libredis++.a: third-party/redis-plus-plus
-	@cd third-party/redis-plus-plus && \
-	mkdir -p compile && \
-	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
-		  -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
-		  -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		  -DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. && \
-	make CC=$(DEP_CC) CXX=$(RPP_CX) -j $(NPROC) && \
-	make CC=$(DEP_CC) CXX=$(RPP_CX) install && \
-	echo "Finished installing Redis-plus-plus"
-
-# Pybind11 (hidden build target)
-.PHONY: pybind
-pybind: third-party/pybind/include/pybind11/pybind11.h
-third-party/pybind/include/pybind11/pybind11.h:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(PYBIND_URL) pybind --branch $(PYBIND_VER) --depth=1
-	@mkdir -p third-party/pybind/build && \
-	echo "Finished installing Pybind11"
 
 # Redis (hidden test target)
 .PHONY: redis

@@ -23,7 +23,6 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 # Enable setting version in the project statement
 if (POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
@@ -49,6 +48,59 @@ include(smartredis_defs)
 if (SR_FORTRAN)
     enable_language(Fortran)
 endif()
+
+# Include external libraries
+include(ExternalProject)
+# Add hiredis as an external project
+ExternalProject_Add(hiredis
+    GIT_REPOSITORY https://github.com/redis/hiredis.git
+    GIT_TAG v1.2.0
+    CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    INSTALL_COMMAND make install
+)
+
+# Define hiredis as an external project
+ExternalProject_Get_Property(hiredis source_dir binary_dir)
+
+add_library(libhiredis UNKNOWN IMPORTED)
+add_dependencies(libhiredis hiredis)
+
+# Set hiredis properties
+set_target_properties(libhiredis PROPERTIES
+    IMPORTED_LOCATION ${binary_dir}/libhiredis.a
+    INTERFACE_INCLUDE_DIRECTORIES ${source_dir}
+)
+
+# Define redis++ as an external project
+ExternalProject_Add(redis++
+    GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
+    GIT_TAG 1.3.10
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/redis++
+    INSTALL_COMMAND make install PREFIX=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
+                -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF
+                -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    DEPENDS hiredis  # Add hiredis as a dependency
+)
+
+ExternalProject_Get_Property(redis++ source_dir binary_dir)
+
+add_library(libredis++ UNKNOWN IMPORTED)
+add_dependencies(libredis++ redis++)
+
+set_target_properties(libredis++ PROPERTIES
+    IMPORTED_LOCATION ${binary_dir}/libredis++.a
+    INTERFACE_INCLUDE_DIRECTORIES ${source_dir}
+)
+
+# Add pybind11
+include(FetchContent)
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11
+    GIT_TAG        v2.11.1
+)
+
 
 # For now, we only support Pedantic on the main library build.
 # If/when we fine-tune the examples and test cases, move this block
@@ -76,17 +128,7 @@ if (SR_PEDANTIC)
     endif()
 endif()
 
-# Bring in third-party libaries needed for the SmartRedis library
-find_library(REDISPP redis++
-    PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH
-    REQUIRED STATIC
-)
-find_library(HIREDIS hiredis
-    PATHS ${CMAKE_SOURCE_DIR}/install/lib NO_DEFAULT_PATH
-    REQUIRED STATIC
-)
 find_package(Threads REQUIRED)
-set(EXT_CLIENT_LIBRARIES ${REDISPP} ${HIREDIS})
 
 # Define source code that goes into the SmartRedis library
 set(CLIENT_SRC
@@ -142,13 +184,15 @@ if (STATIC_BUILD)
     set(TEMP_LIB_FULLNAME lib${TEMP_LIB_NAME}.a)
     set(SR_LIB_INSTALL_PATH ${CMAKE_SOURCE_DIR}/include/lib)
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+    add_dependencies(smartredis libhiredis libredis++)
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
     )
     set_target_properties(smartredis PROPERTIES
         OUTPUT_NAME ${TEMP_LIB_NAME}
     )
-    target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+    # target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+    target_link_libraries(smartredis PRIVATE Threads::Threads)
 
     # Merge SmartRedis static library with dependencies
     #  . Create a sacrificial dummy file so we have source to make a target against
@@ -170,10 +214,11 @@ if (STATIC_BUILD)
     )
 
     # Install static library
-    install(TARGETS ${SMARTREDIS_LIB}
+    install( TARGETS ${SMARTREDIS_LIB}
      	LIBRARY DESTINATION lib)
 else () # Shared library build
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
+    add_dependencies(smartredis libhiredis libredis++)
     set_target_properties(smartredis PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
     )
@@ -210,6 +255,7 @@ if (SR_FORTRAN)
     set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
     # Fortran library
     add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} ${FORTRAN_SRC})
+    add_dependencies(smartredis-fortran smartredis)
     set_target_properties(smartredis-fortran PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
     )
@@ -225,9 +271,11 @@ endif()
 # Build the Python library for SmartRedis
 if(SR_PYTHON)
 	message("-- Python client build enabled")
-	add_subdirectory(${CMAKE_SOURCE_DIR}/third-party/pybind
-                     ${CMAKE_SOURCE_DIR}/third-party/pybind/build)
-
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+        FetchContent_Populate(pybind11)
+    endif()
+    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
 	pybind11_add_module(smartredisPy
 	                    src/python/src/pyclient.cpp
                         src/python/src/pyconfigoptions.cpp
