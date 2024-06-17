@@ -7,6 +7,7 @@ Released on 14 May 2024
 Description
 
 -   Remove broken oss.redis.com URLs from documentation
+-   Streamline compilation of SmartRedis dependencies
 -   Pin NumPy version to 1.x
 -   Improve client error logging
 -   Fix pylint regression error
@@ -32,6 +33,12 @@ Description
 
 Detailed Notes
 
+-   hiredis, redis++, and pybind are now retrieved and installed
+    in `CMakeLists.txt` instead of in the Makefile. This decouples the
+    user-facing side of SmartRedis from the Makefile, which now can be
+    used as a convenient interface to compile SmartRedis with various
+    options and coordinate testing
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
 -   The new major version release of Numpy is incompatible with modules
     compiled against Numpy 1.x. For both SmartSim and SmartRedis we request a
     1.x version of numpy. This is needed in SmartSim because some of the downstream
