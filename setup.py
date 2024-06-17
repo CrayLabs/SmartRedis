@@ -73,14 +73,6 @@ class CMakeBuild(build_ext):
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
 
-        # Build dependencies
-        print('-'*10, 'Building third-party dependencies', '-'*40)
-        subprocess.check_call(
-            [self.make, "deps"],
-            cwd=source_directory,
-            shell=False
-        )
-
         # Run CMake config step
         print('-'*10, 'Configuring build', '-'*40)
         config_args = [
