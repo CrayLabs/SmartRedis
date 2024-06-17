@@ -101,7 +101,6 @@ FetchContent_Declare(
     GIT_TAG        v2.11.1
 )
 
-
 # For now, we only support Pedantic on the main library build.
 # If/when we fine-tune the examples and test cases, move this block
 # to smartredis_defs.cmake
@@ -191,7 +190,6 @@ if (STATIC_BUILD)
     set_target_properties(smartredis PROPERTIES
         OUTPUT_NAME ${TEMP_LIB_NAME}
     )
-    # target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
     target_link_libraries(smartredis PRIVATE Threads::Threads)
 
     # Merge SmartRedis static library with dependencies
@@ -214,7 +212,7 @@ if (STATIC_BUILD)
     )
 
     # Install static library
-    install( TARGETS ${SMARTREDIS_LIB}
+    install(TARGETS ${SMARTREDIS_LIB}
      	LIBRARY DESTINATION lib)
 else () # Shared library build
     add_library(smartredis ${SMARTREDIS_LINK_MODE} ${CLIENT_SRC})
@@ -225,7 +223,7 @@ else () # Shared library build
     set_target_properties(smartredis PROPERTIES
         OUTPUT_NAME ${SMARTREDIS_LIB}
     )
-    target_link_libraries(smartredis PUBLIC ${EXT_CLIENT_LIBRARIES} PRIVATE Threads::Threads)
+    target_link_libraries(smartredis PRIVATE Threads::Threads)
 
     # Install dynamic library
     install(TARGETS smartredis
@@ -262,7 +260,7 @@ if (SR_FORTRAN)
 	set_target_properties(smartredis-fortran PROPERTIES
 		OUTPUT_NAME ${SMARTREDIS_FORTRAN_LIB}
 	)
-    target_link_libraries(smartredis-fortran PUBLIC smartredis ${EXT_CLIENT_LIBRARIES})
+    target_link_libraries(smartredis-fortran PUBLIC smartredis)
     # Install dynamic library and headers
     install(TARGETS smartredis-fortran
     	LIBRARY DESTINATION lib)
@@ -285,7 +283,7 @@ if(SR_PYTHON)
                         ${CLIENT_SRC}
                         src/python/bindings/bind.cpp)
 
-	target_link_libraries(smartredisPy PUBLIC ${EXT_CLIENT_LIBRARIES})
+    add_dependencies(smartredisPy libhiredis libredis++)
 	install(TARGETS smartredisPy LIBRARY DESTINATION lib)
     install(TARGETS smartredisPy LIBRARY DESTINATION ../src/python/module/smartredis)
 else()
