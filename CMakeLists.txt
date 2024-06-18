@@ -55,7 +55,10 @@ include(ExternalProject)
 ExternalProject_Add(hiredis
     GIT_REPOSITORY https://github.com/redis/hiredis.git
     GIT_TAG v1.2.0
-    CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+    CMAKE_ARGS
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
     INSTALL_COMMAND make install
 )
 
@@ -79,6 +82,7 @@ ExternalProject_Add(redis++
     INSTALL_COMMAND make install PREFIX=${CMAKE_INSTALL_PREFIX}
     CMAKE_ARGS -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
                 -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF
+                -DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true
                 -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
     DEPENDS hiredis  # Add hiredis as a dependency
 )
@@ -105,6 +109,7 @@ FetchContent_Declare(
 # If/when we fine-tune the examples and test cases, move this block
 # to smartredis_defs.cmake
 # Note: -Wextra can be added after unused parameters are addressed
+
 if (SR_PEDANTIC)
     if(
         (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
@@ -190,7 +195,7 @@ if (STATIC_BUILD)
     set_target_properties(smartredis PROPERTIES
         OUTPUT_NAME ${TEMP_LIB_NAME}
     )
-    target_link_libraries(smartredis PRIVATE Threads::Threads)
+    target_link_libraries(smartredis PUBLIC libhiredis libredis++ PRIVATE Threads::Threads)
 
     # Merge SmartRedis static library with dependencies
     #  . Create a sacrificial dummy file so we have source to make a target against
@@ -223,7 +228,7 @@ else () # Shared library build
     set_target_properties(smartredis PROPERTIES
         OUTPUT_NAME ${SMARTREDIS_LIB}
     )
-    target_link_libraries(smartredis PRIVATE Threads::Threads)
+    target_link_libraries(smartredis PUBLIC libhiredis libredis++ PRIVATE Threads::Threads)
 
     # Install dynamic library
     install(TARGETS smartredis
