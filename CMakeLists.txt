@@ -287,8 +287,8 @@ if(SR_PYTHON)
                         src/python/src/pysrobject.cpp
                         ${CLIENT_SRC}
                         src/python/bindings/bind.cpp)
-
     add_dependencies(smartredisPy libhiredis libredis++)
+    target_link_libraries(smartredisPy PUBLIC libhiredis libredis++)
 	install(TARGETS smartredisPy LIBRARY DESTINATION lib)
     install(TARGETS smartredisPy LIBRARY DESTINATION ../src/python/module/smartredis)
 else()
