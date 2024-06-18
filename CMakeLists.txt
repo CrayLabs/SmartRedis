@@ -55,6 +55,7 @@ include(ExternalProject)
 ExternalProject_Add(hiredis
     GIT_REPOSITORY https://github.com/redis/hiredis.git
     GIT_TAG v1.2.0
+    GIT_SHALLOW 1
     CMAKE_ARGS
         -DBUILD_SHARED_LIBS=OFF
         -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
@@ -78,6 +79,7 @@ set_target_properties(libhiredis PROPERTIES
 ExternalProject_Add(redis++
     GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
     GIT_TAG 1.3.10
+    GIT_SHALLOW 1
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/redis++
     INSTALL_COMMAND make install PREFIX=${CMAKE_INSTALL_PREFIX}
     CMAKE_ARGS -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
