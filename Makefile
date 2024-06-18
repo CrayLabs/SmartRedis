@@ -37,7 +37,18 @@ SR_PEDANTIC := OFF
 SR_FORTRAN := OFF
 SR_PYTHON := OFF
 
+# Test dependencies
+REDIS_URL := https://github.com/redis/redis.git
+REDIS_VER := 7.2.4
+REDISAI_URL :=  https://github.com/RedisAI/RedisAI.git
+CATCH2_URL := https://github.com/catchorg/Catch2.git
+CATCH2_VER := v2.13.6
+LCOV_URL := https://github.com/linux-test-project/lcov.git
+LCOV_VER := v2.0
+
 # Test variables
+DEP_CC := gcc
+DEP_CXX := g++
 COV_FLAGS :=
 SR_TEST_REDIS_MODE := Clustered
 SR_TEST_UDS_FILE := /tmp/redis.sock
@@ -468,20 +479,6 @@ test-examples:
 ############################################################################
 # hidden build targets for third-party software
 
-# Redis (hidden test target)
-.PHONY: redis
-
-third-party/redis:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
-
-redis: third-party/redis/src/redis-server
-third-party/redis/src/redis-server: third-party/redis
-	@cd third-party/redis && \
-	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
-	echo "Finished installing redis"
-
 # cudann-check (hidden test target)
 # checks cuda dependencies for GPU build
 .PHONY: cudann-check
@@ -503,6 +500,19 @@ ifeq (,$(wildcard $(CUDNN_LIBRARY)/libcudnn.so))
 	$(error ERROR: could not find libcudnn.so at $(CUDNN_LIBRARY))
 endif
 endif
+
+# Redis (hidden test target)
+.PHONY: redis
+third-party/redis:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
+
+redis: third-party/redis/src/redis-server
+third-party/redis/src/redis-server: third-party/redis
+	@cd third-party/redis && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
+	echo "Finished installing redis"
 
 # RedisAI (hidden test target)
 third-party/RedisAI:
