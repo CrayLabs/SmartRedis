@@ -36,6 +36,7 @@ SR_LINK := Shared
 SR_PEDANTIC := OFF
 SR_FORTRAN := OFF
 SR_PYTHON := OFF
+SR_PREFIX := $(CWD)/install
 
 # Test dependencies
 REDIS_URL := https://github.com/redis/redis.git
@@ -57,6 +58,7 @@ SR_TEST_NODES := 3
 SR_TEST_REDISAI_VER := v1.2.7
 SR_TEST_DEVICE := cpu
 SR_TEST_PYTEST_FLAGS := -vv -s
+
 
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
@@ -112,7 +114,8 @@ help:
 lib:
 lib:
 	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
-		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
+		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON) \
+		-DCMAKE_INSTALL_PREFIX=$(SR_PREFIX)
 	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
 	@cmake --install build/$(SR_BUILD)
 
@@ -148,7 +151,9 @@ test-deps-gpu: test-deps
 build-tests: test-deps
 build-tests: test-lib
 	@cmake -S tests -B build/$(SR_BUILD)/tests/$(SR_LINK) \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(SR_PREFIX)/share/cmake/smartredis-fortran
 	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK) -- -j $(NPROC)
 
 
@@ -157,7 +162,8 @@ build-tests: test-lib
 build-test-cpp: test-deps
 build-test-cpp: test-lib
 	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis
 	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp -- -j $(NPROC)
 
 # help: build-unit-test-cpp            - build the C++ unit tests
@@ -165,7 +171,8 @@ build-test-cpp: test-lib
 build-unit-test-cpp: test-deps
 build-unit-test-cpp: test-lib
 	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis
 	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests -- -j $(NPROC)
 
 # help: build-test-c                   - build the C tests
@@ -173,7 +180,8 @@ build-unit-test-cpp: test-lib
 build-test-c: test-deps
 build-test-c: test-lib
 	@cmake -S tests/c -B build/$(SR_BUILD)/tests/$(SR_LINK)/c \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis
 	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/c -- -j $(NPROC)
 
 
@@ -183,7 +191,9 @@ build-test-fortran: test-deps
 build-test-fortran: SR_FORTRAN=ON
 build-test-fortran: test-lib
 	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/$(SR_LINK)/fortran \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(SR_PREFIX)/share/cmake/smartredis-fortran
 	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/fortran -- -j $(NPROC)
 
 
@@ -191,7 +201,9 @@ build-test-fortran: test-lib
 .PHONY: build-examples
 build-examples: lib
 	@cmake -S examples -B build/$(SR_BUILD)/examples/$(SR_LINK) -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(SR_PREFIX)/share/cmake/smartredis-fortran
 	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK) -- -j $(NPROC)
 
 
@@ -199,7 +211,9 @@ build-examples: lib
 .PHONY: build-example-serial
 build-example-serial: lib
 	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/$(SR_LINK)/serial \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(SR_PREFIX)/share/cmake/smartredis-fortran
 	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/serial
 
 
@@ -207,7 +221,9 @@ build-example-serial: lib
 .PHONY: build-example-parallel
 build-example-parallel: lib
 	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/$(SR_LINK)/parallel \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
+		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN) \
+		-Dsmartredis_DIR=$(SR_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(SR_PREFIX)/share/cmake/smartredis-fortran
 	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parallel
 
 
