@@ -26,7 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-FROM smartredis:local
+FROM smartredis
 
 # Install Fortran compiler
 RUN apt-get update && \

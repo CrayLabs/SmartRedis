@@ -57,6 +57,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads)
 
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     set(CMAKE_BUILD_TYPE Debug)
@@ -74,6 +75,12 @@ if (BUILD_FORTRAN)
 endif()
 
 ## Include external libraries
+## Note: These ExternalProjects need to be installed into the
+## SmartRedis install directory since there are variants of the
+## header files that are chosen based on various configuration
+## options. Any extra artifacts should be removed in the
+## POST_BUILD step
+
 # Add hiredis as an external project
 ExternalProject_Add(hiredis
     GIT_REPOSITORY https://github.com/redis/hiredis.git
@@ -90,15 +97,10 @@ ExternalProject_Add(hiredis
 ExternalProject_Get_Property(hiredis source_dir binary_dir)
 set(hiredis_source_dir ${source_dir})
 set(hiredis_binary_dir ${binary_dir})
+file(GLOB hiredis_objs ${binary_dir}/CMakeFiles/hiredis.dir/*.o)
 
 add_library(libhiredis UNKNOWN IMPORTED)
 add_dependencies(libhiredis hiredis)
-
-## Note: These ExternalProjects need to be installed into the
-## SmartRedis install directory since there are variants of the
-## header files that are chosen based on various configuration
-## options. Any extra artifacts should be removed in the
-## POST_BUILD step
 
 # Set hiredis properties
 set_target_properties(libhiredis PROPERTIES
@@ -123,6 +125,7 @@ ExternalProject_Add(redis++
 ExternalProject_Get_Property(redis++ source_dir binary_dir)
 set(redis++_source_dir ${source_dir})
 set(redis++_binary_dir ${binary_dir})
+file(GLOB redis++_objs ${binary_dir}/CMakeFiles/redis++_static.dir/src/sw/redis++/*.o)
 cmake_print_variables(redis++_source_dir)
 
 add_library(libredis++ UNKNOWN IMPORTED)
@@ -164,8 +167,6 @@ if (PEDANTIC)
         set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -Wno-maybe-uninitialized")
     endif()
 endif()
-
-find_package(Threads REQUIRED)
 
 # Define source code that goes into the SmartRedis library
 list(APPEND C_CPP_SRC
@@ -226,11 +227,11 @@ include_directories(SYSTEM $<BUILD_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 cmake_print_variables(BUILD_SHARED_LIBS)
 set(CLIENT_SRC ${C_CPP_SRC})
 add_library(smartredis ${CLIENT_SRC})
+add_dependencies(smartredis hiredis redis++)
 if(BUILD_SHARED_LIBS)
     set_target_properties(smartredis PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-target_link_libraries(smartredis PRIVATE libhiredis libredis++ Threads::Threads)
-add_dependencies(smartredis libhiredis libredis++)
+target_link_libraries(smartredis PRIVATE ${hiredis_objs} ${redis++_objs} PUBLIC Threads::Threads)
 target_include_directories(smartredis PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )

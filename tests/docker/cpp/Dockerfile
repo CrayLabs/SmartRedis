@@ -26,7 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-FROM smartredis:local
+FROM smartredis
 
 # Copy source and build files into the container
 COPY ./CMakeLists.txt /usr/local/src/DockerTest/
