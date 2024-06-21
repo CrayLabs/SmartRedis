@@ -235,9 +235,9 @@ else () # Shared library build
     target_include_directories(${SMARTREDIS_LIB} PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
-    target_link_libraries(smartredis PRIVATE libhiredis libredis++ Threads::Threads)
+    target_link_libraries(${SMARTREDIS_LIB} PRIVATE libhiredis libredis++ Threads::Threads)
     add_custom_command(
-        TARGET smartredis
+	TARGET ${SMARTREDIS_LIB}
         POST_BUILD
         COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/libhiredis.a ${CMAKE_INSTALL_PREFIX}/lib/libredis++.a ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig ${CMAKE_INSTALL_PREFIX}/lib/cmake
         VERBATIM
@@ -273,14 +273,17 @@ if (SR_FORTRAN)
     set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
     # Fortran library
     add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} ${FORTRAN_SRC})
-    add_dependencies(smartredis-fortran smartredis)
+    add_dependencies(smartredis-fortran ${SMARTREDIS_LIB})
+    target_include_directories(smartredis-fortran PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
     set_target_properties(smartredis-fortran PROPERTIES
         SUFFIX ${SMARTREDIS_LINK_LIBRARY_SUFFIX}
     )
 	set_target_properties(smartredis-fortran PROPERTIES
 		OUTPUT_NAME ${SMARTREDIS_FORTRAN_LIB}
 	)
-    target_link_libraries(smartredis-fortran PUBLIC smartredis)
+target_link_libraries(smartredis-fortran PUBLIC ${SMARTREDIS_LIB})
     # Install dynamic library and headers
     install(TARGETS smartredis-fortran
             EXPORT smartredis-fortran-targets

@@ -35,33 +35,15 @@ enable_language(CXX)
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
-include(smartredis_defs)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-# Assume by default that users should link against the
-# install directory in this repository
-if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../../install/")
-endif()
-
-# Locate dependencies
-find_library(SR_LIB ${SMARTREDIS_LIB}
-  PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-  REQUIRED
-  ${SMARTREDIS_LINK_MODE}
-)
 find_package(Threads REQUIRED)
-
-# Define include directories for header files
-include_directories(SYSTEM
-    /usr/local/include
-    ${SMARTREDIS_INSTALL_PATH}/include
-)
+find_package(smartredis)
 
 # Identify source files to be built into the CPP Catch2 unit tests
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
 # Build the CPP Catch2 unit tests
 add_executable(cpp_unit_tests ${UNIT_TESTS})
-target_link_libraries(cpp_unit_tests PUBLIC ${SR_LIB} PRIVATE Threads::Threads)
+target_link_libraries(cpp_unit_tests PRIVATE smartredis Threads::Threads)
+target_include_directories(cpp_unit_tests PRIVATE ${smartredis_INCLUDE_DIR})
