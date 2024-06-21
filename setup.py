@@ -78,10 +78,10 @@ class CMakeBuild(build_ext):
         config_args = [
             '-S.',
             f'-B{str(build_directory)}',
-            '-DSR_BUILD=' + cfg,
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
+            '-DBUILD_TYPE=' + cfg,
+            '-DCMAKE_INSTALL_PREFIX=' + str(build_directory),
             '-DPYTHON_EXECUTABLE=' + sys.executable,
-            '-DSR_PYTHON=ON',
+            '-DBUILD_PYTHON=ON',
         ]
         subprocess.check_call(
             [self.cmake] + config_args,

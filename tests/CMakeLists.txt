@@ -31,14 +31,14 @@ project(SmartSim-Tests)
 # Enable language support for the examples
 enable_language(C)
 enable_language(CXX)
-if (SR_FORTRAN)
+if (BUILD_FORTRAN)
     enable_language(Fortran)
 endif()
 
 # Bring in subdirectories
 add_subdirectory(c)
 add_subdirectory(cpp)
-if (SR_FORTRAN)
+if (BUILD_FORTRAN)
     add_subdirectory(fortran)
 endif()
 
