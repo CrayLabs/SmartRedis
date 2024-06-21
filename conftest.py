@@ -135,21 +135,23 @@ class MockTestModel:
 
 # Add a build type option to pytest command lines
 def pytest_addoption(parser):
-    parser.addoption("--build", action="store", default="Release")
-    parser.addoption("--link", action="store", default="Shared")
-    parser.addoption("--sr_fortran", action="store", default="OFF")
+    parser.addoption("--build_type", action="store", default="Release")
+    parser.addoption("--build_shared_libs", action="store", default="on")
+    parser.addoption("--build_fortran", action="store", default="OFF")
 
 # Fixture to retrieve the build type setting
 @pytest.fixture(scope="session")
-def build(request):
-    return request.config.getoption("--build")
+def build_type(request):
+    return request.config.getoption("--build_type")
 
 # Fixture to retrieve the link type setting
 @pytest.fixture(scope="session")
-def link(request):
-    return request.config.getoption("--link")
+def link_type(request):
+    if request.config.getoption("--build_shared_libs").lower() == "on":
+        return "shared"
+    return "static"
 
 # Fixture to retrieve the Fortran enablement setting
 @pytest.fixture(scope="session")
-def sr_fortran(request):
-    return request.config.getoption("--sr_fortran")
+def build_fortran(request):
+    return request.config.getoption("--build_fortran")
