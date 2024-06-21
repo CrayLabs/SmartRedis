@@ -36,6 +36,7 @@ set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 find_package(smartredis REQUIRED)
 find_package(smartredis-fortran REQUIRED)
+find_package(Threads REQUIRED)
 
 # Stuff the test_utils into a library to enable parallel builds
 add_library(test-utils STATIC test_utils.F90)
@@ -68,7 +69,7 @@ foreach(EXECUTABLE ${EXECUTABLES})
         OUTPUT_NAME ${EXECUTABLE}
     )
     target_link_libraries(${EXECUTABLE}_fortran_test
-        smartredis smartredis-fortran test-utils
+        smartredis smartredis-fortran test-utils Threads::Threads
     )
     target_include_directories(${EXECUTABLE}_fortran_test PRIVATE ${smartredis_INCLUDE_DIR} ${smartredis-fortran_INCLUDE_DIR})
 endforeach()
