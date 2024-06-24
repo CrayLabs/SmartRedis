@@ -35,7 +35,6 @@ enable_language(CXX)
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 find_package(smartredis REQUIRED)
-find_package(Threads)
 
 # Bring in the Catch2 unit-tests
 add_subdirectory(unit-tests)

@@ -37,8 +37,8 @@ project(SmartRedis VERSION "0.5.3")
 option(BUILD_FORTRAN "Build the fortran client library" OFF)
 option(BUILD_PYTHON  "Build the python module" OFF)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
-option(PEDANTIC "Build with pickiest compiler settings" OFF)
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+option(PEDANTIC "Build with strictest compiler settings" OFF)
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 endif()
 if(NOT DEFINED CMAKE_BUILD_TYPE)
@@ -97,9 +97,8 @@ ExternalProject_Add(hiredis
 ExternalProject_Get_Property(hiredis source_dir binary_dir)
 set(hiredis_source_dir ${source_dir})
 set(hiredis_binary_dir ${binary_dir})
-file(GLOB hiredis_objs ${binary_dir}/CMakeFiles/hiredis.dir/*.o)
 
-add_library(libhiredis UNKNOWN IMPORTED)
+add_library(libhiredis STATIC IMPORTED)
 add_dependencies(libhiredis hiredis)
 
 # Set hiredis properties
@@ -125,10 +124,9 @@ ExternalProject_Add(redis++
 ExternalProject_Get_Property(redis++ source_dir binary_dir)
 set(redis++_source_dir ${source_dir})
 set(redis++_binary_dir ${binary_dir})
-file(GLOB redis++_objs ${binary_dir}/CMakeFiles/redis++_static.dir/src/sw/redis++/*.o)
-cmake_print_variables(redis++_source_dir)
 
-add_library(libredis++ UNKNOWN IMPORTED)
+
+add_library(libredis++ STATIC IMPORTED)
 add_dependencies(libredis++ redis++)
 
 set_target_properties(libredis++ PROPERTIES
@@ -231,25 +229,47 @@ add_dependencies(smartredis hiredis redis++)
 if(BUILD_SHARED_LIBS)
     set_target_properties(smartredis PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
-target_link_libraries(smartredis PRIVATE ${hiredis_objs} ${redis++_objs} PUBLIC Threads::Threads)
 target_include_directories(smartredis PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
-add_custom_command(
-    TARGET smartredis
-    POST_BUILD
-    # Delete hiredis artifacts
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/libhiredis.a
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/build
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/cmake
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
-    # Delete redis++ artifacts
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/libredis++.a
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
-    COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/share/cmake/redis++
-    VERBATIM
-    COMMENT "Removing artifacts from dependencies"
-)
+
+if (BUILD_SHARED_LIBS)
+    target_link_libraries(smartredis PRIVATE libhiredis libredis++ Threads::Threads)
+    add_custom_command(
+        TARGET smartredis
+        POST_BUILD
+        # Delete hiredis artifacts
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/libhiredis.a
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/build
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/cmake
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        # Delete redis++ artifacts
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/libredis++.a
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/share/cmake/redis++
+        VERBATIM
+        COMMENT "Removing artifacts from dependencies"
+    )
+else()
+
+    target_link_libraries(smartredis PUBLIC
+        ${CMAKE_INSTALL_PREFIX}/lib/libhiredis.a
+        ${CMAKE_INSTALL_PREFIX}/lib/libredis++.a
+    )
+    add_custom_command(
+        TARGET smartredis
+        POST_BUILD
+        # Delete hiredis artifacts
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/build
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/cmake
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        # Delete redis++ artifacts
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+        COMMAND rm -rf ${CMAKE_INSTALL_PREFIX}/share/cmake/redis++
+        VERBATIM
+        COMMENT "Removing artifacts from dependencies"
+    )
+endif()
 
 install(
     TARGETS smartredis
