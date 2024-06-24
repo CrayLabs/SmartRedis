@@ -42,7 +42,7 @@ COPY ./test_docker.F90 /usr/local/src/DockerTest/
 WORKDIR /usr/local/src/DockerTest
 
 # Run CMake and make
-RUN mkdir build && cd build && cmake .. && make && cd ../
+RUN mkdir build && cd build && cmake .. -Dsmartredis_DIR=/usr/local/share/cmake/smartredis && make && cd ../
 
 # Default command for container execution
 CMD ["/usr/local/src/DockerTest/build/docker_test"]
