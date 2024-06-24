@@ -48,8 +48,8 @@ def get_test_names():
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_example(test, build, sr_fortran, link):
-    if (sr_fortran == "ON" or ".F90" not in test):
+def test_example(test, build_type, build_fortran, link_type):
+    if (build_fortran == "ON" or ".F90" not in test):
         # Build the path to the test executable from the source file name
         # . keep only the last three parts of the path: (parallel/serial, language, basename)
         test = "/".join(test.split("/")[-3:])
@@ -57,7 +57,7 @@ def test_example(test, build, sr_fortran, link):
         # . drop the file extension
         test = ".".join(test.split(".")[:-1])
         # . prepend the path to the built test executable
-        test = f"{getcwd()}/build/{build}/examples/{link}/{test}"
+        test = f"{getcwd()}/build/{build_type}/examples/{link_type}/{test}"
         cmd = ["mpirun", "-n", "2"] if "parallel" in test else []
         cmd += [test]
         print(f"Running test: {osp.basename(test)}")

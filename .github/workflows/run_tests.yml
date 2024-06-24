@@ -176,22 +176,23 @@ jobs:
 
       - name: Build and install test dependencies
         run: |
-          make test-deps &&
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+          make test-deps
 
       # Make sure the examples work
       - name: Run examples
         run: |
-          make test-examples SR_FORTRAN=ON SR_PYTHON=ON SR_LINK=$LINK_TYPE \
-          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+          make test-examples BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE \
+          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }} \
+          INSTALL_PREFIX=$PWD/install/$LINK_TYPE
 
       # Run the tests using various DB deployments
       - name: Run tests
         run: |
           make test-verbose-with-coverage \
             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
-            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 SR_LINK=$LINK_TYPE \
-            SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+            BUILD_FORTRAN=ON BUILD_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 LINK_TYPE=$LINK_TYPE \
+            SR_TEST_REDISAI_VER=v${{ matrix.rai_v }} \
+            INSTALL_PREFIX=$PWD/install/$LINK_TYPE
 
       # Process and upload code coverage (Python was collected during pytest)
       - name: Collect coverage from C/C++/Fortran testers
