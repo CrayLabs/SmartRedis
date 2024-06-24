@@ -35,7 +35,6 @@ enable_language(C)
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 find_package(smartredis REQUIRED)
-find_package(Threads REQUIRED)
 
 # Define all the tests to be built
 list(APPEND EXECUTABLES
