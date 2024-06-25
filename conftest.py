@@ -158,20 +158,20 @@ def bin_path(request):
 def execute_cmd():
     def _execute_cmd(cmd_list, run_path=pathlib.Path.cwd()):
         """Execute a command """
-
+        print(f"Running {cmd_list} at {run_path}")
         # spawning the subprocess and connecting to its output
         proc = Popen(
             cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
         try:
             out, err = proc.communicate(timeout=120)
             if out:
-                print("OUTPUT:", out.decode("utf-8"))
+                print("OUTPUT:", out.decode("unicode_escape"))
             if err:
-                print("ERROR:", err.decode("utf-8"))
+                print("ERROR:", err.decode("unicode_escape"))
             assert(proc.returncode == 0)
         except UnicodeDecodeError:
             output, errs = proc.communicate()
-            print("ERROR:", errs.decode("utf-8"))
+            print("ERROR:", errs.decode("unicode_escape"))
             assert(False)
         except TimeoutExpired:
             proc.kill()

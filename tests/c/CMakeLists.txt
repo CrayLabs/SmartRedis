@@ -59,6 +59,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
         smartredis
     )
     target_include_directories(${EXECUTABLE}_c_test PRIVATE ${smartredis_INCLUDE_DIR})
-    list(APPEND test-targets ${EXECUTABLE})
-    install( ${EXECUTABLE_c_test})
+    install(TARGETS ${EXECUTABLE}_c_test)
 endforeach()
