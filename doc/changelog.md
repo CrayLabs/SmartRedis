@@ -6,6 +6,7 @@ Released on 14 May 2024
 
 Description
 
+-   Pin NumPy version to 1.x
 -   Improve client error logging
 -   Fix pylint regression error
 -   Fix build wheel error
@@ -30,6 +31,11 @@ Description
 
 Detailed Notes
 
+-   The new major version release of Numpy is incompatible with modules
+    compiled against Numpy 1.x. For both SmartSim and SmartRedis we request a
+    1.x version of numpy. This is needed in SmartSim because some of the downstream
+    dependencies request NumPy.
+    ([PR498](https://github.com/CrayLabs/SmartRedis/pull/498))
 -   Ensure errors raised from client include details
     ([PR485](https://github.com/CrayLabs/SmartRedis/pull/485))
 -   Pin pylint to fix regression error
