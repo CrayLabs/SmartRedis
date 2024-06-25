@@ -32,7 +32,7 @@ import time
 test_gpu = environ.get("SR_TEST_DEVICE","cpu").lower() == "gpu"
 
 RANKS = 1
-TEST_PATH = pathlib.parent(pathlib.Path(__file__).resolve())
+TEST_PATH = pathlib.Path(__file__).resolve().parent
 
 def get_test_names():
     """Obtain test names by globbing for client_test
@@ -40,9 +40,9 @@ def get_test_names():
     """
     glob_path = TEST_PATH
     test_names = glob_path.glob("client_test*.F90")
-    test_names = list(filter(lambda test: test.find('gpu') == -1, test_names))
+    test_names = list(filter(lambda test: str(test).find('gpu') == -1, test_names))
     test_names = [(pytest.param(test,
-                                id=test.basename())) for test in test_names]
+                                id=test.name)) for test in test_names]
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
@@ -55,15 +55,11 @@ def test_fortran_client(test, bin_path, execute_cmd):
     """
     # Build the path to the test executable from the source file name
     # . keep only the last three parts of the path: (language, basename)
-    test = "/".join(test.split("/")[-2:])
-    # . drop the file extension
-    test = ".".join(test.split(".")[:-1])
-    # . prepend the path to the built test executable
-    test = bin_path / test
-    cmd = [test]
-    print(f"Running test: {test.name}")
-    print(f"Test command {' '.join(cmd)}")
-    execute_cmd(cmd)
+    basename = test.stem
+    language = test.parent.name
+    test = bin_path / language / "bin" / basename
+    cmd = [str(test)]
+    execute_cmd(cmd, TEST_PATH)
     time.sleep(1)
 
 @pytest.mark.skipif(

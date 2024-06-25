@@ -56,5 +56,5 @@ def test_cpp_client(test, bin_path, execute_cmd):
     test = bin_path / language / "bin" / basename
     cmd = [str(test)]
     print(f"\nRunning test: {test.name}")
-    execute_cmd(cmd)
+    execute_cmd(cmd, str(test.parent.parent))
     time.sleep(1)
