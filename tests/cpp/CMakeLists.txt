@@ -78,4 +78,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
         smartredis
     )
     target_include_directories(${EXECUTABLE}_cpp_test PRIVATE ${smartredis_INCLUDE_DIR})
+    install(TARGETS ${EXECUTABLE}_cpp_test)
 endforeach()

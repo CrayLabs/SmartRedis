@@ -35,15 +35,15 @@ enable_language(CXX)
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 
-find_package(Threads REQUIRED)
 find_package(smartredis)
+
 
 # Identify source files to be built into the CPP Catch2 unit tests
 file(GLOB UNIT_TESTS CONFIGURE_DEPENDS ./*.cpp)
 
 # Build the CPP Catch2 unit tests
 add_executable(cpp_unit_tests ${UNIT_TESTS})
-target_link_libraries(cpp_unit_tests PRIVATE smartredis Threads::Threads)
+target_link_libraries(cpp_unit_tests PRIVATE smartredis)
 target_include_directories(cpp_unit_tests PRIVATE ${smartredis_INCLUDE_DIR})
+install(TARGETS cpp_unit_tests)
