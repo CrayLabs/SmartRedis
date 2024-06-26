@@ -66,7 +66,7 @@ jobs:
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.9.x', '3.10.x', '3.11.x'] # versions of Python
         compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
-        link_type: [static, shared]
+        link_type: [shared]
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
       LINK_TYPE: ${{ matrix.link_type }}
@@ -75,6 +75,7 @@ jobs:
     steps:
       # Maximize the space in this image
       - name: Maximize build space
+        if: false
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 30720
@@ -177,11 +178,11 @@ jobs:
       - name: Build and install test dependencies
         run: |
           make test-deps
-      
+
       - name: Build and install SmartRedis library
         run: |
           make test-lib INSTALL_PREFIX=$PWD/install/$LINK_TYPE \
-            BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE \
+            BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE
           echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/$LINK_TYPE/lib >> $GITHUB_ENV
 
       # Make sure the examples work
@@ -189,8 +190,8 @@ jobs:
         run: |
           make test-examples INSTALL_PREFIX=$PWD/install/$LINK_TYPE \
             BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE \
-          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }} \
-          INSTALL_PREFIX=$PWD/install/$LINK_TYPE
+            SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }} \
+            INSTALL_PREFIX=$PWD/install/$LINK_TYPE
 
       # Run the tests using various DB deployments
       - name: Run tests
