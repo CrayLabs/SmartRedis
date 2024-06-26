@@ -31,7 +31,7 @@ import pathlib
 import time
 
 RANKS = 1
-TEST_PATH = pathlib.parent(pathlib.Path(__file__).resolve())
+TEST_PATH = pathlib.Path(__file__).resolve().parent
 
 def get_test_names():
     """Obtain test names by globbing for client_test
