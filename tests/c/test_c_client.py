@@ -51,13 +51,10 @@ def test_c_client(test, bin_path, execute_cmd):
     :type test: str
     """
     # Build the path to the test executable from the source file name
-    # . keep only the last two parts of the path: (language, basename)
-    test = "/".join(test.split("/")[-2:])
-    # . drop the file extension
-    test = ".".join(test.split(".")[:-1])
-    # . prepend the path to the built test executable
-    test = bin_path / test
-    cmd = [test]
-    print(f"\nRunning test: {test.basename()}")
-    execute_cmd(cmd)
+    basename = test.stem
+    language = test.parent.name
+    test = bin_path / language / "bin" / basename
+    cmd = [str(test)]
+    print(f"\nRunning test: {test.name}")
+    execute_cmd(cmd, str(test.parent.parent))
     time.sleep(1)

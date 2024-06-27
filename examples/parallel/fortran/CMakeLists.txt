@@ -32,6 +32,13 @@ project(SmartRedis-Examples-Parallel-Fortran)
 enable_language(Fortran)
 enable_language(CXX)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 find_package(MPI REQUIRED)
@@ -66,4 +73,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
 		smartredis
 		smartredis-fortran
 	)
+	install(TARGETS ${EXECUTABLE}_fortran_parallel RUNTIME DESTINATION parallel/fortran)
 endforeach()

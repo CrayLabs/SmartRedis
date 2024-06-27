@@ -31,6 +31,13 @@ project(SmartRedis-Examples-Serial-Cpp)
 # Enable language support for the examples
 enable_language(CXX)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
@@ -56,4 +63,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
     target_link_libraries(${EXECUTABLE}_cpp_serial
         smartredis
     )
+	install(TARGETS ${EXECUTABLE}_cpp_serial RUNTIME DESTINATION serial/cpp)
 endforeach()

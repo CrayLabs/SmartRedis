@@ -35,6 +35,13 @@ if (BUILD_FORTRAN)
     enable_language(Fortran)
 endif()
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Bring in subdirectories
 add_subdirectory(c)
 add_subdirectory(cpp)

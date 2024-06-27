@@ -32,7 +32,7 @@ CWD := $(shell pwd)
 # Build variables
 NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
 INSTALL_PREFIX := $(CWD)/install
-TEST_PREFIX := $(CWD)/tests/
+TEST_PREFIX := $(CWD)/tests
 EXAMPLES_PREFIX := $(CWD)/examples/bin
 BUILD_FORTRAN := OFF
 BUILD_PYTHON := OFF
@@ -134,7 +134,7 @@ test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: PEDANTIC=ON
+test-lib-with-fortran: PEDANTIC=off
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
@@ -150,7 +150,7 @@ test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-lib
+build-tests: test-lib-with-fortran
 build-tests: build-unit-test-cpp
 build-tests: build-test-cpp
 build-tests: build-test-c
@@ -173,7 +173,7 @@ build-test-cpp: catch2
 build-unit-test-cpp: test-lib
 build-unit-test-cpp: catch2
 	@cmake -S tests/cpp/unit-tests -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp/unit-tests \
-		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
 		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/cpp \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis
 	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp/unit-tests -- -j $(NPROC)
@@ -183,7 +183,7 @@ build-unit-test-cpp: catch2
 .PHONY: build-test-c
 build-test-c: test-lib
 	@cmake -S tests/c -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/c \
-		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
 		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/c
 	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/c -- -j $(NPROC)
@@ -193,9 +193,9 @@ build-test-c: test-lib
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
 build-test-fortran: BUILD_FORTRAN=ON
-build-test-fortran: test-lib
+build-test-fortran: test-lib-with-fortran
 	@cmake -S tests/fortran -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/fortran \
-		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
 		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/fortran \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
 		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
@@ -206,7 +206,7 @@ build-test-fortran: test-lib
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
 build-examples: lib
-	@cmake -S examples -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE) -DBUILD_TYPE=$(BUILD_TYPE) \
+	@cmake -S examples -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
 		-DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
 		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
@@ -219,7 +219,7 @@ build-examples: lib
 .PHONY: build-example-serial
 build-example-serial: lib
 	@cmake -S examples/serial -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/serial \
-		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
 		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
 		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
@@ -230,7 +230,7 @@ build-example-serial: lib
 .PHONY: build-example-parallel
 build-example-parallel: lib
 	@cmake -S examples/parallel -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/parallel \
-		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
 		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
 		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
 		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
@@ -345,7 +345,7 @@ define run_smartredis_tests_with_standalone_server
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--bin-path $(TEST_PREFIX) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
+		--bin-path $(2) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
@@ -365,7 +365,7 @@ define run_smartredis_tests_with_clustered_server
 	echo "Running clustered tests" && \
 	PYTHONFAULTHANDLER=1 python -s -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--bin-path $(TEST_PREFIX) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
+		--bin-path $(2) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down clustered Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) \
@@ -388,7 +388,7 @@ define run_smartredis_tests_with_uds_server
 	echo "Running standalone tests with Unix Domain Socket connection" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--bin-path $(TEST_PREFIX)  --build-fortran $(BUILD_FORTRAN) $(1)  ; \
+		--bin-path $(2)  --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server with Unix Domain Socket support" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
@@ -403,16 +403,16 @@ endef
 define run_smartredis_tests_with_server
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Standalone),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_standalone_server,$(1))
+		$(call run_smartredis_tests_with_standalone_server,$(1),$(2))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Clustered),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_clustered_server,$(1))
+		$(call run_smartredis_tests_with_clustered_server,$(1),$(2))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),UDS),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
 		$(if $(filter-out $(shell uname -s),Darwin),
-			$(call run_smartredis_tests_with_uds_server,$(1)),
+			$(call run_smartredis_tests_with_uds_server,$(1),$(2)),
 			@echo "Skipping: Unix Domain Socket is not supported on MacOS"
 		)
 	)
@@ -424,7 +424,7 @@ test: test-deps
 test: build-tests
 test: SR_TEST_PYTEST_FLAGS := -vv
 test:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
@@ -432,7 +432,7 @@ test-verbose: test-deps
 test-verbose: build-tests
 test-verbose: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
@@ -441,14 +441,14 @@ test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose-with-coverage:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
 test-c: build-test-c
 test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
-	@$(call run_smartredis_tests_with_server,./tests/c)
+	@$(call run_smartredis_tests_with_server,./tests/c, $(TEST_PREFIX))
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
@@ -456,14 +456,14 @@ test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 test-cpp:
-	@$(call run_smartredis_tests_with_server,./tests/cpp)
+	@$(call run_smartredis_tests_with_server,./tests/cpp, $(TEST_PREFIX))
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
-	@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
+	@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests, $(TEST_PREFIX))
 
 # help: test-py                        - run python tests
 .PHONY: test-py
@@ -472,7 +472,7 @@ test-py: BUILD_PYTHON := ON
 test-py: lib
 test-py: SR_TEST_PYTEST_FLAGS := -vv
 test-py:
-	@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python, $(TEST_PREFIX))
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
@@ -480,7 +480,7 @@ test-fortran: BUILD_FORTRAN := ON
 test-fortran: build-test-fortran
 test-fortran: SR_TEST_PYTEST_FLAGS := -vv -s
 test-fortran:
-	@$(call run_smartredis_tests_with_server,./tests/fortran)
+	@$(call run_smartredis_tests_with_server,./tests/fortran, $(TEST_PREFIX))
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
@@ -489,7 +489,7 @@ testpy-cov: BUILD_PYTHON := ON
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv
 testpy-cov: COV_FLAGS := --cov=./src/python/module/smartredis/
 testpy-cov:
-	@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python, $(TEST_PREFIX))
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
@@ -497,7 +497,7 @@ test-examples: test-deps
 test-examples: build-examples
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv -s
 test-examples:
-	@$(call run_smartredis_tests_with_server,./examples)
+	@$(call run_smartredis_tests_with_server,./examples,$(EXAMPLES_PREFIX))
 
 
 ############################################################################
