@@ -48,10 +48,11 @@ endif()
 ## Cmake Modules
 include(GNUInstallDirs)
 include(ExternalProject)
-include(CMakePrintHelpers)
 if(BUILD_PYTHON)
     include(FetchContent)
 endif()
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+include(EnableCoverage)
 
 ## Configure the remainder of the builder
 set(CMAKE_CXX_STANDARD 17)
@@ -59,19 +60,13 @@ set(CMAKE_CXX_VISIBILITY_PRESET default)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
 
-if(CMAKE_BUILD_TYPE STREQUAL Coverage)
-    set(CMAKE_BUILD_TYPE Debug)
-    if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") AND (CMAKE_C_COMPILER_ID STREQUAL "GNU"))
-        add_compile_options(--coverage)
-        add_link_options(--coverage)
-    else()
-        message(WARNING "A coverage build was specified, but the CMAKE compiler is not GCC")
-    endif()
-endif()
-
 if (BUILD_FORTRAN)
     enable_language(Fortran)
     set(CMAKE_Fortran_MODULE_DIRECTORY "${CMAKE_INSTALL_PREFIX}/include")
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
 endif()
 
 ## Include external libraries
@@ -107,7 +102,6 @@ set_target_properties(libhiredis PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES ${hiredis_source_dir}
 )
 
-cmake_print_variables(hiredis_source_dir)
 # Define redis++ as an external project
 ExternalProject_Add(redis++
     GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
@@ -222,7 +216,6 @@ set(FORTRAN_SRC
 include_directories(SYSTEM $<BUILD_INTERFACE:${CMAKE_INSTALL_PREFIX}/include>)
 
 ## Build the main SmartRedis library
-cmake_print_variables(BUILD_SHARED_LIBS)
 set(CLIENT_SRC ${C_CPP_SRC})
 add_library(smartredis ${CLIENT_SRC})
 add_dependencies(smartredis hiredis redis++)
@@ -288,7 +281,7 @@ install(EXPORT smartredis-targets
     DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/smartredis
 )
 include(CMakePackageConfigHelpers)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.smartredis.cmake.in
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.smartredis.cmake.in
   smartredisConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/smartredis
 )
@@ -325,7 +318,7 @@ if (BUILD_FORTRAN)
         FILE smartredis-fortran.cmake
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/smartredis-fortran
     )
-    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.smartredis-fortran.cmake.in
+    configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.smartredis-fortran.cmake.in
       smartredis-fortranConfig.cmake
       INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/cmake/smartredis-fortran
     )

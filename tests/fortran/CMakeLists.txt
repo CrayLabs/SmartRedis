@@ -31,6 +31,13 @@ project(SmartRedis-Tests-Fortran)
 # Enable language support for the tests
 enable_language(Fortran)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
@@ -68,7 +75,8 @@ foreach(EXECUTABLE ${EXECUTABLES})
         OUTPUT_NAME ${EXECUTABLE}
     )
     target_link_libraries(${EXECUTABLE}_fortran_test
-        smartredis smartredis-fortran test-utils Threads::Threads
+        smartredis smartredis-fortran test-utils
     )
     target_include_directories(${EXECUTABLE}_fortran_test PRIVATE ${smartredis_INCLUDE_DIR} ${smartredis-fortran_INCLUDE_DIR})
+    install(TARGETS ${EXECUTABLE}_fortran_test)
 endforeach()

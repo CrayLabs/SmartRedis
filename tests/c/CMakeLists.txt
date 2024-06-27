@@ -31,6 +31,13 @@ project(SmartSim-Tests-C)
 # Enable language support for the tests
 enable_language(C)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)

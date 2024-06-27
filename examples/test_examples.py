@@ -25,13 +25,12 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import pytest
-from os import path as osp
 from glob import glob
 import pathlib
 import time
 
 RANKS = 1
-TEST_PATH = pathlib.Path(__file__).resolve().parent
+TEST_PATH = pathlib.Path(__file__).resolve().parent # Should be the smartredis/examples directory
 
 def get_test_names():
     """Obtain test names by globbing for client_test
@@ -40,28 +39,28 @@ def get_test_names():
     glob_path_1 = TEST_PATH.glob("*/*/example*")
     glob_path_2 = TEST_PATH.glob("*/*/smartredis*")
     test_names = list(glob_path_1) + list(glob_path_2)
-    test_names = list(filter(lambda test: test.find('example_utils') == -1, test_names))
-    test_names = list(filter(lambda test: test.find('.py') == -1, test_names))
+    test_names = list(filter(lambda test: str(test).find('example_utils') == -1, test_names))
+    test_names = list(filter(lambda test: str(test).find('.py') == -1, test_names))
     test_names = [(pytest.param(test,
-                                id=osp.basename(test))) for test in test_names]
+                                id=test.name)) for test in test_names]
     return test_names
 
 @pytest.mark.parametrize("test", get_test_names())
 def test_example(test, bin_path, build_fortran, execute_cmd):
-    if (build_fortran == "ON" or ".F90" not in test):
+    if (build_fortran or ".F90" not in str(test)):
         # Build the path to the test executable from the source file name
         # . keep only the last three parts of the path: (parallel/serial, language, basename)
-        test = "/".join(test.split("/")[-3:])
-        test_subdir = "/".join(test.split("/")[0:2])
-        # . drop the file extension
-        test = ".".join(test.split(".")[:-1])
-        # . prepend the path to the built test executable
-        test = bin_path / test
-        cmd = ["mpirun", "-n", "2"] if "parallel" in test else []
-        cmd += [test]
-        print(f"\nRunning test: {test.basename()}")
+
+        basename = test.stem
+        language = test.parent.name
+        execution = test.parent.parent.name
+        test = bin_path/execution/language/basename
+
+        cmd = ["mpirun", "-n", "2"] if "parallel" in str(test) else []
+        cmd += [str(test)]
+        print(f"\nRunning test: {test.name}")
         print(f"Test command {' '.join(cmd)}")
-        execute_cmd(cmd, pathlib.Path.cwd()/test_subdir)
+        execute_cmd(cmd, str(TEST_PATH/"common"))
         time.sleep(1)
     else:
         print (f"Skipping Fortran test {test}")

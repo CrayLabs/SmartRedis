@@ -154,6 +154,11 @@ def pytest_addoption(parser):
 def bin_path(request):
     return pathlib.Path(request.config.getoption("--bin-path"))
 
+# Fixture to retrieve the build type setting
+@pytest.fixture(scope="module")
+def build_fortran(request):
+    return pathlib.Path(request.config.getoption("--build-fortran"))
+
 @pytest.fixture()
 def execute_cmd():
     def _execute_cmd(cmd_list, run_path=pathlib.Path.cwd()):

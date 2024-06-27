@@ -32,6 +32,13 @@ project(SmartRedis-Examples-Serial-Fortran)
 enable_language(Fortran)
 enable_language(CXX)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
@@ -57,4 +64,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
 		smartredis
 		smartredis-fortran
 	)
+	install(TARGETS ${EXECUTABLE}_fortran_serial RUNTIME DESTINATION serial/fortran)
 endforeach()

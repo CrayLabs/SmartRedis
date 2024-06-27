@@ -31,6 +31,13 @@ project(SmartRedis-Examples-Parallel-Cpp)
 # Enable language support for the examples
 enable_language(CXX)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Configure the build
 set(CMAKE_CXX_STANDARD 17)
 # Locate dependencies
@@ -55,4 +62,5 @@ foreach(EXECUTABLE ${EXECUTABLES})
     	MPI::MPI_CXX
         smartredis
     )
+	install(TARGETS ${EXECUTABLE}_cpp_parallel RUNTIME DESTINATION parallel/cpp)
 endforeach()
