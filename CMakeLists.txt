@@ -38,6 +38,7 @@ option(BUILD_FORTRAN "Build the fortran client library" OFF)
 option(BUILD_PYTHON  "Build the python module" OFF)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(PEDANTIC "Build with strictest compiler settings" OFF)
+option(RETAIN_RPATH "Keep the path of the linked main SmartRedis library. Only applies to shared library builds" ON)
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/install)
 endif()
@@ -306,6 +307,11 @@ if (BUILD_FORTRAN)
     target_include_directories(smartredis PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
+    if(RETAIN_RPATH)
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+        set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    endif()
+
     install(
         TARGETS smartredis-fortran
         EXPORT smartredis-fortran-targets
