@@ -24,29 +24,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pathlib
 import pytest
-from os import path as osp
-from os import getcwd
-from glob import glob
-from subprocess import Popen, PIPE, TimeoutExpired
 import time
 
 RANKS = 1
-TEST_PATH = osp.dirname(osp.abspath(__file__))
+TEST_PATH = pathlib.Path(__file__).resolve().parent
 
 def get_test_names():
     """Obtain test names by globbing for client_test
     Add tests manually if necessary
     """
-    glob_path = osp.join(TEST_PATH, "client_test*")
-    test_names = glob(glob_path)
+    glob_path = TEST_PATH
+    test_names = glob_path.glob("client_test*.c")
     test_names = [(pytest.param(test,
-                                id=osp.basename(test))) for test in test_names]
+                                id=test.name)) for test in test_names]
     return test_names
 
 
 @pytest.mark.parametrize("test", get_test_names())
-def test_c_client(test, build, link):
+def test_c_client(test, bin_path, execute_cmd):
     """This function actually runs the tests using the parameterization
     function provided in Pytest
 
@@ -54,44 +51,10 @@ def test_c_client(test, build, link):
     :type test: str
     """
     # Build the path to the test executable from the source file name
-    # . keep only the last two parts of the path: (language, basename)
-    test = "/".join(test.split("/")[-2:])
-    # . drop the file extension
-    test = ".".join(test.split(".")[:-1])
-    # . prepend the path to the built test executable
-    test = f"{getcwd()}/build/{build}/tests/{link}/{test}"
-    cmd = [test]
-    print(f"\nRunning test: {osp.basename(test)}")
-    execute_cmd(cmd)
+    basename = test.stem
+    language = test.parent.name
+    test = bin_path / language / "bin" / basename
+    cmd = [str(test)]
+    print(f"\nRunning test: {test.name}")
+    execute_cmd(cmd, str(test.parent.parent))
     time.sleep(1)
-
-def execute_cmd(cmd_list):
-    """Execute a command """
-
-    # spawning the subprocess and connecting to its output
-    proc = Popen(
-        cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=TEST_PATH)
-    try:
-        out, err = proc.communicate(timeout=120)
-        if out:
-            print("OUTPUT:", out.decode("utf-8"))
-        if err:
-            print("ERROR:", err.decode("utf-8"))
-        assert(proc.returncode == 0)
-    except UnicodeDecodeError:
-        output, errs = proc.communicate()
-        print("ERROR:", errs.decode("utf-8"))
-        assert(False)
-    except TimeoutExpired:
-        proc.kill()
-        output, errs = proc.communicate()
-        print("TIMEOUT: test timed out after test timeout limit of 120 seconds")
-        print("OUTPUT:", output.decode("utf-8"))
-        print("ERROR:", errs.decode("utf-8"))
-        assert(False)
-    except Exception:
-        proc.kill()
-        output, errs = proc.communicate()
-        print("OUTPUT:", output.decode("utf-8"))
-        print("ERROR:", errs.decode("utf-8"))
-        assert(False)

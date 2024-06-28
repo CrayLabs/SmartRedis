@@ -73,23 +73,15 @@ class CMakeBuild(build_ext):
             env.get('CXXFLAGS', ''),
             self.distribution.get_version())
 
-        # Build dependencies
-        print('-'*10, 'Building third-party dependencies', '-'*40)
-        subprocess.check_call(
-            [self.make, "deps"],
-            cwd=source_directory,
-            shell=False
-        )
-
         # Run CMake config step
         print('-'*10, 'Configuring build', '-'*40)
         config_args = [
             '-S.',
             f'-B{str(build_directory)}',
-            '-DSR_BUILD=' + cfg,
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(build_directory),
+            '-DBUILD_TYPE=' + cfg,
+            '-DCMAKE_INSTALL_PREFIX=' + str(build_directory),
             '-DPYTHON_EXECUTABLE=' + sys.executable,
-            '-DSR_PYTHON=ON',
+            '-DBUILD_PYTHON=ON',
         ]
         subprocess.check_call(
             [self.cmake] + config_args,

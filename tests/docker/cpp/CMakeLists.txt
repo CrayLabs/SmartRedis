@@ -34,18 +34,12 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD 17)
 
-find_library(SR_LIB smartredis)
-
-include_directories(SYSTEM
-    /usr/local/include/smartredis
-)
-
+find_package(smartredis)
 # Build executables
-
 add_executable(docker_test_cpp
 	docker_test.cpp
 )
 set_target_properties(docker_test_cpp PROPERTIES
     OUTPUT_NAME docker_test
 )
-target_link_libraries(docker_test_cpp ${SR_LIB} pthread)
+target_link_libraries(docker_test_cpp smartredis pthread)
