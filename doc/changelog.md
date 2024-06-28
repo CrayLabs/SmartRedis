@@ -6,7 +6,16 @@ Released on 14 May 2024
 
 Description
 
+<<<<<<< HEAD
 -   Remove broken oss.redis.com URLs from documentation
+=======
+-   Add option to allow SmartRedis Fortran library to retain the
+    path to the main client library
+-   Update examples and tests to use find_package(smartredis)
+-   Generate config files necessary to allow CMake projects to add
+    SmartRedis via find_package
+-   Allow users to specify install location of SmartRedis libraries
+>>>>>>> 783e335 (Final changes)
 -   Streamline compilation of SmartRedis dependencies
 -   Pin NumPy version to 1.x
 -   Improve client error logging
@@ -33,10 +42,33 @@ Description
 
 Detailed Notes
 
+-   As part of this cleanup, some behaviors of how the libraries were
+    named have been removed. The testing suite now distinguishes between
+    various build types (e.g. Debug, Coverage, etc.) by specifying the
+    ``CMAKE_INSTALL_PREFIX`` instead of appending it as part of the name
+    of the library itself.
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The SmartRedis Fortran library now by default will retain the path
+    to the SmartRedis C/C++ library. This should avoid occasional problems
+    where users were getting "library not found" errors if they had moved
+    libraries post-installation
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   All the examples and tests now use the ``find_package`` functionality
+    to setup linking flags
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The install process now generates package configuration files for
+    the C/C++ SmartRedis library and the Fortran SmartRedis library.
+    Users can use the ``find_package()`` command in their CMakeLists.txt
+    to setup the linking and include flags automatically
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The CMakeLists.txt for SmartRedis now includes the install commands
+    which allow users to specify the specific install prefix to install
+    the SmartRedis libraries, header files, and Fortran .mod files
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
 -   hiredis, redis++, and pybind are now retrieved and installed
     in `CMakeLists.txt` instead of in the Makefile. This decouples the
     user-facing side of SmartRedis from the Makefile, which now can be
-    used as a convenient interface to compile SmartRedis with various
+    used pureley as a convenient interface to compile SmartRedis with various
     options and coordinate testing
     ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
 -   The new major version release of Numpy is incompatible with modules
