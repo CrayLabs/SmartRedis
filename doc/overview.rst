@@ -17,10 +17,7 @@ In addition to the RedisAI capabilities above,
 SmartRedis includes the following features developed for
 large, distributed HPC architectures:
 
--   Redis cluster support for RedisAI data types
-    (`tensors <https://oss.redis.com/redisai/intro/#using-redisai-tensors>`__,
-    `models <https://oss.redis.com/redisai/intro/#loading-models>`__,
-    and `scripts <https://oss.redis.com/redisai/intro/#scripting>`__).
+-   Redis cluster support for RedisAI data types (`tensors`, `models`, and `scripts`).
 -   Distributed model and script placement for parallel
     evaluation that maximizes hardware utilization and throughput
 -   A ``DataSet`` storage format to aggregate multiple tensors

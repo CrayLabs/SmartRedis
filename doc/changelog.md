@@ -6,6 +6,7 @@ Released on 14 May 2024
 
 Description
 
+-   Remove broken oss.redis.com URLs from documentation
 -   Pin NumPy version to 1.x
 -   Improve client error logging
 -   Fix pylint regression error
