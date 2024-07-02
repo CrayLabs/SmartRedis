@@ -6,16 +6,13 @@ Released on 14 May 2024
 
 Description
 
-<<<<<<< HEAD
 -   Remove broken oss.redis.com URLs from documentation
-=======
 -   Add option to allow SmartRedis Fortran library to retain the
     path to the main client library
 -   Update examples and tests to use find_package(smartredis)
 -   Generate config files necessary to allow CMake projects to add
     SmartRedis via find_package
 -   Allow users to specify install location of SmartRedis libraries
->>>>>>> 783e335 (Final changes)
 -   Streamline compilation of SmartRedis dependencies
 -   Pin NumPy version to 1.x
 -   Improve client error logging
