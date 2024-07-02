@@ -73,6 +73,7 @@ foreach(EXECUTABLE ${EXECUTABLES})
     )
     set_target_properties(${EXECUTABLE}_fortran_test PROPERTIES
         OUTPUT_NAME ${EXECUTABLE}
+		LINKER_LANGUAGE Fortran
     )
     target_link_libraries(${EXECUTABLE}_fortran_test
         smartredis smartredis-fortran test-utils

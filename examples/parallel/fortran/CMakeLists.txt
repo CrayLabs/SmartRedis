@@ -65,6 +65,7 @@ foreach(EXECUTABLE ${EXECUTABLES})
 	)
 	set_target_properties(${EXECUTABLE}_fortran_parallel PROPERTIES
 		OUTPUT_NAME ${EXECUTABLE}
+		LINKER_LANGUAGE Fortran
 	)
 	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
