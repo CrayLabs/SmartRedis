@@ -24,6 +24,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+import pathlib
+from subprocess import Popen, PIPE, TimeoutExpired
+
 import pytest
 import numpy as np
 import torch
@@ -133,23 +136,59 @@ class MockTestModel:
             str_model = buffer.getvalue()
             return str_model
 
-# Add a build type option to pytest command lines
+# Add a options to pytest command lines
 def pytest_addoption(parser):
-    parser.addoption("--build", action="store", default="Release")
-    parser.addoption("--link", action="store", default="Shared")
-    parser.addoption("--sr_fortran", action="store", default="OFF")
+    parser.addoption(
+        "--bin-path",
+        action="store",
+        default=pathlib.Path.cwd() / "build" / "Release" / "tests"
+    )
+    parser.addoption(
+        "--build-fortran",
+        action="store",
+        default=0
+    )
 
 # Fixture to retrieve the build type setting
-@pytest.fixture(scope="session")
-def build(request):
-    return request.config.getoption("--build")
+@pytest.fixture(scope="module")
+def bin_path(request):
+    return pathlib.Path(request.config.getoption("--bin-path"))
 
-# Fixture to retrieve the link type setting
-@pytest.fixture(scope="session")
-def link(request):
-    return request.config.getoption("--link")
+# Fixture to retrieve the build type setting
+@pytest.fixture(scope="module")
+def build_fortran(request):
+    return pathlib.Path(request.config.getoption("--build-fortran"))
 
-# Fixture to retrieve the Fortran enablement setting
-@pytest.fixture(scope="session")
-def sr_fortran(request):
-    return request.config.getoption("--sr_fortran")
+@pytest.fixture()
+def execute_cmd():
+    def _execute_cmd(cmd_list, run_path=pathlib.Path.cwd()):
+        """Execute a command """
+        print(f"Running {cmd_list} at {run_path}")
+        # spawning the subprocess and connecting to its output
+        proc = Popen(
+            cmd_list, stderr=PIPE, stdout=PIPE, stdin=PIPE, cwd=run_path)
+        try:
+            out, err = proc.communicate(timeout=120)
+            if out:
+                print("OUTPUT:", out.decode("unicode_escape"))
+            if err:
+                print("ERROR:", err.decode("unicode_escape"))
+            assert(proc.returncode == 0)
+        except UnicodeDecodeError:
+            output, errs = proc.communicate()
+            print("ERROR:", errs.decode("unicode_escape"))
+            assert(False)
+        except TimeoutExpired:
+            proc.kill()
+            output, errs = proc.communicate()
+            print("TIMEOUT: test timed out after test timeout limit of 120 seconds")
+            print("OUTPUT:", output.decode("utf-8"))
+            print("ERROR:", errs.decode("utf-8"))
+            assert(False)
+        except Exception:
+            proc.kill()
+            output, errs = proc.communicate()
+            print("OUTPUT:", output.decode("utf-8"))
+            print("ERROR:", errs.decode("utf-8"))
+            assert(False)
+    return _execute_cmd

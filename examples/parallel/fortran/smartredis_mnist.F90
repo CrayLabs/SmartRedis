@@ -35,9 +35,9 @@ program mnist_example
 #include "enum_fortran.inc"
 
   character(len=*), parameter :: model_key = "mnist_model"
-  character(len=*), parameter :: model_file = "../../common/mnist_data/mnist_cnn.pt"
+  character(len=*), parameter :: model_file = "mnist_data/mnist_cnn.pt"
   character(len=*), parameter :: script_key = "mnist_script"
-  character(len=*), parameter :: script_file = "../../common/mnist_data/data_processing_script.txt"
+  character(len=*), parameter :: script_file = "mnist_data/data_processing_script.txt"
 
   type(client_type) :: client
   integer :: err_code, pe_id, result
