@@ -6,6 +6,7 @@ Released on 14 May 2024
 
 Description
 
+-   Touch-up outdated information in README.md
 -   Remove broken oss.redis.com URLs from documentation
 -   Add option to allow SmartRedis Fortran library to retain the
     path to the main client library
@@ -39,6 +40,9 @@ Description
 
 Detailed Notes
 
+-   Update links to install documentation and remove outdated version
+    numbers in the README.md
+    ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
 -   As part of this cleanup, some behaviors of how the libraries were
     named have been removed. The testing suite now distinguishes between
     various build types (e.g. Debug, Coverage, etc.) by specifying the

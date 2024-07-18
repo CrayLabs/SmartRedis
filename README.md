@@ -6,7 +6,7 @@
     <br />
     <div display="inline-block">
         <a href="https://github.com/CrayLabs/SmartRedis"><b>Home</b></a>&nbsp;&nbsp;&nbsp;
-        <a href="https://www.craylabs.org/docs/installation.html#smartredis"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
+        <a href="https://www.craylabs.org/docs/installation_instructions/basic.html#"><b>Install</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://www.craylabs.org/docs/smartredis.html"><b>Documentation</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://join.slack.com/t/craylabs/shared_invite/zt-nw3ag5z5-5PS4tIXBfufu1bIvvr71UA"><b>Slack</b></a>&nbsp;&nbsp;&nbsp;
         <a href="https://github.com/CrayLabs"><b>Cray Labs</b></a>&nbsp;&nbsp;&nbsp;
@@ -51,7 +51,7 @@ SmartSim in any Python, C++, C, or Fortran project.
 ## Using SmartRedis
 
 SmartRedis installation instructions are currently hosted as part of the
-[SmartSim library installation instructions](https://www.craylabs.org/docs/installation_instructions/basic.html#smartredis)
+[SmartSim library installation instructions](https://www.craylabs.org/docs/installation_instructions/basic.html#)
 Additionally, detailed [API documents](https://www.craylabs.org/docs/api/smartredis_api.html) are also available as
 part of the SmartSim documentation.
 
@@ -60,8 +60,8 @@ part of the SmartSim documentation.
 SmartRedis utilizes the following libraries:
 
  - [NumPy](https://github.com/numpy/numpy)
- - [Hiredis](https://github.com/redis/hiredis) 1.1.0
- - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus) 1.3.5
+ - [Hiredis](https://github.com/redis/hiredis)
+ - [Redis-plus-plus](https://github.com/sewenew/redis-plus-plus)
 
 ## Publications
 
