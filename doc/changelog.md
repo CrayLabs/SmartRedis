@@ -19,7 +19,7 @@ Description
 
 Detailed Notes
 
--   Update codecov to v4.0.5 for github actions
+-   Update codecov to v4.5.0 for github actions
     ([PR502](https://github.com/CrayLabs/SmartRedis/pull/502))
 -   As part of this cleanup, some behaviors of how the libraries were
     named have been removed. The testing suite now distinguishes between
