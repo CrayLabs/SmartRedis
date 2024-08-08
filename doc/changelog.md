@@ -6,6 +6,8 @@ To be released at some future point in time
 
 Description
 
+-   Fix instructions for including SmartRedis as an ExternalProject
+    in CMake-based projects
 -   Touch-up outdated information in README.md
 -   Update codecov to v4.5.0 for github actions
 -   Remove broken oss.redis.com URLs from documentation
@@ -20,6 +22,10 @@ Description
 
 Detailed Notes
 
+-   Instructions for including SmartRedis as a CMake ExternalProject
+    had a couple of missing closing parentheses and typo in the
+    definition of the libsmartredis-fortran block
+    ([PR503](https://github.com/CrayLabs/SmartRedis/pull/503))
 -   Update links to install documentation and remove outdated version
     numbers in the README.md
     ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))

@@ -224,13 +224,15 @@ Most applications should be able to incorporate the following into their
     set_target_properties(libsmartredis PROPERTIES
         IMPORTED_LOCATION ${binary_dir}/libsmartredis.so
         INTERFACE_INCLUDE_DIRECTORIES  $<INSTALL_INTERFACE:${CMAKE_BINARY_DIR}/external/include}>
+    )
 
     # Optional, only for Fortran applications
     add_library(libsmartredis-fortran SHARED IMPORTED)
     add_dependencies(libsmartredis-fortran smartredis)
-    set_target_properties(libsmartredis PROPERTIES
+    set_target_properties(libsmartredis-fortran PROPERTIES
         IMPORTED_LOCATION ${binary_dir}/libsmartredis-fortran.so
         INTERFACE_INCLUDE_DIRECTORIES  $<INSTALL_INTERFACE:${CMAKE_BINARY_DIR}/external/include}>
+    )
 
     # ... define the example_target executable here
 
