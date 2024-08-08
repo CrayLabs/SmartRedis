@@ -6,7 +6,8 @@ To be released at some future point in time
 
 Description
 
--   Update codecov to v4.0.5 for github actions
+-   Touch-up outdated information in README.md
+-   Update codecov to v4.5.0 for github actions
 -   Remove broken oss.redis.com URLs from documentation
 -   Add option to allow SmartRedis Fortran library to retain the
     path to the main client library
@@ -19,6 +20,9 @@ Description
 
 Detailed Notes
 
+-   Update links to install documentation and remove outdated version
+    numbers in the README.md
+    ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
 -   Update codecov to v4.5.0 for github actions
     ([PR502](https://github.com/CrayLabs/SmartRedis/pull/502))
 -   As part of this cleanup, some behaviors of how the libraries were
