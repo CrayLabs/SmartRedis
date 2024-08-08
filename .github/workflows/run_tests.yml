@@ -204,7 +204,7 @@ jobs:
         run: third-party/lcov/install/bin/lcov --ignore-errors gcov,mismatch --keep-going -c -d build/Coverage/CMakeFiles -o coverage.info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.5.0
         with:
           files: ./coverage.xml, ./coverage.info
 
