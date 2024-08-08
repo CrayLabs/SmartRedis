@@ -1,12 +1,13 @@
 # Changelog
 
-### 0.5.3
+### Development branch
 
-Released on 14 May 2024
+To be released at some future point in time
 
 Description
 
 -   Touch-up outdated information in README.md
+-   Update codecov to v4.5.0 for github actions
 -   Remove broken oss.redis.com URLs from documentation
 -   Add option to allow SmartRedis Fortran library to retain the
     path to the main client library
@@ -16,33 +17,14 @@ Description
 -   Allow users to specify install location of SmartRedis libraries
 -   Streamline compilation of SmartRedis dependencies
 -   Pin NumPy version to 1.x
--   Improve client error logging
--   Fix pylint regression error
--   Fix build wheel error
--   Fix header styling issue
--   Correct changelog indention
--   Automate the creation of release notes
--   Auto-post release PR to develop from master
--   Upgrade ubuntu to 22.04 and gcc to 11
--   Drop Python 3.8 support
--   Fix C++ cosmetic defects leading to compiler warnings
--   Re-enable SR_PEDANTIC for the Makefile targets
--   Enforce changelog updates
--   Removed unused TensorBase constructor parameter
--   Remove unused parameter in internal redis cluster method
--   Enforce matching TensorType for DataSet::unpack_tensor()
--   Update CI for Intel suite
--   Add socket time out environment variable
--   Fix inconsistency in C-API ConfigOptions is_configured() parameters
--   Bump redis dep to 7.2.4
--   Fix widths field for list-table in install documentation
--   Remove a vestigial requirements.txt file
 
 Detailed Notes
 
 -   Update links to install documentation and remove outdated version
     numbers in the README.md
     ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
+-   Update codecov to v4.5.0 for github actions
+    ([PR502](https://github.com/CrayLabs/SmartRedis/pull/502))
 -   As part of this cleanup, some behaviors of how the libraries were
     named have been removed. The testing suite now distinguishes between
     various build types (e.g. Debug, Coverage, etc.) by specifying the
@@ -77,6 +59,38 @@ Detailed Notes
     1.x version of numpy. This is needed in SmartSim because some of the downstream
     dependencies request NumPy.
     ([PR498](https://github.com/CrayLabs/SmartRedis/pull/498))
+-   Ensure errors raised from client include details
+
+### 0.5.3
+
+Released on 14 May 2024
+
+Description
+
+-   Improve client error logging
+-   Fix pylint regression error
+-   Fix build wheel error
+-   Fix header styling issue
+-   Correct changelog indention
+-   Automate the creation of release notes
+-   Auto-post release PR to develop from master
+-   Upgrade ubuntu to 22.04 and gcc to 11
+-   Drop Python 3.8 support
+-   Fix C++ cosmetic defects leading to compiler warnings
+-   Re-enable SR_PEDANTIC for the Makefile targets
+-   Enforce changelog updates
+-   Removed unused TensorBase constructor parameter
+-   Remove unused parameter in internal redis cluster method
+-   Enforce matching TensorType for DataSet::unpack_tensor()
+-   Update CI for Intel suite
+-   Add socket time out environment variable
+-   Fix inconsistency in C-API ConfigOptions is_configured() parameters
+-   Bump redis dep to 7.2.4
+-   Fix widths field for list-table in install documentation
+-   Remove a vestigial requirements.txt file
+
+Detailed Notes
+
 -   Ensure errors raised from client include details
     ([PR485](https://github.com/CrayLabs/SmartRedis/pull/485))
 -   Pin pylint to fix regression error
