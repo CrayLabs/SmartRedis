@@ -62,7 +62,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
+        os: [ubuntu-24.04] # cannot test on macOS as docker isn't supported on Mac
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.9.x', '3.10.x', '3.11.x'] # versions of Python
         compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12, gcc-14] # intel compiler, and versions of GNU compiler
