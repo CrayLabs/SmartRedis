@@ -31,6 +31,7 @@
 
 #include <unordered_set>
 #include <mutex>
+#include <algorithm>
 
 #include "redisserver.h"
 #include "dbnode.h"
