@@ -23,6 +23,7 @@ Detailed Notes
 
 -   Include algorithm import in rediscluster.h to satisfy
     gcc-14 compilation error.
+    ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
 -   Update links to install documentation and remove outdated version
     numbers in the README.md
     ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
