@@ -6,7 +6,8 @@ To be released at some future point in time
 
 Description
 
--   Include algorithm import in rediscluster for gcc-14
+-   Include algorithm import in rediscluster for gcc-14 and
+    updated github artifact version
 -   Touch-up outdated information in README.md
 -   Update codecov to v4.5.0 for github actions
 -   Remove broken oss.redis.com URLs from documentation
@@ -22,7 +23,8 @@ Description
 Detailed Notes
 
 -   Include algorithm import in rediscluster.h to satisfy
-    gcc-14 compilation error.
+    gcc-14 compilation error and update github actions to
+    upload-artifact@v3
     ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
 -   Update links to install documentation and remove outdated version
     numbers in the README.md
