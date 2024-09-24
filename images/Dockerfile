@@ -33,9 +33,8 @@ FROM ubuntu:22.04 as builder
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends \
     ca-certificates git \
-    make cmake gcc g++ libc6-dev python3 libpython3-dev pip gfortran && \
+    make cmake gcc g++ libc6-dev python3 libpython3-dev pip gfortran python-is-python3 && \
     rm -rf /var/lib/apt/lists/*
-RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Get source code from current clone
 COPY . /usr/local/src/SmartRedis
@@ -50,11 +49,6 @@ COPY . /usr/local/src/SmartRedis
 # Compile and install
 WORKDIR /usr/local/src/SmartRedis
 RUN pip3 install --upgrade pip
-RUN make clobber && make lib SR_FORTRAN=ON SR_PYTHON=ON && pip install . && rm -rf ~/.cache/pip \
-    && rm -rf build tests examples images utils third-party doc images
-
-# Copy install files and directories to /usr/local/lib and
-# usr/local/include and delete unnecessary build files
-RUN cp -r /usr/local/src/SmartRedis/install/lib/* /usr/local/lib/ && \
-    mkdir /usr/local/include/smartredis && \
-    cp -r /usr/local/src/SmartRedis/install/include/* /usr/local/include/smartredis/
+RUN make clobber && make lib BUILD_FORTRAN=ON BUILD_PYTHON=ON INSTALL_PREFIX=/usr/local
+RUN pip install . && rm -rf ~/.cache/pip \
+    && rm -rf build tests examples images utils third-party doc

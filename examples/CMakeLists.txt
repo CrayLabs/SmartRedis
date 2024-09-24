@@ -28,10 +28,17 @@
 cmake_minimum_required(VERSION 3.13)
 project(SmartRedis-Examples)
 
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
+endif()
+
 # Enable language support for the examples
 enable_language(C)
 enable_language(CXX)
-if (SR_FORTRAN)
+if (BUILD_FORTRAN)
     enable_language(Fortran)
 endif()
 

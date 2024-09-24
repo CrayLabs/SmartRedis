@@ -29,33 +29,29 @@ MAKEFLAGS += --no-print-directory
 SHELL:=/bin/bash
 CWD := $(shell pwd)
 
-# Params for third-party software
-HIREDIS_URL := https://github.com/redis/hiredis.git
-HIREDIS_VER := v1.2.0
-RPP_URL := https://github.com/sewenew/redis-plus-plus.git
-RPP_VER := 1.3.10
-PYBIND_URL := https://github.com/pybind/pybind11.git
-PYBIND_VER := v2.11.1
+# Build variables
+NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
+INSTALL_PREFIX := $(CWD)/install
+TEST_PREFIX := $(CWD)/tests
+EXAMPLES_PREFIX := $(CWD)/examples/bin
+BUILD_FORTRAN := OFF
+BUILD_PYTHON := OFF
+BUILD_TYPE := Release
+LINK_TYPE := shared
+PEDANTIC := OFF
+
+# Test dependencies
 REDIS_URL := https://github.com/redis/redis.git
 REDIS_VER := 7.2.4
-REDISAI_URL := https://github.com/RedisAI/RedisAI.git
-# REDISAI_VER is controlled instead by SR_TEST_REDISAI_VER below
+REDISAI_URL :=  https://github.com/RedisAI/RedisAI.git
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git
 LCOV_VER := v2.0
-DEP_CC := gcc
-DEP_CXX := g++
-
-# Build variables
-NPROC := $(shell nproc 2>/dev/null || python -c "import multiprocessing as mp; print (mp.cpu_count())" 2>/dev/null || echo 4)
-SR_BUILD := Release
-SR_LINK := Shared
-SR_PEDANTIC := OFF
-SR_FORTRAN := OFF
-SR_PYTHON := OFF
 
 # Test variables
+DEP_CC := gcc
+DEP_CXX := g++
 COV_FLAGS :=
 SR_TEST_REDIS_MODE := Clustered
 SR_TEST_UDS_FILE := /tmp/redis.sock
@@ -64,7 +60,12 @@ SR_TEST_NODES := 3
 SR_TEST_REDISAI_VER := v1.2.7
 SR_TEST_DEVICE := cpu
 SR_TEST_PYTEST_FLAGS := -vv -s
-
+ifeq ($(LINK_TYPE), shared)
+	BUILD_SHARED_LIBS=on
+else
+	BUILD_SHARED_LIBS=off
+endif
+SR_TEST_INSTALL_PREFIX = $(CWD)/install/$(BUILD_TYPE)/$(LINK_TYPE)
 # Do not remove this block. It is used by the 'help' rule when
 # constructing the help output.
 # help:
@@ -83,17 +84,14 @@ help:
 # help: These variables affect the way that the SmartRedis library is built. Each
 # help: has several options; the first listed is the default. Use by appending
 # help: the variable name and setting after the make target, e.g.
-# help:    make lib SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# help:    make lib BUILD_TYPE=Debug Static BUILD_FORTRAN=ON
 # help:
-# help: SR_BUILD {Release, Debug, Coverage} -- optimization level for the build
-# help: SR_LINK {Shared, Static} -- linkage for the SmartRedis library
-# help: SR_PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings,
+# help: BUILD_TYPE {Release, Debug, Coverage} -- optimization level for the build
+# help: LINK_TYPE {shared, static} -- type of linking for the smartredis libraries
+# help: PEDANTIC {OFF, ON} -- GNU only; enable pickiest compiler settings,
 # help: 					     currently fails due to warnings on newer GNU versions
-# help: SR_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
-# help: SR_PYTHON {OFF, ON} -- Enable/disable build of Python library
-# help: DEP_CC, DEP_CXX -- Set the C and C++ compilers used to compile dependencies.
-# help:					   This will generally be gcc/g++ due to the build system's
-# help:					   assuming the GCC toolchain
+# help: BUILD_FORTRAN {OFF, ON} -- Enable/disable build of Fortran library
+# help: BUILD_PYTHON {OFF, ON} -- Enable/disable build of Python library
 # help:
 # help: Test variables
 # help: --------------
@@ -101,7 +99,7 @@ help:
 # help: These variables affect the way that the SmartRedis library is tested. Each
 # help: has several options; the first listed is the default. Use by appending
 # help: the variable name and setting after the make target, e.g.
-# help:    make test SR_BUILD=Debug SR_LINK=Static SR_FORTRAN=ON
+# help:    make test BUILD_TYPE=Debug BUILD_SHARED_LIBS=off BUILD_FORTRAN=ON
 # help:
 # help: SR_TEST_REDIS_MODE {Clustered, Standalone} -- type of Redis backend launched for tests
 # help: SR_TEST_PORT (Default: 6379) -- first port for Redis server(s)
@@ -114,42 +112,35 @@ help:
 # help: Build targets
 # help: -------------
 
-# help: deps                           - Make SmartRedis dependencies
-.PHONY: deps
-deps: hiredis
-deps: redis-plus-plus
-deps: pybind
-deps:
-
 # help: lib                            - Build SmartRedis C/C++/Python clients into a dynamic library
 .PHONY: lib
-lib: deps
 lib:
-	@cmake -S . -B build/$(SR_BUILD) -DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) \
-		-DSR_PEDANTIC=$(SR_PEDANTIC) -DSR_FORTRAN=$(SR_FORTRAN) -DSR_PYTHON=$(SR_PYTHON)
-	@cmake --build build/$(SR_BUILD) -- -j $(NPROC)
-	@cmake --install build/$(SR_BUILD)
+lib:
+	@cmake -S . -B build/$(BUILD_TYPE) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DPEDANTIC=$(PEDANTIC) -DBUILD_FORTRAN=$(BUILD_FORTRAN) -DBUILD_PYTHON=$(BUILD_PYTHON) \
+		-DCMAKE_INSTALL_PREFIX=$(INSTALL_PREFIX)
+	@cmake --build build/$(BUILD_TYPE) -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)
 
 # help: lib-with-fortran               - Build SmartRedis C/C++/Python and Fortran clients into a dynamic library
 .PHONY: lib-with-fortran
-lib-with-fortran: SR_FORTRAN=ON
+lib-with-fortran: BUILD_FORTRAN=ON
 lib-with-fortran: lib
 
 # help: test-lib                       - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib
-test-lib: SR_PEDANTIC=ON
+test-lib: PEDANTIC=OFF # Re-enable after warnings fixed
 test-lib: lib
 
 # help: test-lib-with-fortran          - Build SmartRedis clients into a dynamic library with least permissive compiler settings
 .PHONY: test-lib-with-fortran
-test-lib-with-fortran: SR_PEDANTIC=ON
+test-lib-with-fortran: PEDANTIC=off
 test-lib-with-fortran: lib-with-fortran
 
 # help: test-deps                      - Make SmartRedis testing dependencies
 .PHONY: test-deps
 test-deps: redis
 test-deps: redisAI
-test-deps: catch2
 test-deps: lcov
 
 # help: test-deps-gpu                  - Make SmartRedis GPU testing dependencies
@@ -159,70 +150,91 @@ test-deps-gpu: test-deps
 
 # help: build-tests                    - build all tests (C, C++, Fortran)
 .PHONY: build-tests
-build-tests: test-deps
-build-tests: test-lib
-	@cmake -S tests -B build/$(SR_BUILD)/tests/$(SR_LINK) \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK) -- -j $(NPROC)
+build-tests: test-lib-with-fortran
+build-tests: build-unit-test-cpp
+build-tests: build-test-cpp
+build-tests: build-test-c
+build-tests: build-test-fortran
 
 
 # help: build-test-cpp                 - build the C++ tests
 .PHONY: build-test-cpp
-build-test-cpp: test-deps
 build-test-cpp: test-lib
-	@cmake -S tests/cpp -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp -- -j $(NPROC)
+build-test-cpp: catch2
+	@cmake -S tests/cpp -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp \
+		-DBUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/cpp
+	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp
 
 # help: build-unit-test-cpp            - build the C++ unit tests
 .PHONY: build-unit-test-cpp
-build-unit-test-cpp: test-deps
 build-unit-test-cpp: test-lib
-	@cmake -S tests/cpp/unit-tests -B build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/cpp/unit-tests -- -j $(NPROC)
+build-unit-test-cpp: catch2
+	@cmake -S tests/cpp/unit-tests -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp/unit-tests \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/cpp \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis
+	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp/unit-tests -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/cpp/unit-tests
 
 # help: build-test-c                   - build the C tests
 .PHONY: build-test-c
-build-test-c: test-deps
 build-test-c: test-lib
-	@cmake -S tests/c -B build/$(SR_BUILD)/tests/$(SR_LINK)/c \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/c -- -j $(NPROC)
+	@cmake -S tests/c -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/c \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/c
+	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/c -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/c
 
 
 # help: build-test-fortran             - build the Fortran tests
 .PHONY: build-test-fortran
-build-test-fortran: test-deps
-build-test-fortran: SR_FORTRAN=ON
-build-test-fortran: test-lib
-	@cmake -S tests/fortran -B build/$(SR_BUILD)/tests/$(SR_LINK)/fortran \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK)
-	@cmake --build build/$(SR_BUILD)/tests/$(SR_LINK)/fortran -- -j $(NPROC)
+build-test-fortran: BUILD_FORTRAN=ON
+build-test-fortran: test-lib-with-fortran
+	@cmake -S tests/fortran -B build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/fortran \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) \
+		-DCMAKE_INSTALL_PREFIX=$(TEST_PREFIX)/fortran \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
+	@cmake --build build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/fortran -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)/tests/$(LINK_TYPE)/fortran
 
 
 # help: build-examples                 - build all examples (serial, parallel)
 .PHONY: build-examples
 build-examples: lib
-	@cmake -S examples -B build/$(SR_BUILD)/examples/$(SR_LINK) -DSR_BUILD=$(SR_BUILD) \
-		-DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK) -- -j $(NPROC)
+	@cmake -S examples -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE) -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
+		-DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
+		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
+	@cmake --build build/$(BUILD_TYPE)/examples/$(LINK_TYPE) -- -j $(NPROC)
+	@cmake --install build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/
 
 
 # help: build-example-serial           - buld serial examples
 .PHONY: build-example-serial
 build-example-serial: lib
-	@cmake -S examples/serial -B build/$(SR_BUILD)/examples/$(SR_LINK)/serial \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/serial
+	@cmake -S examples/serial -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/serial \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
+		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
+	@cmake --build build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/serial
 
 
 # help: build-example-parallel         - build parallel examples (requires MPI)
 .PHONY: build-example-parallel
 build-example-parallel: lib
-	@cmake -S examples/parallel -B build/$(SR_BUILD)/examples/$(SR_LINK)/parallel \
-		-DSR_BUILD=$(SR_BUILD) -DSR_LINK=$(SR_LINK) -DSR_FORTRAN=$(SR_FORTRAN)
-	@cmake --build build/$(SR_BUILD)/examples/$(SR_LINK)/parallel
+	@cmake -S examples/parallel -B build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/parallel \
+		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) -DBUILD_SHARED_LIBS=$(BUILD_SHARED_LIBS) -DBUILD_FORTRAN=$(BUILD_FORTRAN) \
+		-DCMAKE_INSTALL_PREFIX=$(EXAMPLES_PREFIX) \
+		-Dsmartredis_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis \
+		-Dsmartredis-fortran_DIR=$(INSTALL_PREFIX)/share/cmake/smartredis-fortran
+	@cmake --build build/$(BUILD_TYPE)/examples/$(LINK_TYPE)/parallel
 
 
 # help: clean-deps                     - remove third-party deps
@@ -235,6 +247,7 @@ clean-deps:
 .PHONY: clean
 clean:
 	@git clean -X -f -d
+	rm -rf build
 
 
 # help: clobber                        - clean, remove deps, builds, (be careful)
@@ -306,10 +319,10 @@ cov:
 # help: ------------
 
 # Build Pytest flags to skip various subsets of the tests
-ifeq ($(SR_PYTHON),OFF)
+ifeq ($(BUILD_PYTHON),OFF)
 SKIP_PYTHON = --ignore ./tests/python
 endif
-ifeq ($(SR_FORTRAN),OFF)
+ifeq ($(BUILD_FORTRAN),OFF)
 SKIP_FORTRAN = --ignore ./tests/fortran
 endif
 SKIP_DOCKER := --ignore ./tests/docker
@@ -332,8 +345,7 @@ define run_smartredis_tests_with_standalone_server
 	echo "Running standalone tests" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --link $(SR_LINK) \
-		--sr_fortran $(SR_FORTRAN) $(1)  ; \
+		--bin-path $(2) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 --stop && \
@@ -351,10 +363,9 @@ define run_smartredis_tests_with_clustered_server
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes $(SR_TEST_NODES) \
 		--rai $(SR_TEST_REDISAI_VER) --device $(SR_TEST_DEVICE) && \
 	echo "Running clustered tests" && \
-	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
+	PYTHONFAULTHANDLER=1 python -s -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --link $(SR_LINK) \
-		--sr_fortran $(SR_FORTRAN) $(1)  ; \
+		--bin-path $(2) --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down clustered Redis server" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) \
@@ -377,8 +388,7 @@ define run_smartredis_tests_with_uds_server
 	echo "Running standalone tests with Unix Domain Socket connection" && \
 	PYTHONFAULTHANDLER=1 python -m pytest $(SR_TEST_PYTEST_FLAGS) $(COV_FLAGS) \
 		$(SKIP_DOCKER) $(SKIP_PYTHON) $(SKIP_FORTRAN) \
-		--build $(SR_BUILD) --link $(SR_LINK) \
-		--sr_fortran $(SR_FORTRAN) $(1)  ; \
+		--bin-path $(2)  --build-fortran $(BUILD_FORTRAN) $(1)  ; \
 	(testresult=$$?; \
 	echo "Shutting down standalone Redis server with Unix Domain Socket support" && \
 	python utils/launch_redis.py --port $(SR_TEST_PORT) --nodes 1 \
@@ -393,16 +403,16 @@ endef
 define run_smartredis_tests_with_server
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Standalone),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_standalone_server,$(1))
+		$(call run_smartredis_tests_with_standalone_server,$(1),$(2))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),Clustered),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
-		$(call run_smartredis_tests_with_clustered_server,$(1))
+		$(call run_smartredis_tests_with_clustered_server,$(1),$(2))
 	)
 	$(if $(or $(filter $(SR_TEST_REDIS_MODE),UDS),
 	          $(filter $(SR_TEST_REDIS_MODE),All)),
 		$(if $(filter-out $(shell uname -s),Darwin),
-			$(call run_smartredis_tests_with_uds_server,$(1)),
+			$(call run_smartredis_tests_with_uds_server,$(1),$(2)),
 			@echo "Skipping: Unix Domain Socket is not supported on MacOS"
 		)
 	)
@@ -414,7 +424,7 @@ test: test-deps
 test: build-tests
 test: SR_TEST_PYTEST_FLAGS := -vv
 test:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-verbose                   - Build and run all tests [verbosely]
 .PHONY: test-verbose
@@ -422,23 +432,23 @@ test-verbose: test-deps
 test-verbose: build-tests
 test-verbose: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-verbose-with-coverage     - Build and run all tests [verbose-with-coverage]
 .PHONY: test-verbose-with-coverage
-test-verbose-with-coverage: SR_BUILD := Coverage
+test-verbose-with-coverage: BUILD_TYPE := Coverage
 test-verbose-with-coverage: test-deps
 test-verbose-with-coverage: build-tests
 test-verbose-with-coverage: SR_TEST_PYTEST_FLAGS := -vv -s
 test-verbose-with-coverage:
-	@$(call run_smartredis_tests_with_server,./tests)
+	@$(call run_smartredis_tests_with_server,./tests, $(TEST_PREFIX))
 
 # help: test-c                         - Build and run all C tests
 .PHONY: test-c
 test-c: build-test-c
 test-c: SR_TEST_PYTEST_FLAGS := -vv -s
 test-c:
-	@$(call run_smartredis_tests_with_server,./tests/c)
+	@$(call run_smartredis_tests_with_server,./tests/c, $(TEST_PREFIX))
 
 # help: test-cpp                       - Build and run all C++ tests
 .PHONY: test-cpp
@@ -446,40 +456,40 @@ test-cpp: build-test-cpp
 test-cpp: build-unit-test-cpp
 test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 test-cpp:
-	@$(call run_smartredis_tests_with_server,./tests/cpp)
+	@$(call run_smartredis_tests_with_server,./tests/cpp, $(TEST_PREFIX))
 
 # help: unit-test-cpp                  - Build and run unit tests for C++
 .PHONY: unit-test-cpp
 unit-test-cpp: build-unit-test-cpp
 unit-test-cpp: SR_TEST_PYTEST_FLAGS := -vv -s
 unit-test-cpp:
-	@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests)
+	@$(call run_smartredis_tests_with_server,./tests/cpp/unit-tests, $(TEST_PREFIX))
 
 # help: test-py                        - run python tests
 .PHONY: test-py
 test-py: test-deps
-test-py: SR_PYTHON := ON
+test-py: BUILD_PYTHON := ON
 test-py: lib
 test-py: SR_TEST_PYTEST_FLAGS := -vv
 test-py:
-	@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python, $(TEST_PREFIX))
 
 # help: test-fortran                   - run fortran tests
 .PHONY: test-fortran
-test-fortran: SR_FORTRAN := ON
+test-fortran: BUILD_FORTRAN := ON
 test-fortran: build-test-fortran
 test-fortran: SR_TEST_PYTEST_FLAGS := -vv -s
 test-fortran:
-	@$(call run_smartredis_tests_with_server,./tests/fortran)
+	@$(call run_smartredis_tests_with_server,./tests/fortran, $(TEST_PREFIX))
 
 # help: testpy-cov                     - run python tests with coverage
 .PHONY: testpy-cov
 testpy-cov: test-deps
-testpy-cov: SR_PYTHON := ON
+testpy-cov: BUILD_PYTHON := ON
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv
 testpy-cov: COV_FLAGS := --cov=./src/python/module/smartredis/
 testpy-cov:
-	@$(call run_smartredis_tests_with_server,./tests/python)
+	@$(call run_smartredis_tests_with_server,./tests/python, $(TEST_PREFIX))
 
 # help: test-examples                   - Build and run all examples
 .PHONY: test-examples
@@ -487,72 +497,11 @@ test-examples: test-deps
 test-examples: build-examples
 testpy-cov: SR_TEST_PYTEST_FLAGS := -vv -s
 test-examples:
-	@$(call run_smartredis_tests_with_server,./examples)
+	@$(call run_smartredis_tests_with_server,./examples,$(EXAMPLES_PREFIX))
 
 
 ############################################################################
 # hidden build targets for third-party software
-
-# Hiredis (hidden build target)
-.PHONY: hiredis
-hiredis: install/lib/libhiredis.a
-
-third-party/hiredis:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(HIREDIS_URL) hiredis --branch $(HIREDIS_VER) --depth=1
-
-install/lib/libhiredis.a: third-party/hiredis
-	@cd third-party/hiredis && \
-	make LIBRARY_PATH=lib CC=$(DEP_CC) CXX=$(DEP_CXX) PREFIX="../../install" install -j $(NPROC) && \
-	rm -f ../../install/lib/libhiredis*.so* && \
-	rm -f ../../install/lib/libhiredis*.dylib* && \
-	echo "Finished installing Hiredis"
-
-# Redis-plus-plus (hidden build target)
-.PHONY: redis-plus-plus
-redis-plus-plus: install/lib/libredis++.a
-
-third-party/redis-plus-plus:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(RPP_URL) redis-plus-plus --branch $(RPP_VER) --depth=1
-
-install/lib/libredis++.a: third-party/redis-plus-plus
-	@cd third-party/redis-plus-plus && \
-	mkdir -p compile && \
-	cd compile && \
-	cmake -DCMAKE_BUILD_TYPE=Release -DREDIS_PLUS_PLUS_BUILD_TEST=OFF \
-		  -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF -DCMAKE_PREFIX_PATH="../../../install/lib/" \
-		  -DCMAKE_INSTALL_PREFIX="../../../install" -DCMAKE_CXX_STANDARD=17 \
-		  -DCMAKE_INSTALL_LIBDIR="lib" -DCMAKE_C_COMPILER=$(DEP_CC) -DCMAKE_CXX_COMPILER=$(DEP_CXX) .. && \
-	make CC=$(DEP_CC) CXX=$(RPP_CX) -j $(NPROC) && \
-	make CC=$(DEP_CC) CXX=$(RPP_CX) install && \
-	echo "Finished installing Redis-plus-plus"
-
-# Pybind11 (hidden build target)
-.PHONY: pybind
-pybind: third-party/pybind/include/pybind11/pybind11.h
-third-party/pybind/include/pybind11/pybind11.h:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(PYBIND_URL) pybind --branch $(PYBIND_VER) --depth=1
-	@mkdir -p third-party/pybind/build && \
-	echo "Finished installing Pybind11"
-
-# Redis (hidden test target)
-.PHONY: redis
-
-third-party/redis:
-	@mkdir -p third-party
-	@cd third-party && \
-	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
-
-redis: third-party/redis/src/redis-server
-third-party/redis/src/redis-server: third-party/redis
-	@cd third-party/redis && \
-	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
-	echo "Finished installing redis"
 
 # cudann-check (hidden test target)
 # checks cuda dependencies for GPU build
@@ -575,6 +524,19 @@ ifeq (,$(wildcard $(CUDNN_LIBRARY)/libcudnn.so))
 	$(error ERROR: could not find libcudnn.so at $(CUDNN_LIBRARY))
 endif
 endif
+
+# Redis (hidden test target)
+.PHONY: redis
+third-party/redis:
+	@mkdir -p third-party
+	@cd third-party && \
+	git clone $(REDIS_URL) redis --branch $(REDIS_VER) --depth=1
+
+redis: third-party/redis/src/redis-server
+third-party/redis/src/redis-server: third-party/redis
+	@cd third-party/redis && \
+	make CC=$(DEP_CC) CXX=$(DEP_CXX) MALLOC=libc -j $(NPROC) && \
+	echo "Finished installing redis"
 
 # RedisAI (hidden test target)
 third-party/RedisAI:
