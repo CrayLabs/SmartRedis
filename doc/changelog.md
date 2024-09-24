@@ -6,6 +6,8 @@ To be released at some future point in time
 
 Description
 
+-   Fix instructions for including SmartRedis as an ExternalProject
+    in CMake-based projects
 -   Include algorithm import in rediscluster for gcc-14 and
     updated github artifact version
 -   Touch-up outdated information in README.md
@@ -22,6 +24,10 @@ Description
 
 Detailed Notes
 
+-   Instructions for including SmartRedis as a CMake ExternalProject
+    had a couple of missing closing parentheses and typo in the
+    definition of the libsmartredis-fortran block
+    ([PR503](https://github.com/CrayLabs/SmartRedis/pull/503))
 -   Include algorithm import in rediscluster.h to satisfy
     gcc-14 compilation error and update github actions to
     upload-artifact@v3
