@@ -1,8 +1,8 @@
 # Changelog
 
-### Development branch
+### 0.6.0
 
-To be released at some future point in time
+Released on 24 September, 2024
 
 Description
 
