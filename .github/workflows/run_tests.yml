@@ -66,11 +66,10 @@ jobs:
         rai_v: [1.2.7] # versions of RedisAI
         py_v: ['3.9.x', '3.10.x', '3.11.x'] # versions of Python
         compiler: [nvhpc-23-11, intel-2024.0, gcc-11, gcc-12] # intel compiler, and versions of GNU compiler
-        link_type: [Static, Shared]
+        link_type: [shared, static]
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
       LINK_TYPE: ${{ matrix.link_type }}
-
 
     steps:
       # Maximize the space in this image
@@ -171,26 +170,33 @@ jobs:
         if: contains(matrix.os, 'ubuntu')
         run: sudo apt-get -y install cmake
 
+      - name: Build and install SmartRedis library
+        run: |
+          make test-lib INSTALL_PREFIX=$PWD/install/$LINK_TYPE \
+            BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE
+          echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/$LINK_TYPE/lib >> $GITHUB_ENV
+
       - name: Build SmartRedis python and install
         run: python -m pip install -e .[dev,xarray]
 
       - name: Build and install test dependencies
         run: |
-          make test-deps &&
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$PWD/install/lib" >> $GITHUB_ENV
+          make test-deps
 
       # Make sure the examples work
       - name: Run examples
         run: |
-          make test-examples SR_FORTRAN=ON SR_PYTHON=ON SR_LINK=$LINK_TYPE \
-          SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
+          make test-examples INSTALL_PREFIX=$PWD/install/$LINK_TYPE \
+            BUILD_FORTRAN=ON BUILD_PYTHON=ON LINK_TYPE=$LINK_TYPE \
+            SR_TEST_PORT=7000 SR_TEST_REDISAI_VER=v${{ matrix.rai_v }} \
+            INSTALL_PREFIX=$PWD/install/$LINK_TYPE
 
       # Run the tests using various DB deployments
       - name: Run tests
         run: |
-          make test-verbose-with-coverage \
+          make test-verbose-with-coverage INSTALL_PREFIX=$PWD/install/$LINK_TYPE \
             COV_FLAGS="--cov=./src/python/module/smartredis/ --cov-report=xml --cov-append" \
-            SR_FORTRAN=ON SR_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 SR_LINK=$LINK_TYPE \
+            BUILD_FORTRAN=ON BUILD_PYTHON=ON SR_TEST_REDIS_MODE=All SR_TEST_PORT=7000 LINK_TYPE=$LINK_TYPE \
             SR_TEST_REDISAI_VER=v${{ matrix.rai_v }}
 
       # Process and upload code coverage (Python was collected during pytest)
@@ -198,7 +204,7 @@ jobs:
         run: third-party/lcov/install/bin/lcov --ignore-errors gcov,mismatch --keep-going -c -d build/Coverage/CMakeFiles -o coverage.info
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4.5.0
         with:
           files: ./coverage.xml, ./coverage.info
 

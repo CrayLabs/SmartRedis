@@ -32,84 +32,21 @@ project(SmartRedis-Examples-Parallel-Fortran)
 enable_language(Fortran)
 enable_language(CXX)
 
-# Configure the build
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../..")
-include(smartredis_defs)
-
-# Assume by default that users should link against the install directory in this repository
-if(NOT DEFINED SMARTREDIS_INSTALL_PATH)
-  set(SMARTREDIS_INSTALL_PATH "../../../install/")
+# Add our custom module(s) stored in smartredis/cmake
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake")
+include(EnableCoverage)
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    enable_coverage()
 endif()
 
-# Locate dependencies
-#  . MPI
+# Configure the build
+set(CMAKE_CXX_STANDARD 17)
 find_package(MPI REQUIRED)
 IF(NOT MPI_Fortran_FOUND)
 	message(FATAL_ERROR "Could not find Fortran MPI components")
 endif()
-#  . Main SmartRedis Library (C/C++ based)
-add_library(smartredis-main ${SMARTREDIS_LINK_MODE} IMPORTED)
-find_library(SR_LIB ${SMARTREDIS_LIB}
-    PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-    REQUIRED
-    ${SMARTREDIS_LINK_MODE}
-)
-set_target_properties(smartredis-main PROPERTIES
-    IMPORTED_LOCATION ${SR_LIB}
-)
-#  . SmartRedis Fortran Library (Fortran based)
-add_library(smartredis-fortran ${SMARTREDIS_LINK_MODE} IMPORTED)
-find_library(SR_FTN_LIB ${SMARTREDIS_FORTRAN_LIB}
-	PATHS ${SMARTREDIS_INSTALL_PATH}/lib NO_DEFAULT_PATH
-	REQUIRED
-    ${SMARTREDIS_LINK_MODE}
-)
-set_target_properties(smartredis-fortran PROPERTIES
-    IMPORTED_LOCATION ${SR_FTN_LIB}
-)
-
-# Select libraries for build
-if (STATIC_BUILD)
-	# The CMake "preferred" approach only seems to work with the GNU
-	# compiler. We will streamline this in the future
-	if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-		# Mark that SmartRedis requires the C++ linker
-		set_target_properties(smartredis-main PROPERTIES
-			IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-		)
-		set_target_properties(smartredis-fortran PROPERTIES
-			IMPORTED_LINK_INTERFACE_LANGUAGES "FORTRAN"
-		)
-	else() # Tested with PGI, Intel
-		# For other compilers, don't set languages so that CMake will use the Fortran linker (default)
-
-		# Add the stdc++ linker flag
-		set(CMAKE_EXE_LINKER_FLAGS "-lstdc++ ${CMAKE_EXE_LINKER_FLAGS}")
-	endif()
-
-	# Static builds have an extra dependency on the Pthreads library
-	# The order of libraries here is crucial to get dependencies covered
-	find_package(Threads REQUIRED)
-	set(SMARTREDIS_LIBRARIES
-		smartredis-fortran
-		smartredis-main
-		Threads::Threads
-	)
-else()
-    # Shared builds only need the SmartRedis libraries
-    set(SMARTREDIS_LIBRARIES
-		smartredis-fortran
-		smartredis-main
-    )
-endif()
-
-# Define include directories for header files
-include_directories(SYSTEM
-    /usr/local/include
-    ${MPI_INCLUDE_PATH}
-    ${SMARTREDIS_INSTALL_PATH}/include
-)
+find_package(smartredis)
+find_package(smartredis-fortran)
 
 # Stuff the example_utils into a library to enable building the examples in parallel
 add_library(example_utils STATIC example_utils.F90)
@@ -128,10 +65,14 @@ foreach(EXECUTABLE ${EXECUTABLES})
 	)
 	set_target_properties(${EXECUTABLE}_fortran_parallel PROPERTIES
 		OUTPUT_NAME ${EXECUTABLE}
+		LINKER_LANGUAGE Fortran
 	)
 	target_link_libraries(${EXECUTABLE}_fortran_parallel
 		${SMARTREDIS_LIBRARIES}
 		MPI::MPI_Fortran
 		example_utils
+		smartredis
+		smartredis-fortran
 	)
+	install(TARGETS ${EXECUTABLE}_fortran_parallel RUNTIME DESTINATION parallel/fortran)
 endforeach()

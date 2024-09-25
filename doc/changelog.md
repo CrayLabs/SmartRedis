@@ -1,5 +1,81 @@
 # Changelog
 
+### 0.6.0
+
+Released on 25 September, 2024
+
+Description
+
+-   Fix instructions for including SmartRedis as an ExternalProject
+    in CMake-based projects
+-   Include algorithm import in rediscluster for gcc-14 and
+    updated github artifact version
+-   Touch-up outdated information in README.md
+-   Update codecov to v4.5.0 for github actions
+-   Remove broken oss.redis.com URLs from documentation
+-   Add option to allow SmartRedis Fortran library to retain the
+    path to the main client library
+-   Update examples and tests to use find_package(smartredis)
+-   Generate config files necessary to allow CMake projects to add
+    SmartRedis via find_package
+-   Allow users to specify install location of SmartRedis libraries
+-   Streamline compilation of SmartRedis dependencies
+-   Pin NumPy version to 1.x
+
+Detailed Notes
+
+-   Instructions for including SmartRedis as a CMake ExternalProject
+    had a couple of missing closing parentheses and typo in the
+    definition of the libsmartredis-fortran block
+    ([PR503](https://github.com/CrayLabs/SmartRedis/pull/503))
+-   Include algorithm import in rediscluster.h to satisfy
+    gcc-14 compilation error.
+    ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
+-   Update github actions to upload-artifact@v3 and download-artifact@v3
+    ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
+    ([PR511](https://github.com/CrayLabs/SmartRedis/pull/511))
+    ([PR512](https://github.com/CrayLabs/SmartRedis/pull/512))
+-   Update links to install documentation and remove outdated version
+    numbers in the README.md
+    ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
+-   Update codecov to v4.5.0 for github actions
+    ([PR502](https://github.com/CrayLabs/SmartRedis/pull/502))
+-   As part of this cleanup, some behaviors of how the libraries were
+    named have been removed. The testing suite now distinguishes between
+    various build types (e.g. Debug, Coverage, etc.) by specifying the
+    ``CMAKE_INSTALL_PREFIX`` instead of appending it as part of the name
+    of the library itself.
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The SmartRedis Fortran library now by default will retain the path
+    to the SmartRedis C/C++ library. This should avoid occasional problems
+    where users were getting "library not found" errors if they had moved
+    libraries post-installation
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   All the examples and tests now use the ``find_package`` functionality
+    to setup linking flags
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The install process now generates package configuration files for
+    the C/C++ SmartRedis library and the Fortran SmartRedis library.
+    Users can use the ``find_package()`` command in their CMakeLists.txt
+    to setup the linking and include flags automatically
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The CMakeLists.txt for SmartRedis now includes the install commands
+    which allow users to specify the specific install prefix to install
+    the SmartRedis libraries, header files, and Fortran .mod files
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   hiredis, redis++, and pybind are now retrieved and installed
+    in `CMakeLists.txt` instead of in the Makefile. This decouples the
+    user-facing side of SmartRedis from the Makefile, which now can be
+    used pureley as a convenient interface to compile SmartRedis with various
+    options and coordinate testing
+    ([PR497](https://github.com/CrayLabs/SmartRedis/pull/497))
+-   The new major version release of Numpy is incompatible with modules
+    compiled against Numpy 1.x. For both SmartSim and SmartRedis we request a
+    1.x version of numpy. This is needed in SmartSim because some of the downstream
+    dependencies request NumPy.
+    ([PR498](https://github.com/CrayLabs/SmartRedis/pull/498))
+-   Ensure errors raised from client include details
+
 ### 0.5.3
 
 Released on 14 May 2024

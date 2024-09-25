@@ -36,17 +36,8 @@ SET(CMAKE_C_STANDARD 99)
 set(CMAKE_BUILD_TYPE Debug)
 
 # Locate dependencies
-find_library(SR_LIB smartredis REQUIRED)
-find_library(SR_FTN_LIB smartredis-fortran REQUIRED)
-set(SMARTREDIS_LIBRARIES
-	${SR_LIB}
-	${SR_FTN_LIB}
-)
-
-# Define include directories for header files
-include_directories(SYSTEM
-    /usr/local/include/smartredis
-)
+find_package(smartredis)
+find_package(smartredis-fortran)
 
 # Build the test
 add_executable(docker_test_fortran
@@ -55,4 +46,4 @@ add_executable(docker_test_fortran
 set_target_properties(docker_test_fortran PROPERTIES
     OUTPUT_NAME docker_test
 )
-target_link_libraries(docker_test_fortran ${SMARTREDIS_LIBRARIES} pthread)
+target_link_libraries(docker_test_fortran smartredis smartredis-fortran pthread)
