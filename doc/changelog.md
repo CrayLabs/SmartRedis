@@ -29,9 +29,12 @@ Detailed Notes
     definition of the libsmartredis-fortran block
     ([PR503](https://github.com/CrayLabs/SmartRedis/pull/503))
 -   Include algorithm import in rediscluster.h to satisfy
-    gcc-14 compilation error and update github actions to
-    upload-artifact@v3
+    gcc-14 compilation error.
     ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
+-   Update github actions to upload-artifact@v3 and download-artifact@v3
+    ([PR505](https://github.com/CrayLabs/SmartRedis/pull/505))
+    ([PR511](https://github.com/CrayLabs/SmartRedis/pull/511))
+    ([PR512](https://github.com/CrayLabs/SmartRedis/pull/512))
 -   Update links to install documentation and remove outdated version
     numbers in the README.md
     ([PR501](https://github.com/CrayLabs/SmartRedis/pull/501))
