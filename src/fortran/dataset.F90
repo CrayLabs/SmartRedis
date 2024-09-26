@@ -157,12 +157,13 @@ subroutine final_destructor(self)
 end subroutine final_destructor
 
 !> Destroy the dataset
-subroutine destructor(self)
+function destructor(self) result(code)
   class(dataset_type), intent(inout) :: self
   integer :: code
 
+  code = 0
   if (c_associated(self%dataset_ptr)) code = dataset_deconstructor(self%dataset_ptr)
-end subroutine destructor
+end function destructor
 
 !> Access the raw C pointer for the dataset
 function get_c_pointer(self)
