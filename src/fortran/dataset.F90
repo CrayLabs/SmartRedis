@@ -37,7 +37,7 @@ module smartredis_dataset
 
 use iso_c_binding,   only : c_ptr, c_char, c_int
 use iso_c_binding,   only : c_int8_t, c_int16_t, c_int32_t, c_int64_t, c_float, c_double, c_size_t
-use iso_c_binding,   only : c_loc, c_f_pointer
+use iso_c_binding,   only : c_loc, c_f_pointer, c_associated
 
 use, intrinsic :: iso_fortran_env, only: stderr => error_unit
 
@@ -65,8 +65,12 @@ type, public :: dataset_type
 
   !> Initialize a new dataset with a given name
   procedure :: initialize => initialize_dataset
+  !> Destroy the underlying C++ object
+  final :: final_destructor
+  procedure :: destructor
   !> Access the raw C pointer for the dataset
   procedure :: get_c_pointer
+
 
   ! Metadata procedures
   !> Add metadata to the dataset with a given field and string
@@ -143,6 +147,22 @@ function initialize_dataset(self, name) result(code)
 
   code = dataset_constructor(c_name, name_length, self%dataset_ptr)
 end function initialize_dataset
+
+!> Final method (for compilers which support it)
+subroutine final_destructor(self)
+  type(dataset_type), intent(inout) :: self
+  integer :: code
+
+  if (c_associated(self%dataset_ptr)) code = dataset_deconstructor(self%dataset_ptr)
+end subroutine final_destructor
+
+!> Destroy the dataset
+subroutine destructor(self)
+  class(dataset_type), intent(inout) :: self
+  integer :: code
+
+  if (c_associated(self%dataset_ptr)) code = dataset_deconstructor(self%dataset_ptr)
+end subroutine destructor
 
 !> Access the raw C pointer for the dataset
 function get_c_pointer(self)
@@ -246,7 +266,6 @@ function add_tensor_double(self, name, data, dims) result(code)
   code = add_tensor_c(self%dataset_ptr, c_name, name_length, data_ptr, &
        c_dims_ptr, c_n_dims, data_type, c_fortran_contiguous)
 end function add_tensor_double
-
 
 !> Unpack a tensor into already allocated memory whose Fortran type is the equivalent 'int8' C-type
 function unpack_dataset_tensor_i8(self, name, result, dims) result(code)
