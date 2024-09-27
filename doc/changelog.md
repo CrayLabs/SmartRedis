@@ -2,7 +2,7 @@
 
 ### 0.6.1
 
-Released on 26 September, 2024
+Released on 27 September, 2024
 
 Description
 
