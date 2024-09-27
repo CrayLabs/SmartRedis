@@ -36,6 +36,15 @@ interface
 end interface
 
 interface
+  function dataset_deconstructor( dataset ) bind(c, name="DeallocateDataSet")
+    use iso_c_binding, only : c_ptr
+    import :: enum_kind
+    integer(kind=enum_kind)       :: dataset_deconstructor
+    type(c_ptr)                   :: dataset !< Pointer to the underlying dataset
+  end function dataset_deconstructor
+end interface
+
+interface
   function dataset_to_string_c(client) bind(c, name="dataset_to_string")
     use iso_c_binding, only : c_ptr, c_char
     type(c_ptr)                   :: dataset_to_string_c

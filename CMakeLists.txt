@@ -31,7 +31,7 @@ endif (POLICY CMP0048)
 
 ## Project definition for the SmartRedis
 cmake_minimum_required(VERSION 3.13)
-project(SmartRedis VERSION "0.6.0")
+project(SmartRedis VERSION "0.6.1")
 
 ## Specify options for the SmartRedis project
 option(BUILD_FORTRAN "Build the fortran client library" OFF)

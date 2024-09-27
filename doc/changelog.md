@@ -1,5 +1,22 @@
 # Changelog
 
+### 0.6.1
+
+Released on 27 September, 2024
+
+Description
+
+-  Fix a memory leak in the Fortran Dataset implementation
+
+Detailed Notes
+
+-  The dataset object, if used in a loop, would leave memory dangling.
+   To alleviate this, a final procedure has been implemented. Fortran
+   compilers, however, are notoriously bad at detecting when an object
+   goes out of scope and to destroy them automatically. We thus also
+   provide an explicit destructor procedure.
+   ([PR514](https://github.com/CrayLabs/SmartRedis/pull/514))
+
 ### 0.6.0
 
 Released on 25 September, 2024
