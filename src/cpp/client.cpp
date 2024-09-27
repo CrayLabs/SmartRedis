@@ -422,8 +422,7 @@ void Client::unpack_tensor(const std::string& name,
     std::vector<size_t> reply_dims = GetTensorCommand::get_dims(reply);
 
     // Make sure we have the right dims to unpack into (Contiguous case)
-    if (mem_layout == SRMemLayoutContiguous ||
-        mem_layout == SRMemLayoutFortranContiguous) {
+    if (mem_layout == SRMemLayoutContiguous) {
         size_t total_dims = 1;
         for (size_t i = 0; i < reply_dims.size(); i++) {
             total_dims *= reply_dims[i];

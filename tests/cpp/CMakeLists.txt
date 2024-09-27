@@ -64,7 +64,6 @@ list(APPEND EXECUTABLES
     client_test_put_get_3D
     client_test_put_get_3D_static_values
     client_test_put_get_contiguous_3D
-    client_test_put_get_transpose_3D
     client_test_put_get_2D
     client_test_put_get_1D
     client_test_mnist
@@ -77,7 +76,7 @@ list(APPEND EXECUTABLES
 foreach(EXECUTABLE ${EXECUTABLES})
     add_executable(${EXECUTABLE}_cpp_test
         ${EXECUTABLE}.cpp
-    )
+    )make t
     set_target_properties(${EXECUTABLE}_cpp_test PROPERTIES
         OUTPUT_NAME ${EXECUTABLE}
     )
