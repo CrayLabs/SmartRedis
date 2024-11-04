@@ -476,6 +476,96 @@ SCENARIO("Testing Tensor Functions on Client Object", "[Client]")
     log_data(context, LLDebug, "***End Client tensor testing***");
 }
 
+SCENARIO("Testing Bytes Functions on Client Object", "[Client]")
+{
+    std::cout << std::to_string(get_time_offset()) 
+              << ": Testing Bytes Functions on Client Object" << std::endl;
+    std::string context("test_bytes");
+    log_data(context, LLDebug, "***Beginning Client bytes testing***");
+    GIVEN("A Client object")
+    {
+        Client client("test_client");
+
+        AND_WHEN("A byte string is create and put by the client into the database")
+        {
+            const size_t n_bytes = 5;
+            unsigned char bytes_value[n_bytes] = {0x00, 0x65, 0x6C, 0x6C, 0x6F};
+            std::string bytes_name = "byte_string_1";
+
+            client.put_bytes(bytes_name, &bytes_value, n_bytes);
+
+            THEN("The bytes exist in the database")
+            {
+                CHECK(client.bytes_exists(bytes_name) == true);
+            }
+
+            THEN("Polling for the bytes returns true")
+            {
+                CHECK(client.poll_bytes(bytes_name, 2, 5) == true);
+            }
+
+            THEN("The bytes can be retrieved by clients.get_bytes()")
+            {
+                // Declare the retrieved bytes size as something that
+                // is not accurate to make sure it is properly set
+                // by the API function
+                size_t retrieved_n_bytes = n_bytes + 1;
+                void* retrieved_bytes_values = NULL;
+                client.get_bytes(bytes_name, 
+                                 retrieved_bytes_values, 
+                                 retrieved_n_bytes);
+
+                CHECK(retrieved_bytes_values != NULL);
+                CHECK(retrieved_n_bytes == n_bytes);
+
+                for(int i = 0; i < n_bytes; i++) {
+                    unsigned char* r_pointer = reinterpret_cast<unsigned char*>(retrieved_bytes_values);
+                    CHECK((r_pointer)[i] == bytes_value[i]);
+                }
+
+                free(retrieved_bytes_values);
+            }
+
+            THEN("The bytes can be retrieved by clients.unpack_bytes()")
+            {
+                size_t retrieved_n_bytes = 0;
+                // Allocate more memory than needed to test unequal buffers
+                unsigned char* retrieved_bytes_values = (unsigned char*)malloc(n_bytes*2);
+
+                client.unpack_bytes(bytes_name, 
+                                    retrieved_bytes_values,
+                                    n_bytes, 
+                                    retrieved_n_bytes);
+
+                CHECK(retrieved_bytes_values != NULL);
+                CHECK(retrieved_n_bytes == n_bytes);
+
+                for(int i = 0; i < n_bytes; i++) {
+                    CHECK((retrieved_bytes_values)[i] == bytes_value[i]);
+                }
+
+                free(retrieved_bytes_values);
+            }
+
+            AND_WHEN("The bytes are removed from the database")
+            {
+                client.delete_bytes(bytes_name);
+
+                THEN("The bytes no longer exist in the database") 
+                {
+                    CHECK(client.bytes_exists(bytes_name) == false);
+                }
+
+                THEN("Polling for the bytes returns false")
+                {
+                    CHECK(client.poll_bytes(bytes_name, 2, 5) == false);
+                }
+            }
+        }
+    }
+    log_data(context, LLDebug, "***End Client tensor testing***");
+}
+
 SCENARIO("Testing INFO Functions on Client Object", "[Client]")
 {
     std::cout << std::to_string(get_time_offset()) << ": Testing INFO Functions on Client Object" << std::endl;

@@ -50,6 +50,7 @@ list(APPEND EXECUTABLES
     smartredis_dataset
     smartredis_model
     smartredis_mnist
+    smartredis_put_get_bytes
 )
 
 # Build the examples

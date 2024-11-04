@@ -345,6 +345,79 @@ void Client::put_tensor(const std::string& name,
     _report_reply_errors(reply, "put_tensor failed");
 }
 
+// Put bytes into the database
+void Client::put_bytes(const std::string& name,
+                       const void* bytes,
+                       const size_t n_bytes)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string key = _build_bytes_key(name, false);
+
+    // Send the tensor
+    CommandReply reply = _redis_server->put_bytes(key, bytes, n_bytes);
+
+    if (reply.has_error())
+        throw SRRuntimeException("put_bytes failed");
+}
+
+// Get byte data and return to the user via modifying the
+// supplied void pointer.
+void Client::get_bytes(const std::string& name,
+                       void*& data,
+                       size_t& n_bytes)
+{
+    std::string get_key = _build_bytes_key(name, true);
+    CommandReply reply = _redis_server->get_bytes(get_key);
+
+    if (reply.has_error())
+        throw SRRuntimeException("put_bytes failed");
+
+    n_bytes = reply.str_len();
+    data = malloc(n_bytes);
+    std::memcpy(data, (void*)(reply.str()), n_bytes);
+}
+
+// Get byte data and fill an already allocated array 
+// memory space that has the specified size.
+void Client::unpack_bytes(const std::string& name,
+                          void* data,
+                          const size_t n_bytes,
+                          size_t& n_used_bytes)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string get_key = _build_bytes_key(name, true);
+    CommandReply reply = _redis_server->get_bytes(get_key);
+
+    if (reply.has_error())
+        throw SRRuntimeException("put_bytes failed");
+
+    if (n_bytes < reply.str_len()) {
+        throw SRRuntimeException("Provided number of bytes of " + 
+                                 std::to_string(n_bytes) + " " +
+                                 "smaller than retrieved data size of " +
+                                 std::to_string(reply.str_len()) + ".");
+    }
+
+    n_used_bytes = reply.str_len();
+    std::memcpy(data, reply.str(), reply.str_len());
+}
+
+// Delete bytes from the database
+void Client::delete_bytes(const std::string& name)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string key = _build_bytes_key(name, true);
+    CommandReply reply = _redis_server->delete_bytes(key);
+    if (reply.has_error())
+        throw SRRuntimeException("put_bytes failed");
+}
+
 // Get the tensor data, dimensions, and type for the provided tensor name.
 // This function will allocate and retain management of the memory for the
 // tensor data.
@@ -1132,6 +1205,17 @@ bool Client::model_exists(const std::string& name)
     return _redis_server->model_key_exists(key);
 }
 
+// Check if the bytes exists in the database
+bool Client::bytes_exists(const std::string& name)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    std::string key = _build_bytes_key(name, true);
+    return _redis_server->key_exists(key);
+}
+
+
 // Check if the key exists in the database at a specified frequency for a specified number of times
 bool Client::poll_key(const std::string& key,
                       int poll_frequency_ms,
@@ -1208,6 +1292,25 @@ bool Client::poll_dataset(const std::string& name,
     return false;
 }
 
+// Check if the bytes exists in the database at a specified frequency for a specified number of times
+bool Client::poll_bytes(const std::string& name,
+                        int poll_frequency_ms,
+                        int num_tries)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    // Check for the tensor however many times requested
+    for (int i = 0; i < num_tries; i++) {
+        if (bytes_exists(name))
+            return true;
+        std::this_thread::sleep_for(std::chrono::milliseconds(poll_frequency_ms));
+    }
+
+    // If we get here, it was never found
+    return false;
+}
+
 // Establish a datasource
 void Client::set_data_source(std::string source_id)
 {
@@ -1237,35 +1340,6 @@ void Client::set_data_source(std::string source_id)
     _get_key_prefix = _get_key_prefixes[save_index];
 }
 
-// Set whether names of model and script entities should be prefixed
-// (e.g. in an ensemble) to form database keys. Prefixes will only be
-// used if they were previously set through the environment variables
-// SSKEYOUT and SSKEYIN. Keys of entities created before this function
-// is called will not be affected. By default, the client does not
-// prefix model and script keys.
-void Client::use_model_ensemble_prefix(bool use_prefix)
-{
-    // Track calls to this API function
-    LOG_API_FUNCTION();
-
-    _use_model_prefix = use_prefix;
-}
-
-// Set whether names of aggregation lists should be prefixed
-// (e.g. in an ensemble) to form database keys. Prefixes will only be
-// used if they were previously set through the environment variables
-// SSKEYOUT and SSKEYIN. Keys of entities created before this function
-// is called will not be affected. By default, the client prefixes
-// aggregation list keys.
-void Client::use_list_ensemble_prefix(bool use_prefix)
-{
-    // Track calls to this API function
-    LOG_API_FUNCTION();
-
-    _use_list_prefix = use_prefix;
-}
-
-
 // Set whether names of tensor entities should be prefixed
 // (e.g. in an ensemble) to form database keys. Prefixes will only be used
 // if they were previously set through the environment variables SSKEYOUT
@@ -1294,6 +1368,50 @@ void Client::use_dataset_ensemble_prefix(bool use_prefix)
     LOG_API_FUNCTION();
 
     _use_dataset_prefix = use_prefix;
+}
+
+// Set whether names of model and script entities should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be
+// used if they were previously set through the environment variables
+// SSKEYOUT and SSKEYIN. Keys of entities created before this function
+// is called will not be affected. By default, the client does not
+// prefix model and script keys.
+void Client::use_model_ensemble_prefix(bool use_prefix)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_model_prefix = use_prefix;
+}
+
+// Set whether names of aggregation lists should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be
+// used if they were previously set through the environment variables
+// SSKEYOUT and SSKEYIN. Keys of entities created before this function
+// is called will not be affected. By default, the client prefixes
+// aggregation list keys with the first prefix specified with the
+// SSKEYIN and SSKEYOUT environment variables.
+void Client::use_list_ensemble_prefix(bool use_prefix)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_list_prefix = use_prefix;
+}
+
+// Set whether names of raw bytes should be prefixed
+// (e.g. in an ensemble) to form database keys. Prefixes will only be
+// used if they were previously set through the environment variables
+// SSKEYOUT and SSKEYIN. Keys of entities created before this function
+// is called will not be affected. By default, the client prefixes
+// raw byte keys with the first prefix specified with the
+// SKEYIN and SSKEYOUT environment variables.
+void Client::use_bytes_ensemble_prefix(bool use_prefix)
+{
+    // Track calls to this API function
+    LOG_API_FUNCTION();
+
+    _use_bytes_prefix = use_prefix;
 }
 
 // Returns information about the given database node
@@ -2040,6 +2158,16 @@ Client::_build_list_key(const std::string& list_name,
     return prefix + list_name;
 }
 
+// Build full formatted key of a tensor, based on current prefix settings.
+inline std::string Client::_build_bytes_key(const std::string& key,
+                                             bool on_db)
+{
+    std::string prefix("");
+    if (_use_bytes_prefix)
+        prefix = on_db ? _get_prefix() : _put_prefix();
+
+    return prefix + key;
+}
 
 // Create the key to place an indicator in the database that the
 // dataset has been successfully stored.

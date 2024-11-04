@@ -6,10 +6,20 @@ To be released at a future time.
 
 Description
 
+-  Add Client API functions to put, get, unpack,
+   delete, poll, and check for existance of raw bytes for the
+   C++ and Python clients.
+-  Fix lint issues using make lint
 -  Reenable move semantics and fix compiler warnings.
 
 Detailed Notes
 
+-  Add Client API functions to put, get, unpack,
+   delete, poll, and check for existance of raw bytes for the
+   C++ and Python clients.
+   ([PR521](https://github.com/CrayLabs/SmartRedis/pull/521))
+-  Fix lint issues using make lint
+   ([PR522](https://github.com/CrayLabs/SmartRedis/pull/522))
 -  Fix compiler warnings stemming from override and const
    keywords as well as move semantics impliclty disabled
    because of std::random_device.
@@ -21,14 +31,11 @@ Released on 27 September, 2024
 
 Description
 
--  Fix lint issues using make lint
 -  Fix RedisAI build to allow for compilation with GCC-14
 -  Fix a memory leak in the Fortran Dataset implementation
 
 Detailed Notes
 
--  Fix lint issues using make lint
-   ([PR522](https://github.com/CrayLabs/SmartRedis/pull/522))
 -  Fix RedisAI build to allow for compilation with GCC-14. Also,
    we only use the Torch backend and change the compilation of
    RedisAI to use CMake (like SmartSim)

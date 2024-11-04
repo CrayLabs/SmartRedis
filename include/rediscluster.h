@@ -223,6 +223,37 @@ class RedisCluster : public RedisServer
         virtual CommandReply put_tensor(TensorBase& tensor);
 
         /*!
+        *   \brief Put bytes on the server
+        *   \param key The key at which to store the bytes
+        *   \param bytes The bytes to put on the server
+        *   \param num_bytes The number of bytes
+        *   \returns The CommandReply from the put bytes
+        *            command execution
+        *   \throw SmartRedis::Exception if bytes storage fails
+        */
+        virtual CommandReply put_bytes(const std::string& key, 
+                                       const void* bytes,
+                                       const size_t n_bytes);
+
+        /*!
+        *   \brief Get bytes from the server
+        *   \param key The database key for the bytes
+        *   \returns The CommandReply from the get bytes server
+        *            command execution
+        *   \throw SmartRedis::Exception if bytes retrieval fails
+        */
+        virtual CommandReply get_bytes(const std::string& key);
+
+        /*!
+        *   \brief Delete a bytes in the database
+        *   \param key The database key for the bytes
+        *   \returns The CommandReply from delete command
+        *            executed on the server
+        *   \throw SmartRedis::Exception if bytes removal fails
+        */
+        virtual CommandReply delete_bytes(const std::string& key);
+        
+        /*!
         *   \brief Get a Tensor from the server
         *   \param key The name of the tensor to retrieve
         *   \returns The CommandReply from the get tensor server

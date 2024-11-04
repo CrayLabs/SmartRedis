@@ -125,6 +125,14 @@ void PyClient::put_tensor(
     });
 }
 
+void PyClient::put_bytes(std::string& name, py::object data)
+{
+    MAKE_CLIENT_API({
+        std::string bytes_data = data.attr("getvalue")().cast<std::string>();
+        _client->put_bytes(name, bytes_data.data(), bytes_data.size());
+    });
+}
+
 py::array PyClient::get_tensor(const std::string& name)
 {
     return MAKE_CLIENT_API({
@@ -183,6 +191,35 @@ py::array PyClient::get_tensor(const std::string& name)
         }
     });
 }
+
+// Get a py::bytes object pointing to the underlying bytes data
+py::bytes PyClient::get_bytes(const std::string& name)
+{
+    return MAKE_CLIENT_API({
+        
+        void* data = NULL;
+        size_t n_bytes = 0;
+
+        // Get the bytes and store in data pointer and update n_bytes
+        _client->get_bytes(name, data, n_bytes);
+
+        // TODO by using py::bytes makes another copy.  It would
+        // be ideal to transfer ownership because get_bytes gives
+        // back new, unmanaged memory that could be transferred
+        py::bytes py_bytes = py::bytes((char*)data, n_bytes);
+        free(data);
+        return py_bytes;
+    });
+}
+
+
+void PyClient::delete_bytes(const std::string& name)
+{
+    MAKE_CLIENT_API({
+        _client->delete_bytes(name);
+    });
+}
+
 
 void PyClient::delete_tensor(const std::string& name)
 {
@@ -492,6 +529,13 @@ bool PyClient::dataset_exists(const std::string& name)
     });
 }
 
+bool PyClient::bytes_exists(const std::string& name)
+{
+    return MAKE_CLIENT_API({
+        return this->_client->bytes_exists(name);
+    });
+}
+
 bool PyClient::poll_tensor(const std::string& name,
                            int poll_frequency_ms,
                            int num_tries)
@@ -516,6 +560,15 @@ bool PyClient::poll_model(const std::string& name,
 {
     return MAKE_CLIENT_API({
         return _client->poll_model(name, poll_frequency_ms, num_tries);
+    });
+}
+
+bool PyClient::poll_bytes(const std::string& name,
+                          int poll_frequency_ms,
+                          int num_tries)
+{
+    return MAKE_CLIENT_API({
+        return _client->poll_bytes(name, poll_frequency_ms, num_tries);
     });
 }
 
@@ -547,6 +600,12 @@ void PyClient::use_list_ensemble_prefix(bool use_prefix)
     });
 }
 
+void PyClient::use_bytes_ensemble_prefix(bool use_prefix)
+{
+    MAKE_CLIENT_API({
+        _client->use_bytes_ensemble_prefix(use_prefix);
+    });
+}
 
 std::vector<py::dict> PyClient::get_db_node_info(std::vector<std::string> addresses)
 {

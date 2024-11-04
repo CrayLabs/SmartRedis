@@ -60,38 +60,111 @@ SCENARIO("Testing Client prefixing")
         std::string dataset_tensor_key = "dataset_tensor";
         std::string dataset_key = "test_dataset";
         std::string tensor_key = "test_tensor";
+        std::string bytes_key = "test_bytes";
 
         SRTensorType g_type;
         std::vector<size_t> g_dims;
         void* g_result;
 
-        THEN("Client prefixing can be tested")
+        THEN("Client prefixing can be used for tensors")
         {
+            // Set env vars to enable key prefixing
             setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
             setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
+
+            // Initialize a client
             Client client(context);
-            client.use_dataset_ensemble_prefix(true);
+
+            // Enable prefixing for tensors
             client.use_tensor_ensemble_prefix(true);
 
+            // Create tensor data
             float* array = (float*)malloc(dims[0]*sizeof(float));
             for(int i=0; i<dims[0]; i++)
                 array[i] = (float)(rand()/((float)RAND_MAX/10.0));
+
+            // Put tensor into database
             client.put_tensor(tensor_key, (void*)array,
                               dims, SRTensorTypeFloat,
                               SRMemLayoutNested);
+
+            // Check that the tensor exists
             CHECK(client.tensor_exists(tensor_key));
+
+            // Check that the tensor key exists
             CHECK(client.key_exists(prefix + "." + tensor_key));
 
+            // Reset environment variables to their original state
+            reset_env_vars(old_keyin, old_keyout);
+
+            // Free test memory
+            free(array);
+        }
+        THEN("Client prefixing can be used for datasets")
+        {
+            // Set env vars to enable key prefixing
+            setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
+            setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
+
+            // Initialize a client
+            Client client(context);
+
+            // Enable prefixing for datasets
+            client.use_dataset_ensemble_prefix(true);
+
+            // Create a dataset with a tensor
+            float* array = (float*)malloc(dims[0]*sizeof(float));
+            for(int i=0; i<dims[0]; i++)
+                array[i] = (float)(rand()/((float)RAND_MAX/10.0));
             DataSet dataset(dataset_key);
             dataset.add_tensor(dataset_tensor_key, (void*)array, dims,
                                SRTensorTypeFloat, SRMemLayoutNested);
+
+            // Put dataset into the database
             client.put_dataset(dataset);
+
+            // Check that the dataset exists
             CHECK(client.dataset_exists(dataset_key));
+
+            // Check that the dataset key exists
             CHECK(client.key_exists(prefix + ".{" + dataset_key + "}.meta"));
 
-            // reset environment variables to their original state
+            // Reset environment variables to their original state
             reset_env_vars(old_keyin, old_keyout);
+
+            // Free test memory
+            free(array);
         }
+        THEN("Client prefixing can be used for bytes")
+        {
+            // Set env vars to enable key prefixing
+            setenv("SSKEYIN", keyin_env_put, (old_keyin != NULL));
+            setenv("SSKEYOUT", keyout_env_put, (old_keyout != NULL));
+
+            // Initialize a client
+            Client client(context);
+
+            // Enable prefixing for datasets
+            client.use_bytes_ensemble_prefix(true);
+
+            // Create a bytes array and put into the database
+            const size_t n_bytes = 5;
+            unsigned char bytes_value[n_bytes] = {0x00, 0x65, 0x6C, 0x6C, 0x6F};
+
+            // Put bytes into the database
+            client.put_bytes(bytes_key, (void*)bytes_value, n_bytes);
+
+            // Check that the bytes exists
+            CHECK(client.bytes_exists(bytes_key));
+
+            // Check that the bytes key exists
+            CHECK(client.key_exists(prefix + "." + bytes_key));
+
+            // Reset environment variables to their original state
+            reset_env_vars(old_keyin, old_keyout);
+
+        }
+
     }
     log_data(context, LLDebug, "***End Client Prefixing testing***");
 }

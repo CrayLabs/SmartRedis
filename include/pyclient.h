@@ -101,6 +101,50 @@ class PyClient : public PySRObject
                         py::array data);
 
         /*!
+        *   \brief Put bytes into the database
+        *   \details The key used to place the bytes 
+        *            may be formed by applying a prefix to the
+        *            supplied name. See set_data_source()
+        *            and use_bytes_ensemble_prefix() for more details.
+        *   \param name The name to associate with the bytes
+        *              in the database
+        *   \param data The bytes to store
+        *   \throw RuntimeException for all client errors
+        */
+        void put_bytes(std::string& name,
+                       py::object data);
+
+        /*!
+        *   \brief Delete bytes from the database
+        *   \details The bytes key used to locate the bytes to be
+        *            deleted may be formed by applying a prefix to the
+        *            supplied name. See set_data_source()
+        *            and use_bytes_ensemble_prefix() for more details.
+        *   \param name The name of the bytes to delete
+        *   \throw RuntimeException for all client errors
+        */
+        void delete_bytes(const std::string& name);
+
+        /*!
+        *   \brief Check if bytes exists in the database, repeating
+        *          the check at a specified polling interval
+        *   \details The key used to check for existence
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
+        *            and use_bytes_ensemble_prefix() for more details.
+        *   \param name The bytes name to be checked in the database
+        *   \param poll_frequency_ms The time delay between checks,
+        *                            in milliseconds
+        *   \param num_tries The total number of times to check for the name
+        *   \returns Returns true if the bytes is found within the
+        *            specified number of tries, otherwise false.
+        *   \throw RuntimeException for all client errors
+        */
+        bool poll_bytes(const std::string& name,
+                        int poll_frequency_ms,
+                        int num_tries);
+
+        /*!
         *   \brief  Retrieve a tensor from the database.
         *   \details The memory of the data pointer used
         *            to construct the Numpy array is valid
@@ -116,6 +160,13 @@ class PyClient : public PySRObject
         *   \throw RuntimeException for all client errors
         */
         py::array get_tensor(const std::string& name);
+
+        /*!
+        *   \brief  Retrieve bytes from the database.
+        *   \param name The name used to reference the bytes
+        *   \throw RuntimeException for all client errors
+        */
+        py::bytes get_bytes(const std::string& name);
 
         /*!
         *   \brief delete a tensor stored in the database
@@ -543,6 +594,18 @@ class PyClient : public PySRObject
         bool model_exists(const std::string& name);
 
         /*!
+        *   \brief Check if bytes exists in the database
+        *   \details The key used to check for existence
+        *            may be formed by applying a prefix to the supplied
+        *            name. See set_data_source()
+        *            and use_bytes_ensemble_prefix() for more details.
+        *   \param name The bytes name to be checked in the database
+        *   \returns Returns true if the bytes exists in the database
+        *   \throw RuntimeException for all client errors
+        */
+        bool bytes_exists(const std::string& name);
+
+        /*!
         *   \brief Check if the key exists in the database at a
         *          specified frequency for a specified number
         *          of times
@@ -619,6 +682,36 @@ class PyClient : public PySRObject
         void set_data_source(const std::string& source_id);
 
         /*!
+        * \brief Set whether names of tensors should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
+        *
+        * \param use_prefix If set to true, all future operations on tensors will
+        *                   add a prefix to the entity names, if available.
+        */
+        void use_tensor_ensemble_prefix(bool use_prefix);
+
+        /*!
+        * \brief Set whether names of datasets should be prefixed (e.g.
+        *        in an ensemble) to form database keys.
+        *        Prefixes will only be used if they were previously set through
+        *        the environment variables SSKEYOUT and SSKEYIN.
+        *        Keys formed before this function is called will not be affected.
+        *        By default, the client prefixes tensor keys with the first
+        *        prefix specified with the SSKEYIN and SSKEYOUT environment
+        *        variables.
+        *
+        * \param use_prefix If set to true, all future operations on datasets will
+        *                   add a prefix to the entity names, if available.
+        */
+        void use_dataset_ensemble_prefix(bool use_prefix);
+
+        /*!
         * \brief Set whether names of model or scripts should be
         *        prefixed (e.g. in an ensemble) to form database keys.
         *        Prefixes will only be used if they were previously set through
@@ -656,34 +749,23 @@ class PyClient : public PySRObject
         void use_list_ensemble_prefix(bool use_prefix);
 
         /*!
-        * \brief Set whether names of tensors should be prefixed (e.g.
-        *        in an ensemble) to form database keys.
-        *        Prefixes will only be used if they were previously set through
-        *        the environment variables SSKEYOUT and SSKEYIN.
-        *        Keys formed before this function is called will not be affected.
-        *        By default, the client prefixes tensor keys with the first
-        *        prefix specified with the SSKEYIN and SSKEYOUT environment
-        *        variables.
-        *
-        * \param use_prefix If set to true, all future operations on tensors will
-        *                   add a prefix to the entity names, if available.
+        *   \brief Control whether raw bytes are prefixed
+        *   \details This function can be used to avoid key collisions in an
+        *            ensemble by prepending the string value from the
+        *            environment variable SSKEYIN and/or SSKEYOUT to
+        *            raw byte names.  Prefixes will only be used if
+        *            they were previously set through the environment variables
+        *            SSKEYOUT and SSKEYIN. Keys for raw bytes created
+        *            before this function is called will not be retroactively
+        *            prefixed. By default, the client prefixes raw bytes
+        *            keys with the first prefix specified with the SSKEYIN
+        *            and SSKEYOUT environment variables.
+        *  \param use_prefix If set to true, all future operations
+        *                    on raw bytes will use a prefix, if available.
+        *  \throw SmartRedis::Exception for failed activation of
+        *         raw byte prefixing
         */
-        void use_tensor_ensemble_prefix(bool use_prefix);
-
-        /*!
-        * \brief Set whether names of datasets should be prefixed (e.g.
-        *        in an ensemble) to form database keys.
-        *        Prefixes will only be used if they were previously set through
-        *        the environment variables SSKEYOUT and SSKEYIN.
-        *        Keys formed before this function is called will not be affected.
-        *        By default, the client prefixes tensor keys with the first
-        *        prefix specified with the SSKEYIN and SSKEYOUT environment
-        *        variables.
-        *
-        * \param use_prefix If set to true, all future operations on datasets will
-        *                   add a prefix to the entity names, if available.
-        */
-        void use_dataset_ensemble_prefix(bool use_prefix);
+        void use_bytes_ensemble_prefix(bool use_prefix);
 
         /*!
         *   \brief Returns information about the given database nodes

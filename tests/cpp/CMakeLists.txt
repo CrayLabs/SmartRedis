@@ -67,6 +67,7 @@ list(APPEND EXECUTABLES
     client_test_put_get_transpose_3D
     client_test_put_get_2D
     client_test_put_get_1D
+    client_test_put_get_bytes
     client_test_mnist
     client_test_mnist_dataset
     client_test_ensemble
