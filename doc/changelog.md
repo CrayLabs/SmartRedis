@@ -6,6 +6,7 @@ To be released at a future time.
 
 Description
 
+-  Bump versions for upload/download-artifact Github Actions
 -  Add Client API functions to put, get, unpack,
    delete, poll, and check for existance of raw bytes for the
    C++ and Python clients.
@@ -14,6 +15,8 @@ Description
 
 Detailed Notes
 
+-  Bump versions for upload/download-artifact Github Actions
+   ([PR526](https://github.com/CrayLabs/SmartRedis/pull/526))
 -  Add Client API functions to put, get, unpack,
    delete, poll, and check for existance of raw bytes for the
    C++ and Python clients.
