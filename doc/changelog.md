@@ -6,6 +6,7 @@ To be released at a future time.
 
 Description
 
+-  Update supported Python versions to 3.10, 3.11, and 3.12
 -  Bump versions for upload/download-artifact Github Actions
 -  Add Client API functions to put, get, unpack,
    delete, poll, and check for existance of raw bytes for the
@@ -15,6 +16,8 @@ Description
 
 Detailed Notes
 
+- Update supported Python versions to 3.10, 3.11, and 3.12
+   ([PR527](https://github.com/CrayLabs/SmartRedis/pull/527))
 -  Bump versions for upload/download-artifact Github Actions
    ([PR526](https://github.com/CrayLabs/SmartRedis/pull/526))
 -  Add Client API functions to put, get, unpack,
