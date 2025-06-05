@@ -70,7 +70,7 @@ jobs:
     env:
       COMPILER: ${{ matrix.compiler }} # used when the compiler is gcc/gfortran
       LINK_TYPE: ${{ matrix.link_type }}
-      CMAKE_MINIMUM_REQUIRED: "3.5" # minimum cmake version required for SmartRedis
+      CMAKE_MINIMUM_REQUIRED_VERSION: "3.5" # minimum cmake version required for SmartRedis
 
     steps:
       # Maximize the space in this image
