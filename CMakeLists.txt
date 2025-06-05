@@ -80,7 +80,7 @@ endif()
 # Add hiredis as an external project
 ExternalProject_Add(hiredis
     GIT_REPOSITORY https://github.com/redis/hiredis.git
-    GIT_TAG v1.2.0
+    GIT_TAG v1.3.0
     GIT_SHALLOW 1
     CMAKE_ARGS
         -DBUILD_SHARED_LIBS=OFF
