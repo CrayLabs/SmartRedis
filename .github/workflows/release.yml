@@ -53,7 +53,7 @@ jobs:
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
-      CMAKE_MINIMUM_REQUIRED_VERSION: 3.5
+      CMAKE_POLICY_VERSION_MINIMUM: 3.5
 
     steps:
       - uses: actions/checkout@v2

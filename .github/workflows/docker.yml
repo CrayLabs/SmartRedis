@@ -41,7 +41,7 @@ jobs:
               rai_v: [1.2.5] # verisons of RedisAI
         env:
           # Set the minimum required version of CMake
-          CMAKE_MINIMUM_REQUIRED_VERSION: 3.5
+          CMAKE_POLICY_VERSION_MINIMUM: 3.5
 
         # Service containers to run with docker tests
         services:
