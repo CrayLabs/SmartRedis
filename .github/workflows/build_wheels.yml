@@ -87,7 +87,7 @@ jobs:
         run: brew install cmake || true
 
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        run: CMAKE_POLICY_VERSION_MINIMUM=3.5 python -m cibuildwheel --output-dir wheelhouse
 
       - uses: actions/upload-artifact@v4
         with:
