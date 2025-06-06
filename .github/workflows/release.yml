@@ -53,7 +53,6 @@ jobs:
     env:
       FC: gfortran-${{ matrix.gcc_v }}
       GCC_V: ${{ matrix.gcc_v }}
-      CMAKE_POLICY_VERSION_MINIMUM: "3.5"
 
     steps:
       - uses: actions/checkout@v2
@@ -93,6 +92,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: smartredis-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
