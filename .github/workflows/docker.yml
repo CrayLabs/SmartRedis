@@ -38,10 +38,7 @@ jobs:
             fail-fast: true
             matrix:
               os: [ubuntu-22.04] # cannot test on macOS as docker isn't supported on Mac
-              rai_v: [1.2.5] # verisons of RedisAI
-        env:
-          # Set the minimum required version of CMake
-          CMAKE_POLICY_VERSION_MINIMUM: 3.5
+              rai_v: [1.2.5] # versions of RedisAI
 
         # Service containers to run with docker tests
         services:
