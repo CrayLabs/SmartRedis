@@ -36,7 +36,7 @@ env:
   HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
   HOMEBREW_NO_GITHUB_API: "ON"
   HOMEBREW_NO_INSTALL_CLEANUP: "ON"
-  CIBW_SKIP: "pp* *i686* *musl*" # skip building for PyPy and musllinux
+  CIBW_SKIP: "pp* *i686*" # skip building for PyPy
   CIBW_ARCHES: x86_64
 
 jobs:
