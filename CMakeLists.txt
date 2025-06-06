@@ -107,7 +107,7 @@ set_target_properties(libhiredis PROPERTIES
 ExternalProject_Add(redis++
     GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
     GIT_TAG e30d4c4c557568b01d5adce9df2714de8d3921c2
-    GIT_SHALLOW 1
+    GIT_SHALLOW 0
     INSTALL_COMMAND make install PREFIX=${CMAKE_INSTALL_PREFIX}
     CMAKE_ARGS -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
                -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF
