@@ -90,5 +90,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: smartredis-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
-          overwrite: true
