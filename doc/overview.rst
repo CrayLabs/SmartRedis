@@ -47,7 +47,7 @@ below summarizes the language standards for each client.
    * - Language
      - Version/Standard
    * - Python
-     - 3.9-3.11
+     - 3.10-3.12
    * - C++
      - C++17
    * - C
