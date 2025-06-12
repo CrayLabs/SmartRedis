@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15]
+        os: [ubuntu-24.04, macos-13, macos-15]
         gcc_v: [11] # Version of GFortran we want to use.
     env:
       FC: gfortran-${{ matrix.gcc_v }}
@@ -113,6 +113,7 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          name: artifact
           path: dist/*.tar.gz
 
 
