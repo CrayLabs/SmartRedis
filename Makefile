@@ -43,7 +43,7 @@ PEDANTIC := OFF
 # Test dependencies
 REDIS_URL := https://github.com/redis/redis.git
 REDIS_VER := 7.2.4
-REDISAI_URL :=  https://github.com/RedisAI/RedisAI.git
+REDISAI_URL :=  https://github.com/RedisAI/redis-inference-optimization.git
 CATCH2_URL := https://github.com/catchorg/Catch2.git
 CATCH2_VER := v2.13.6
 LCOV_URL := https://github.com/linux-test-project/lcov.git

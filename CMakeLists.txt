@@ -80,7 +80,7 @@ endif()
 # Add hiredis as an external project
 ExternalProject_Add(hiredis
     GIT_REPOSITORY https://github.com/redis/hiredis.git
-    GIT_TAG v1.2.0
+    GIT_TAG v1.3.0
     GIT_SHALLOW 1
     CMAKE_ARGS
         -DBUILD_SHARED_LIBS=OFF
@@ -106,8 +106,8 @@ set_target_properties(libhiredis PROPERTIES
 # Define redis++ as an external project
 ExternalProject_Add(redis++
     GIT_REPOSITORY https://github.com/sewenew/redis-plus-plus.git
-    GIT_TAG 1.3.10
-    GIT_SHALLOW 1
+    GIT_TAG e30d4c4c557568b01d5adce9df2714de8d3921c2
+    GIT_SHALLOW 0
     INSTALL_COMMAND make install PREFIX=${CMAKE_INSTALL_PREFIX}
     CMAKE_ARGS -DREDIS_PLUS_PLUS_BUILD_TEST=OFF
                -DREDIS_PLUS_PLUS_BUILD_SHARED=OFF
