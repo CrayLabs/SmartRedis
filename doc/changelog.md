@@ -19,9 +19,9 @@ Detailed Notes
 -  For compilers that automatically call the dataset
    destructor when the object goes out of scope, a segfault
    was being triggered if the user was also explictly calling
-   the destructor. This was partially arising because the
-   while we were freeing the underlying data and pointing to
-   null, the pointer to the object itself was never being
+   the destructor. This was partially arising because
+   although we were freeing the underlying data and pointing to
+   NULL, the pointer to the object itself was never being
    set to NULL. This has been fixed and should now be robust
    to multiple calls to the destructor.
    ([PR525](https://github.com/CrayLabs/SmartRedis/pull/525))
