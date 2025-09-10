@@ -95,6 +95,7 @@ extern "C" SRError DeallocateDataSet(void** dataset)
     DataSet* d = reinterpret_cast<DataSet*>(*dataset);
     delete d;
     *dataset = NULL;
+    dataset = NULL;
   });
 }
 
