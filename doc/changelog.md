@@ -6,6 +6,7 @@ To be released at a future time.
 
 Description
 
+-  Add missing header file to scalarfield.h
 -  Update supported Python versions to 3.10, 3.11, and 3.12
 -  Bump versions for upload/download-artifact Github Actions
 -  Add Client API functions to put, get, unpack,
@@ -16,7 +17,11 @@ Description
 
 Detailed Notes
 
-- Update supported Python versions to 3.10, 3.11, and 3.12
+-  When including scalarfield.h into an application, 
+   MetadataBuffer was never defined. Add an explicit include
+   to the header file to ensure that applications can build.
+   ([PR528](https://github.com/CrayLabs/SmartRedis/pull/528))
+-  Update supported Python versions to 3.10, 3.11, and 3.12
    ([PR527](https://github.com/CrayLabs/SmartRedis/pull/527))
 -  Bump versions for upload/download-artifact Github Actions
    ([PR526](https://github.com/CrayLabs/SmartRedis/pull/526))

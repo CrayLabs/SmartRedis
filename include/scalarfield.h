@@ -29,6 +29,7 @@
 #ifndef SMARTREDIS_SCALARFIELD_H
 #define SMARTREDIS_SCALARFIELD_H
 
+#include "metadatabuffer.h"
 #include "metadatafield.h"
 #include <iostream>
 
