@@ -73,7 +73,7 @@ program main
   integer :: ndims
 
   integer :: i, j, k
-  type(dataset_type) :: dataset
+  type(dataset_type) :: dataset, retrieved_dataset
   type(client_type) :: client
 
   integer :: err_code
@@ -238,6 +238,11 @@ program main
   result = client%poll_dataset("test_dataset", 50, 5, exists)
   if (result .ne. SRNoError) error stop
   if (.not. exists) error stop 'existent dataset: FAILED'
+
+  ! Test retrieval of dataset
+  result = client%get_dataset("test_dataset", retrieved_dataset)
+  if (result .ne. SRNoError) error stop
+  if (.not. exists) error stop 'get_dataset: FAILED'
 
 
   write(*,*) "Fortran Dataset: passed"
