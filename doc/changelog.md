@@ -6,6 +6,7 @@ To be released at a future time.
 
 Description
 
+-  Add missing header file to scalarfield.h
 -  Fix a segfault in the dataset destructor
 -  Update supported Python versions to 3.10, 3.11, and 3.12
 -  Bump versions for upload/download-artifact Github Actions
@@ -16,6 +17,10 @@ Description
 -  Reenable move semantics and fix compiler warnings.
 
 Detailed Notes
+-  When including scalarfield.h into an application, 
+   MetadataBuffer was never defined. Add an explicit include
+   to the header file to ensure that applications can build.
+   ([PR530](https://github.com/CrayLabs/SmartRedis/pull/530))
 -  For compilers that automatically call the dataset
    destructor when the object goes out of scope, a segfault
    was being triggered if the user was also explictly calling
