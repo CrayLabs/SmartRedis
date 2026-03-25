@@ -6,6 +6,8 @@ To be released at a future time.
 
 Description
 
+-  Bump pybind11 version number to v2.13.6 to avoid Python
+   client bug
 -  Add missing header file to scalarfield.h
 -  Fix a segfault in the dataset destructor
 -  Update supported Python versions to 3.10, 3.11, and 3.12
@@ -17,7 +19,13 @@ Description
 -  Reenable move semantics and fix compiler warnings.
 
 Detailed Notes
--  When including scalarfield.h into an application, 
+-  The older version of pybind11 has a python array descriptor
+   which was incompatibile with numpy 2.x, leading to a bug
+   wehn using the python client. This bumps the pybind11
+   version to add support for numpy 2.x while retaining
+   support for numpy 1.x
+   ([PR531](https://github.com/CrayLabs/SmartRedis/pull/531))
+-  When including scalarfield.h into an application,
    MetadataBuffer was never defined. Add an explicit include
    to the header file to ensure that applications can build.
    ([PR530](https://github.com/CrayLabs/SmartRedis/pull/530))
