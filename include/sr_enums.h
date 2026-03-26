@@ -39,8 +39,6 @@ typedef enum {
     SRMemLayoutInvalid           = 0, // Invalid or uninitialized memory layout
     SRMemLayoutNested            = 1, // Multidimensional row-major array layout with nested arrays of pointers (contiguous at innermost layer)
     SRMemLayoutContiguous        = 2, // Multidimensional row-major array layout in contiguous memory
-    SRMemLayoutFortranNested     = 3, // Multidimensional column-major array layout with nested arrays of pointers (contiguous at innermost layer)
-    SRMemLayoutFortranContiguous = 4  // Multidimensional column-major array layout in contiguous memory
 } SRMemoryLayout;
 
 /*!
